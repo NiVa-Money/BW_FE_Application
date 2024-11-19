@@ -11,4 +11,5 @@ export const authProtectedRoutes: RouteType[] = [
 ];
 export const publicRoutes: RouteType[] = [
   { path: "/login", component: <Login /> },
+  { path: "/", component: <Login /> },
 ];
