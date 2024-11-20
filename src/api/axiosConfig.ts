@@ -1,7 +1,7 @@
 import axios from 'axios';
-
+export const publicBaseUrl = "https://uatapi.botwot.io"
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+  baseURL: publicBaseUrl,
 });
 axiosInstance.interceptors.request.use(
   (config: any) => {
