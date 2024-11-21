@@ -160,8 +160,7 @@ const SignUp = () => {
             href="/login" 
             className={`
               ${isDarkMode ? 'text-blue-200' : 'text-blue-600'}
-            `}
-          >
+            `}>
             Login
           </a>
         </div>
