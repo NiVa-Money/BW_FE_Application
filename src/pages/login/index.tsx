@@ -134,12 +134,12 @@ const Login = () => {
         </div>
         
         <button
+        
           className="
             mt-3 w-full p-2.5 bg-red-500 
             text-white rounded-md text-base 
             cursor-pointer hover:bg-red-600
-          "
-        >
+          ">
           Google Login
         </button>
       </form>

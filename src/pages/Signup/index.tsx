@@ -154,6 +154,17 @@ const SignUp = () => {
         )}
       </Form>
     </Formik>
+    <div className="mt-4 text-center">
+          <span>Already Have an account?</span>{' '}
+          <a 
+            href="/login" 
+            className={`
+              ${isDarkMode ? 'text-blue-200' : 'text-blue-600'}
+            `}
+          >
+            Login
+          </a>
+        </div>
   </div>
 
   {/* OTP Modal */}
