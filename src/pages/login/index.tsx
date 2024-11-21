@@ -1,28 +1,22 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // For navigation
-import { LoginUserService } from '../../api/services/authServices'; // Assuming this service is correctly defined
+import { useNavigate } from 'react-router-dom';
+import { LoginUserService } from '../../api/services/authServices';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
       const response = await LoginUserService({ email, password });
       if (response.success) {
-        // Assuming the response contains a `success` flag and `userId`
-        console.log('Login successful:', response);
-        
-        // Save userId in localStorage
-        localStorage.setItem('userId', response.userId); // Save userId to local storage
-        
-        // Redirect to the dashboard
+        localStorage.setItem('userId', response.userId);
         navigate('/dashboard');
       } else {
-        setError(response.message || 'Login failed. Please try again.'); // Show error message if available
+        setError(response.message || 'Login failed. Please try again.');
       }
     } catch (err) {
       console.error('Error logging in:', err);
@@ -34,57 +28,43 @@ const Login = () => {
 
   return (
     <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: isDarkMode ? '#121212' : '#f0f0f0',
-        padding: '20px',
-      }}
-    >
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          width: '350px',
-          padding: '30px',
-          border: isDarkMode ? '1px solid #444' : '1px solid #ccc',
-          borderRadius: '8px',
-          backgroundColor: isDarkMode ? '#1e1e1e' : 'white',
-          color: isDarkMode ? '#f5f5f5' : '#000',
-          boxShadow: isDarkMode
-            ? '0px 4px 6px rgba(0, 0, 0, 0.8)'
-            : '0px 4px 6px rgba(0, 0, 0, 0.1)',
-        }}
+    className={`
+      flex justify-center items-center h-screen w-screen 
+      ${isDarkMode ? 'bg-[#121212]' : 'bg-gray-100'}
+      p-5
+    `}
+  >
+  
+      <form 
+        onSubmit={handleSubmit} 
+        className={`
+          w-[350px] p-7 rounded-lg 
+          ${isDarkMode 
+            ? 'bg-[#1e1e1e] border-[#444] text-gray-100 shadow-[0px_4px_6px_rgba(0,0,0,0.8)]' 
+            : 'bg-white border-gray-300 text-black shadow-md'}
+          border
+        `}
       >
-        <h2
-          style={{
-            textAlign: 'center',
-            marginBottom: '25px',
-            fontSize: '1.5rem',
-            color: isDarkMode ? '#f5f5f5' : '#000',
-          }}
-        >
+        <h2 className={`
+          text-center mb-6 text-2xl 
+          ${isDarkMode ? 'text-gray-100' : 'text-black'}
+        `}>
           Login
         </h2>
+        
         {error && (
-          <p
-            style={{
-              color: 'red',
-              textAlign: 'center',
-              marginBottom: '15px',
-            }}
-          >
+          <p className="text-red-500 text-center mb-4">
             {error}
           </p>
         )}
-        <div style={{ marginBottom: '15px' }}>
-          <label
-            htmlFor="email"
-            style={{
-              fontSize: '1rem',
-              color: isDarkMode ? '#f5f5f5' : '#000',
-            }}
+        
+        <div className="mb-4">
+          <label 
+            htmlFor="email" 
+            className={`
+              text-base 
+              ${isDarkMode ? 'text-gray-100' : 'text-black'}
+            `}
           >
             Email
           </label>
@@ -94,26 +74,23 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{
-              width: '100%',
-              padding: '10px',
-              marginTop: '8px',
-              border: '1px solid',
-              borderColor: isDarkMode ? '#555' : '#ccc',
-              borderRadius: '4px',
-              fontSize: '1rem',
-              backgroundColor: isDarkMode ? '#1e1e1e' : 'white',
-              color: isDarkMode ? '#f5f5f5' : '#000',
-            }}
+            className={`
+              w-full p-2.5 mt-2 rounded-md text-base
+              ${isDarkMode 
+                ? 'bg-[#1e1e1e] border-[#555] text-gray-100' 
+                : 'bg-white border-gray-300 text-black'}
+              border
+            `}
           />
         </div>
-        <div style={{ marginBottom: '20px' }}>
-          <label
-            htmlFor="password"
-            style={{
-              fontSize: '1rem',
-              color: isDarkMode ? '#f5f5f5' : '#000',
-            }}
+        
+        <div className="mb-5">
+          <label 
+            htmlFor="password" 
+            className={`
+              text-base 
+              ${isDarkMode ? 'text-gray-100' : 'text-black'}
+            `}
           >
             Password
           </label>
@@ -123,63 +100,45 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{
-              width: '100%',
-              padding: '10px',
-              marginTop: '8px',
-              border: '1px solid',
-              borderColor: isDarkMode ? '#555' : '#ccc',
-              borderRadius: '4px',
-              fontSize: '1rem',
-              backgroundColor: isDarkMode ? '#1e1e1e' : 'white',
-              color: isDarkMode ? '#f5f5f5' : '#000',
-            }}
+            className={`
+              w-full p-2.5 mt-2 rounded-md text-base
+              ${isDarkMode 
+                ? 'bg-[#1e1e1e] border-[#555] text-gray-100' 
+                : 'bg-white border-gray-300 text-black'}
+              border
+            `}
           />
         </div>
+        
         <button
           type="submit"
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: isDarkMode ? '#007bff' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-          }}
-          onMouseOver={(e) =>
-            (e.currentTarget.style.backgroundColor = isDarkMode
-              ? '#0056b3'
-              : '#0056b3')
-          }
-          onMouseOut={(e) =>
-            (e.currentTarget.style.backgroundColor = isDarkMode
-              ? '#007bff'
-              : '#007bff')
-          }
+          className="
+            w-full p-3 bg-blue-600 text-white 
+            rounded-md text-base cursor-pointer 
+            hover:bg-blue-700 transition-colors
+          "
         >
           Login
         </button>
-        <div style={{ marginTop: '15px', textAlign: 'center' }}>
+        
+        <div className="mt-4 text-center">
           <span>Don't have an account?</span>{' '}
-          <a href="/signup" style={{ color: isDarkMode ? '#90caf9' : '#007bff' }}>
+          <a 
+            href="/signup" 
+            className={`
+              ${isDarkMode ? 'text-blue-200' : 'text-blue-600'}
+            `}
+          >
             Sign Up
           </a>
         </div>
+        
         <button
-          style={{
-            marginTop: '10px',
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#db4437',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-          }}
+          className="
+            mt-3 w-full p-2.5 bg-red-500 
+            text-white rounded-md text-base 
+            cursor-pointer hover:bg-red-600
+          "
         >
           Google Login
         </button>

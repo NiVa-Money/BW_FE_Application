@@ -66,138 +66,127 @@ const SignUp = () => {
       setOtpErrorMessage('An error occurred while verifying OTP.');
     }
   };
-
+  const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 shadow-lg rounded-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
-        <Formik
-          initialValues={{
-            firstName: '',
-            lastName: '',
-            emailId: '',
-            password: '',
-            mobileNo: '',
-          }}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}>
-          <Form>
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">First Name</label>
-              <Field
-                name="firstName"
-                type="text"
-                className="w-full px-3 py-2 border rounded"
-              />
-              <ErrorMessage
-                name="firstName"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
+<div className={`h-screen w-screen flex items-center justify-center ${isDarkMode ? 'bg-[#121212] text-white' : 'bg-gray-100 text-black'}`}>
+  <div className={`p-8 shadow-lg rounded-lg w-full max-w-md ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+    <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
+    <Formik
+      initialValues={{
+        firstName: '',
+        lastName: '',
+        emailId: '',
+        password: '',
+        mobileNo: '',
+      }}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}>
+      <Form>
+        {/* First Name */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 dark:text-gray-300">First Name</label>
+          <Field
+            name="firstName"
+            type="text"
+            className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
+          />
+          <ErrorMessage name="firstName" component="div" className="text-red-500 text-sm mt-1" />
+        </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Last Name</label>
-              <Field
-                name="lastName"
-                type="text"
-                className="w-full px-3 py-2 border rounded"
-              />
-              <ErrorMessage
-                name="lastName"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
+        {/* Last Name */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 dark:text-gray-300">Last Name</label>
+          <Field
+            name="lastName"
+            type="text"
+            className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
+          />
+          <ErrorMessage name="lastName" component="div" className="text-red-500 text-sm mt-1" />
+        </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Email</label>
-              <Field
-                name="emailId"
-                type="email"
-                className="w-full px-3 py-2 border rounded"
-              />
-              <ErrorMessage
-                name="emailId"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
+        {/* Email */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 dark:text-gray-300">Email</label>
+          <Field
+            name="emailId"
+            type="email"
+            className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
+          />
+          <ErrorMessage name="emailId" component="div" className="text-red-500 text-sm mt-1" />
+        </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Password</label>
-              <Field
-                name="password"
-                type="password"
-                className="w-full px-3 py-2 border rounded"
-              />
-              <ErrorMessage
-                name="password"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
+        {/* Password */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 dark:text-gray-300">Password</label>
+          <Field
+            name="password"
+            type="password"
+            className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
+          />
+          <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
+        </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Phone Number</label>
-              <Field
-                name="mobileNo"
-                type="text"
-                className="w-full px-3 py-2 border rounded"
-              />
-              <ErrorMessage
-                name="phoneNumber"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
+        {/* Mobile Number */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 dark:text-gray-300">Phone Number</label>
+          <Field
+            name="mobileNo"
+            type="text"
+            className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
+          />
+          <ErrorMessage name="mobileNo" component="div" className="text-red-500 text-sm mt-1" />
+        </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`w-full py-2 rounded ${isSubmitting ? 'bg-gray-500' : 'bg-blue-500'} text-white`}
-            >
-              {isSubmitting ? 'Signing Up...' : 'Sign Up'}
-            </button>
-
-            {errorMessage && (
-              <div className="text-red-500 text-sm mt-2">
-                {errorMessage}
-              </div>
-            )}
-          </Form>
-        </Formik>
-      </div>
-
-      {/* OTP Modal */}
-      <Modal
-        isOpen={isOtpModalOpen}
-        onRequestClose={() => setOtpModalOpen(false)}
-        className="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-auto"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-      >
-        <h2 className="text-xl font-bold mb-4">Verify OTP</h2>
-        <p className="text-gray-600 mb-4">
-          An OTP has been sent to your registered phone number.
-        </p>
-        <input
-          type="text"
-          placeholder="Enter OTP"
-          className="w-full px-3 py-2 border rounded mb-4"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-        />
+        {/* Submit Button */}
         <button
-          className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
-          onClick={handleOtpVerification}
-        >
-          Verify OTP
+          type="submit"
+          disabled={isSubmitting}
+          className={`w-full py-2 rounded ${
+            isSubmitting ? 'bg-gray-500' : 'bg-blue-500'
+          } text-white dark:bg-blue-600 dark:hover:bg-blue-700`}>
+          {isSubmitting ? 'Signing Up...' : 'Sign Up'}
         </button>
-        {otpErrorMessage && (
-          <div className="text-red-500 text-sm mt-2">{otpErrorMessage}</div>
+
+        {errorMessage && (
+          <div className="text-red-500 text-sm mt-2">
+            {errorMessage}
+          </div>
         )}
-      </Modal>
-    </div>
+      </Form>
+    </Formik>
+  </div>
+
+  {/* OTP Modal */}
+  <Modal
+    isOpen={isOtpModalOpen}
+    onRequestClose={() => setOtpModalOpen(false)}
+    className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm mx-auto"
+    overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+  >
+    <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Verify OTP</h2>
+    <p className="text-gray-600 dark:text-gray-400 mb-4">
+      An OTP has been sent to your registered email.
+    </p>
+    <input
+      type="text"
+      placeholder="Enter OTP"
+      className="w-full px-3 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"
+      value={otp}
+      onChange={(e) => setOtp(e.target.value)}
+    />
+    <button
+      className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 dark:bg-green-700 dark:hover:bg-green-800"
+      onClick={handleOtpVerification}
+    >
+      Verify OTP
+    </button>
+    {otpErrorMessage && (
+      <div className="text-red-500 text-sm mt-2">{otpErrorMessage}</div>
+    )}
+  </Modal>
+</div>
+
+
   );
 };
 
