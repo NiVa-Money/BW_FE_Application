@@ -7,6 +7,7 @@ import {
   SignUpUserService,
   verifyOtpUserService,
 } from "../../api/services/authServices"; // Make sure to import the service
+import { Link } from "react-router-dom";
 
 Modal.setAppElement("#root"); // Set your app element for accessibility
 
@@ -79,136 +80,7 @@ const SignUp = () => {
     }
   };
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  //   return (
-  // <div className={`h-screen w-screen flex items-center justify-center ${isDarkMode ? 'bg-[#121212] text-white' : 'bg-gray-100 text-black'}`}>
-  //   <div className={`p-8 shadow-lg rounded-lg w-full max-w-md ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-  //     <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
-  //     <Formik
-  //       initialValues={{
-  //         firstName: '',
-  //         lastName: '',
-  //         emailId: '',
-  //         password: '',
-  //         mobileNo: '',
-  //       }}
-  //       validationSchema={validationSchema}
-  //       onSubmit={handleSubmit}>
-  //       <Form>
-  //         {/* First Name */}
-  //         <div className="mb-4">
-  //           <label className="block text-sm font-medium mb-1 dark:text-gray-300">First Name</label>
-  //           <Field
-  //             name="firstName"
-  //             type="text"
-  //             className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
-  //           />
-  //           <ErrorMessage name="firstName" component="div" className="text-red-500 text-sm mt-1" />
-  //         </div>
-
-  //         {/* Last Name */}
-  //         <div className="mb-4">
-  //           <label className="block text-sm font-medium mb-1 dark:text-gray-300">Last Name</label>
-  //           <Field
-  //             name="lastName"
-  //             type="text"
-  //             className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
-  //           />
-  //           <ErrorMessage name="lastName" component="div" className="text-red-500 text-sm mt-1" />
-  //         </div>
-
-  //         {/* Email */}
-  //         <div className="mb-4">
-  //           <label className="block text-sm font-medium mb-1 dark:text-gray-300">Email</label>
-  //           <Field
-  //             name="emailId"
-  //             type="email"
-  //             className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
-  //           />
-  //           <ErrorMessage name="emailId" component="div" className="text-red-500 text-sm mt-1" />
-  //         </div>
-
-  //         {/* Password */}
-  //         <div className="mb-4">
-  //           <label className="block text-sm font-medium mb-1 dark:text-gray-300">Password</label>
-  //           <Field
-  //             name="password"
-  //             type="password"
-  //             className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
-  //           />
-  //           <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
-  //         </div>
-
-  //         {/* Mobile Number */}
-  //         <div className="mb-4">
-  //           <label className="block text-sm font-medium mb-1 dark:text-gray-300">Phone Number</label>
-  //           <Field
-  //             name="mobileNo"
-  //             type="text"
-  //             className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:text-white"
-  //           />
-  //           <ErrorMessage name="mobileNo" component="div" className="text-red-500 text-sm mt-1" />
-  //         </div>
-
-  //         {/* Submit Button */}
-  //         <button
-  //           type="submit"
-  //           disabled={isSubmitting}
-  //           className={`w-full py-2 rounded ${
-  //             isSubmitting ? 'bg-gray-500' : 'bg-blue-500'
-  //           } text-white dark:bg-blue-600 dark:hover:bg-blue-700`}>
-  //           {isSubmitting ? 'Signing Up...' : 'Sign Up'}
-  //         </button>
-
-  //         {errorMessage && (
-  //           <div className="text-red-500 text-sm mt-2">
-  //             {errorMessage}
-  //           </div>
-  //         )}
-  //       </Form>
-  //     </Formik>
-  //     <div className="mt-4 text-center">
-  //           <span>Already Have an account?</span>{' '}
-  //           <a
-  //             href="/login"
-  //             className={`
-  //               ${isDarkMode ? 'text-blue-200' : 'text-blue-600'}
-  //             `}>
-  //             Login
-  //           </a>
-  //         </div>
-  //   </div>
-
-  //   {/* OTP Modal */}
-  //   <Modal
-  //     isOpen={isOtpModalOpen}
-  //     onRequestClose={() => setOtpModalOpen(false)}
-  //     className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm mx-auto"
-  //     overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-  //   >
-  //     <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Verify OTP</h2>
-  //     <p className="text-gray-600 dark:text-gray-400 mb-4">
-  //       An OTP has been sent to your registered email.
-  //     </p>
-  //     <input
-  //       type="text"
-  //       placeholder="Enter OTP"
-  //       className="w-full px-3 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"
-  //       value={otp}
-  //       onChange={(e) => setOtp(e.target.value)}
-  //     />
-  //     <button
-  //       className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 dark:bg-green-700 dark:hover:bg-green-800"
-  //       onClick={handleOtpVerification}
-  //     >
-  //       Verify OTP
-  //     </button>
-  //     {otpErrorMessage && (
-  //       <div className="text-red-500 text-sm mt-2">{otpErrorMessage}</div>
-  //     )}
-  //   </Modal>
-  // </div>
-
-  //   );
+ 
   return (
     <div className="overflow-hidden py-4 pr-20 pl-4 bg-white rounded-none max-md:pr-5">
       <div className="flex gap-5 max-md:flex-col">
@@ -319,12 +191,7 @@ const SignUp = () => {
               <div className="text-center text-black">
                 Already have an account?
               </div>
-              <button
-                //onClick={() => Router.push("")}
-                className="text-[#387D8C] cursor-pointer"
-              >
-                Login
-              </button>
+              <Link to="/login">Login</Link>;
             </div>
           </div>
         </div>
