@@ -14,11 +14,12 @@ export const LoginUserService = async (payload: any) => {
   export const SignUpUserService = async (payload: any) => {
     try {
       const response = await axiosInstance.post('/user/signup/otherEmail', payload);
-      return response.data;
+      return response.data; 
     } catch (error: any) {
-      throw new Error(`${error?.response?.data?.error}`);
+      return error?.response?.data || { success: false, message: "Something went wrong." };
     }
   };
+  
 
   export const verifyOtpUserService = async (payload: any) => {
     try {

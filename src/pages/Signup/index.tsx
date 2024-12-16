@@ -1,86 +1,197 @@
-import React, { useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import Modal from "react-modal";
-import { Route, Router, useNavigate } from "react-router-dom"; // For React Router v5/v6
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   SignUpUserService,
   verifyOtpUserService,
-} from "../../api/services/authServices"; // Make sure to import the service
-import { Link } from "react-router-dom";
+} from "../../api/services/authServices";
+import OtpModal from "./otpModal";
 
-Modal.setAppElement("#root"); // Set your app element for accessibility
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+}
 
-const SignUp = () => {
-  const [isOtpModalOpen, setOtpModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
-  const [errorMessage, setErrorMessage] = useState(""); // Store error messages
-  const [otpErrorMessage, setOtpErrorMessage] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ [key: string]: string }>({}); // Store OTP error messages
-  const [otp, setOtp] = useState(""); // Store OTP entered by the user
-  const [saveDataEmail, setSaveDataEmail] = useState("");
+interface FormErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+}
+
+interface SignUpResponse {
+  success: boolean;
+  message?: string;
+}
+
+interface FieldConfig {
+  name: keyof FormData;
+  placeholder: string;
+  imgSrc: string;
+  type: string;
+}
+
+const SignUp: React.FC = () => {
+  const [isOtpModalOpen, setOtpModalOpen] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [otpErrorMessage, setOtpErrorMessage] = useState<string>("");
+  const [formData, setFormData] = useState<FormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [otp, setOtp] = useState<string>("");
+  const [saveDataEmail, setSaveDataEmail] = useState<string>("");
   const navigate = useNavigate();
 
-  // Form validation schema using Yup
-  const validationSchema = Yup.object({
-    firstName: Yup.string().required("First Name is required"),
-    lastName: Yup.string().required("Last Name is required"),
-    emailId: Yup.string().email("Invalid email").required("Email is required"),
-    mobileNo: Yup.string()
-      .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
-      .required("Phone Number is required"),
-  });
-
-  const handleSubmit = async (values: any) => {
-    try {
-      setIsSubmitting(true); // Set loading state
-      setErrorMessage(""); // Reset any previous error messages
-
-      // Call the SignUpUserService function with form values
-      const response = await SignUpUserService(values);
-      console.log(values);
-      setSaveDataEmail(values.emailId);
-      // Assuming the response contains a success message or data
-      if (response.success) {
-        console.log("Sign Up successful!", response);
-        setOtpModalOpen(true); // Open OTP modal on successful sign-up
-      } else {
-        setErrorMessage(response.message || "Something went wrong!"); // Display error message
-      }
-    } catch (error) {
-      setErrorMessage("An error occurred while signing up."); // Handle errors
-    } finally {
-      setIsSubmitting(false); // Reset loading state
+  const validateField = (name: keyof FormData, value: string): string => {
+    switch (name) {
+      case "firstName":
+        return value.trim() === "" ? "First name is required" : "";
+      case "lastName":
+        return value.trim() === "" ? "Last name is required" : "";
+      case "email":
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return !emailRegex.test(value) ? "Please enter a valid email address" : "";
+      case "phone":
+        const phoneRegex = /^[0-9]{10}$/;
+        return !phoneRegex.test(value) ? "Phone number must be 10 digits" : "";
+      case "password":
+        return value.length < 8 
+          ? "Password must be at least 8 characters long" 
+          : !value.match(/[A-Z]/)
+          ? "Password must contain at least one uppercase letter"
+          : !value.match(/[0-9]/)
+          ? "Password must contain at least one number"
+          : "";
+      default:
+        return "";
     }
   };
 
-  const handleOtpVerification = async () => {
-    console.log("here");
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    const error = validateField(name as keyof FormData, value);
+    setErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault();
+    
+    // Validate all fields
+    const newErrors: FormErrors = {};
+    (Object.keys(formData) as Array<keyof FormData>).forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
+  
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+  
     try {
-      // Make the OTP verification request
-      const response = await verifyOtpUserService({
-        otp: otp,
+      setIsSubmitting(true);
+      setErrorMessage("");
+    
+      const response: SignUpResponse & { error?: string } = await SignUpUserService({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        emailId: formData.email,
+        mobileNo: formData.phone,
+        password: formData.password,
+      });
+    
+      if (response.success) {
+        setSaveDataEmail(formData.email);
+        setOtpModalOpen(true);
+  
+        // Clear the form data
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          password: "",
+        });
+        setErrors({}); // Reset errors as well
+      } else {
+        setErrorMessage(response.error || response.message || "Signup failed. Please try again.");
+      }
+    } catch (error: any) {
+      const errorMsg = error?.response?.data?.error || "An error occurred. Please try again.";
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }; 
+  
+
+  const handleOtpVerification = async (): Promise<void> => {
+    try {
+      const response: SignUpResponse = await verifyOtpUserService({
+        otp,
         emailId: saveDataEmail,
-      }); // Pass OTP to the service
+      });
 
       if (response.success) {
-        console.log("OTP verified successfully");
-        // Redirect to login page after successful OTP verification
         navigate("/login");
       } else {
-        setOtpErrorMessage(
-          response.message || "OTP verification failed. Please try again."
-        );
+        setOtpErrorMessage(response.message || "OTP verification failed. Please try again.");
       }
     } catch (error) {
       setOtpErrorMessage("An error occurred while verifying OTP.");
     }
   };
-  const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
- 
+
+  const fields: FieldConfig[] = [
+    {
+      name: "firstName",
+      placeholder: "Enter your first name",
+      imgSrc: "/assets/key_icon.svg",
+      type: "text",
+    },
+    {
+      name: "lastName",
+      placeholder: "Enter your last name",
+      imgSrc: "/assets/key_icon.svg",
+      type: "text",
+    },
+    {
+      name: "email",
+      placeholder: "Enter your email",
+      imgSrc: "/assets/mail_icon.svg",
+      type: "email",
+    },
+    {
+      name: "phone",
+      placeholder: "Enter your phone no",
+      imgSrc: "/assets/mobile_icon.svg",
+      type: "tel",
+    },
+    {
+      name: "password",
+      placeholder: "Enter your password",
+      imgSrc: "/assets/key_icon.svg",
+      type: "password",
+    },
+  ];
+
   return (
     <div className="overflow-hidden py-4 pr-20 pl-4 bg-white rounded-none max-md:pr-5">
       <div className="flex gap-5 max-md:flex-col">
@@ -121,66 +232,48 @@ const SignUp = () => {
               </div>
             </div>
             {/* Input Fields */}
-            <form
-              onSubmit={handleSubmit}
-              className="flex flex-col justify-center text-black self-center mt-10 rounded-[128px] max-w-full w-[600px]"
-            >
-              {[
-                {
-                  placeholder: "Enter your email",
-                  imgSrc: "/assets/mail_icon.svg",
-                  value: email,
-                  setValue: setEmail,
-                  type: "email",
-                  error: errors.email,
-                },
-                {
-                  placeholder: "Enter your phone no",
-                  imgSrc: "/assets/mobile_icon.svg",
-                  value: phone,
-                  setValue: setPhone,
-                  type: "text",
-                  error: errors.phone,
-                },
-                {
-                  placeholder: "Enter your password",
-                  imgSrc: "/assets/key_icon.svg",
-                  value: password,
-                  setValue: setPassword,
-                  type: "password",
-                  error: errors.password,
-                },
-              ].map((field, index) => (
-                <div
-                  key={index}
-                  className="flex gap-2.5 items-center px-8 py-4 mt-7 w-full bg-neutral-100 text-black rounded-[128px] max-md:px-5 max-md:max-w-full"
-                >
-                  <img
-                    loading="lazy"
-                    src={field.imgSrc}
-                    alt="Input Icon"
-                    width={20}
-                    height={20}
-                    className="object-contain shrink-0 self-stretch my-auto w-6 aspect-[1.04]"
-                  />
-                  <input
-                    type={field.type}
-                    placeholder={field.placeholder}
-                    value={field.value}
-                    onChange={(e) => field.setValue(e.target.value)}
-                    className="w-full bg-transparent outline-none"
-                  />
-                  {field.error && (
-                    <div className="text-red-500 text-sm">{field.error}</div>
+            <form onSubmit={handleSubmit} className="flex flex-col justify-center text-black self-center mt-10 rounded-[128px] max-w-full w-[600px]">
+              {fields.map((field, index) => (
+                <div key={index} className="relative">
+                  <div className="flex gap-2.5 items-center px-8 py-4 mt-7 w-full bg-neutral-100 text-black rounded-[128px] max-md:px-5 max-md:max-w-full">
+                    <img
+                      loading="lazy"
+                      src={field.imgSrc}
+                      alt="Input Icon"
+                      width={20}
+                      height={20}
+                      className="object-contain shrink-0 self-stretch my-auto w-6 aspect-[1.04]"
+                    />
+                    <input
+                      type={field.type}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      value={formData[field.name]}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent outline-none"
+                    />
+                  </div>
+                  {errors[field.name] && (
+                    <div className="text-red-500 text-sm mt-1 ml-4">
+                      {errors[field.name]}
+                    </div>
                   )}
                 </div>
               ))}
+              
+              {errorMessage && (
+                <div className="text-red-500 text-sm mt-4 text-center">
+                  {errorMessage}
+                </div>
+              )}
+
               {/* Sign-Up Button */}
               <button
                 type="submit"
-                className="gap-2.5 self-stretch mt-8 px-2.5 py-4 w-full text-xl text-white whitespace-nowrap rounded-full bg-neutral-800 min-h-[63px]"
+                disabled={isSubmitting}
+                className="gap-2.5 self-stretch mt-8 px-2.5 py-4 w-full text-xl text-white whitespace-nowrap rounded-full bg-neutral-800 min-h-[63px] disabled:opacity-50"
               >
-                Sign-Up
+                {isSubmitting ? "Signing Up..." : "Sign-Up"}
               </button>
             </form>
             {/* Footer */}
@@ -191,11 +284,20 @@ const SignUp = () => {
               <div className="text-center text-black">
                 Already have an account?
               </div>
-              <Link to="/login">Login</Link>;
+              <Link to="/login" className="text-blue-600 hover:text-blue-800">
+                Login
+              </Link>
             </div>
           </div>
         </div>
       </div>
+      <OtpModal
+        isOpen={isOtpModalOpen}
+        onClose={() => setOtpModalOpen(false)}
+        onVerify={handleOtpVerification}
+        errorMessage={otpErrorMessage}
+        onChangeOtp={(value: string) => setOtp(value)}
+      />
     </div>
   );
 };

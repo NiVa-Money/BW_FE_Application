@@ -2,14 +2,26 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoginUserService } from "../../api/services/authServices";
 import { Link } from "react-router-dom";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  // Validate email and password
+  const isValidEmail = (email: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+  const isValidForm = () => email && password && isValidEmail(email);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidForm()) {
+      setError("Please provide a valid email and password.");
+      return;
+    }
+
+    setIsLoading(true);
     try {
       const response = await LoginUserService({ email, password });
       if (response.success) {
@@ -21,13 +33,14 @@ const Login = () => {
     } catch (err) {
       console.error("Error logging in:", err);
       setError("An unexpected error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   return (
-
     <>
       <head>
         <title>BotWot ICX - Login</title>
@@ -137,8 +150,9 @@ const Login = () => {
                     <button
                       type="submit"
                       className="gap-2.5 self-stretch px-2.5 py-4 w-full text-xl text-white rounded-full bg-neutral-800 min-h-[63px]"
+                      disabled={isLoading}
                     >
-                      Log in
+                      {isLoading ? "Logging in..." : "Log in"}
                     </button>
                     <div className="gap-1 mt-8 text-base text-neutral-400">
                       <span className="leading-6 text-black">
