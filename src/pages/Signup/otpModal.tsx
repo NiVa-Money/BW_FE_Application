@@ -1,11 +1,11 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 
 interface OtpModalProps {
   isOpen: boolean;
   onClose: () => void;
   onVerify: () => void;
   errorMessage: string;
-  onChangeOtp: (otp: string) => void; // Update OTP
+  onChangeOtp: (otp: string) => void;
 }
 
 const OtpModal: React.FC<OtpModalProps> = ({
@@ -15,6 +15,8 @@ const OtpModal: React.FC<OtpModalProps> = ({
   errorMessage,
   onChangeOtp,
 }) => {
+  const [otpValues, setOtpValues] = useState<string[]>(["", "", "", ""]);
+
   const inputRefs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
@@ -22,16 +24,17 @@ const OtpModal: React.FC<OtpModalProps> = ({
     useRef<HTMLInputElement>(null),
   ];
 
-  const otpValues = ["", "", "", ""];
-
   const handleInputChange = (index: number, value: string) => {
     if (value.length > 1) return; // Allow only single digit
 
-    otpValues[index] = value; // Update OTP values locally
-    const otp = otpValues.join(""); // Join to form complete OTP
-    onChangeOtp(otp);
+    const newOtpValues = [...otpValues];
+    newOtpValues[index] = value; // Update OTP value at the current index
+    setOtpValues(newOtpValues);
 
-    // Move to the next input if value is entered
+    const otp = newOtpValues.join(""); // Join all digits
+    onChangeOtp(otp); 
+
+    // Move to the next input field if a digit is entered
     if (value && index < inputRefs.length - 1) {
       inputRefs[index + 1].current?.focus();
     }
@@ -39,7 +42,10 @@ const OtpModal: React.FC<OtpModalProps> = ({
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !otpValues[index] && index > 0) {
-      // Move focus to previous input on backspace
+      // Clear the previous input and move focus
+      const newOtpValues = [...otpValues];
+      newOtpValues[index - 1] = "";
+      setOtpValues(newOtpValues);
       inputRefs[index - 1].current?.focus();
     }
   };
@@ -59,6 +65,7 @@ const OtpModal: React.FC<OtpModalProps> = ({
               type="text"
               maxLength={1}
               ref={ref}
+              value={otpValues[index]} // Set value from state
               className="w-12 h-12 text-center border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={(e) => handleInputChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}

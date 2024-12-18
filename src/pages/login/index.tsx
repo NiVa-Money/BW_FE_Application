@@ -15,6 +15,7 @@ const Login = () => {
   const isValidForm = () => email && password && isValidEmail(email);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
     e.preventDefault();
     if (!isValidForm()) {
       setError("Please provide a valid email and password.");
@@ -22,10 +23,11 @@ const Login = () => {
     }
 
     setIsLoading(true);
+    
     try {
       const response = await LoginUserService({ email, password });
       if (response.success) {
-        localStorage.setItem("userId", response.userId);
+        console.log("hello",response.success)
         navigate("/dashboard");
       } else {
         setError(response.message || "Login failed. Please try again.");
@@ -77,7 +79,7 @@ const Login = () => {
                 <div className="flex z-0 mt-6 w-full rounded-xl bg-neutral-800 min-h-[63px] shadow-[0px_4px_15px_rgba(0,0,0,0.11)] max-md:max-w-full" />
 
                 {/* Google Login */}
-                <div className="flex absolute left-2/4 z-0 gap-7 max-w-full text-base leading-none text-white rounded-full -translate-x-2/4 bottom-[19px] h-[26px] translate-y-[0%] w-[198px]">
+                <div className="flex absolute left-2/4 z-0 gap-7 max-w-full text-base leading-none text-white rounded-full -translate-x-2/4 bottom-[18px] h-[26px] translate-y-[0%] w-[198px]">
                   <img
                     src="/assets/google_logo.svg"
                     alt="Google Login"

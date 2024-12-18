@@ -8,7 +8,7 @@ interface AuthMiddlewareProps {
 const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children }) => {
   const location = useLocation();
 
-  if (!localStorage.getItem("userId")) {
+  if (!localStorage.getItem("user_id")) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
