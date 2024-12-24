@@ -10,6 +10,10 @@ export default {
         xl: "1280px",
         "2xl": "1536px",
       },
+      helperText: {
+        paddingLeft: '0rem', // Equivalent to text-sm
+         // Equivalent to mt-1
+      },
     },
   },
   plugins: [],

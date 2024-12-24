@@ -4,6 +4,7 @@ import Dashboard from "../pages/Dashboard";
 import MyChatBot from "../pages/MyChatBot";
 import AdminPanel from "../pages/AdminPanel";
 import { Navigate } from "react-router-dom";
+import CreateBot from "../pages/CreateBot";
 const MODULE_MAP = {
   '/dashboard': 1,
   '/chatBot': 2,
@@ -62,6 +63,7 @@ export const publicRoutes: RouteType[] = [
   { path: "/login", component: <Login /> },
   { path: "/Signup", component: <SignUp /> },
   { path: "/", component: <Login /> },
+  {path:'/createbot',component:<CreateBot/>}
 ];
 
 export const useModuleAccess = () => {
