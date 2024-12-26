@@ -3,7 +3,7 @@ import { Chip } from '@mui/material';
 import { FieldProps } from 'formik';
 
 interface FormikChipsFieldProps extends FieldProps {
-  options: { label: string; value: string; }[];
+  options: { label: string; value: string;icon:any }[];
 }
 
 const FormikFieldChipComponent: React.FC<FormikChipsFieldProps> = ({ field, form, options }) => {
@@ -22,7 +22,7 @@ const FormikFieldChipComponent: React.FC<FormikChipsFieldProps> = ({ field, form
           label={
             <div className="flex items-center space-x-1">
               <span>{option.label}</span>
-              
+              {option.icon}
             </div>
           }
           clickable

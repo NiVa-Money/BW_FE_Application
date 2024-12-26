@@ -19,8 +19,12 @@ const FormikFieldInputComponent: React.FC<any> = ({ field, form, ...props }) => 
         helperText={form.touched[field.name] && form.errors[field.name]}
         variant="outlined"
         sx={{
+            '& .MuiInputBase-root':{
+              backgroundColor:'#F3F2F6',
+            },
             '& .MuiOutlinedInput-root': {
               height: '35px',
+              
               '& .MuiOutlinedInput-input': {
                 height: '35px',
               },

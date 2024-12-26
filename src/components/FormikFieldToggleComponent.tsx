@@ -21,7 +21,7 @@ console.log('o',options)
       value={value}
       exclusive
       onChange={handleChange}
-      className="rounded-full w-max border h-[100%] border-gray-300 rounded-[50%]"
+      className="rounded-full w-max border h-[35px] border-gray-300 rounded-[50%]"
     >
       {options.map((option) => (
         <ToggleButton

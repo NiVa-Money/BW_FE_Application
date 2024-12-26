@@ -1,18 +1,57 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { HexColorPicker } from 'react-colorful';
+
 import CreateBotRightContainer from './CreateBotRightContainer';
-import { TextField } from '@mui/material';
+import BedtimeIcon from '@mui/icons-material/Bedtime';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import FormikFieldChipComponent from '../../components/FormikFieldChipComponent';
 import FormikFieldToggleComponent from '../../components/FormikFieldToggleComponent';
 import FormikFieldInputComponent from '../../components/FormikFieldInputComponent';
+import { Button } from '@mui/material';
 
 interface FormValues {
   name: string;
   email: string;
 }
 const CreateBot: React.FC = () => {
+  const imgViewerRef = useRef(null);
+  const [imageName, setImageName] = useState('');
+  const [chatColor, setChatColor] = useState('#5D39AD');
+  const [showColorPicker, setShowColorPicker] = useState<any>(false);
+  const [imageSrc, setImageSrc] = useState('/assets/bot1.svg');
 
+  const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
+
+  const botSamples = [
+    {
+      imageUrl: `/assets/bot1.svg`,
+    },
+    {
+      imageUrl: `/assets/bot2.svg`,
+    },
+    {
+      imageUrl: `/assets/bot3.svg`,
+    },
+    {
+      imageUrl: `/assets/bot4.svg`,
+    },
+    {
+      imageUrl: `/assets/bot5.svg`,
+    },
+    {
+      imageUrl: `/assets/bot6.svg`,
+    },
+  ];
+  const handleBotSampleClick = async (item: any) => {
+    setImageSrc(item?.imageUrl);
+    const response = await fetch(item?.imageUrl);
+    const blob = await response.blob();
+    const file = new File([blob], 'image.jpg', { type: blob.type });
+    setSelectedFileImage(file);
+  };
+  console.log('im', selectedFileImage, imageSrc)
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
@@ -20,127 +59,255 @@ const CreateBot: React.FC = () => {
   const initialValues: FormValues = {
     name: '',
     email: '',
-  };  const handleSubmit = (values: FormValues) => {
+  }; const handleSubmit = (values: FormValues) => {
     // Handle form submission logic here
     console.log('Form Submitted:', values);
   };
-
+  const handleColorClick = (color: any) => {
+    if (color === 'rainbow') {
+      setColorPicker(true);
+      // setChatColor(color);
+      setShowColorPicker(true);
+    } else {
+      setColorPicker(false);
+      setChatColor(color);
+      setShowColorPicker(false);
+    }
+  };
+  const handleFileUpload = (event: any) => {
+    const file = event.target.files[0];
+    const imagePath = URL.createObjectURL(file);
+    setImageSrc(imagePath);
+    setImageName(file.name);
+    if (file && file.size <= 10 * 1024 * 1024) {
+      setBase64Image(file);
+    } else {
+      alert('File must be less than 10MB');
+    }
+  };
   return (
     <div className='m-[15px] max-w-[1400px] h-[100vh] w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
-       <Formik
-       
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      onSubmit={handleSubmit}
-    >
-      {() => (
-        <Form className="w-[95%] m-auto h-[95%] grid grid-cols-[60%_40%]">
-          <left-container className="bg-blue">
-            <div className="flex-col">
-            <div className=" flex flex-col" >
-            <label htmlFor="name">Bot Name</label>
-           
-            <Field
-              type="text"
-              id="name"
-              name="name"
-              
-              placeholder="Enter your Bot Name"
-              component={FormikFieldInputComponent}
-              
-            />
-            </div>
-            <div className=" flex flex-col" >
-            <label htmlFor="theme">Choose theme</label>
-           
-            <Field
-              name="mood"
-              component={FormikFieldChipComponent}
-              options={[
-                { label: 'Light', value: 'light'  },
-                { label: 'Dark', value: 'dark'},
-              ]}
-            />
-            </div>
-            <div className=" flex flex-col" >
-            <label htmlFor="botTone">Bot Tone</label>
-           
-            <Field
-               name="botTone"
-               component={FormikFieldToggleComponent}
-               options={[
-                 { label: 'Formal Tone', value: 'formal' },
-                 { label: 'Casual Tone', value: 'casual' },
-                 { label: 'Enthusiastic Tone', value: 'enthusiastic' },
-               ]}
-            />
-            </div>
-            <div className=" flex flex-col" >
-            <label htmlFor="botFont">Bot Tone</label>
-           
-            <Field
-               name="botFont"
-               component={FormikFieldToggleComponent}
-               options={[
-                 { label: 'Poppins', value: 'Poppins' },
-                 { label: 'Montserrat', value: 'Montserrat' },
-                 { label: 'Times Roman', value: 'Times Roman' },
-               ]}
-            />
-            </div>
-            <div className=" flex flex-col" >
-            <label htmlFor="greetingMessage">Bot Greeting Message</label>
-           
-            <Field
-              type="text"
-              id="greetingMessage"
-              name="greetingMessage"
-              placeholder="Enter your Bot Name"
-              component={FormikFieldInputComponent}
-              
-            />
-            </div>
-            <div className=" flex flex-col" >
-            <label htmlFor="botIdentity">Bot Identity</label>
-           
-            <Field
-              type="text"
-              id="name"
-              name="botIdentity"
-              placeholder="Enter your Bot Name"
-              component={FormikFieldInputComponent}
-              
-            />
-            </div>
-            </div>
-          </left-container>
-          <CreateBotRightContainer botName='Botwot Assistant'/>
-          {/* <div>
-            <label htmlFor="name">Name</label>
-            <Field
-              type="text"
-              id="name"
-              name="name"
-              placeholder="Enter your name"
-            />
-            <ErrorMessage name="name" component="div" className="error" />
-          </div> */}
+      <Formik
 
-          {/* <div>
-            <label htmlFor="email">Email</label>
-            <Field
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email"
-            />
-            <ErrorMessage name="email" component="div" className="error" />
-          </div> */}
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        {() => (
+          <Form className="w-[95%] m-auto h-[95%] grid grid-cols-[60%_40%]">
+            <left-container className="bg-blue">
+              <div className="flex-col">
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label htmlFor="name">Bot Name</label>
 
-          {/* <button type="submit">Submit</button> */}
-        </Form>
-      )}
-    </Formik>
+                  <Field
+                    type="text"
+                    id="name"
+                    name="name"
+
+                    placeholder="Enter your Bot Name"
+                    component={FormikFieldInputComponent}
+
+                  />
+                </div>
+                <div className='flex flex-col w-[85%] mb-3'>
+                  <label htmlFor="name">Chat Color</label>
+                  <div className="flex space-x-2">
+                    {[
+                      '#78C9F1',
+                      '#F65CCC',
+                      '#E4E748',
+                      '#681F9F',
+                      '#53D258',
+                      'rainbow',
+                    ].map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => handleColorClick(color)}
+                        className={`w-8 h-8 rounded-[100%] rounded-full ${color === 'rainbow'
+                          ? 'bg-gradient-to-r from-red-500 via-green-500 to-blue-500'
+                          : ''
+                          }${chatColor === color ? 'border-4 border-gray-400' : ''}`}
+                        style={{
+                          backgroundColor: color !== 'rainbow' ? color : undefined,
+                        }}
+                      />
+                    ))}
+
+                    {showColorPicker && (
+                      <div className="absolute z-10 mt-2">
+                        <HexColorPicker color={chatColor} onChange={setChatColor} />
+                      </div>
+                    )}
+
+                  </div>
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label htmlFor="theme">Choose Profile</label>
+                  <div className="grid grid-cols-6 gap-1 items-center">
+                    {/* Add bot profile images here */}
+                    {botSamples.map((item, idx) => (
+                      <img
+                        key={idx}
+                        src={item.imageUrl}
+                        alt="logo"
+                        width={'100%'}
+                        height={50}
+                        onClick={() => handleBotSampleClick(item)}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label >Choose Image</label>
+
+                  <div className="mb-4">
+                    <div className="relative h-[50px]">
+                      <div className="flex items-center h-[100%] w-full rounded-[12px] bg-[#F3F2F6] absolute ">
+                        <div className='flex justify-start items-center ml-4'>
+                          {imageName?.length ? <img
+                            src={imageSrc}
+                            alt="logo"
+                            width={20}
+                            height={20}
+                          /> : null}
+
+                          <span className="mr-2 ml-2">
+                            {imageName?.length ? imageName : 'Choose File'}
+                          </span></div>
+                          {imageName?.length ?
+                        <button
+                          onClick={() => {
+                            setImageName('');
+                            setImageSrc('');
+                          }}
+                          className="mr-4 ml-auto bg-none text-[black] text-white"
+                        >
+                          ×
+                        </button>:null}
+                      </div>
+                      <input
+                        type="file"
+                        onChange={handleFileUpload}
+                        ref={imgViewerRef}
+                        accept="image/*"
+                        id="file-upload-image"
+                        className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label htmlFor="theme">Choose theme</label>
+
+                  <Field
+                    name="mood"
+                    component={FormikFieldChipComponent}
+                    options={[
+                      { label: 'Light', value: 'light', icon: <LightModeIcon /> },
+                      { label: 'Dark', value: 'dark', icon: <BedtimeIcon /> },
+                    ]}
+                  />
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label htmlFor="botTone">Bot Tone</label>
+
+                  <Field
+                    name="botTone"
+                    component={FormikFieldToggleComponent}
+                    options={[
+                      { label: 'Formal Tone', value: 'formal' },
+                      { label: 'Casual Tone', value: 'casual' },
+                      { label: 'Enthusiastic Tone', value: 'enthusiastic' },
+                    ]}
+                  />
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label htmlFor="botFont">Bot Font</label>
+
+                  <Field
+                    name="botFont"
+                    component={FormikFieldToggleComponent}
+                    options={[
+                      { label: 'Poppins', value: 'Poppins' },
+                      { label: 'Montserrat', value: 'Montserrat' },
+                      { label: 'Times Roman', value: 'Times Roman' },
+                    ]}
+                  />
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label htmlFor="greetingMessage">Bot Greeting Message</label>
+
+                  <Field
+                    type="text"
+                    id="greetingMessage"
+                    name="greetingMessage"
+                    placeholder="Enter your Bot Name"
+                    component={FormikFieldInputComponent}
+
+                  />
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label htmlFor="botIdentity">Bot Identity</label>
+
+                  <Field
+                    type="text"
+                    id="name"
+                    name="botIdentity"
+                    placeholder="Enter your Bot Name"
+                    component={FormikFieldInputComponent}
+
+                  />
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label htmlFor="botLimit">Bot Limit per Message</label>
+
+                  <Field
+                    type="text"
+                    id="name"
+                    name="botLimit"
+                    placeholder="Enter your Bot Name"
+                    component={FormikFieldInputComponent}
+
+                  />
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label >Agent Creation</label>
+
+                  <Button variant="text" className='bg-[#65558F] w-[150px] self-start rounded-[100px]'
+                    sx={{
+                      '&.MuiButtonBase-root': {
+                        backgroundColor: 'white',
+                        color: 'black',
+                        borderRadius: '100px',
+                        border:'1px solid',
+                        marginTop:'10px'
+                      },
+                    }}
+                  >Create Agent</Button>
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3" >
+                  <label >Add to Workflow</label>
+
+                  <Button variant="text" className='bg-[#65558F] w-[180px] self-start rounded-[100px]'
+                    sx={{
+                      '&.MuiButtonBase-root': {
+                        backgroundColor: 'white',
+                        color: 'black',
+                        borderRadius: '100px',
+                        border:'1px solid',
+                        marginTop:'10px'
+                      },
+                    }}
+                  >Add to Workflow</Button>
+                </div>
+              </div>
+            </left-container>
+            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' />
+
+          </Form>
+        )}
+      </Formik>
     </div>
 
   );
