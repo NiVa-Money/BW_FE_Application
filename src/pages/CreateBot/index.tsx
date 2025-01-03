@@ -10,11 +10,9 @@ import FormikFieldChipComponent from '../../components/FormikFieldChipComponent'
 import FormikFieldToggleComponent from '../../components/FormikFieldToggleComponent';
 import FormikFieldInputComponent from '../../components/FormikFieldInputComponent';
 import { Button } from '@mui/material';
+import { THEME } from '../../enums';
 
-interface FormValues {
-  name: string;
-  email: string;
-}
+
 const CreateBot: React.FC = () => {
   const imgViewerRef = useRef(null);
   const [imageName, setImageName] = useState('');
@@ -23,7 +21,15 @@ const CreateBot: React.FC = () => {
   const [imageSrc, setImageSrc] = useState('/assets/bot1.svg');
 
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
-
+  const [formValues, setFormValues] = useState<any>({
+    botName: '',
+    theme: '',
+    botTone: '',
+    botFont: '',
+    greetingMessage: '',
+    botIdentity: '',
+    botLimit: '',
+  });
   const botSamples = [
     {
       imageUrl: `/assets/bot1.svg`,
@@ -44,6 +50,7 @@ const CreateBot: React.FC = () => {
       imageUrl: `/assets/bot6.svg`,
     },
   ];
+  const {botName,theme}:any=formValues
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
     const response = await fetch(item?.imageUrl);
@@ -51,15 +58,18 @@ const CreateBot: React.FC = () => {
     const file = new File([blob], 'image.jpg', { type: blob.type });
     setSelectedFileImage(file);
   };
-  console.log('im', selectedFileImage, imageSrc)
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
   });
-  const initialValues: FormValues = {
+  const initialValues: any = {
     name: '',
-    email: '',
-  }; const handleSubmit = (values: FormValues) => {
+    theme: '',
+    botTone:'',
+    botFont:'',
+    greetingMessage:'',
+    botIdentity:''
+  }; const handleSubmit = (values: any) => {
     // Handle form submission logic here
     console.log('Form Submitted:', values);
   };
@@ -85,6 +95,12 @@ const CreateBot: React.FC = () => {
       alert('File must be less than 10MB');
     }
   };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('e',e.target)
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+    console.log('for',{ ...formValues, [name]: value })
+  };
   return (
     <div className='m-[15px] max-w-[1400px] h-[100vh] w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
       <Formik
@@ -92,26 +108,28 @@ const CreateBot: React.FC = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
+        
       >
         {() => (
           <Form className="w-[95%] m-auto h-[95%] grid grid-cols-[60%_40%]">
             <left-container className="bg-blue">
               <div className="flex-col">
                 <div className=" flex flex-col w-[85%] mb-3" >
-                  <label htmlFor="name">Bot Name</label>
+                  <label htmlFor="botName">Bot Name</label>
 
                   <Field
                     type="text"
-                    id="name"
-                    name="name"
-
+                    id="botName"
+                    name="botName"
+                    value={botName}
                     placeholder="Enter your Bot Name"
                     component={FormikFieldInputComponent}
+                    onChange={handleChange}
 
                   />
                 </div>
                 <div className='flex flex-col w-[85%] mb-3'>
-                  <label htmlFor="name">Chat Color</label>
+                  <label htmlFor="chatColor">Chat Color</label>
                   <div className="flex space-x-2">
                     {[
                       '#78C9F1',
@@ -143,7 +161,7 @@ const CreateBot: React.FC = () => {
                   </div>
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3" >
-                  <label htmlFor="theme">Choose Profile</label>
+                  <label htmlFor="botIcon">Choose Profile</label>
                   <div className="grid grid-cols-6 gap-1 items-center">
                     {/* Add bot profile images here */}
                     {botSamples.map((item, idx) => (
@@ -201,11 +219,14 @@ const CreateBot: React.FC = () => {
                   <label htmlFor="theme">Choose theme</label>
 
                   <Field
-                    name="mood"
+                    name="theme"
                     component={FormikFieldChipComponent}
-                    options={[
-                      { label: 'Light', value: 'light', icon: <LightModeIcon /> },
-                      { label: 'Dark', value: 'dark', icon: <BedtimeIcon /> },
+                    onChange={(value: string) => {
+                      setFormValues({ ...formValues, theme: value });
+                      // Perform additional logic if needed
+                    }}                   options={[
+                      { label: 'Light', value: THEME.light, icon: <LightModeIcon /> },
+                      { label: 'Dark', value: THEME.dark, icon: <BedtimeIcon /> },
                     ]}
                   />
                 </div>
@@ -215,6 +236,8 @@ const CreateBot: React.FC = () => {
                   <Field
                     name="botTone"
                     component={FormikFieldToggleComponent}
+                    onChange={handleChange}
+
                     options={[
                       { label: 'Formal Tone', value: 'formal' },
                       { label: 'Casual Tone', value: 'casual' },
@@ -228,6 +251,8 @@ const CreateBot: React.FC = () => {
                   <Field
                     name="botFont"
                     component={FormikFieldToggleComponent}
+                    onChange={handleChange}
+
                     options={[
                       { label: 'Poppins', value: 'Poppins' },
                       { label: 'Montserrat', value: 'Montserrat' },
@@ -244,6 +269,8 @@ const CreateBot: React.FC = () => {
                     name="greetingMessage"
                     placeholder="Enter your Bot Name"
                     component={FormikFieldInputComponent}
+                    onChange={handleChange}
+
 
                   />
                 </div>
@@ -256,6 +283,8 @@ const CreateBot: React.FC = () => {
                     name="botIdentity"
                     placeholder="Enter your Bot Name"
                     component={FormikFieldInputComponent}
+                    onChange={handleChange}
+
 
                   />
                 </div>
@@ -268,6 +297,8 @@ const CreateBot: React.FC = () => {
                     name="botLimit"
                     placeholder="Enter your Bot Name"
                     component={FormikFieldInputComponent}
+                    onChange={handleChange}
+
 
                   />
                 </div>
@@ -303,7 +334,7 @@ const CreateBot: React.FC = () => {
                 </div>
               </div>
             </left-container>
-            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' />
+            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} />
 
           </Form>
         )}

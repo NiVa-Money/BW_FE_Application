@@ -15,7 +15,6 @@ const FormikFieldToggleComponent: React.FC<FormikToggleButtonGroupProps> = ({ fi
       setFieldValue(name, newValue);
     }
   };
-console.log('o',options)
   return (
     <ToggleButtonGroup
       value={value}

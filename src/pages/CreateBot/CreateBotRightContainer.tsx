@@ -4,11 +4,13 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { Button } from '@mui/material';
 interface CreateBotRightContainerProps {
   botName?: string;
-  imageSrc?: any
+  imageSrc?: any;
+  theme:string
+
 }
 
-const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botName, imageSrc }) => {
-
+const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botName, imageSrc,theme }) => {
+console.log('th',theme)
   const messages: any = [
     { id: 1, sender: 'bot', text: "Hi I’m BotWot, How can I assist you today?", time: '7:30 pm' },
     { id: 2, sender: 'user', text: 'I need to book an appointment', time: '7:31 pm' },
@@ -27,7 +29,10 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botNa
             },
           }}
         >Submit</Button>
-        <div className='w-max-[480px] mt-10 border-[solid] border-[black] h-[420px] bg-[#CAC4D0] flex justify-center items-center rounded-[12px]'>
+<div
+  className='w-max-[480px] mt-10 border border-black h-[420px] flex justify-center items-center rounded-[12px]'
+  style={{ backgroundColor: theme === 'dark' ? '#1D1B20' : '#CAC4D0' }}
+>
           <div className='h-[90%] w-[90%] flex flex-col'>
             <div className='flex'>
               {imageSrc?.length ?
