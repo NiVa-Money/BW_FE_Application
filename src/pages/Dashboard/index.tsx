@@ -73,10 +73,18 @@ const Dashboard: React.FC = () => {
     section: {
       marginBottom: '32px',
     },
+    heading: {
+      textAlign: 'left',
+      fontSize: '24px',
+      fontWeight: 'bold',
+      marginBottom: '16px',
+    },
   };
 
   return (
     <div style={styles.container}>
+      <div style={styles.heading}>Your Dashboard</div>
+
       <div style={styles.section}>
         <FirstLayerCards
           cards={firstLayerCards}
