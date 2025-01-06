@@ -127,6 +127,7 @@ const CreateBot: React.FC = () => {
                     id="botName"
                     name="botName"
                     value={botName}
+                    required
                     placeholder="Enter your Bot Name"
                     component={FormikFieldInputComponent}
                     onChange={handleChange}
@@ -322,6 +323,7 @@ const CreateBot: React.FC = () => {
                     type="text"
                     id="phoneNumber"
                     name="phoneNumber"
+                    value={phoneNumber}
                     placeholder="Enter your Phone Number"
                     component={FormikFieldInputComponent}
                     onChange={handleChange}
@@ -334,11 +336,10 @@ const CreateBot: React.FC = () => {
                     type="text"
                     id="email"
                     name="email"
+                    value={email}
                     placeholder="Enter your Email"
                     component={FormikFieldInputComponent}
                     onChange={handleChange}
-
-
                   />
                 </div>
 
