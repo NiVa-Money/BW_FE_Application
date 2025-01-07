@@ -68,7 +68,7 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
     },
     cardComponent: {
       marginTop: '16px',
-      width: '100%',
+      width: '90%',
     },
 
   };
