@@ -1,68 +1,109 @@
 import React, { useState, CSSProperties } from 'react';
 import FirstLayerCards from './FirstLayerCards';
-import SecondLayerCards from './SecondLayerCards';
-import ThirdLayerCards from './ThirdLayerCards';
-import FourthLayerCards from './FourthLayerCards';
+import { AreaChart } from "../../lib/chartUtils"
+
 
 const Dashboard: React.FC = () => {
+
+
+  const chartdata = [
+    {
+      date: "Jan 23",
+      SolarPanels: 2890,
+      Inverters: 2338,
+    },
+    {
+      date: "Feb 23",
+      SolarPanels: 2756,
+      Inverters: 2103,
+    },
+    {
+      date: "Mar 23",
+      SolarPanels: 3322,
+      Inverters: 2194,
+    },
+    {
+      date: "Apr 23",
+      SolarPanels: 3470,
+      Inverters: 2108,
+    },
+    {
+      date: "May 23",
+      SolarPanels: 3475,
+      Inverters: 1812,
+    },
+    {
+      date: "Jun 23",
+      SolarPanels: 3129,
+      Inverters: 1726,
+    },
+    {
+      date: "Jul 23",
+      SolarPanels: 3490,
+      Inverters: 1982,
+    },
+    {
+      date: "Aug 23",
+      SolarPanels: 2903,
+      Inverters: 2012,
+    },
+    {
+      date: "Sep 23",
+      SolarPanels: 2643,
+      Inverters: 2342,
+    },
+    {
+      date: "Oct 23",
+      SolarPanels: 2837,
+      Inverters: 2473,
+    },
+    {
+      date: "Nov 23",
+      SolarPanels: 2954,
+      Inverters: 3848,
+    },
+    {
+      date: "Dec 23",
+      SolarPanels: 3239,
+      Inverters: 3736,
+    },
+  ]
+
+
   const [firstLayerCards, setFirstLayerCards] = useState([
-    { id: 1, title: 'Active Users', value: '2,847', icon: '👥', trend: 'up', change: '+12.5%' },
-    { id: 2, title: 'Total Revenue', value: '$12,847', icon: '💰', trend: 'up', change: '+8.2%' },
-    { id: 3, title: 'Pending Tasks', value: '45', icon: '📋', trend: 'down', change: '-5.1%' },
-    { id: 4, title: 'Completed Projects', value: '124', icon: '✅', trend: 'up', change: '+2.4%' },
-    { id: 5, title: 'Customer Satisfaction', value: '94%', icon: '⭐', trend: 'up', change: '+1.8%' },
-    { id: 6, title: 'Average Response Time', value: '2.4h', icon: '⏱️', trend: 'down', change: '-15%' },
+    { id: 1, title: 'Resolution Rate', value: '50.44%', icon: '📊', height: "100px", width: "200px" },
+    { id: 2, title: 'Pending Queries', value: '10', icon: '💰', height: "100px", width: "200px" },
+    { id: 3, title: 'AI vs. Human Resolution Rate', value: '45', height: "100px", width: "200px" },
+    { id: 4, title: 'Your balance', value: '$124', icon: '✅', trend: 'up', change: '+2.4%', height: "100px", width: "200px" },
+    { id: 5, title: 'Active Chats', value: '94%', icon: '⭐', trend: 'up', change: '+1.8%', height: "100px", width: "200px" },
+    { id: 6, title: 'Escalations', value: '2.4h', icon: '⏱️', trend: 'down', change: '-15%', height: "100px", width: "200px" },
+
+    {
+      id: 7, title: 'New Signups', value: '342', icon: '📝', trend: 'up', change: '+5.6%', height: "100px", width: "200px", component: <AreaChart
+        className="h-80"
+        data={chartdata}
+        index="date"
+        categories={["SolarPanels", "Inverters"]}
+        valueFormatter={(number: number) =>
+          `$${Intl.NumberFormat("us").format(number).toString()}`
+        }
+        onValueChange={(v) => console.log(v)}
+      />
+    },
+
+
+    {
+      id: 8, title: 'Bug Reports', value: '18', icon: '🐞', trend: 'down', change: '-3.4%', height: "100px", width: "200px",
+    },
+    { id: 9, title: 'Server Uptime', value: '99.99%', icon: '🖥️', trend: 'up', change: '+0.1%', height: "100px", width: "200px" },
+    { id: 10, title: 'Subscriptions', value: '1,045', icon: '📦', trend: 'up', change: '+4.2%', height: "100px", width: "200px" },
+    { id: 11, title: 'Support Tickets', value: '87', icon: '🎟️', trend: 'down', change: '-2.3%', height: "100px", width: "200px" },
+    { id: 12, title: 'Team Members', value: '28', icon: '👔', trend: 'up', change: '+1.4%', height: "100px", width: "200px" },
+    { id: 13, title: 'Active Campaigns', value: '14', icon: '📈', trend: 'up', change: '+3.9%', height: "100px", width: "200px" },
+    { id: 14, title: 'Social Media Reach', value: '21K', icon: '📱', trend: 'up', change: '+7.5%', height: "100px", width: "200px" },
+    { id: 15, title: 'Expenses', value: '$3,456', icon: '💳', trend: 'down', change: '-2.1%', height: "100px", width: "200px" },
+    { id: 16, title: 'Net Promoter Score', value: '72', icon: '📊', trend: 'up', change: '+6.3%', height: "100px", width: "200px" },
   ]);
-
-  const secondLayerCards = [
-    {
-      id: 1,
-      title: 'Total Sales',
-      value: '$84,500',
-      description: 'Sales have increased by 20% compared to last month.',
-      icon: '📈',
-    },
-    {
-      id: 2,
-      title: 'Net Profit',
-      value: '$25,000',
-      description: 'Profit margins remain steady at 30%.',
-      icon: '💹',
-    },
-  ];
-
-  const thirdLayerCards = [
-    { id: 1, title: 'Sales Performance', value: '$34,000', description: 'Q4 performance.', icon: '📊' },
-    { id: 2, title: 'New Users', value: '1,500', icon: '👤' },
-    { id: 3, title: 'Support Tickets', value: '120', icon: '🎫' },
-    { id: 4, title: 'Marketing Spend', value: '$12,000', description: 'Campaign results.', icon: '📣' },
-    { id: 5, title: 'Website Traffic', value: '90,000', icon: '🌐' },
-    { id: 6, title: 'Orders Fulfilled', value: '2,400', icon: '📦' },
-  ];
-
-  const fourthLayerCards = [
-    {
-      id: 1,
-      title: 'New Signups',
-      value: '1,254',
-      description: 'Signups increased by 30% this week.',
-      icon: '📝',
-    },
-    {
-      id: 2,
-      title: 'Churn Rate',
-      value: '2.5%',
-      description: 'Churn rate remains low compared to last quarter.',
-      icon: '📉',
-    },
-    {
-      id: 3,
-      title: 'Customer Reviews',
-      value: '4.8/5',
-      description: 'Average rating from customer reviews.',
-      icon: '🌟',
-    },
-  ];
 
   const styles: Record<string, CSSProperties> = {
     container: {
@@ -88,24 +129,11 @@ const Dashboard: React.FC = () => {
       <div style={styles.section}>
         <FirstLayerCards
           cards={firstLayerCards}
-          onDragStart={() => {}}
-          onDragOver={() => {}}
-          onDrop={() => {}}
+
         />
       </div>
 
-      <div style={styles.section}>
-        <SecondLayerCards cards={secondLayerCards} />
-      </div>
 
-      <div style={styles.section}>
-        <ThirdLayerCards cards={thirdLayerCards} />
-      </div>
-
-      {/* Fourth Layer Section */}
-      <div style={styles.section}>
-        <FourthLayerCards cards={fourthLayerCards} />
-      </div>
     </div>
   );
 };

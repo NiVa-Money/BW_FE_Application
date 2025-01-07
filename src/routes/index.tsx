@@ -1,10 +1,10 @@
 import Login from "../pages/login";
 import SignUp from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
-import MyChatBot from "../pages/MyChatBot";
 import AdminPanel from "../pages/AdminPanel";
 import { Navigate } from "react-router-dom";
 import CreateBot from "../pages/CreateBot";
+import { AreaChartHero } from "../pages/MyChatBot";
 const MODULE_MAP = {
   '/dashboard': 1,
   '/chatBot': 2,
@@ -51,7 +51,7 @@ export const authProtectedRoutes: RouteType[] = [
   },
   { 
     path: "/chatBot", 
-    component: <ProtectedRoute route={{ path: "/chatBot", component: <MyChatBot /> }} />
+    component: <ProtectedRoute route={{ path: "/chatBot", component: <AreaChartHero/> }} />
   },
   { 
     path: "/adminPanel", 

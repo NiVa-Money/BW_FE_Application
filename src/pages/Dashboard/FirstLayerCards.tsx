@@ -1,32 +1,32 @@
 import React, { CSSProperties } from 'react';
+import { Resizable } from "re-resizable";
 
 interface CardData {
   id: number;
   title: string;
   value: string;
-  bgColor?: string; // Optional as we override it with white
-  trend?: string;
+  bgColor?: string; 
   change?: string;
   icon?: string;
+  height?: string;
+  width?: string;
+  component?: React.ReactNode;
 }
 
 interface FirstLayerCardsProps {
   cards: CardData[];
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
-  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => void;
+
 }
 
-const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards, onDragStart, onDragOver, onDrop }) => {
+const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
   const styles: Record<string, CSSProperties> = {
     cardContainer: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(6, 1fr)', // Defines 6 cards per row
+      display: 'flex',
+      flexWrap: 'wrap',
       gap: '16px',
     },
     card: {
-      backgroundColor: '#FFFFFF', // Ensure all cards are white
-      minWidth: '200px',
+      backgroundColor: '#FFFFFF', 
       borderRadius: '8px',
       padding: '16px',
       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -66,37 +66,35 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards, onDragStart, o
       alignItems: 'center',
       gap: '4px',
     },
-    dragHandle: {
-      color: '#666',
-      cursor: 'move',
-      alignSelf: 'flex-start',
+    cardComponent: {
+      marginTop: '16px',
+      width: '100%',
     },
+
   };
 
   return (
     <div style={styles.cardContainer}>
       {cards.map((card, index) => (
-        <div
-          key={card.id}
-          draggable
-          onDragStart={(e) => onDragStart(e, index)}
-          onDragOver={onDragOver}
-          onDrop={(e) => onDrop(e, index)}
-          style={styles.card}
-        >
-          <div style={styles.icon}>{card.icon}</div>
-          <div style={styles.cardContent}>
-            <div style={styles.cardTitle}>{card.title}</div>
-            <div style={styles.cardValue}>{card.value}</div>
-            <div style={styles.cardTrend}>
-              {card.trend === 'up' ? '↑' : '↓'}
-              <span style={{ color: card.trend === 'up' ? '#059669' : '#DC2626' }}>
-                {card.change}
-              </span>
+        <Resizable key={card.id}
+
+        style={{ ...styles.card, height: card.height, width: card.width }}>
+            <div style={styles.icon}>{card.icon}</div>
+            <div style={styles.cardContent}>
+              <div style={styles.cardTitle}>{card.title}</div>
+              <div style={styles.cardValue}>{card.value}</div>
+              <div style={styles.cardTrend}>
+               
+                <span >
+                  {card.change}
+                </span>
+              </div>
             </div>
-          </div>
-          <span style={styles.dragHandle}>⋮⋮</span>
-        </div>
+            {card.component && (
+            <div style={styles.cardComponent}>{card.component}</div>
+          )}
+          
+        </Resizable>
       ))}
     </div>
   );
