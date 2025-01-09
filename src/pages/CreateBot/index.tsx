@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { HexColorPicker } from 'react-colorful';
-
+import FilePresentIcon from '@mui/icons-material/FilePresent';
 import CreateBotRightContainer from './CreateBotRightContainer';
 import BedtimeIcon from '@mui/icons-material/Bedtime';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -11,16 +11,24 @@ import FormikFieldToggleComponent from '../../components/FormikFieldToggleCompon
 import FormikFieldInputComponent from '../../components/FormikFieldInputComponent';
 import { Button } from '@mui/material';
 import { THEME } from '../../enums';
+import FormikFieldSelectComponent from '../../components/FormikFieldSelectDropdownComponent';
+import { useDispatch } from 'react-redux';
+import { createBotAction } from '../../store/actions/botActions';
 
 
 const CreateBot: React.FC = () => {
   const imgViewerRef = useRef(null);
+  const viewerRef = useRef(null);
   const [imageName, setImageName] = useState('');
   const [chatColor, setChatColor] = useState('#5D39AD');
   const [showColorPicker, setShowColorPicker] = useState<any>(false);
   const [imageSrc, setImageSrc] = useState('/assets/bot1.svg');
-
+  const [filename, setFileName] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
+  const [base64Image, setBase64Image] = useState('');
+
+  const [base64File, setBase64File] = useState('');
   const [formValues, setFormValues] = useState<any>({
     botName: '',
     theme: '',
@@ -30,7 +38,9 @@ const CreateBot: React.FC = () => {
     botIdentity: '',
     botLimit: '',
     phoneNumber: '',
-    email: ''
+    email: '',
+    botSmartness: false,
+    appoimentLink: ''
   });
   const botSamples = [
     {
@@ -52,7 +62,8 @@ const CreateBot: React.FC = () => {
       imageUrl: `/assets/bot6.svg`,
     },
   ];
-  const { botName, theme, greetingMessage, phoneNumber, email }: any = formValues
+  const dispatch = useDispatch()
+  const { botName, theme, botTone, greetingMessage, phoneNumber, email, botSmartness, botIdentity, botLimit, appoimentLink }: any = formValues
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
     const response = await fetch(item?.imageUrl);
@@ -61,7 +72,7 @@ const CreateBot: React.FC = () => {
     setSelectedFileImage(file);
   };
   const validationSchema = Yup.object({
-    name: Yup.string().required('Name is required'),
+    botName: Yup.string().required('BotName is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
   });
   const initialValues: any = {
@@ -72,11 +83,35 @@ const CreateBot: React.FC = () => {
     greetingMessage: '',
     botIdentity: '',
     phoneNumber: '',
-    email: ''
+    email: '',
+    botSmartness: false,
+    appoimentLink: ''
 
-  }; const handleSubmit = (values: any) => {
+  }; const handleSubmit = () => {
     // Handle form submission logic here
-    console.log('Form Submitted:', values);
+    const formData = new FormData();
+    const imageFile: any = base64Image ? base64Image : selectedFileImage;
+    const docFile: any = base64File ? base64File : selectedFile
+    formData.append('botName', botName);
+    formData.append('botTone', botTone);
+    formData.append('botColor', chatColor);
+    formData.append('botGreetingMessage', greetingMessage);
+    formData.append('botSmartness', botSmartness);
+    formData.append('botIdentity', botIdentity);
+    formData.append('supportNumber', phoneNumber);
+    formData.append('appointmentSchedulerLink', appoimentLink);
+    formData.append('supportEmail', email);
+    formData.append('wordLimitPerMessage', botLimit);
+    formData.append('docName', filename);
+    formData.append('docType', filename.length > 0 ? 'pdf' : '');
+    formData.append('customBotImage', imageFile);
+    formData.append('userId', '66c86842176c96b683c13809');
+    formData.append('file', docFile);
+    console.log('Form Submitted:', formValues, formData.entries());
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+    dispatch(createBotAction(formData));
   };
   const handleColorClick = (color: any) => {
     if (color === 'rainbow') {
@@ -89,7 +124,7 @@ const CreateBot: React.FC = () => {
       setShowColorPicker(false);
     }
   };
-  const handleFileUpload = (event: any) => {
+  const handleImageUpload = (event: any) => {
     const file = event.target.files[0];
     const imagePath = URL.createObjectURL(file);
     setImageSrc(imagePath);
@@ -105,6 +140,17 @@ const CreateBot: React.FC = () => {
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
     console.log('for', { ...formValues, [name]: value })
+  };
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file && file.size <= 10 * 1024 * 1024) {
+      setSelectedFile(file);
+      setFileName(file.name);
+    } else {
+      alert('File must be a PDF and less than 10MB');
+    }
   };
   return (
     <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
@@ -127,7 +173,6 @@ const CreateBot: React.FC = () => {
                     id="botName"
                     name="botName"
                     value={botName}
-                    required
                     placeholder="Enter your Bot Name"
                     component={FormikFieldInputComponent}
                     onChange={handleChange}
@@ -185,40 +230,38 @@ const CreateBot: React.FC = () => {
                 <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label >Choose Image</label>
 
-                  <div className="mb-4">
-                    <div className="relative h-[50px]">
-                      <div className="flex items-center h-[100%] w-full rounded-[12px] bg-[#F3F2F6] absolute ">
-                        <div className='flex justify-start items-center ml-4'>
-                          {imageName?.length ? <img
-                            src={imageSrc}
-                            alt="logo"
-                            width={20}
-                            height={20}
-                          /> : null}
+                  <div className="relative h-[50px]">
+                    <div className="flex items-center h-[100%] w-full rounded-[12px] bg-[#F3F2F6] absolute ">
+                      <div className='flex justify-start items-center ml-4'>
+                        {imageName?.length ? <img
+                          src={imageSrc}
+                          alt="logo"
+                          width={20}
+                          height={20}
+                        /> : null}
 
-                          <span className="mr-2 ml-2">
-                            {imageName?.length ? imageName : 'Choose File'}
-                          </span></div>
-                        {imageName?.length ?
-                          <button
-                            onClick={() => {
-                              setImageName('');
-                              setImageSrc('');
-                            }}
-                            className="mr-4 ml-auto bg-none text-[black] text-white"
-                          >
-                            ×
-                          </button> : null}
-                      </div>
-                      <input
-                        type="file"
-                        onChange={handleFileUpload}
-                        ref={imgViewerRef}
-                        accept="image/*"
-                        id="file-upload-image"
-                        className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
-                      />
+                        <span className="mr-2 ml-2">
+                          {imageName?.length ? imageName : 'Choose File'}
+                        </span></div>
+                      {imageName?.length ?
+                        <button
+                          onClick={() => {
+                            setImageName('');
+                            setImageSrc('');
+                          }}
+                          className="mr-4 ml-auto bg-none text-[black] text-white"
+                        >
+                          ×
+                        </button> : null}
                     </div>
+                    <input
+                      type="file"
+                      onChange={handleImageUpload}
+                      ref={imgViewerRef}
+                      accept="image/*"
+                      id="file-upload-image"
+                      className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
+                    />
                   </div>
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black" >
@@ -304,6 +347,51 @@ const CreateBot: React.FC = () => {
                   />
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                  <label >Knowledge Base</label>
+
+                  <div className="relative h-[50px]">
+                    <div className="flex items-center h-[100%] w-full rounded-[12px] bg-[#F3F2F6] absolute ">
+                      <div className='flex justify-start items-center ml-4'>
+                        {filename?.length ? <FilePresentIcon /> : null}
+
+                        <span className="mr-2 ml-2">
+                          {filename?.length ? filename : 'Choose File'}
+                        </span></div>
+                      {filename?.length ?
+                        <button
+                          onClick={() => {
+                            setFileName('');
+                            setSelectedFile(null);
+                          }}
+                          className="mr-4 ml-auto bg-none text-[black] text-white"
+                        >
+                          ×
+                        </button> : null}
+                    </div>
+                    <input
+                      type="file"
+                      onChange={handleFileChange}
+                      ref={viewerRef}
+                      accept="pdf/*"
+                      id="file-upload"
+                      className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
+                    />
+                  </div>
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                  <label >Appointment Link</label>
+                  <Field
+                    type="text"
+                    id="appoimentLink"
+                    name="appoimentLink"
+                    value={appoimentLink}
+                    placeholder="Enter your Appointment Link"
+                    component={FormikFieldInputComponent}
+                    onChange={handleChange}
+
+                  />
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="botLimit">Bot Limit per Message</label>
 
                   <Field
@@ -311,8 +399,19 @@ const CreateBot: React.FC = () => {
                     id="name"
                     name="botLimit"
                     placeholder="Enter your Bot Name"
-                    component={FormikFieldInputComponent}
-                    onChange={handleChange}
+                    component={FormikFieldSelectComponent}
+                    onChange={(value: string) => {
+                      setFormValues({ ...formValues, botLimit: value });
+                      // Perform additional logic if needed
+                    }}
+                    options={[
+                      { label: '50', value: 50 },
+                      { label: '100', value: 100 },
+                      { label: '200', value: 200 },
+                      { label: '400', value: 400 },
+                      { label: '530', value: 530 },
+
+                    ]}
 
 
                   />
@@ -375,7 +474,7 @@ const CreateBot: React.FC = () => {
                 </div>
               </div>
             </left-container>
-            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} />
+            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} setFormValues={setFormValues} formValues={formValues} handleSubmit={handleSubmit} />
 
           </Form>
         )}
