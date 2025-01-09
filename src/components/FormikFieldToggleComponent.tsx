@@ -28,6 +28,7 @@ const FormikFieldToggleComponent: React.FC<FormikToggleButtonGroupProps> = ({ fi
         <ToggleButton
           key={option.value}
           value={option.value}
+          required
           onClick={() => handleChipClick(option.value)}
 
           className={`  ${value === option.value

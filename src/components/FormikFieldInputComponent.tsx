@@ -1,6 +1,6 @@
 
 
-  import React from 'react';
+import React from 'react';
 import { Chip, TextField } from '@mui/material';
 import { FieldProps } from 'formik';
 
@@ -12,26 +12,28 @@ const FormikFieldInputComponent: React.FC<any> = ({ field, form, ...props }) => 
 
 
   return (
-    <TextField
+    <div>
+      <TextField
         {...field}
         {...props}
-        error={form.touched[field.name] && Boolean(form.errors[field.name])}
-        helperText={form.touched[field.name] && form.errors[field.name]}
+        ErrorMessage={form.touched[field.name] && form.errors[field.name]}
         variant="outlined"
         sx={{
-            '& .MuiInputBase-root':{
-              backgroundColor:'#F3F2F6',
-            },
-            '& .MuiOutlinedInput-root': {
+          '& .MuiInputBase-root': {
+            backgroundColor: '#F3F2F6',
+          },
+          '& .MuiOutlinedInput-root': {
+            height: '35px',
+
+            '& .MuiOutlinedInput-input': {
               height: '35px',
-              
-              '& .MuiOutlinedInput-input': {
-                height: '35px',
-              },
             },
-          }}
+          },
+        }}
         fullWidth
       />
+
+    </div>
   );
 };
 
