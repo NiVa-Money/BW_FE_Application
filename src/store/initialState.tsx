@@ -1,5 +1,11 @@
-const initialState: any = {
+export const initialState: any = {
    chat: {
-    messages: []
+      messages: []
+   },
+   bot: {
+      create: {
+         data: null,
+         loader: false
+      }
    }
 }

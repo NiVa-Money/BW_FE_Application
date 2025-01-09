@@ -2,16 +2,17 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { publicRoutes, authProtectedRoutes } from "./routes"; // Import routes configuration
 import RouteMiddleware from "./routes/routeMiddleware";
+import { ReduxProvider } from "./store/redux-provider";
 
 function App() {
   const router = createBrowserRouter([
     ...publicRoutes.map((route) => ({
       path: route.path,
-      element: <>{route.component}</>,
+      element: <RouteMiddleware><ReduxProvider> {route.component}</ReduxProvider></RouteMiddleware>,
     })),
     ...authProtectedRoutes.map((route) => ({
       path: route.path,
-      element: <RouteMiddleware>{route.component}</RouteMiddleware>,
+      element: <RouteMiddleware><ReduxProvider> {route.component}</ReduxProvider></RouteMiddleware>,
     })),
   ]);
 
