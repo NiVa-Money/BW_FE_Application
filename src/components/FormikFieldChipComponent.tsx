@@ -3,15 +3,19 @@ import { Chip } from '@mui/material';
 import { FieldProps } from 'formik';
 
 interface FormikChipsFieldProps extends FieldProps {
-  options: { label: string; value: string;icon:any }[];
+  options: { label: string; value: string; icon?: React.ReactNode }[];
+  onChange?: (value: string) => void; 
 }
 
-const FormikFieldChipComponent: React.FC<FormikChipsFieldProps> = ({ field, form, options }) => {
+const FormikFieldChipComponent: React.FC<FormikChipsFieldProps> = ({ field, form, options,onChange }) => {
   const { name, value } = field;
   const { setFieldValue } = form;
 
   const handleChipClick = (selectedValue: string) => {
-    setFieldValue(name, selectedValue);
+    setFieldValue(name, selectedValue); // Update Formik state
+    if (onChange) {
+      onChange(selectedValue); // Call parent onChange handler
+    }
   };
 
   return (

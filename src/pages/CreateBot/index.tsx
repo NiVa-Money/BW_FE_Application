@@ -10,11 +10,9 @@ import FormikFieldChipComponent from '../../components/FormikFieldChipComponent'
 import FormikFieldToggleComponent from '../../components/FormikFieldToggleComponent';
 import FormikFieldInputComponent from '../../components/FormikFieldInputComponent';
 import { Button } from '@mui/material';
+import { THEME } from '../../enums';
 
-interface FormValues {
-  name: string;
-  email: string;
-}
+
 const CreateBot: React.FC = () => {
   const imgViewerRef = useRef(null);
   const [imageName, setImageName] = useState('');
@@ -23,7 +21,17 @@ const CreateBot: React.FC = () => {
   const [imageSrc, setImageSrc] = useState('/assets/bot1.svg');
 
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
-
+  const [formValues, setFormValues] = useState<any>({
+    botName: '',
+    theme: '',
+    botTone: '',
+    botFont: '',
+    greetingMessage: '',
+    botIdentity: '',
+    botLimit: '',
+    phoneNumber: '',
+    email: ''
+  });
   const botSamples = [
     {
       imageUrl: `/assets/bot1.svg`,
@@ -44,6 +52,7 @@ const CreateBot: React.FC = () => {
       imageUrl: `/assets/bot6.svg`,
     },
   ];
+  const { botName, theme, greetingMessage, phoneNumber, email }: any = formValues
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
     const response = await fetch(item?.imageUrl);
@@ -51,15 +60,21 @@ const CreateBot: React.FC = () => {
     const file = new File([blob], 'image.jpg', { type: blob.type });
     setSelectedFileImage(file);
   };
-  console.log('im', selectedFileImage, imageSrc)
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
   });
-  const initialValues: FormValues = {
+  const initialValues: any = {
     name: '',
-    email: '',
-  }; const handleSubmit = (values: FormValues) => {
+    theme: '',
+    botTone: '',
+    botFont: '',
+    greetingMessage: '',
+    botIdentity: '',
+    phoneNumber: '',
+    email: ''
+
+  }; const handleSubmit = (values: any) => {
     // Handle form submission logic here
     console.log('Form Submitted:', values);
   };
@@ -85,33 +100,42 @@ const CreateBot: React.FC = () => {
       alert('File must be less than 10MB');
     }
   };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('e', e.target)
+    const { name, value } = e.target;
+    setFormValues({ ...formValues, [name]: value });
+    console.log('for', { ...formValues, [name]: value })
+  };
   return (
-    <div className='m-[15px] max-w-[1400px] h-[100vh] w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
+    <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
       <Formik
 
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
+
       >
         {() => (
           <Form className="w-[95%] m-auto h-[95%] grid grid-cols-[60%_40%]">
             <left-container className="bg-blue">
               <div className="flex-col">
-                <div className=" flex flex-col w-[85%] mb-3" >
-                  <label htmlFor="name">Bot Name</label>
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                  <label htmlFor="botName">Bot Name</label>
 
                   <Field
                     type="text"
-                    id="name"
-                    name="name"
-
+                    id="botName"
+                    name="botName"
+                    value={botName}
+                    required
                     placeholder="Enter your Bot Name"
                     component={FormikFieldInputComponent}
+                    onChange={handleChange}
 
                   />
                 </div>
-                <div className='flex flex-col w-[85%] mb-3'>
-                  <label htmlFor="name">Chat Color</label>
+                <div className='flex flex-col w-[85%] mb-3 text-black'>
+                  <label htmlFor="chatColor">Chat Color</label>
                   <div className="flex space-x-2">
                     {[
                       '#78C9F1',
@@ -142,8 +166,8 @@ const CreateBot: React.FC = () => {
 
                   </div>
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
-                  <label htmlFor="theme">Choose Profile</label>
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                  <label htmlFor="botIcon">Choose Profile</label>
                   <div className="grid grid-cols-6 gap-1 items-center">
                     {/* Add bot profile images here */}
                     {botSamples.map((item, idx) => (
@@ -158,7 +182,7 @@ const CreateBot: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label >Choose Image</label>
 
                   <div className="mb-4">
@@ -175,16 +199,16 @@ const CreateBot: React.FC = () => {
                           <span className="mr-2 ml-2">
                             {imageName?.length ? imageName : 'Choose File'}
                           </span></div>
-                          {imageName?.length ?
-                        <button
-                          onClick={() => {
-                            setImageName('');
-                            setImageSrc('');
-                          }}
-                          className="mr-4 ml-auto bg-none text-[black] text-white"
-                        >
-                          ×
-                        </button>:null}
+                        {imageName?.length ?
+                          <button
+                            onClick={() => {
+                              setImageName('');
+                              setImageSrc('');
+                            }}
+                            className="mr-4 ml-auto bg-none text-[black] text-white"
+                          >
+                            ×
+                          </button> : null}
                       </div>
                       <input
                         type="file"
@@ -197,24 +221,32 @@ const CreateBot: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="theme">Choose theme</label>
 
                   <Field
-                    name="mood"
+                    name="theme"
                     component={FormikFieldChipComponent}
+                    onChange={(value: string) => {
+                      setFormValues({ ...formValues, theme: value });
+                      // Perform additional logic if needed
+                    }}
                     options={[
-                      { label: 'Light', value: 'light', icon: <LightModeIcon /> },
-                      { label: 'Dark', value: 'dark', icon: <BedtimeIcon /> },
+                      { label: 'Light', value: THEME.light, icon: <LightModeIcon /> },
+                      { label: 'Dark', value: THEME.dark, icon: <BedtimeIcon /> },
                     ]}
                   />
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="botTone">Bot Tone</label>
 
                   <Field
                     name="botTone"
                     component={FormikFieldToggleComponent}
+                    onChange={(value: string) => {
+                      setFormValues({ ...formValues, botTone: value });
+                      // Perform additional logic if needed
+                    }}
                     options={[
                       { label: 'Formal Tone', value: 'formal' },
                       { label: 'Casual Tone', value: 'casual' },
@@ -222,12 +254,16 @@ const CreateBot: React.FC = () => {
                     ]}
                   />
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="botFont">Bot Font</label>
 
                   <Field
                     name="botFont"
                     component={FormikFieldToggleComponent}
+                    onChange={(value: string) => {
+                      setFormValues({ ...formValues, botFont: value });
+                      // Perform additional logic if needed
+                    }}
                     options={[
                       { label: 'Poppins', value: 'Poppins' },
                       { label: 'Montserrat', value: 'Montserrat' },
@@ -235,7 +271,7 @@ const CreateBot: React.FC = () => {
                     ]}
                   />
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="greetingMessage">Bot Greeting Message</label>
 
                   <Field
@@ -243,23 +279,31 @@ const CreateBot: React.FC = () => {
                     id="greetingMessage"
                     name="greetingMessage"
                     placeholder="Enter your Bot Name"
+                    value={greetingMessage}
                     component={FormikFieldInputComponent}
+                    onChange={handleChange}
+
 
                   />
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="botIdentity">Bot Identity</label>
 
                   <Field
-                    type="text"
-                    id="name"
                     name="botIdentity"
-                    placeholder="Enter your Bot Name"
-                    component={FormikFieldInputComponent}
-
+                    component={FormikFieldToggleComponent}
+                    onChange={(value: string) => {
+                      setFormValues({ ...formValues, botIdentity: value });
+                      // Perform additional logic if needed
+                    }}
+                    options={[
+                      { label: 'Customer Service', value: 'Customer Service' },
+                      { label: 'Sales', value: 'Sales' },
+                      { label: 'Human Resource', value: 'Human Resource' },
+                    ]}
                   />
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="botLimit">Bot Limit per Message</label>
 
                   <Field
@@ -268,10 +312,38 @@ const CreateBot: React.FC = () => {
                     name="botLimit"
                     placeholder="Enter your Bot Name"
                     component={FormikFieldInputComponent}
+                    onChange={handleChange}
+
 
                   />
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                  <label >Support Contact</label>
+                  <Field
+                    type="text"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    value={phoneNumber}
+                    placeholder="Enter your Phone Number"
+                    component={FormikFieldInputComponent}
+                    onChange={handleChange}
+
+                  />
+                </div>
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
+
+                  <Field
+                    type="text"
+                    id="email"
+                    name="email"
+                    value={email}
+                    placeholder="Enter your Email"
+                    component={FormikFieldInputComponent}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label >Agent Creation</label>
 
                   <Button variant="text" className='bg-[#65558F] w-[150px] self-start rounded-[100px]'
@@ -280,13 +352,13 @@ const CreateBot: React.FC = () => {
                         backgroundColor: 'white',
                         color: 'black',
                         borderRadius: '100px',
-                        border:'1px solid',
-                        marginTop:'10px'
+                        border: '1px solid',
+                        marginTop: '10px'
                       },
                     }}
                   >Create Agent</Button>
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3" >
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label >Add to Workflow</label>
 
                   <Button variant="text" className='bg-[#65558F] w-[180px] self-start rounded-[100px]'
@@ -295,15 +367,15 @@ const CreateBot: React.FC = () => {
                         backgroundColor: 'white',
                         color: 'black',
                         borderRadius: '100px',
-                        border:'1px solid',
-                        marginTop:'10px'
+                        border: '1px solid',
+                        marginTop: '10px'
                       },
                     }}
                   >Add to Workflow</Button>
                 </div>
               </div>
             </left-container>
-            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' />
+            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} />
 
           </Form>
         )}
