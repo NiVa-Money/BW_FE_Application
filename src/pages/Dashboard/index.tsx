@@ -129,7 +129,7 @@ const Dashboard: React.FC = () => {
         `$${Intl.NumberFormat("us").format(number).toString()}`
       }
       onValueChange={(v) => console.log(v)}
-    /> },
+    />, hasCalendar: true, },
 
 
     { id: 8, title: 'Bug Reports', value: '18', icon: '🐞', trend: 'down', change: '-3.4%', height: "100px", width: "200px",

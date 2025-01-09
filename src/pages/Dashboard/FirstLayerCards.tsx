@@ -1,5 +1,7 @@
 import React, { CSSProperties } from 'react';
 import { Resizable } from "re-resizable";
+import DatePicker from 'react-datepicker'; // Ensure you install 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css';
 
 interface CardData {
   id: number;
@@ -11,6 +13,7 @@ interface CardData {
   height?: string;
   width?: string;
   component?: React.ReactNode;
+  hasCalendar?: boolean;
 }
 
 interface FirstLayerCardsProps {
@@ -70,6 +73,16 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
       marginTop: '16px',
       width: '90%',
     },
+    calendar: {
+      position: 'absolute', 
+      top: '8px', 
+      right: '60%', 
+      transform: 'translate(-50%, 0) scale(0.8)',
+      backgroundColor: '#FFFFFF',
+      borderRadius: '8px', 
+      zIndex: 10,
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', 
+    },
 
   };
 
@@ -93,7 +106,15 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
             {card.component && (
             <div style={styles.cardComponent}>{card.component}</div>
           )}
-          
+           {card.hasCalendar && (
+              <div style={styles.calendar}>
+                <DatePicker
+                  selected={new Date()} // Replace with state for controlled behavior
+                  onChange={(date) => console.log(date)} // Replace with state handler
+                  dateFormat="yyyy-MM-dd"
+                />
+              </div>
+            )}
         </Resizable>
       ))}
     </div>
