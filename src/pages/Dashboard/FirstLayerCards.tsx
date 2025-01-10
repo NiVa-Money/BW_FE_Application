@@ -1,13 +1,13 @@
 import React, { CSSProperties } from 'react';
 import { Resizable } from "re-resizable";
-import DatePicker from 'react-datepicker'; // Ensure you install 'react-datepicker'
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 interface CardData {
   id: number;
   title: string;
   value: string;
-  bgColor?: string; 
+  bgColor?: string;
   change?: string;
   icon?: string;
   height?: string;
@@ -27,10 +27,11 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
       display: 'flex',
       flexWrap: 'wrap',
       gap: '16px',
+      justifyContent: 'flex-start',
     },
     card: {
-      backgroundColor: '#FFFFFF', 
-      borderRadius: '8px',
+      backgroundColor: '#FFFFFF',
+      borderRadius: '16px',
       padding: '16px',
       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
       transition: 'box-shadow 0.2s, transform 0.2s',
@@ -74,14 +75,14 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
       width: '90%',
     },
     calendar: {
-      position: 'absolute', 
-      top: '8px', 
-      right: '60%', 
+      position: 'absolute',
+      top: '8px',
+      right: '60%',
       transform: 'translate(-50%, 0) scale(0.8)',
       backgroundColor: '#FFFFFF',
-      borderRadius: '8px', 
+      borderRadius: '8px',
       zIndex: 10,
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', 
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
     },
 
   };
@@ -91,30 +92,30 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
       {cards.map((card, index) => (
         <Resizable key={card.id}
 
-        style={{ ...styles.card, height: card.height, width: card.width }}>
-            <div style={styles.icon}>{card.icon}</div>
-            <div style={styles.cardContent}>
-              <div style={styles.cardTitle}>{card.title}</div>
-              <div style={styles.cardValue}>{card.value}</div>
-              <div style={styles.cardTrend}>
-               
-                <span >
-                  {card.change}
-                </span>
-              </div>
+          style={{ ...styles.card, height: card.height, width: card.width }}>
+          <div style={styles.icon}>{card.icon}</div>
+          <div style={styles.cardContent}>
+            <div style={styles.cardTitle}>{card.title}</div>
+            <div style={styles.cardValue}>{card.value}</div>
+            <div style={styles.cardTrend}>
+
+              <span >
+                {card.change}
+              </span>
             </div>
-            {card.component && (
+          </div>
+          {card.component && (
             <div style={styles.cardComponent}>{card.component}</div>
           )}
-           {card.hasCalendar && (
-              <div style={styles.calendar}>
-                <DatePicker
-                  selected={new Date()} // Replace with state for controlled behavior
-                  onChange={(date) => console.log(date)} // Replace with state handler
-                  dateFormat="yyyy-MM-dd"
-                />
-              </div>
-            )}
+          {card.hasCalendar && (
+            <div style={styles.calendar}>
+              <DatePicker
+                selected={new Date()} 
+                onChange={(date) => console.log(date)} 
+                dateFormat="yyyy-MM-dd"
+              />
+            </div>
+          )}
         </Resizable>
       ))}
     </div>
