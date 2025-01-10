@@ -4,10 +4,10 @@ import { AreaChart } from "../../lib/chartUtils"
 import { DonutChart } from "../../lib/chartUtilsDonout"
 import { BarChart } from  "../../lib/chatUtlisBar"
 import {BarList} from "../../lib/chartUtilsBarList"
+import { LineChart } from '../../lib/chartUtilsLine';
 
 const Dashboard: React.FC = () => {
-
-
+  
   const chartdata = [
     {
       date: "Jan 23",
@@ -70,7 +70,6 @@ const Dashboard: React.FC = () => {
       Inverters: 3736,
     },
   ]
-    
   const chartdata2 = [
     {
       name: "SolarCells",
@@ -109,9 +108,8 @@ const Dashboard: React.FC = () => {
     { name: "/blocks", value: 108 },
     { name: "/documentation", value: 384 },
   ]
+
   
-
-
   const [firstLayerCards, setFirstLayerCards] = useState([
     { id: 1, title: 'Resolution Rate', value: '50.44%', icon: '📊', height: "100px", width: "200px" },
     { id: 2, title: 'Pending Queries', value: '10', icon: '💰', height: "100px", width: "200px" },
@@ -120,8 +118,8 @@ const Dashboard: React.FC = () => {
     { id: 5, title: 'Active Chats', value: '94%', icon: '⭐', trend: 'up', change: '+1.8%', height: "100px", width: "200px" },
     { id: 6, title: 'Escalations', value: '2.4h', icon: '⏱️', trend: 'down', change: '-15%', height: "100px", width: "200px" },
 
-    { id: 7, title: 'New Signups', value: '342', icon: '📝', trend: 'up', change: '+5.6%', height: "100px", width: "200px", component: <AreaChart
-      className="h-80"
+    { id: 7, title: 'Live Metric', value: '', icon: '📝', trend: 'up', height: "100px", width: "200px", component: <AreaChart
+    
       data={chartdata}
       index="date"
       categories={["SolarPanels", "Inverters"]}
@@ -132,8 +130,18 @@ const Dashboard: React.FC = () => {
     />, hasCalendar: true, },
 
 
-    { id: 8, title: 'Bug Reports', value: '18', icon: '🐞', trend: 'down', change: '-3.4%', height: "100px", width: "200px",
-   },
+    { id: 8, title: 'Total Spent', value: '$37.5K', icon: '🐞', trend: 'down', change: '-3.4%', height: "100px", width: "200px",component:
+       <LineChart
+    
+      data={chartdata}
+      index="date"
+      categories={["SolarPanels", "Inverters"]}
+      valueFormatter={(number: number) =>
+        `$${Intl.NumberFormat("us").format(number).toString()}`
+      }
+      onValueChange={(v) => console.log(v)}
+      />
+  },
     { id: 9, title: 'Server Uptime', value: '99.99%', icon: '🖥️', trend: 'up', change: '+0.1%', height: "100px", width: "200px" },
     { id: 10, title: 'Subscriptions', value: '1,045', icon: '📦', trend: 'up', change: '+4.2%', height: "100px", width: "200px" },
     { id: 11, title: 'Support Tickets', value: '87', icon: '🎟️', trend: 'down', change: '-2.3%', height: "100px", width: "200px" },
@@ -142,7 +150,6 @@ const Dashboard: React.FC = () => {
       className="mx-auto"
       data={chartdata2}
       variant="pie"
-
       category="name"
       value="amount"
       showLabel={true}
@@ -154,7 +161,7 @@ const Dashboard: React.FC = () => {
     { id: 14, title: 'Social Media Reach', value: '21K', icon: '📱', trend: 'up', change: '+7.5%', height: "100px", width: "200px", component: <BarList data={chartdata3} /> },
     { id: 15, title: 'Expenses', value: '$3,456', icon: '💳', trend: 'down', change: '-2.1%', height: "100px", width: "200px", component: 
     <BarChart
-      className="h-80"
+    
       data={chartdata}
       index="date"
       categories={["SolarPanels", "Inverters"]}
@@ -162,9 +169,11 @@ const Dashboard: React.FC = () => {
         `$${Intl.NumberFormat("us").format(number).toString()}`
       }
       onValueChange={(v) => console.log(v)}
-    />
+    />, hasCalendar: true
    },
     { id: 16, title: 'Net Promoter Score', value: '72', icon: '📊', trend: 'up', change: '+6.3%', height: "100px", width: "200px" },
+    { id: 17, title: 'User Engement with thye bot', value: '72', icon: '📊', trend: 'up', change: '+6.3%', height: "100px", width: "200px" },
+
   ]);
 
   const styles: Record<string, CSSProperties> = {
