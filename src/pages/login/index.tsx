@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoginUserService } from "../../api/services/authServices";
 import { Link } from "react-router-dom";
+import { loginWithGoogle } from "../../components/firebase/firebaseConfig";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -11,11 +12,12 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Validate email and password
-  const isValidEmail = (email: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+  const isValidEmail = (email: string) =>
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
   const isValidForm = () => email && password && isValidEmail(email);
 
+  // Handle form login submission
   const handleSubmit = async (e: React.FormEvent) => {
-    
     e.preventDefault();
     if (!isValidForm()) {
       setError("Please provide a valid email and password.");
@@ -23,11 +25,10 @@ const Login = () => {
     }
 
     setIsLoading(true);
-    
+
     try {
       const response = await LoginUserService({ email, password });
       if (response.success) {
-        console.log("hello",response.success)
         navigate("/dashboard");
       } else {
         setError(response.message || "Login failed. Please try again.");
@@ -40,7 +41,23 @@ const Login = () => {
     }
   };
 
-  const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // Handle Google login
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const response = await loginWithGoogle();
+      if (response.success) {
+        navigate("/dashboard");
+      } else {
+        setError(response.message || "Google login failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error logging in with Google:", err);
+      setError("An unexpected error occurred during Google login.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -75,17 +92,17 @@ const Login = () => {
                   Future of ICX
                 </div>
 
-                {/* Placeholder Background */}
-                <div className="flex z-0 mt-6 w-full rounded-xl bg-neutral-800 min-h-[63px] shadow-[0px_4px_15px_rgba(0,0,0,0.11)] max-md:max-w-full" />
-
                 {/* Google Login */}
-                <div className="flex absolute left-2/4 z-0 gap-7 max-w-full text-base leading-none text-white rounded-full -translate-x-2/4 bottom-[18px] h-[26px] translate-y-[0%] w-[198px]">
+                <div
+                  className="flex items-center justify-center gap-2 mt-6 px-4 py-2 bg-neutral-800 text-white rounded-full cursor-pointer"
+                  onClick={handleGoogleLogin}
+                >
                   <img
                     src="/assets/google_logo.svg"
                     alt="Google Login"
                     width={28}
                     height={28}
-                    className="object-contain shrink-0 w-7 rounded-full aspect-[1.12]"
+                    className="object-contain"
                   />
                   Login with Google
                 </div>
@@ -129,7 +146,7 @@ const Login = () => {
                           alt="Input Icon"
                           width={20}
                           height={20}
-                          className="object-contain shrink-0 self-stretch my-auto w-6 aspect-[1.04]"
+                          className="object-contain shrink-0 self-stretch my-auto w-6"
                         />
                         <input
                           type={field.type || "text"}
@@ -160,7 +177,7 @@ const Login = () => {
                       <span className="leading-6 text-black">
                         Don't have an account?{" "}
                       </span>
-                      <Link to="/Signup">Sign Up</Link>;
+                      <Link to="/Signup">Sign Up</Link>
                     </div>
                   </div>
                 </div>
