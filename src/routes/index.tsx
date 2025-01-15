@@ -5,10 +5,15 @@ import AdminPanel from "../pages/AdminPanel";
 import { Navigate } from "react-router-dom";
 import CreateBot from "../pages/CreateBot";
 import { AreaChartHero } from "../pages/MyChatBot";
+import IntegrationsPage from "../pages/Integration";
+import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
 const MODULE_MAP = {
   '/dashboard': 1,
   '/chatBot': 2,
-  '/adminPanel': 9
+  '/adminPanel': 9,
+  "/Integration": 5,
+  "/IntegrationApp":5.1,
+
 };
 
 interface RouteType {
@@ -57,6 +62,15 @@ export const authProtectedRoutes: RouteType[] = [
     path: "/adminPanel", 
     component: <ProtectedRoute route={{ path: "/adminPanel", component: <AdminPanel /> }} />
   },
+  { 
+    path: "/Integration", 
+    component: <ProtectedRoute route={{ path: "/Integration", component: <IntegrationsPage /> }} />
+  },
+  { 
+    path: "/Integration/IntegrationApp", 
+    component: <ProtectedRoute route={{ path: "/Integration", component: <WhatsAppIntegration /> }} />
+  },
+
 ];
 
 export const publicRoutes: RouteType[] = [
