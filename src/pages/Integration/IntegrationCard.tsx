@@ -18,7 +18,7 @@ export const IntegrationCard: React.FC<IntegrationProps> = ({
   connected,
 }) => {
   const navigate = useNavigate();
-
+//for adding routes
   const handleConnectClick = () => {
     if (variant === 'whatsapp') {
       navigate('/Integration/IntegrationApp');
