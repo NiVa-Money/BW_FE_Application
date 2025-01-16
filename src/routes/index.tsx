@@ -8,6 +8,7 @@ import { AreaChartHero } from "../pages/MyChatBot";
 import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
 import Campaign from "../pages/Marketing/Campaign";
 import MarketingDash from "../pages/Marketing/Dashboard";
+import IntegrationsPage from "../pages/Integration";
 const MODULE_MAP = {
   "/dashboard": 1,
   "/chatBot": 2,
