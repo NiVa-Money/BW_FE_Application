@@ -5,14 +5,19 @@ import AdminPanel from "../pages/AdminPanel";
 import { Navigate } from "react-router-dom";
 import CreateBot from "../pages/CreateBot";
 import { AreaChartHero } from "../pages/MyChatBot";
+import IntegrationsPage from "../pages/Integration";
+import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
 import Campaign from "../pages/Marketing/Campaign";
 import MarketingDash from "../pages/Marketing/Dashboard";
 const MODULE_MAP = {
-  "/dashboard": 1,
-  "/chatBot": 2,
-   "/marketing/campaign" : 5.1, 
-   "/marketing/dashboard" : 5.2, 
-  "/adminPanel": 9,
+  '/dashboard': 1,
+  '/chatBot': 2,
+  '/adminPanel': 9,
+  "/Integration": 5,
+  "/IntegrationApp":5.1,
+  "/marketing/campaign" : 6.1, 
+   "/marketing/dashboard" : 6.2, 
+
 };
 
 interface RouteType {
@@ -89,6 +94,15 @@ export const authProtectedRoutes: RouteType[] = [
       />
     ),
   },
+  { 
+    path: "/Integration", 
+    component: <ProtectedRoute route={{ path: "/Integration", component: <IntegrationsPage /> }} />
+  },
+  { 
+    path: "/Integration/IntegrationApp", 
+    component: <ProtectedRoute route={{ path: "/Integration", component: <WhatsAppIntegration /> }} />
+  },
+
 ];
 
 export const publicRoutes: RouteType[] = [
