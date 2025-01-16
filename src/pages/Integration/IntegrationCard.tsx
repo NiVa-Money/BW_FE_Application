@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent, Box, Typography, Button, Avatar } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface IntegrationProps {
   icon: string;
@@ -9,7 +10,21 @@ interface IntegrationProps {
   connected?: boolean;
 }
 
-export const IntegrationCard: React.FC<IntegrationProps> = ({ icon, name, description, connected }) => {
+export const IntegrationCard: React.FC<IntegrationProps> = ({
+  icon,
+  name,
+  description,
+  variant,
+  connected,
+}) => {
+  const navigate = useNavigate();
+//for adding routes
+  const handleConnectClick = () => {
+    if (variant === 'whatsapp') {
+      navigate('/Integration/IntegrationApp');
+    }
+  };
+
   return (
     <Card>
       <CardContent>
@@ -49,17 +64,14 @@ export const IntegrationCard: React.FC<IntegrationProps> = ({ icon, name, descri
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
-            variant={connected ? "contained" : "outlined"}
+            variant={connected ? 'contained' : 'outlined'}
             size="small"
             fullWidth
+            onClick={handleConnectClick}
           >
-            {connected ? "Connected" : "Connect"}
+            {connected ? 'Connected' : 'Connect'}
           </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            fullWidth
-          >
+          <Button variant="outlined" size="small" fullWidth>
             Integration details
           </Button>
         </Box>
@@ -67,4 +79,3 @@ export const IntegrationCard: React.FC<IntegrationProps> = ({ icon, name, descri
     </Card>
   );
 };
-
