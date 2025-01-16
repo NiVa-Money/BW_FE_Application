@@ -1,4 +1,4 @@
-import React from "react";
+
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { publicRoutes, authProtectedRoutes } from "./routes"; // Import routes configuration
 import RouteMiddleware from "./routes/routeMiddleware";

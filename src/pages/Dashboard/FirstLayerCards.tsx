@@ -89,7 +89,7 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
 
   return (
     <div style={styles.cardContainer}>
-      {cards.map((card, index) => (
+      {cards.map((card) => (
         <Resizable key={card.id}
 
           style={{ ...styles.card, height: card.height, width: card.width }}>

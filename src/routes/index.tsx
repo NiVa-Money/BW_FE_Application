@@ -5,10 +5,14 @@ import AdminPanel from "../pages/AdminPanel";
 import { Navigate } from "react-router-dom";
 import CreateBot from "../pages/CreateBot";
 import { AreaChartHero } from "../pages/MyChatBot";
+import Campaign from "../pages/Marketing/Campaign";
+import MarketingDash from "../pages/Marketing/Dashboard";
 const MODULE_MAP = {
-  '/dashboard': 1,
-  '/chatBot': 2,
-  '/adminPanel': 9
+  "/dashboard": 1,
+  "/chatBot": 2,
+   "/marketing/campaign" : 5.1, 
+   "/marketing/dashboard" : 5.2, 
+  "/adminPanel": 9,
 };
 
 interface RouteType {
@@ -21,15 +25,15 @@ interface RouteType {
 const ProtectedRoute: React.FC<{ route: RouteType }> = ({ route }) => {
   const checkModuleAccess = (path: string): boolean => {
     try {
-      const moduleMapString = localStorage.getItem('moduleMap');
+      const moduleMapString = localStorage.getItem("moduleMap");
       if (!moduleMapString) return false;
 
       const moduleMap = JSON.parse(moduleMapString);
       const requiredModule = MODULE_MAP[path as keyof typeof MODULE_MAP];
-      
+
       return moduleMap.includes(requiredModule);
     } catch (error) {
-      console.error('Error checking module access:', error);
+      console.error("Error checking module access:", error);
       return false;
     }
   };
@@ -45,17 +49,45 @@ const ProtectedRoute: React.FC<{ route: RouteType }> = ({ route }) => {
 
 // Updated routes with protection
 export const authProtectedRoutes: RouteType[] = [
-  { 
-    path: "/dashboard", 
-    component: <ProtectedRoute route={{ path: "/dashboard", component: <Dashboard /> }} />
+  {
+    path: "/dashboard",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/dashboard", component: <Dashboard /> }}
+      />
+    ),
   },
-  { 
-    path: "/chatBot", 
-    component: <ProtectedRoute route={{ path: "/chatBot", component: <AreaChartHero/> }} />
+  {
+    path: "/chatBot",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/chatBot", component: <AreaChartHero /> }}
+      />
+    ),
   },
-  { 
-    path: "/adminPanel", 
-    component: <ProtectedRoute route={{ path: "/adminPanel", component: <AdminPanel /> }} />
+  {
+    path: "/adminPanel",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/adminPanel", component: <AdminPanel /> }}
+      />
+    ),
+  },
+  {
+    path: "/marketing/campaign",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/campaign", component: <Campaign /> }}
+      />
+    ),
+  },
+  {
+    path: "/marketing/dashboard",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/dashboard", component: <MarketingDash /> }}
+      />
+    ),
   },
 ];
 
@@ -63,21 +95,21 @@ export const publicRoutes: RouteType[] = [
   { path: "/login", component: <Login /> },
   { path: "/Signup", component: <SignUp /> },
   { path: "/", component: <Login /> },
-  {path:'/createbot',component:<CreateBot/>}
+  { path: "/createbot", component: <CreateBot /> },
 ];
 
 export const useModuleAccess = () => {
   const checkAccess = (path: string): boolean => {
     try {
-      const moduleMapString = localStorage.getItem('moduleMap');
+      const moduleMapString = localStorage.getItem("moduleMap");
       if (!moduleMapString) return false;
 
       const moduleMap = JSON.parse(moduleMapString);
       const requiredModule = MODULE_MAP[path as keyof typeof MODULE_MAP];
-      
+
       return moduleMap.includes(requiredModule);
     } catch (error) {
-      console.error('Error checking module access:', error);
+      console.error("Error checking module access:", error);
       return false;
     }
   };
