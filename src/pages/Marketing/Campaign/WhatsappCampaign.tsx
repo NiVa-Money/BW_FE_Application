@@ -4,6 +4,7 @@ import { WhatsApp } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import CampaignTemplate from "../../../components/CampaignTemplate";
 
 const WhatsappCampaign: React.FC = () => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>("");
@@ -11,6 +12,7 @@ const WhatsappCampaign: React.FC = () => {
   const [campaignName, setCampaignName] = useState<string>("");
   const [contactList, setContactList] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
+  const [showTemplate, setShowTemplate] = useState<boolean>(false);
 
   // Handlers for user inputs
   const handleWhatsappNumberChange = (value: string) => {
@@ -33,6 +35,14 @@ const WhatsappCampaign: React.FC = () => {
 
   const handleModeChange = (selectedMode: "Text" | "Image" | "Template") => {
     setMode(selectedMode);
+  };
+
+  const handleSave = () => {
+    if (mode === "Template") {
+      setShowTemplate(true);
+    } else {
+      alert("Save functionality for this mode is not implemented yet.");
+    }
   };
 
   const handleGoWizard = () => {
@@ -250,7 +260,9 @@ const WhatsappCampaign: React.FC = () => {
                   "linear-gradient(to right, #E4E748 7%, #C0EE24 20%, #A5FFD6 23%, #27D692 36%, #4BA2A4 41%, #418DF9 45%, #A5FFD6 50%, #418DF9 53%, #00C2FF 56%, #A5FFD6 85%, #4BA2A4 91%) 1",
               }}
             >
-              <label className="text-slate-700 font-medium text-lg">AI Wizard</label>
+              <label className="text-slate-700 font-medium text-lg">
+                AI Wizard
+              </label>
               <p className="mt-1 text-zinc-500">
                 Allow our Wizard AI to assist you in creating the perfect
                 template for your campaign.
@@ -266,7 +278,10 @@ const WhatsappCampaign: React.FC = () => {
 
             {/* Bottom Buttons */}
             <div className="flex justify-center mt-4 gap-4">
-              <button className="flex gap-2 w-[200px] whitespace-nowrap justify-center items-center text-xl font-medium text-gray-100 bg-[#65558F] rounded-3xl">
+              <button
+                onClick={handleSave}
+                className="flex gap-2 w-[200px] whitespace-nowrap justify-center items-center text-xl font-medium text-gray-100 bg-[#65558F] rounded-3xl"
+              >
                 Save
               </button>
               <button className="flex gap-2 w-[200px] whitespace-nowrap border-black justify-center items-center py-2 text-xl font-medium text-black border bg-transparent rounded-3xl">
@@ -274,6 +289,7 @@ const WhatsappCampaign: React.FC = () => {
               </button>
             </div>
           </div>
+          {showTemplate && <CampaignTemplate onClose={() => setShowTemplate(false)} />}
 
           {/* WhatsApp Preview */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">
