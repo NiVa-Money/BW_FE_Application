@@ -3,6 +3,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { publicRoutes, authProtectedRoutes } from "./routes"; // Import routes configuration
 import RouteMiddleware from "./routes/routeMiddleware";
 import { ReduxProvider } from "./store/redux-provider";
+import { Snackbar } from "@mui/material";
+import { useSnackbar } from "./hooks/useSnackbar";
+import Toast from "./components/Toast";
 
 function App() {
   const router = createBrowserRouter([
@@ -16,7 +19,8 @@ function App() {
     })),
   ]);
 
-  return <RouterProvider router={router} />;
+  return <><RouterProvider router={router} />
+  </>;
 }
 
 export default App;

@@ -9,12 +9,36 @@ export const createBotProfileService = async (payload: any) => {
         payload
       );
       return response.data;
-      notifySuccess('Bot Created Successfully')
     } catch (error) {
       // console.log('e',error)
-      notifyError('error')
       
-    toast.error('error')
       throw new Error('Error in Creating Bot');
+    }
+  };
+
+  export const editBotProfileService = async (payload: any) => {
+    try {
+      const response = await axiosInstance.post(
+        '/user/editBotProfile',
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      // console.log('e',error)
+      
+      throw new Error('Error in Creating Bot');
+    }
+  };
+
+  export const getBotsService = async (payload: any) => {
+    try {
+      const response = await axiosInstance.get(
+        `user/getUserBotProfiles?userId=${payload}`,
+        {}
+      );
+      return response.data;
+    } catch (error: any) {
+      console.log('e',error)
+      throw new Error('Error fetching user profile');
     }
   };

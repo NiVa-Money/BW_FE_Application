@@ -28,6 +28,9 @@ const FormikFieldInputComponent: React.FC<any> = ({ field, form, ...props }) => 
             '& .MuiOutlinedInput-input': {
               height: '35px',
             },
+            '& .MuiInputBase-input': {
+              padding: '0 10px'
+            }
           },
         }}
         fullWidth

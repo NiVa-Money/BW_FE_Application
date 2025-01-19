@@ -5,14 +5,15 @@ import AdminPanel from "../pages/AdminPanel";
 import { Navigate } from "react-router-dom";
 import CreateBot from "../pages/CreateBot";
 import { AreaChartHero } from "../pages/MyChatBot";
-import IntegrationsPage from "../pages/Integration";
 import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
+import EditBot from "../pages/EditBot";
+import MyBots from "../pages/MyBots";
 const MODULE_MAP = {
   '/dashboard': 1,
   '/chatBot': 2,
   '/adminPanel': 9,
   "/Integration": 5,
-  "/IntegrationApp":5.1,
+  "/IntegrationApp": 5.1,
 
 };
 
@@ -30,8 +31,9 @@ const ProtectedRoute: React.FC<{ route: RouteType }> = ({ route }) => {
       if (!moduleMapString) return false;
 
       const moduleMap = JSON.parse(moduleMapString);
+      console.log('m', moduleMap)
       const requiredModule = MODULE_MAP[path as keyof typeof MODULE_MAP];
-      
+
       return moduleMap.includes(requiredModule);
     } catch (error) {
       console.error('Error checking module access:', error);
@@ -50,24 +52,24 @@ const ProtectedRoute: React.FC<{ route: RouteType }> = ({ route }) => {
 
 // Updated routes with protection
 export const authProtectedRoutes: RouteType[] = [
-  { 
-    path: "/dashboard", 
+  {
+    path: "/dashboard",
     component: <ProtectedRoute route={{ path: "/dashboard", component: <Dashboard /> }} />
   },
-  { 
-    path: "/chatBot", 
-    component: <ProtectedRoute route={{ path: "/chatBot", component: <AreaChartHero/> }} />
+  {
+    path: "/chatBot",
+    component: <ProtectedRoute route={{ path: "/chatBot", component: <AreaChartHero /> }} />
   },
-  { 
-    path: "/adminPanel", 
+  {
+    path: "/adminPanel",
     component: <ProtectedRoute route={{ path: "/adminPanel", component: <AdminPanel /> }} />
   },
-  { 
-    path: "/Integration", 
-    component: <ProtectedRoute route={{ path: "/Integration", component: <IntegrationsPage /> }} />
-  },
-  { 
-    path: "/Integration/IntegrationApp", 
+  // { 
+  //   path: "/Integration", 
+  //   component: <ProtectedRoute route={{ path: "/Integration", component: <IntegrationsPage /> }} />
+  // },
+  {
+    path: "/Integration/IntegrationApp",
     component: <ProtectedRoute route={{ path: "/Integration", component: <WhatsAppIntegration /> }} />
   },
 
@@ -77,7 +79,9 @@ export const publicRoutes: RouteType[] = [
   { path: "/login", component: <Login /> },
   { path: "/Signup", component: <SignUp /> },
   { path: "/", component: <Login /> },
-  {path:'/createbot',component:<CreateBot/>}
+  { path: '/createbot', component: <CreateBot /> },
+  { path: '/editbot/:id', component: <EditBot /> },
+  { path: '/mybots', component: <MyBots /> }
 ];
 
 export const useModuleAccess = () => {
@@ -88,7 +92,7 @@ export const useModuleAccess = () => {
 
       const moduleMap = JSON.parse(moduleMapString);
       const requiredModule = MODULE_MAP[path as keyof typeof MODULE_MAP];
-      
+
       return moduleMap.includes(requiredModule);
     } catch (error) {
       console.error('Error checking module access:', error);
