@@ -5,6 +5,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import CampaignTemplate from "../../../components/CampaignTemplate";
+import { useNavigate } from "react-router-dom";
 
 const WhatsappCampaign: React.FC = () => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>("");
@@ -13,6 +14,9 @@ const WhatsappCampaign: React.FC = () => {
   const [contactList, setContactList] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
+
+  const navigate = useNavigate();
+
 
   // Handlers for user inputs
   const handleWhatsappNumberChange = (value: string) => {
@@ -35,14 +39,11 @@ const WhatsappCampaign: React.FC = () => {
 
   const handleModeChange = (selectedMode: "Text" | "Image" | "Template") => {
     setMode(selectedMode);
+    setShowTemplate(selectedMode === "Template");
   };
 
   const handleSave = () => {
-    if (mode === "Template") {
-      setShowTemplate(true);
-    } else {
-      alert("Save functionality for this mode is not implemented yet.");
-    }
+    navigate("/marketing/dashboard");
   };
 
   const handleGoWizard = () => {
@@ -50,7 +51,7 @@ const WhatsappCampaign: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col max-w-[1400px] items-center justify-center bg-gray-100">
+    <div className="flex flex-col max-w-full bg-white items-center justify-center">
       <div className="w-full max-w-[1400px] p-4">
         {/* Header Section */}
         <div className="flex flex-col justify-center w-full text-2xl text-slate-700 mb-4">
@@ -104,29 +105,29 @@ const WhatsappCampaign: React.FC = () => {
               </div>
             </div>
 
-            {/* Contact List Upload */}
+            {/* Mode-Specific Input */}
             <div className="flex flex-col w-full mb-4">
-              <label className="text-slate-700">Upload Contact List *</label>
-              <div className="flex items-center p-3 mt-2 border border-slate-500 rounded-3xl">
-                <input
-                  type="file"
-                  onChange={handleContactListUpload}
-                  className="hidden"
-                  id="contact-upload"
-                />
-                <label
-                  htmlFor="contact-upload"
-                  className="flex gap-2 items-center cursor-pointer"
-                >
-                  <img
-                    loading="lazy"
-                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/99164b9ccb15cd85c49756bfef0c2886ede9266c6fb26304a973774410b942d4"
-                    alt="Upload icon"
-                    className="w-6 aspect-square"
+              {mode === "Text" && (
+                <div className="flex flex-col w-full mb-4">
+                  <label className="text-slate-700 ml-2 mb-2">
+                    Message Content *
+                  </label>
+                  <textarea
+                    placeholder="Enter your message content"
+                    className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
                   />
-                  <span className="ml-2 text-zinc-400">Upload</span>
-                </label>
-              </div>
+                </div>
+              )}
+              {mode === "Image" && (
+                <div>
+                  <label className="text-slate-700 ml-2">Upload Image *</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Schedule Date */}
@@ -147,6 +148,10 @@ const WhatsappCampaign: React.FC = () => {
                   }}
                 />
               </LocalizationProvider>
+              <p className="mt-4 text-zinc-600 text-sm">
+                <b>Note: </b> The campaign will remain active for one day, and
+                user responses during this period will be captured.
+              </p>
             </div>
           </div>
 
@@ -169,7 +174,8 @@ const WhatsappCampaign: React.FC = () => {
               </div>
               <div className="mt-2 leading-6 text-zinc-500">
                 Upload the contact list you wish to target with your messages or
-                campaigns on WhatsApp, or choose from an existing contact list.
+                campaigns on WhatsApp, or choose from an existing contact list.{" "}
+                <b>Only CSV files are allowed.</b>
               </div>
             </div>
             <div className="flex gap-2.5 items-start mt-2.5 w-full">
@@ -289,7 +295,9 @@ const WhatsappCampaign: React.FC = () => {
               </button>
             </div>
           </div>
-          {showTemplate && <CampaignTemplate onClose={() => setShowTemplate(false)} />}
+          {showTemplate && (
+            <CampaignTemplate onClose={() => setShowTemplate(false)} />
+          )}
 
           {/* WhatsApp Preview */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">

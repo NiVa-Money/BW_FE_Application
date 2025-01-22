@@ -9,6 +9,7 @@ import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
 import Campaign from "../pages/Marketing/Campaign";
 import MarketingDash from "../pages/Marketing/Dashboard";
 import IntegrationsPage from "../pages/Integration";
+import WhatsApp from "../pages/Marketing/Whatsapp";
 
 const MODULE_MAP = {
   "/dashboard": 1,
@@ -19,6 +20,7 @@ const MODULE_MAP = {
   "/marketing/campaign": 6,
   "/marketing/dashboard": 6.1,
   "/marketing/campaign-template": 6.2,
+  "/marketing/whatsapp-dash" : 7,
 };
 
 interface RouteType {
@@ -97,6 +99,15 @@ export const authProtectedRoutes: RouteType[] = [
     ),
   },
   
+  {
+    path: "/marketing/whatsapp-dash",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/whatsapp-dash", component: <WhatsApp /> }}
+      />
+    ),
+  },
+
   {
     path: "/Integration",
     component: (
