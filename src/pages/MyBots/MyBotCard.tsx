@@ -1,6 +1,10 @@
 import React from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
 import { FiDownload } from 'react-icons/fi';
+<<<<<<< Updated upstream
+=======
+import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
+>>>>>>> Stashed changes
 
 interface CardProps {
     name: string;
@@ -24,16 +28,26 @@ const MyBotCard: React.FC<CardProps> = ({
     onDelete,
     onExport,
     onClick
+<<<<<<< Updated upstream
 }) => {
     return (
         <div className="border border-gray-300 rounded-lg p-4 flex flex-col md:flex-row items-center md:items-start shadow-sm" onClick={onClick}>
             {/* Left Section - Avatar */}
             <div className="flex-shrink-0 flex items-center justify-center w-24 h-24 rounded-full bg-gray-100">
+=======
+
+}) => {
+    return (
+        <div className="border border-gray-300 rounded-lg p-4 flexs md:flex-row w-[100%] items-center md:items-start shadow-sm" >
+            {/* Left Section - Avatar */}
+            <div className="flex-shrink-0 flex items-center justify-between w-24 h-24 rounded-full bg-gray-100">
+>>>>>>> Stashed changes
                 <img
                     src="/assets/bot1.svg"
                     alt={`${name} Avatar`}
                     className="w-full h-full rounded-full"
                 />
+<<<<<<< Updated upstream
             </div>
 
             {/* Middle Section - Details */}
@@ -65,10 +79,40 @@ const MyBotCard: React.FC<CardProps> = ({
 
                         <div className="font-semibold">Created at</div>
                         <div className="col-span-4">{createdAt}</div>
+=======
+                <div className="flex mt-4 md:mt-0 space-x-4 flex-col">
+                    <div className='ml-[16px]'>
+                        <h2 className="text-xl font-bold text-gray-800">{name}</h2>
+                        <p className="text-gray-500 text-sm m-0">({description})</p>
+                    </div>
+                    <div className='flex justify-between gap-[20px] m-0'>
+                        <button
+                            onClick={onDelete}
+                            className="text-red-500 hover:text-red-700 flex items-center flex flex-col justify-end"
+                        >
+                            <FaTrashAlt />
+                            <span>Delete</span>
+                        </button>
+                        <button
+                            onClick={onClick}
+                            className="text-green-500 hover:text-green-700 flex items-center flex flex-col justify-end"
+                        >
+                            <FiDownload />
+                            <span>Edit</span>
+                        </button>
+                        <button
+                            onClick={onExport}
+                            className="text-grey-500 hover:text-grey-700 flex items-center flex flex-col justify-end"
+                        >
+                            <SettingsSuggestIcon />
+                            <span>Test</span>
+                        </button>
+>>>>>>> Stashed changes
                     </div>
                 </div>
             </div>
 
+<<<<<<< Updated upstream
             {/* Right Section - Actions */}
             <div className="flex mt-4 md:mt-0 space-x-4">
                 <button
@@ -86,6 +130,43 @@ const MyBotCard: React.FC<CardProps> = ({
                     Export
                 </button>
             </div>
+=======
+            {/* Middle Section - Details */}
+            <div className='flex'>
+                <div className="flex-grow mt-4 md:mt-0 text-center md:text-left">
+
+                    <div className="flex flex-col gap-2 mt-4 text-sm text-gray-700">
+
+                        <div className='flex justify-between'>
+                            <div className="font-semibold">Tone</div>
+                            <div className="col-span-4">{tone}</div>
+                        </div>
+                        <div className='flex justify-between'>
+                            <div className="font-semibold">File</div>
+                            <div className="col-span-4">{fileName}</div>
+                        </div>
+                        <div className='flex justify-between'>
+
+                            <div className="font-semibold">Color</div>
+                            <div className="col-span-4 flex items-center">
+                                <div
+                                    className="w-4 h-4 rounded-full mr-2"
+                                    style={{ backgroundColor: color }}
+                                ></div>
+                                {color}
+                            </div>
+                        </div>
+                        <div className='flex justify-between'>
+
+                            <div className="font-semibold">Created at</div>
+                            <div className="col-span-4">{createdAt}</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+>>>>>>> Stashed changes
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoginUserService } from "../../api/services/authServices";
+import { LoginUserService, verifyGoogleUserService } from "../../api/services/authServices";
 import { Link } from "react-router-dom";
 import { loginWithGoogle } from "../../components/firebase/firebaseConfig";
 
@@ -46,9 +46,22 @@ const Login = () => {
     setIsLoading(true);
     try {
       const response = await loginWithGoogle();
+      console.log('re', response)
       if (response.success) {
-        navigate("/dashboard");
-      } else {
+        try {
+          const email = response?.user?.email
+          const verify = await verifyGoogleUserService(email);
+          if (verify.success) {
+            localStorage.setItem('user_id', verify.user_id)
+            navigate("/dashboard");
+          }
+        }
+        catch {
+
+        }
+
+      }
+      else {
         setError(response.message || "Google login failed. Please try again.");
       }
     } catch (err) {

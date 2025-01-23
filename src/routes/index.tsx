@@ -1,6 +1,7 @@
-import Login from "../pages/login";
-import SignUp from "../pages/Signup";
+// src/routes.ts
+
 import Dashboard from "../pages/Dashboard";
+<<<<<<< Updated upstream
 import AdminPanel from "../pages/AdminPanel";
 import { Navigate } from "react-router-dom";
 import CreateBot from "../pages/CreateBot";
@@ -14,15 +15,14 @@ const MODULE_MAP = {
   '/adminPanel': 9,
   "/Integration": 5,
   "/IntegrationApp": 5.1,
+=======
+import Login from "../pages/login";
+>>>>>>> Stashed changes
 
-};
 
-interface RouteType {
-  path: string;
-  component: React.ReactNode;
-  exact?: boolean;
-}
+export const routes = [
 
+<<<<<<< Updated upstream
 // ProtectedRoute component that checks module access
 const ProtectedRoute: React.FC<{ route: RouteType }> = ({ route }) => {
   const checkModuleAccess = (path: string): boolean => {
@@ -104,3 +104,21 @@ export const useModuleAccess = () => {
 };
 
 export default { authProtectedRoutes, publicRoutes, useModuleAccess };
+=======
+  {
+    path: '/login',
+    component: Login,
+    isProtected: false, // Public route
+  },
+  {
+    path: '/dashboard',
+    component: Dashboard,
+    isProtected: true, // Protected route
+  },
+  {
+    path: '*',
+    component: <div>no found</div>, // Catch-all for undefined routes
+    isProtected: false,
+  },
+];
+>>>>>>> Stashed changes
