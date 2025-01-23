@@ -339,6 +339,7 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
+import axiosInstance from "../../../api/axiosConfig";
 // import axiosInstance from "../../../api/axiosConfig";
 
 const followerData = [
@@ -419,17 +420,19 @@ const MarketingDashboard = () => {
     };
 
     try {
-      // const response = await axiosInstance.post(
-      //   "/marketing/insights",
+      const response = await axiosInstance.post(
+        "/marketing/insights",
 
-      const response = await axios.post(
-        "https://345b-103-211-113-239.ngrok-free.app/marketing/insights",
         payload,
         {
           headers: { "Content-Type": "application/json" },
         }
       );
-      setNewsData(response.data.data.newsInsights.buisnessInsights ? [response.data.data.newsInsights.buisnessInsights] : []);
+      setNewsData(
+        response.data.data.newsInsights.buisnessInsights
+          ? [response.data.data.newsInsights.buisnessInsights]
+          : []
+      );
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.message || "Failed to fetch data.");
