@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { CREATE_BOT,CREATE_BOT_SUCCESS,CREATE_BOT_FAILURE } from '../actionTypes/botActionsTypes';
 import { initialState } from '../initialState';

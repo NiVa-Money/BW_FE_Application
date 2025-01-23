@@ -6,6 +6,10 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import CampaignTemplate from "../../../components/CampaignTemplate";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../store";
+import { createWhatsAppCampaignAction } from "../../../store/actions/whatsappCampaignActions";
+
 
 const WhatsappCampaign: React.FC = () => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>("");
@@ -16,7 +20,9 @@ const WhatsappCampaign: React.FC = () => {
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  useSelector((state: RootState) => state.whatsappCampaign);
 
   // Handlers for user inputs
   const handleWhatsappNumberChange = (value: string) => {
@@ -33,7 +39,15 @@ const WhatsappCampaign: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files) {
-      setContactList(event.target.files[0] || null);
+      const file = event.target.files[0];
+      const validFileTypes = ["application/pdf", "text/csv"]; // Valid MIME types for PDF and CSV files
+
+      // Check if the file is a valid type
+      if (validFileTypes.includes(file.type)) {
+        setContactList(file);
+      } else {
+        alert("Please upload a valid CSV or PDF file.");
+      }
     }
   };
 
@@ -42,9 +56,49 @@ const WhatsappCampaign: React.FC = () => {
     setShowTemplate(selectedMode === "Template");
   };
 
+  const { loading, success } = useSelector(
+    (state: RootState) => state.whatsappCampaign
+  );
+
   const handleSave = () => {
+    const campaignPayload = {
+      campaignName,
+      channel: "whatsapp",
+      phoneNumberId: whatsappNumber === "Number1" ? 1234567890 : 9876543210,
+      schedule: scheduleDate ? scheduleDate.toISOString() : "",
+      endDate: scheduleDate
+        ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
+        : "",
+      contactsUrl: contactList ? URL.createObjectURL(contactList) : "",
+      messageType: mode.toLowerCase(),
+      messageContent: {
+        text: mode === "Text" ? "Campaign message here" : "",
+        template: mode === "Template" ? {
+          name: "order_notification",
+          language: "en",
+          header: { image: "https://example.com/image.png" },
+          body: {
+            text: ["Your order has been shipped!", "Your package is on its way!"],
+          },
+        } : null,
+        image: mode === "Image" ? {
+          url: "https://example.com/image.png",
+          caption: "Image description",
+        } : null,
+      },
+    };
+
+    // Dispatch using your existing action creator
+    dispatch(createWhatsAppCampaignAction(campaignPayload));
+    alert('campaign is made')
     navigate("/marketing/dashboard");
   };
+
+  React.useEffect(() => {
+    if (success && !loading) {
+      navigate("/marketing/dashboard");
+    }
+  }, [success, loading, navigate]);
 
   const handleGoWizard = () => {
     alert("AI Wizard feature is under development!");

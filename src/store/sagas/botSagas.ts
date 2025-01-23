@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { call, put } from "redux-saga/effects";
 import { CREATE_BOT_FAILURE, CREATE_BOT_SUCCESS } from "../actionTypes/botActionsTypes";
 import { createBotProfileService } from "../../api/services/botService";
