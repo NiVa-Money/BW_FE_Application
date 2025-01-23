@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { WhatsApp } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -10,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { createWhatsAppCampaignAction } from "../../../store/actions/whatsappCampaignActions";
 
-
 const WhatsappCampaign: React.FC = () => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>("");
   const [mode, setMode] = useState<"Text" | "Image" | "Template">("Text");
@@ -21,8 +19,6 @@ const WhatsappCampaign: React.FC = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  useSelector((state: RootState) => state.whatsappCampaign);
 
   // Handlers for user inputs
   const handleWhatsappNumberChange = (value: string) => {
@@ -40,9 +36,8 @@ const WhatsappCampaign: React.FC = () => {
   ) => {
     if (event.target.files) {
       const file = event.target.files[0];
-      const validFileTypes = ["application/pdf", "text/csv"]; // Valid MIME types for PDF and CSV files
+      const validFileTypes = ["text/csv"];
 
-      // Check if the file is a valid type
       if (validFileTypes.includes(file.type)) {
         setContactList(file);
       } else {
@@ -56,9 +51,7 @@ const WhatsappCampaign: React.FC = () => {
     setShowTemplate(selectedMode === "Template");
   };
 
-  const { loading, success } = useSelector(
-    (state: RootState) => state.whatsappCampaign
-  );
+  const { success } = useSelector((state: RootState) => state.whatsappCampaign);
 
   const handleSave = () => {
     const campaignPayload = {
@@ -73,32 +66,39 @@ const WhatsappCampaign: React.FC = () => {
       messageType: mode.toLowerCase(),
       messageContent: {
         text: mode === "Text" ? "Campaign message here" : "",
-        template: mode === "Template" ? {
-          name: "order_notification",
-          language: "en",
-          header: { image: "https://example.com/image.png" },
-          body: {
-            text: ["Your order has been shipped!", "Your package is on its way!"],
-          },
-        } : null,
-        image: mode === "Image" ? {
-          url: "https://example.com/image.png",
-          caption: "Image description",
-        } : null,
+        template:
+          mode === "Template"
+            ? {
+                name: "order_notification",
+                language: "en",
+                header: { image: "https://example.com/image.png" },
+                body: {
+                  text: [
+                    "Your order has been shipped!",
+                    "Your package is on its way!",
+                  ],
+                },
+              }
+            : null,
+        image:
+          mode === "Image"
+            ? {
+                url: "https://example.com/image.png",
+                caption: "Image description",
+              }
+            : null,
       },
     };
 
-    // Dispatch using your existing action creator
+    // Dispatch the action
     dispatch(createWhatsAppCampaignAction(campaignPayload));
-    alert('campaign is made')
+    alert("Campaign is made");
     navigate("/marketing/dashboard");
   };
 
   React.useEffect(() => {
-    if (success && !loading) {
-      navigate("/marketing/dashboard");
-    }
-  }, [success, loading, navigate]);
+    if (success) navigate("/marketing/dashboard");
+  }, [success, navigate]);
 
   const handleGoWizard = () => {
     alert("AI Wizard feature is under development!");
@@ -122,7 +122,6 @@ const WhatsappCampaign: React.FC = () => {
         <div className="flex flex-wrap gap-4 mt-10">
           {/* Left Section */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">
-            {/* WhatsApp Number */}
             <div className="flex flex-col w-full mb-4">
               <label className="leading-snug text-slate-700">
                 Choose WhatsApp Number *
@@ -141,7 +140,7 @@ const WhatsappCampaign: React.FC = () => {
             {/* Mode Selection */}
             <div className="flex flex-col w-full mb-4">
               <label className="text-slate-700">Mode*</label>
-              <p className=" text-zinc-500">Select Mode for marketing</p>
+              <p className="text-zinc-500">Select Mode for marketing</p>
               <div className="flex gap-0 justify-center items-center w-full mt-4 text-sm font-medium text-center min-h-[48px]">
                 {["Text", "Image", "Template"].map((m) => (
                   <div
@@ -149,6 +148,7 @@ const WhatsappCampaign: React.FC = () => {
                     onClick={() =>
                       handleModeChange(m as "Text" | "Image" | "Template")
                     }
+                  
                     className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${
                       mode === m ? "bg-purple-200" : "bg-white"
                     }`}
@@ -336,7 +336,6 @@ const WhatsappCampaign: React.FC = () => {
               </button>
             </div>
 
-            {/* Bottom Buttons */}
             <div className="flex justify-center mt-4 gap-4">
               <button
                 onClick={handleSave}
@@ -352,7 +351,6 @@ const WhatsappCampaign: React.FC = () => {
           {showTemplate && (
             <CampaignTemplate onClose={() => setShowTemplate(false)} />
           )}
-
           {/* WhatsApp Preview */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">
             <img
@@ -368,3 +366,5 @@ const WhatsappCampaign: React.FC = () => {
 };
 
 export default WhatsappCampaign;
+
+
