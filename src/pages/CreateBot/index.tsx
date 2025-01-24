@@ -63,7 +63,7 @@ const CreateBot: React.FC = () => {
     },
   ];
   const dispatch = useDispatch()
-  const { botName, theme, botTone, greetingMessage, phoneNumber, email, botSmartness, botIdentity, botLimit, appoimentLink }: any = formValues
+  const { botName, theme, botTone, greetingMessage, phoneNumber, email, botSmartness, botIdentity, botLimit, appoimentLink, botFont }: any = formValues
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
     const response = await fetch(item?.imageUrl);
@@ -105,8 +105,11 @@ const CreateBot: React.FC = () => {
     formData.append('docName', filename);
     formData.append('docType', filename.length > 0 ? 'pdf' : '');
     formData.append('customBotImage', imageFile);
-    formData.append('userId', '66c86842176c96b683c13809');
+    formData.append('userId', '6780152ce269db8d09b78842');
     formData.append('file', docFile);
+    formData.append('botFont', botFont);
+    formData.append('botTheme', theme);
+
     console.log('Form Submitted:', formValues, formData.entries());
     for (let [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
@@ -151,6 +154,20 @@ const CreateBot: React.FC = () => {
     } else {
       alert('File must be a PDF and less than 10MB');
     }
+  };
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const charCode = event.key;
+
+    // Allow only numeric input
+    if (!/^\d$/.test(charCode)) {
+      event.preventDefault();
+    }
+
+    // Optionally, limit the maximum length
+    // const inputElement = event.target as HTMLInputElement;
+    // if (inputElement.value.length >= 10) {
+    //   event.preventDefault();
+    // }
   };
   return (
     <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
@@ -426,13 +443,13 @@ const CreateBot: React.FC = () => {
                     placeholder="Enter your Phone Number"
                     component={FormikFieldInputComponent}
                     onChange={handleChange}
-
+                    onKeyPress={handleKeyPress}
                   />
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black" >
 
                   <Field
-                    type="text"
+                    type="email"
                     id="email"
                     name="email"
                     value={email}
@@ -474,7 +491,7 @@ const CreateBot: React.FC = () => {
                 </div>
               </div>
             </left-container>
-            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} setFormValues={setFormValues} formValues={formValues} handleSubmit={handleSubmit} />
+            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} setFormValues={setFormValues} formValues={formValues} handleSubmit={handleSubmit} font={botFont} />
 
           </Form>
         )}

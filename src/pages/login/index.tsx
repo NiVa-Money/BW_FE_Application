@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoginUserService } from "../../api/services/authServices";
+import { getUserProfileService, LoginUserService, verifyGoogleUserService } from "../../api/services/authServices";
 import { Link } from "react-router-dom";
 import { loginWithGoogle } from "../../components/firebase/firebaseConfig";
 
@@ -47,7 +47,31 @@ const Login = () => {
     try {
       const response = await loginWithGoogle();
       if (response.success) {
-        navigate("/dashboard");
+        try {
+          const emailverify = await verifyGoogleUserService({ emailId: response?.user?.email });
+          if (emailverify.success) {
+            localStorage.setItem('user_id', emailverify.user_id)
+            try {
+              const email: string = response?.user?.email
+                ? encodeURIComponent(response.user.email)
+                : '';
+              const userProfile = await getUserProfileService(email)
+              if (userProfile) {
+                localStorage.setItem('userData', JSON.stringify(userProfile))
+              }
+              navigate("/dashboard");
+
+            } catch {
+              console.error("Error fetching user detail",);
+            }
+          } else {
+            setError(response.message || "Google login failed. Please try again.");
+          }
+        } catch (err) {
+          console.error("Error logging in with Google:", err);
+          setError("An unexpected error occurred during Google login.");
+        }
+
       } else {
         setError(response.message || "Google login failed. Please try again.");
       }
