@@ -75,11 +75,24 @@ export const LoginverifyGoogleLogin = async (payload: any) => {
 
 export const verifyGoogleUserService = async (payload: any) => {
   try {
-    const response = await axiosInstance.post("/user/signup/verify", {
-      emailId: payload,
-    });
+    const response = await axiosInstance.post("/user/signup/verify", payload);
     return response.data;
   } catch (error) {
     throw new Error("Error in verifying otp");
+  }
+};
+export const getUserProfileService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.get(
+      `/user/getUserProfile?emailId=${payload}`
+    );
+    return response.data;
+  } catch (error: any) {
+    return (
+      error?.response?.data || {
+        success: false,
+        message: "Something went wrong.",
+      }
+    );
   }
 };

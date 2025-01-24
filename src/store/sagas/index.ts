@@ -1,14 +1,3 @@
-<<<<<<< Updated upstream
-import { takeEvery } from 'redux-saga/effects';
-import { CREATE_BOT, EDIT_BOT, GET_BOTS } from '../actionTypes/botActionsTypes';
-import { createBotSaga, editBotSaga, getBotsSaga } from './botSagas';
-
-export default function* rootSaga() {
-    yield takeEvery(CREATE_BOT, createBotSaga);
-    yield takeEvery(EDIT_BOT, editBotSaga);
-    yield takeEvery(GET_BOTS, getBotsSaga);
-}
-=======
 import { takeEvery } from "redux-saga/effects";
 import {
   CREATE_BOT,
@@ -29,4 +18,3 @@ export default function* rootSaga() {
   yield takeEvery(GET_BOTS, getBotsSaga);
   yield takeEvery(DELETE_BOT, deleteBotSaga);
 }
->>>>>>> Stashed changes

@@ -1,77 +1,50 @@
-// src/routes.ts
-
+import Login from "../pages/login";
+import SignUp from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
-<<<<<<< Updated upstream
 import AdminPanel from "../pages/AdminPanel";
-import { Navigate } from "react-router-dom";
 import CreateBot from "../pages/CreateBot";
 import { AreaChartHero } from "../pages/MyChatBot";
+import IntegrationsPage from "../pages/Integration";
 import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
-import EditBot from "../pages/EditBot";
-import MyBots from "../pages/MyBots";
 const MODULE_MAP = {
   '/dashboard': 1,
   '/chatBot': 2,
   '/adminPanel': 9,
   "/Integration": 5,
   "/IntegrationApp": 5.1,
-=======
-import Login from "../pages/login";
->>>>>>> Stashed changes
 
-
-export const routes = [
-
-<<<<<<< Updated upstream
-// ProtectedRoute component that checks module access
-const ProtectedRoute: React.FC<{ route: RouteType }> = ({ route }) => {
-  const checkModuleAccess = (path: string): boolean => {
-    try {
-      const moduleMapString = localStorage.getItem('moduleMap');
-      if (!moduleMapString) return false;
-
-      const moduleMap = JSON.parse(moduleMapString);
-      console.log('m', moduleMap)
-      const requiredModule = MODULE_MAP[path as keyof typeof MODULE_MAP];
-
-      return moduleMap.includes(requiredModule);
-    } catch (error) {
-      console.error('Error checking module access:', error);
-      return false;
-    }
-  };
-
-  const hasAccess = checkModuleAccess(route.path);
-
-  if (!hasAccess) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <>{route.component}</>;
 };
 
-// Updated routes with protection
+interface RouteType {
+  path: string;
+  component: React.ReactNode;
+  exact?: boolean;
+}
+
+
 export const authProtectedRoutes: RouteType[] = [
   {
     path: "/dashboard",
-    component: <ProtectedRoute route={{ path: "/dashboard", component: <Dashboard /> }} />
+    component: <Dashboard />
   },
   {
     path: "/chatBot",
-    component: <ProtectedRoute route={{ path: "/chatBot", component: <AreaChartHero /> }} />
+    component: <AreaChartHero />
   },
   {
     path: "/adminPanel",
-    component: <ProtectedRoute route={{ path: "/adminPanel", component: <AdminPanel /> }} />
+    component: <AdminPanel />
   },
-  // { 
-  //   path: "/Integration", 
-  //   component: <ProtectedRoute route={{ path: "/Integration", component: <IntegrationsPage /> }} />
-  // },
+  {
+    path: "/Integration",
+    component: <IntegrationsPage />
+  },
   {
     path: "/Integration/IntegrationApp",
-    component: <ProtectedRoute route={{ path: "/Integration", component: <WhatsAppIntegration /> }} />
+    component: <WhatsAppIntegration />
   },
+  { path: '/createbot', component: <CreateBot /> }
+
 
 ];
 
@@ -79,46 +52,10 @@ export const publicRoutes: RouteType[] = [
   { path: "/login", component: <Login /> },
   { path: "/Signup", component: <SignUp /> },
   { path: "/", component: <Login /> },
-  { path: '/createbot', component: <CreateBot /> },
-  { path: '/editbot/:id', component: <EditBot /> },
-  { path: '/mybots', component: <MyBots /> }
 ];
 
-export const useModuleAccess = () => {
-  const checkAccess = (path: string): boolean => {
-    try {
-      const moduleMapString = localStorage.getItem('moduleMap');
-      if (!moduleMapString) return false;
 
-      const moduleMap = JSON.parse(moduleMapString);
-      const requiredModule = MODULE_MAP[path as keyof typeof MODULE_MAP];
 
-      return moduleMap.includes(requiredModule);
-    } catch (error) {
-      console.error('Error checking module access:', error);
-      return false;
-    }
-  };
 
-  return { checkAccess };
-};
 
-export default { authProtectedRoutes, publicRoutes, useModuleAccess };
-=======
-  {
-    path: '/login',
-    component: Login,
-    isProtected: false, // Public route
-  },
-  {
-    path: '/dashboard',
-    component: Dashboard,
-    isProtected: true, // Protected route
-  },
-  {
-    path: '*',
-    component: <div>no found</div>, // Catch-all for undefined routes
-    isProtected: false,
-  },
-];
->>>>>>> Stashed changes
+export default { authProtectedRoutes, publicRoutes };
