@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import React, { useState } from 'react'
@@ -45,7 +46,7 @@ export default function IntegrationsPage() {
                 Select and connect tools you use to integrate with your workflow
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            {/* <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
                 size="small"
                 placeholder="Search"
@@ -67,7 +68,7 @@ export default function IntegrationsPage() {
                   sx={{ width: 32, height: 32 }}
                 />
               </IconButton>
-            </Box>
+            </Box> */}
           </Box>
 
           <Box sx={{ mb: 4, borderBottom: 1, borderColor: 'divider' }}>

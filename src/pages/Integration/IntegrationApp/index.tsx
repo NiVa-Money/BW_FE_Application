@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import {
@@ -28,7 +29,7 @@ export default function WhatsAppIntegration() {
   return (
     <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh' }}>
       {/* Top AppBar */}
-      <AppBar position="static" color="inherit" elevation={0}>
+      {/* <AppBar position="static" color="inherit" elevation={0}>
         <Toolbar>
           <Box sx={{ flexGrow: 1 }}>
             <TextField
@@ -56,7 +57,7 @@ export default function WhatsAppIntegration() {
           </IconButton>
           <Avatar sx={{ ml: 2 }} />
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
 
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         {/* Breadcrumbs */}
