@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { WhatsApp } from "@mui/icons-material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import CampaignTemplate from "../../../components/CampaignTemplate";
@@ -16,9 +17,11 @@ const WhatsappCampaign: React.FC = () => {
   const [mode, setMode] = useState<"Text" | "Image" | "Template">("Text");
   const [campaignName, setCampaignName] = useState<string>("");
   const [contactList, setContactList] = useState<File | null>(null);
+  const [botConfigFile, setBotConfigFile] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
   const [fileName, setFileName] = useState("");
+  const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -45,8 +48,21 @@ const WhatsappCampaign: React.FC = () => {
         setContactList(file);
         setFileName(file.name);
       } else {
-        alert("Please upload a valid CSV or PDF file.");
+        alert("Please upload a valid CSV file.");
       }
+    }
+  };
+
+  const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file && file.type !== "application/pdf") {
+      alert("Only PDF files are allowed.");
+      event.target.value = ""; // Clear the file input
+      setFileName(""); // Clear the file name state
+    } else if (file) {
+      setBotConfigFile(file); // Set the bot configuration file
+      setFileName(file.name); // Update the file name to show in both inputs
     }
   };
 
@@ -255,6 +271,17 @@ const WhatsappCampaign: React.FC = () => {
                     },
                   }}
                 />
+                {/* Time Picker */}
+                <TimePicker
+                  value={scheduleTime}
+                  onChange={(newValue) => setScheduleTime(newValue)}
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      fullWidth: true,
+                    },
+                  }}
+                />
               </LocalizationProvider>
               <p className="mt-4 text-zinc-600 text-sm">
                 <b>Note: </b> The campaign will remain active for one day, and
@@ -281,9 +308,10 @@ const WhatsappCampaign: React.FC = () => {
                 Upload The Contact List *
               </div>
               <div className="mt-2 leading-6 text-zinc-500">
-                Upload the contact list you wish to target with your messages or
-                campaigns on WhatsApp, or choose from an existing contact list.{" "}
-                <b>Only CSV files are allowed.</b>
+                Upload the contact list you wish to target with your campaigns
+                on WhatsApp. The CSV file should only include the following
+                columns: name, number, and country code. <br />
+                <strong>Only CSV files are allowed.</strong>
               </div>
             </div>
             <div className="flex gap-2.5 items-start mt-2.5 w-full">
@@ -318,7 +346,7 @@ const WhatsappCampaign: React.FC = () => {
                     className="w-6 aspect-square"
                   />
                   <span className="ml-2 text-zinc-400">
-                    {fileName || "Upload"}{" "}
+                    {contactList ? contactList.name : "Upload"}
                   </span>
                 </label>
               </div>
@@ -348,12 +376,12 @@ const WhatsappCampaign: React.FC = () => {
               <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
                 <input
                   type="file"
-                  onChange={handleContactListUpload}
+                  onChange={handlePdfUpload}
                   className="hidden"
-                  id="contact-upload"
+                  id="bot-config-upload"
                 />
                 <label
-                  htmlFor="contact-upload"
+                  htmlFor="bot-config-upload"
                   className="flex gap-2 items-center cursor-pointer"
                 >
                   <img
@@ -363,7 +391,7 @@ const WhatsappCampaign: React.FC = () => {
                     className="w-6 aspect-square"
                   />
                   <span className="ml-2 text-zinc-400">
-                    {fileName || "Upload"}{" "}
+                    {botConfigFile ? botConfigFile.name : "Upload"}
                   </span>
                 </label>
               </div>

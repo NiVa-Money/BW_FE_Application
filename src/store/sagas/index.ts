@@ -3,8 +3,11 @@ import { CREATE_BOT } from '../actionTypes/botActionsTypes';
 import { createBotSaga } from './botSagas';
 import { CREATE_WHATSAPP_CAMPAIGN } from '../actionTypes/whatsappCampaignTypes';
 import { createWhatsAppCampaignSaga } from './whatsappCampaignSaga';
+import { saveWhatsappSaga } from './integrationSaga';
+import { SAVE_WHATSAPPINT } from '../actionTypes/integrationActionTypes';
 
 export default function* rootSaga() {
     yield takeEvery(CREATE_BOT, createBotSaga);
     yield takeLatest(CREATE_WHATSAPP_CAMPAIGN, createWhatsAppCampaignSaga);
+    yield takeEvery(SAVE_WHATSAPPINT, saveWhatsappSaga); // This listens to SAVE_WHATSAPPINT actions
 }
