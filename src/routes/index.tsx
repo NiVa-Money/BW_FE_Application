@@ -10,17 +10,19 @@ import Campaign from "../pages/Marketing/Campaign";
 import MarketingDash from "../pages/Marketing/Dashboard";
 import IntegrationsPage from "../pages/Integration";
 import WhatsApp from "../pages/Marketing/Whatsapp";
+import EngagementTab from "../pages/Engagement";
 
 const MODULE_MAP = {
   "/dashboard": 1,
-  "/chatBot": 2,
+  "/engagement" : 2, 
+  "/chatBot": 5,
   "/adminPanel": 9,
-  "/Integration": 5,
+  "/Integration": 6,
   "/IntegrationApp": 5.1,
-  "/marketing/campaign": 6,
-  "/marketing/dashboard": 6.1,
-  "/marketing/campaign-template": 6.2,
-  "/marketing/whatsapp-dash" : 7,
+  // "/marketing/campaign": 4,
+  "/marketing/dashboard": 4,
+  "/marketing/campaign-template": 4.3,
+  "/marketing/whatsapp-dash" : 4.4,
 };
 
 interface RouteType {
@@ -63,6 +65,14 @@ export const authProtectedRoutes: RouteType[] = [
     component: (
       <ProtectedRoute
         route={{ path: "/dashboard", component: <Dashboard /> }}
+      />
+    ),
+  },
+  {
+    path: "/engagement",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/engagement", component: <EngagementTab /> }}
       />
     ),
   },
