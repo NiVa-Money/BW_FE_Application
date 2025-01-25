@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState , useEffect ,  } from "react";
 import {
   LineChart,
   Line,
@@ -21,6 +21,9 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { WhatsAppDashboardService } from "../../../api/services/whatsappCampaignService";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 interface DashboardProps {
   totalMessages: number;
@@ -46,7 +49,12 @@ const WhatsappDash: FC<DashboardProps> = ({
   const [category, setCategory] = useState("");
   const [sentiment, setSentiment] = useState("");
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const totalPages = 5;
+
+  const { campaignId } = useSelector((state: RootState) => state.whatsappCampaign);
+  console.log("Current state:", useSelector((state: RootState) => state.whatsappCampaign));
+
 
   const responseData = [
     { day: "Sunday", campaign1: 200, campaign2: 0 },
@@ -71,6 +79,25 @@ const WhatsappDash: FC<DashboardProps> = ({
   const setScheduleDate = (newValue: Date | null): void => {
     setDate(newValue);
   };
+
+  // Fetch data from API on component mount
+  useEffect(() => {
+    if (campaignId) {
+      console.log("whatsapp dash id", campaignId);
+      WhatsAppDashboardService(campaignId)
+        .then((data) => {
+          console.log("Dashboard data:", data);
+          // Process the data and update state here if needed
+          setLoading(false); // Set loading to false once the data is fetched
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+          setLoading(false); // Stop loading if there's an error
+        });
+    } else if (!loading) {
+      console.error("Campaign ID is null");
+    }
+  }, [campaignId, loading]);
 
   return (
     <div className="p-6">
@@ -312,7 +339,6 @@ const WhatsappDash: FC<DashboardProps> = ({
         {/* Pagination */}
         <div className="flex justify-center mt-4 gap-2">
           <button
-          
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
             className="h-8 rounded-full w-[100px] bg-white"
             disabled={page === 1}

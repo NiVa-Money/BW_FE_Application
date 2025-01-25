@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { WhatsApp } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -8,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { createWhatsAppCampaignAction } from "../../../store/actions/whatsappCampaignActions";
+import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
 
 const WhatsappCampaign: React.FC = () => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>("");
@@ -16,6 +18,7 @@ const WhatsappCampaign: React.FC = () => {
   const [contactList, setContactList] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
+  const [fileName, setFileName] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -40,6 +43,7 @@ const WhatsappCampaign: React.FC = () => {
 
       if (validFileTypes.includes(file.type)) {
         setContactList(file);
+        setFileName(file.name);
       } else {
         alert("Please upload a valid CSV or PDF file.");
       }
@@ -52,9 +56,32 @@ const WhatsappCampaign: React.FC = () => {
   };
 
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
+  // const campaignId = useSelector((state: RootState) => state.whatsappCampaign?.campaignId);
 
-  const handleSave = () => {
-    const campaignPayload = {
+  const handleSave = async () => {
+    // Prepare the campaign payload
+    interface CampaignPayload {
+      campaignName: string;
+      channel: string;
+      phoneNumberId: number;
+      schedule: string;
+      endDate: string;
+      contactsUrl: string;
+      messageType: string;
+      messageContent: {
+        text: string;
+        template: {
+          name: string;
+          language: string;
+          header: { image: string };
+          body: { text: string[] };
+        } | null;
+        image: { url: string; caption: string } | null;
+      };
+      contactsData?: any;
+    }
+
+    const campaignPayload: CampaignPayload = {
       campaignName,
       channel: "whatsapp",
       phoneNumberId: whatsappNumber === "Number1" ? 1234567890 : 9876543210,
@@ -62,7 +89,8 @@ const WhatsappCampaign: React.FC = () => {
       endDate: scheduleDate
         ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
         : "",
-      contactsUrl: contactList ? URL.createObjectURL(contactList) : "",
+      // contactsUrl: contactList ? URL.createObjectURL(contactList) : "",
+      contactsUrl: "", // Initially empty, will be updated later
       messageType: mode.toLowerCase(),
       messageContent: {
         text: mode === "Text" ? "Campaign message here" : "",
@@ -90,14 +118,41 @@ const WhatsappCampaign: React.FC = () => {
       },
     };
 
-    // Dispatch the action
-    dispatch(createWhatsAppCampaignAction(campaignPayload));
-    alert("Campaign is made");
-    navigate("/marketing/dashboard");
+    try {
+      // Upload the CSV file to the /marketing/csv-to-json API
+      if (contactList) {
+        const formData = new FormData();
+        formData.append("file", contactList);
+
+        const data = await convertCsvToJsonService(formData);
+
+        // Add the parsed contact list to the campaign payload
+        campaignPayload.contactsData = data;
+
+        const s3Url = data.s3Url;
+        campaignPayload.contactsUrl = s3Url;
+        // Dispatch the campaign creation action with the payload
+        dispatch(createWhatsAppCampaignAction(campaignPayload));
+
+        // console.log("campaign response", response);
+        // console.log("campaignId from Redux", campaignId); // Access the campaignId from Redux
+
+        // if (campaignId) {
+        //   alert("Campaign is made and ID retrieved from Redux!");
+        // } else {
+        //   alert("Campaign is made, but no ID returned!");
+        // }
+      } else {
+        alert("Please upload a contact list");
+      }
+    } catch (error) {
+      console.error("Error while creating campaign:", error);
+      alert("Failed to create campaign");
+    }
   };
 
   React.useEffect(() => {
-    if (success) navigate("/marketing/dashboard");
+    if (success) navigate("/marketing/whatsapp-dash");
   }, [success, navigate]);
 
   const handleGoWizard = () => {
@@ -148,7 +203,6 @@ const WhatsappCampaign: React.FC = () => {
                     onClick={() =>
                       handleModeChange(m as "Text" | "Image" | "Template")
                     }
-                  
                     className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${
                       mode === m ? "bg-purple-200" : "bg-white"
                     }`}
@@ -233,7 +287,7 @@ const WhatsappCampaign: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-2.5 items-start mt-2.5 w-full">
-              <div className="flex flex-1 shrink justify-between items-center p-2.5 text-base leading-loose whitespace-nowrap rounded-xl basis-0 bg-slate-500 bg-opacity-10 min-w-[240px] text-zinc-400">
+              {/* <div className="flex flex-1 shrink justify-between items-center p-2.5 text-base leading-loose whitespace-nowrap rounded-xl basis-0 bg-slate-500 bg-opacity-10 min-w-[240px] text-zinc-400">
                 <div className="flex flex-1 shrink gap-6 items-center self-stretch my-auto w-full basis-0">
                   <div className="flex-1 shrink self-stretch my-auto basis-0 rotate-[2.4492937051703357e-16rad]">
                     Select
@@ -244,7 +298,7 @@ const WhatsappCampaign: React.FC = () => {
                     className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square"
                   />
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
                 <input
@@ -263,7 +317,9 @@ const WhatsappCampaign: React.FC = () => {
                     alt="Upload icon"
                     className="w-6 aspect-square"
                   />
-                  <span className="ml-2 text-zinc-400">Upload</span>
+                  <span className="ml-2 text-zinc-400">
+                    {fileName || "Upload"}{" "}
+                  </span>
                 </label>
               </div>
             </div>
@@ -277,7 +333,7 @@ const WhatsappCampaign: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-2.5 items-start mt-2.5 w-full">
-              <div className="flex flex-1 shrink justify-between items-center p-2.5 text-base leading-loose whitespace-nowrap rounded-xl basis-0 bg-slate-500 bg-opacity-10 min-w-[240px] text-zinc-400">
+              {/* <div className="flex flex-1 shrink justify-between items-center p-2.5 text-base leading-loose whitespace-nowrap rounded-xl basis-0 bg-slate-500 bg-opacity-10 min-w-[240px] text-zinc-400">
                 <div className="flex flex-1 shrink gap-6 items-center self-stretch my-auto w-full basis-0">
                   <div className="flex-1 shrink self-stretch my-auto basis-0 rotate-[2.4492937051703357e-16rad]">
                     Select
@@ -288,7 +344,7 @@ const WhatsappCampaign: React.FC = () => {
                     className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square"
                   />
                 </div>
-              </div>
+              </div> */}
               <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
                 <input
                   type="file"
@@ -306,7 +362,9 @@ const WhatsappCampaign: React.FC = () => {
                     alt="Upload icon"
                     className="w-6 aspect-square"
                   />
-                  <span className="ml-2 text-zinc-400">Upload</span>
+                  <span className="ml-2 text-zinc-400">
+                    {fileName || "Upload"}{" "}
+                  </span>
                 </label>
               </div>
             </div>
@@ -366,5 +424,3 @@ const WhatsappCampaign: React.FC = () => {
 };
 
 export default WhatsappCampaign;
-
-

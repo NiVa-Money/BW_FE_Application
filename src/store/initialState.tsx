@@ -13,5 +13,6 @@ export const initialState: any = {
       loading: false,
       success: false,
       error: null,
+      // campaignId: "",
    },
 }
