@@ -8,6 +8,7 @@ const sagaMiddleware = createSagaMiddleware();
 const rootReducer = {
   bot: botProfileReducers,
   whatsappCampaign: whatsappCampaignReducer,
+  
 };
 
 const store = configureStore({

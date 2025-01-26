@@ -1,11 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import Modal from "./IntegrationModal";
-import { saveWhatsapp } from "../../../store/actions/integrationActions";
+import { useDispatch } from "react-redux";
 
-const WhatsAppIntegration: React.FC = () => {
+import {
+  deleteWhatsappRequest,
+  updateWhatsappRequest,
+} from "../../../store/actions/integrationActions";
+
+const ConfirmationModal: React.FC<{ onCancel: () => void; onConfirm: () => void }> = ({ onCancel, onConfirm }) => (
+  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-lg shadow-lg">
+      <h3 className="text-xl font-semibold mb-4">Are you sure you want to delete?</h3>
+      <div className="flex justify-between">
+        <button onClick={onCancel} className="bg-gray-500 text-white px-4 py-2 rounded-lg">
+          Cancel
+        </button>
+        <button onClick={onConfirm} className="bg-red-600 text-white px-4 py-2 rounded-lg">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+const CrudIntegration: React.FC = () => {
   const [formData, setFormData] = useState({
     botId: "bot-id",
     appId: "",
@@ -16,29 +35,24 @@ const WhatsAppIntegration: React.FC = () => {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
 
   const dispatch = useDispatch();
-  const { secretToken, webhookUrl } = useSelector(
-    (state: any) => state.integration
-  ) || { secretToken: "", webhookUrl: "" };
 
-  console.log("secret token", secretToken);
-  console.log("webookurl", webhookUrl);
+  const handleUpdate = () => {
+    const dataToUpdate = {
+      botId: "bot-id",
+      appId: 1045402123499321,
+      phoneNumberId: 351283614741019,
+      whatsappBusinessAccountId: 378218768701741,
+      phoneNumber: "+91 9361616047",
+      accessToken: "your-access-token",
+    };
+    dispatch(updateWhatsappRequest(dataToUpdate)); // Dispatch update action
+  };
 
-  const handleSubmit = async () => {
-    const { phoneNumber, appId, accessToken } = formData;
-
-    if (!phoneNumber || !appId || !accessToken) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-
-    try {
-      dispatch(saveWhatsapp(formData)); // Trigger API call
-      setIsModalOpen(true); // Open modal on success
-    } catch (error) {
-      console.error("Error saving WhatsApp data:", error);
-    }
+  const handleDelete = (id: string) => {
+    dispatch(deleteWhatsappRequest(id)); // Dispatch delete action
   };
 
   return (
@@ -57,10 +71,16 @@ const WhatsAppIntegration: React.FC = () => {
             </div>
 
             <button
-              onClick={handleSubmit}
-              className="bg-[#65558F] w-[200px] text-white px-6 py-3 rounded-3xl font-semibold hover:bg-[#65558F]/85"
+              onClick={handleUpdate}
+              className="bg-[#65558F] w-[200px] ml-44 text-white px-6 py-3 rounded-3xl font-semibold hover:bg-[#65558F]/85"
             >
-              Done
+              Edit
+            </button>
+            <button
+              onClick={() => handleDelete("integration-id")}
+              className="bg-[#E53E3E] w-[200px] text-white px-6 py-3 rounded-3xl font-semibold hover:bg-[#E53E3E]/85"
+            >
+              Delete
             </button>
           </div>
 
@@ -172,14 +192,15 @@ const WhatsAppIntegration: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal for Secret Token and Webhook URL */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        data={{ secretToken, webhookUrl }}
-      />
+      {/* Delete Confirmation Modal */}
+      {isDeleteConfirm && (
+        <ConfirmationModal
+          onCancel={() => setIsDeleteConfirm(false)}
+          onConfirm={() => handleDelete("integration-id")}
+        />
+      )}
     </div>
   );
 };
 
-export default WhatsAppIntegration;
+export default CrudIntegration;

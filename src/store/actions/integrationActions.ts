@@ -1,17 +1,60 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SAVE_WHATSAPPINT, SAVE_WHATSAPPINT_SUCCESS, SAVE_WHATSAPPINT_FAILURE } from "../actionTypes/integrationActionTypes";
+import {
+  SAVE_WHATSAPPINT,
+  SAVE_WHATSAPPINT_SUCCESS,
+  SAVE_WHATSAPPINT_FAILURE,
+  DELETE_WHATSAPP_FAILURE,
+  DELETE_WHATSAPP_REQUEST,
+  DELETE_WHATSAPP_SUCCESS,
+  UPDATE_WHATSAPP_FAILURE,
+  UPDATE_WHATSAPP_REQUEST,
+  UPDATE_WHATSAPP_SUCCESS,
+} from "../actionTypes/integrationActionTypes";
 
-export const saveWhatsapp = (data: any) => ({
-    type: SAVE_WHATSAPPINT,
-    payload: data,
-  });
-  
-  export const saveWhatsappSuccess = (response: any) => ({
-    type: SAVE_WHATSAPPINT_SUCCESS,
-    payload: response,
-  });
-  
-  export const saveWhatsappFailure = (error: any) => ({
-    type: SAVE_WHATSAPPINT_FAILURE,
-    payload: error,
-  });
+export const saveWhatsapp = (payload: any) => ({
+  type: SAVE_WHATSAPPINT,
+  payload,
+});
+
+export const saveWhatsappSuccess = (payload: {
+  secretToken: string;
+  webhookUrl: string;
+}) => ({
+  type: SAVE_WHATSAPPINT_SUCCESS,
+  payload,
+});
+
+export const saveWhatsappFailure = (error: string) => ({
+  type: SAVE_WHATSAPPINT_FAILURE,
+  payload: error,
+});
+
+export const updateWhatsappRequest = (data: any) => ({
+  type: UPDATE_WHATSAPP_REQUEST,
+  payload: data,
+});
+
+export const deleteWhatsappRequest = (id: string) => ({
+  type: DELETE_WHATSAPP_REQUEST,
+  payload: { id },
+});
+
+export const updateWhatsappSuccess = (data: any) => ({
+  type: UPDATE_WHATSAPP_SUCCESS,
+  payload: data,
+});
+
+export const updateWhatsappFailure = (error: any) => ({
+  type: UPDATE_WHATSAPP_FAILURE,
+  payload: error,
+});
+
+export const deleteWhatsappSuccess = (data: any) => ({
+  type: DELETE_WHATSAPP_SUCCESS,
+  payload: data,
+});
+
+export const deleteWhatsappFailure = (error: any) => ({
+  type: DELETE_WHATSAPP_FAILURE,
+  payload: error,
+});

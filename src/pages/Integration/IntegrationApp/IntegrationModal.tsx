@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -15,10 +15,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50">
       <div className="bg-white p-8 rounded-lg w-96">
-        <h3 className="text-xl font-semibold mb-4">Token and Webhook Information</h3>
+        <h3 className="text-xl font-semibold mb-4">
+          Token and Webhook Information
+        </h3>
 
         <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Secret Token</label>
+          <label className="block text-gray-700 font-medium mb-2">
+            Secret Token
+          </label>
           <input
             type="text"
             value={data.secretToken}
@@ -28,7 +32,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">BotWot Webhook URL</label>
+          <label className="block text-gray-700 font-medium mb-2">
+            BotWot Webhook URL
+          </label>
           <input
             type="text"
             value={data.webhookUrl}

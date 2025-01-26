@@ -1,27 +1,54 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  SAVE_WHATSAPPINT,
-  SAVE_WHATSAPPINT_SUCCESS,
-  SAVE_WHATSAPPINT_FAILURE,
-} from "../actionTypes/integrationActionTypes";
 
-const initialState = {
-  loading: false,
-  data: null,
-  error: null,
-};
+import { UPDATE_WHATSAPP_REQUEST, DELETE_WHATSAPP_REQUEST, UPDATE_WHATSAPP_SUCCESS, DELETE_WHATSAPP_SUCCESS, UPDATE_WHATSAPP_FAILURE, DELETE_WHATSAPP_FAILURE } from "../actionTypes/integrationActionTypes";
+import { initialState } from "../initialState";
 
-const whatsappReducer = (state = initialState, action: { type: any; payload: any; }) => {
+export const integrationReducer = (
+  state = initialState.whatsappIntegration,
+  action: any
+) => {
   switch (action.type) {
-    case SAVE_WHATSAPPINT:
-      return { ...state, loading: true };
-    case SAVE_WHATSAPPINT_SUCCESS:
-      return { ...state, loading: false, data: action.payload };
-    case SAVE_WHATSAPPINT_FAILURE:
-      return { ...state, loading: false, error: action.payload };
+    case "SAVE_WHATSAPPINT_SUCCESS":
+      return {
+        ...state,
+        secretToken: action.payload.secretToken,
+        webhookUrl: action.payload.webhookUrl,
+        error: null,
+      };
+
+    case "SAVE_WHATSAPPINT_FAILURE":
+      return {
+        ...state,
+        error: action.payload,
+      };
+
     default:
       return state;
   }
 };
 
-export default whatsappReducer;
+interface WhatsappState {
+  loading: boolean;
+  error: string | null;
+  data: any | null;
+}
+
+export const whatsappcrudReducer = (
+  state = initialState.crudIntegration,
+  action: any
+): WhatsappState => {
+  switch (action.type) {
+    case UPDATE_WHATSAPP_REQUEST:
+    case DELETE_WHATSAPP_REQUEST:
+      return { ...state, loading: true, error: null };
+    case UPDATE_WHATSAPP_SUCCESS:
+      return { ...state, loading: false, data: action.payload };
+    case DELETE_WHATSAPP_SUCCESS:
+      return { ...state, loading: false, data: null };
+    case UPDATE_WHATSAPP_FAILURE:
+    case DELETE_WHATSAPP_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
