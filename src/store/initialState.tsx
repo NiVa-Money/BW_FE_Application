@@ -21,9 +21,11 @@ export const initialState: any = {
     error: null,
   },
 
-  crudIntegration: {
-    loading: false,
-    error: null,
-    data: null,
+  integration: {
+    crudIntegration: {
+      loading: false,
+      data: null,
+      error: null,
+    },
   },
 };

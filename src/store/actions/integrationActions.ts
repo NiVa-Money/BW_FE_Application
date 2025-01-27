@@ -9,6 +9,9 @@ import {
   UPDATE_WHATSAPP_FAILURE,
   UPDATE_WHATSAPP_REQUEST,
   UPDATE_WHATSAPP_SUCCESS,
+  GET_WHATSAPP_FAILURE,
+  GET_WHATSAPP_REQUEST,
+  GET_WHATSAPP_SUCCESS,
 } from "../actionTypes/integrationActionTypes";
 
 export const saveWhatsapp = (payload: any) => ({
@@ -56,5 +59,21 @@ export const deleteWhatsappSuccess = (data: any) => ({
 
 export const deleteWhatsappFailure = (error: any) => ({
   type: DELETE_WHATSAPP_FAILURE,
+  payload: error,
+});
+
+
+export const getWhatsappRequest = (botId: string) => ({
+  type: GET_WHATSAPP_REQUEST,
+  payload: botId,
+});
+
+export const getWhatsappSuccess = (data: any) => ({
+  type: GET_WHATSAPP_SUCCESS,
+  payload: data,
+});
+
+export const getWhatsappFailure = (error: string) => ({
+  type: GET_WHATSAPP_FAILURE,
   payload: error,
 });

@@ -19,3 +19,11 @@ export const deleteWhatsappService = async (id: string) => {
   const response = await axiosInstance.delete(`/whatsapp/delete?id=${id}`);
   return response.data;
 };
+
+
+export const fetchWhatsappData = async (botId: string) => {
+  const response = await axiosInstance.get(`/whatsapp/get`, {
+    params: { botId },
+  });
+  return response.data;
+};

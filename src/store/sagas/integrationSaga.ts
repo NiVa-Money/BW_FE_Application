@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { call, put } from 'redux-saga/effects';
-import { deleteWhatsappService, saveWhatsappService, updateWhatsappService } from '../../api/services/integrationServices';
-import { saveWhatsappSuccess, saveWhatsappFailure, deleteWhatsappFailure, deleteWhatsappSuccess, updateWhatsappFailure, updateWhatsappSuccess } from '../actions/integrationActions';
+import { deleteWhatsappService, fetchWhatsappData, saveWhatsappService, updateWhatsappService } from '../../api/services/integrationServices';
+import { saveWhatsappSuccess, saveWhatsappFailure, deleteWhatsappFailure, deleteWhatsappSuccess, updateWhatsappFailure, updateWhatsappSuccess, getWhatsappFailure, getWhatsappSuccess } from '../actions/integrationActions';
 
 
 import { SagaIterator } from 'redux-saga';
@@ -50,6 +50,20 @@ export function* deleteWhatsappSaga(action: any): SagaIterator {
       yield put(deleteWhatsappFailure((error as any).response ? (error as any).response.data : error.message));  // Dispatch failure action
     } else {
       yield put(deleteWhatsappFailure('An unknown error occurred'));  // Dispatch failure action
+    }
+  }
+}
+
+
+export function* getWhatsappSaga(action: { payload: string }): any {
+  try {
+    const response = yield call(fetchWhatsappData, action.payload);
+    yield put(getWhatsappSuccess(response));
+  } catch (error) {
+    if (error instanceof Error) {
+      yield put(getWhatsappFailure(error.message));
+    } else {
+      yield put(getWhatsappFailure("An unknown error occurred"));
     }
   }
 }
