@@ -6,19 +6,20 @@ export const initialState: any = {
   bot: {
     create: {
       data: null,
-         loader: false
-      },
-      edit: {
-         data: null,
-         loader: false
-      },
-      delete: {
-         data: null,
-         loader: false
-      },
-      lists: {
-        data: null,
-        loader: false },
+      loader: false,
+    },
+    edit: {
+      data: null,
+      loader: false,
+    },
+    delete: {
+      data: null,
+      loader: false,
+    },
+    lists: {
+      data: null,
+      loader: false,
+    },
   },
   whatsappCampaign: {
     loading: false,
