@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "../axiosConfig";
 import axios from "axios";
 
@@ -65,5 +66,28 @@ export const WhatsAppDashboardService = async (campaignId: string) => {
       console.error("Unexpected error:", error);
     }
     throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+
+export const fetchWhatsAppTemplatesService = async (integrationId: any) => {
+  try {
+    const response = await axiosInstance.get(
+      `/whatsapp/template?integrationId=${integrationId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching WhatsApp templates:', error);
+    throw error;
+  }
+};
+
+export const createWhatsAppTemplateService = async (templateData: any) => {
+  try {
+    const response = await axiosInstance.post('/whatsapp/template', templateData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating WhatsApp template:', error);
+    throw error;
   }
 };

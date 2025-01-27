@@ -262,11 +262,15 @@ const CrudIntegration: React.FC = () => {
   const { loading, data, error } = useSelector((state: any) => state.integration?.crudIntegration || {});
 
 
+  const secretToken = useSelector((state: any) => state.integration?.secretToken);
   // Fetch WhatsApp data when the component mounts
   useEffect(() => {
+    console.log('dispatching getWhatsappRequest');
     if (botId) {
       console.log('botId', botId);
       dispatch(getWhatsappRequest(botId));
+    } else {
+      console.log('no botId');
     }
   }, [dispatch, botId]);
 
@@ -289,7 +293,9 @@ const CrudIntegration: React.FC = () => {
   };
 
   const handleDelete = () => {
-    dispatch(deleteWhatsappRequest(botId)); // Dispatch delete action
+    if (secretToken) {
+      dispatch(deleteWhatsappRequest(secretToken)); // Use secretToken as the ID
+    }
   };
 
   return (

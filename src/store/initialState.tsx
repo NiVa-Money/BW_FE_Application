@@ -28,4 +28,11 @@ export const initialState: any = {
       error: null,
     },
   },
+
+  whatsappTemplates: {
+    loading: false,
+    templates: [],
+    error: null,
+    success: false,
+  },
 };
