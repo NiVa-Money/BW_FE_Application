@@ -10,11 +10,12 @@ import MarketingDash from "../pages/Marketing/Dashboard";
 import WhatsApp from "../pages/Marketing/Whatsapp";
 import EngagementTab from "../pages/Engagement";
 import IntegrationTab from "../pages/Integration";
+import { Navigate } from "react-router-dom";
 
 const MODULE_MAP = {
   "/dashboard": 1,
-  "/engagement" : 2, 
-  "/chatBot": 5,
+  // "/engagement" : 2, 
+  "/chatBot": 2,
   "/adminPanel": 9,
   "/Integration": 8,
   "/IntegrationApp": 5.1,
@@ -56,29 +57,107 @@ const ProtectedRoute: React.FC<{ route: RouteType }> = ({ route }) => {
   return <>{route.component}</>;
 };
 
+// // Updated routes with protection
+// export const authProtectedRoutes: RouteType[] = [
+//   { 
+//     path: "/dashboard", 
+//     component: <ProtectedRoute route={{ path: "/dashboard", component: <Dashboard /> }} />
+//   },
+//   { 
+//     path: "/chatBot", 
+//     component: <ProtectedRoute route={{ path: "/chatBot", component: <AreaChartHero/> }} />
+//   },
+//   { 
+//     path: "/adminPanel", 
+//     component: <ProtectedRoute route={{ path: "/adminPanel", component: <AdminPanel /> }} />
+//   },
+//   { 
+//     path: "/Integration", 
+//     component: <ProtectedRoute route={{ path: "/Integration", component: <IntegrationTab /> }} />
+//   },
+//   { 
+//     path: "/Integration/IntegrationApp", 
+//     component: <ProtectedRoute route={{ path: "/Integration", component: <WhatsAppIntegration /> }} />
+//   },
+
+// ];
+
 // Updated routes with protection
 export const authProtectedRoutes: RouteType[] = [
-  { 
-    path: "/dashboard", 
-    component: <ProtectedRoute route={{ path: "/dashboard", component: <Dashboard /> }} />
+  {
+    path: "/dashboard",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/dashboard", component: <Dashboard /> }}
+      />
+    ),
   },
-  { 
-    path: "/chatBot", 
-    component: <ProtectedRoute route={{ path: "/chatBot", component: <AreaChartHero/> }} />
+  {
+    path: "/engagement",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/engagement", component: <EngagementTab /> }}
+      />
+    ),
   },
-  { 
-    path: "/adminPanel", 
-    component: <ProtectedRoute route={{ path: "/adminPanel", component: <AdminPanel /> }} />
+  {
+    path: "/chatBot",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/chatBot", component: <AreaChartHero /> }}
+      />
+    ),
   },
-  { 
-    path: "/Integration", 
-    component: <ProtectedRoute route={{ path: "/Integration", component: <IntegrationsPage /> }} />
+  {
+    path: "/adminPanel",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/adminPanel", component: <AdminPanel /> }}
+      />
+    ),
   },
-  { 
-    path: "/Integration/IntegrationApp", 
-    component: <ProtectedRoute route={{ path: "/Integration", component: <WhatsAppIntegration /> }} />
+  {
+    path: "/marketing/campaign",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/campaign", component: <Campaign /> }}
+      />
+    ),
+  },
+  {
+    path: "/marketing/dashboard",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/dashboard", component: <MarketingDash /> }}
+      />
+    ),
+  },
+  
+  {
+    path: "/marketing/whatsapp-dash",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/whatsapp-dash", component: <WhatsApp /> }}
+      />
+    ),
   },
 
+  {
+    path: "/Integration",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/Integration", component: <IntegrationTab /> }}
+      />
+    ),
+  },
+  {
+    path: "/Integration/IntegrationApp",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/Integration", component: <WhatsAppIntegration /> }}
+      />
+    ),
+  },
 ];
 
 export const publicRoutes: RouteType[] = [
