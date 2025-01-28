@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import MyBotCard from './MyBotCard';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteBotAction, getBotsAction } from '../../store/actions/botActions';
+import { deleteBotAction, getBotsAction, resetBotAction } from '../../store/actions/botActions';
 import { RootState } from '../../store';
 import { formatDateString } from '../../hooks/functions';
 import { useNavigate } from 'react-router-dom';
@@ -75,6 +75,11 @@ const MyBots: React.FC = () => {
             }
         }, [userId])
 
+        useEffect(() => {
+            dispatch(resetBotAction('create'))
+            dispatch(resetBotAction('delete'))
+
+        }, [])
 
 
         return (

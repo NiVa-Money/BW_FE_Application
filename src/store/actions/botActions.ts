@@ -3,6 +3,7 @@ import {
   DELETE_BOT,
   EDIT_BOT,
   GET_BOTS,
+  RESET_SPECIFIC_STATE,
 } from "../actionTypes/botActionsTypes";
 
 export const createBotAction = (payload: any) => ({
@@ -21,4 +22,8 @@ export const deleteBotAction = (payload: any) => ({
 export const getBotsAction = (payload: any) => ({
   type: GET_BOTS,
   payload,
+});
+export const resetBotAction = (state: any) => ({
+  type: RESET_SPECIFIC_STATE,
+  state,
 });
