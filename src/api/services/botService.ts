@@ -1,5 +1,3 @@
-import { toast } from "react-toastify";
-import { notifyError, notifySuccess } from "../../components/Toast";
 import axiosInstance from "../axiosConfig";
 
 export const createBotProfileService = async (payload: any) => {

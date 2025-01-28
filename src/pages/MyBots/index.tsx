@@ -23,6 +23,7 @@ const MyBots: React.FC = () => {
 
     const userId: string = localStorage.getItem("user_id");
 
+
     const navigate = useNavigate();
     const botsDataLoader = useSelector(
         (state: RootState) => state.bot?.lists?.loader
@@ -34,83 +35,82 @@ const MyBots: React.FC = () => {
             userId: userId
         })
 
-        console.log('Delete action triggered!');
-    };
-    const handleEdit = (id: string) => {
-        navigate(`/editbot/:${id}`)
-        console.log('Delete action triggered!', id);
-    };
 
-    const handleExport = () => {
-        console.log('Export action triggered!');
-    };
-    const createBotHandler = () => {
-        navigate('/createbot')
-    }
-    const handleClose = () => setIsModalOpen(false);
-    const handleDelete = () => {
-        dispatch(deleteBotAction(payloadDelete))
+        const handleEdit = (id: string) => {
+            navigate(`/editbot/:${id}`)
+            console.log('Delete action triggered!', id);
+        };
 
-        console.log("Bot deleted!");
-        setIsModalOpen(false);
-    };
-    useEffect(() => {
-        if (deleteBotDataRedux !== null) {
-            const success = deleteBotDataRedux?.success
-            if (success) {
+        const handleExport = () => {
+            console.log('Export action triggered!');
+        };
+        const createBotHandler = () => {
+            navigate('/createbot')
+        }
+        const handleClose = () => setIsModalOpen(false);
+        const handleDelete = () => {
+            dispatch(deleteBotAction(payloadDelete))
+
+            console.log("Bot deleted!");
+            setIsModalOpen(false);
+        };
+        useEffect(() => {
+            if (deleteBotDataRedux !== null) {
+                const success = deleteBotDataRedux?.success
+                if (success) {
+                    dispatch(getBotsAction(userId))
+                }
+
+            }
+        }, [deleteBotDataRedux])
+        useEffect(() => {
+            if (botsDataRedux?.length) {
+                setbotLists(botsDataRedux)
+            }
+        }, [botsDataRedux, botsDataLoader])
+
+        useEffect(() => {
+            if (userId?.length) {
                 dispatch(getBotsAction(userId))
             }
-
-        }
-    }, [deleteBotDataRedux])
-    useEffect(() => {
-        if (botsDataRedux?.length) {
-            setbotLists(botsDataRedux)
-        }
-    }, [botsDataRedux, botsDataLoader])
-
-    useEffect(() => {
-        if (userId?.length) {
-            dispatch(getBotsAction(userId))
-        }
-    }, [userId])
+        }, [userId])
 
 
 
-    return (
-        <div className='flex flex-col w-[100%]'>
-            <button className='self-end bg-[#65558F] text-white p-1 w-[160px] rounded-[100px] mb-2' onClick={createBotHandler}>Create Bot</button>
+        return (
+            <div className='flex flex-col w-[100%]'>
+                <button className='self-end bg-[#65558F] text-white p-1 w-[160px] rounded-[100px] mb-2' onClick={createBotHandler}>Create Bot</button>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {botLists.map((item: any) => (
-                    <div
-                        key={item._id} // Always add a key prop when mapping arrays
-                        className="m-[15px] max-w-[50%] min-w-[300px] w-[40%] mx-auto my-0 flex justify-center items-center"
-                    >
-                        <MyBotCard
-                            name={item?.botName}
-                            description={item?.botIdentity}
-                            tone={item?.botTone}
-                            fileName={item?.docName}
-                            color={item?.botColor}
-                            createdAt={formatDateString(item?.createdAt)}
-                            onDelete={() => handleOpen(item._id)}
-                            onExport={handleExport}
-                            onClick={() => handleEdit(item._id)}
-                        />
-                    </div>
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {botLists.map((item: any) => (
+                        <div
+                            key={item._id} // Always add a key prop when mapping arrays
+                            className="m-[15px] max-w-[50%] min-w-[300px] w-[40%] mx-auto my-0 flex justify-center items-center"
+                        >
+                            <MyBotCard
+                                name={item?.botName}
+                                description={item?.botIdentity}
+                                tone={item?.botTone}
+                                fileName={item?.docName}
+                                color={item?.botColor}
+                                createdAt={formatDateString(item?.createdAt)}
+                                onDelete={() => handleOpen(item._id)}
+                                onExport={handleExport}
+                                onClick={() => handleEdit(item._id)}
+                            />
+                        </div>
+                    ))}
 
 
 
+                </div>
+                <DeleteConfirmationModal open={isModalOpen}
+                    onClose={handleClose}
+                    onDelete={handleDelete} />
             </div>
-            <DeleteConfirmationModal open={isModalOpen}
-                onClose={handleClose}
-                onDelete={handleDelete} />
-        </div>
 
 
-    );
-};
+        );
+    };
 
-export default MyBots;
+    export default MyBots;
