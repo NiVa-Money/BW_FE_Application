@@ -4,15 +4,25 @@ import Dashboard from "../pages/Dashboard";
 import AdminPanel from "../pages/AdminPanel";
 import CreateBot from "../pages/CreateBot";
 import { AreaChartHero } from "../pages/MyChatBot";
-import IntegrationsPage from "../pages/Integration";
 import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
-const MODULE_MAP = {
-  '/dashboard': 1,
-  '/chatBot': 2,
-  '/adminPanel': 9,
-  "/Integration": 5,
-  "/IntegrationApp": 5.1,
+import Campaign from "../pages/Marketing/Campaign";
+import MarketingDash from "../pages/Marketing/Dashboard";
+import WhatsApp from "../pages/Marketing/Whatsapp";
+import EngagementTab from "../pages/Engagement";
+import IntegrationTab from "../pages/Integration";
+import { Navigate } from "react-router-dom";
 
+const MODULE_MAP = {
+  "/dashboard": 1,
+  "/engagement": 2,
+  "/chatBot": 5,
+  "/adminPanel": 9,
+  "/Integration": 8,
+  "/IntegrationApp": 5.1,
+  "/marketing/campaign": 6,
+  "/marketing/dashboard": 6.1,
+  "/marketing/campaign-template": 6.2,
+  "/marketing/whatsapp-dash": 7,
 };
 
 interface RouteType {
@@ -21,41 +31,121 @@ interface RouteType {
   exact?: boolean;
 }
 
+// ProtectedRoute component that checks module access
+// eslint-disable-next-line react-refresh/only-export-components
+const ProtectedRoute: React.FC<{ route: RouteType }> = ({ route }) => {
+  const checkModuleAccess = (path: string): boolean => {
+    try {
+      const moduleMapString = localStorage.getItem("moduleMap");
+      if (!moduleMapString) return false;
 
+      const moduleMap = JSON.parse(moduleMapString);
+      const requiredModule = MODULE_MAP[path as keyof typeof MODULE_MAP];
+
+      return moduleMap.includes(requiredModule);
+    } catch (error) {
+      console.error("Error checking module access:", error);
+      return false;
+    }
+  };
+
+  const hasAccess = checkModuleAccess(route.path);
+
+  if (!hasAccess) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{route.component}</>;
+};
+
+// Updated routes with protection
 export const authProtectedRoutes: RouteType[] = [
   {
     path: "/dashboard",
-    component: <Dashboard />
+    component: <Dashboard />,
   },
+
   {
     path: "/chatBot",
-    component: <AreaChartHero />
+    component: <AreaChartHero />,
   },
   {
     path: "/adminPanel",
-    component: <AdminPanel />
+    component: <AdminPanel />,
   },
   {
     path: "/Integration",
-    component: <IntegrationsPage />
+    component: <IntegrationTab />,
+  },
+  {
+    path: "/engagement",
+    component: <EngagementTab />,
+  },
+  {
+    path: "/marketing/campaign",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/campaign", component: <Campaign /> }}
+      />
+    ),
+  },
+  {
+    path: "/marketing/dashboard",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/dashboard", component: <MarketingDash /> }}
+      />
+    ),
+  },
+
+  {
+    path: "/marketing/whatsapp-dash",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/marketing/whatsapp-dash", component: <WhatsApp /> }}
+      />
+    ),
+  },
+
+  {
+    path: "/Integration",
+    component: (
+      <ProtectedRoute
+        route={{ path: "/Integration", component: <IntegrationTab /> }}
+      />
+    ),
   },
   {
     path: "/Integration/IntegrationApp",
-    component: <WhatsAppIntegration />
+    component: <WhatsAppIntegration />,
   },
-  { path: '/createbot', component: <CreateBot /> }
-
-
+  { path: "/createbot", component: <CreateBot /> },
 ];
 
 export const publicRoutes: RouteType[] = [
   { path: "/login", component: <Login /> },
   { path: "/Signup", component: <SignUp /> },
   { path: "/", component: <Login /> },
+  { path: "/createbot", component: <CreateBot /> },
 ];
 
+export const useModuleAccess = () => {
+  const checkAccess = (path: string): boolean => {
+    try {
+      const moduleMapString = localStorage.getItem("moduleMap");
+      if (!moduleMapString) return false;
 
+      const moduleMap = JSON.parse(moduleMapString);
+      const requiredModule = MODULE_MAP[path as keyof typeof MODULE_MAP];
 
+      return moduleMap.includes(requiredModule);
+    } catch (error) {
+      console.error("Error checking module access:", error);
+      return false;
+    }
+  };
 
+  return { checkAccess };
+};
 
 export default { authProtectedRoutes, publicRoutes };
