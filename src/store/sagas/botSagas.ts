@@ -4,6 +4,8 @@ import {
   CREATE_BOT_SUCCESS,
   DELETE_BOT_FAILURE,
   DELETE_BOT_SUCCESS,
+  EDIT_BOT_FAILURE,
+  EDIT_BOT_SUCCESS,
   GET_BOTS_FAILURE,
   GET_BOTS_SUCCESS,
 } from "../actionTypes/botActionsTypes";
@@ -21,6 +23,7 @@ export function* createBotSaga({
   type: string;
   payload: any;
 }): Generator<any> {
+  console.log("calling create saga");
   try {
     const createBotSuccess = yield call(createBotProfileService, payload);
     yield put({
@@ -44,12 +47,12 @@ export function* editBotSaga({
   try {
     const createBotSuccess = yield call(editBotProfileService, payload);
     yield put({
-      type: CREATE_BOT_SUCCESS,
+      type: EDIT_BOT_SUCCESS,
       payload: createBotSuccess,
     });
   } catch (error: any) {
     yield put({
-      type: CREATE_BOT_FAILURE,
+      type: EDIT_BOT_FAILURE,
       payload: false,
     });
   }
@@ -82,9 +85,7 @@ export function* getBotsSaga({
   payload: any;
 }): Generator<any> {
   try {
-    console.log("Saga triggered with payload:", payload);
     const getBotsSuccess = yield call(getBotsService, payload);
-    console.log("Service response:", getBotsSuccess);
     yield put({
       type: GET_BOTS_SUCCESS,
       payload: getBotsSuccess,

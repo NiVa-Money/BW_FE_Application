@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Formik, Field, Form, ErrorMessage } from 'formik';
+import { Formik, Field, Form } from 'formik';
 import * as Yup from 'yup';
 import { HexColorPicker } from 'react-colorful';
 import FilePresentIcon from '@mui/icons-material/FilePresent';
@@ -14,9 +14,9 @@ import { THEME } from '../../enums';
 import FormikFieldSelectComponent from '../../components/FormikFieldSelectDropdownComponent';
 import { useDispatch, useSelector } from 'react-redux';
 import { createBotAction } from '../../store/actions/botActions';
-import ConfirmationModal from '../../components/ConformationMOdal';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../store';
+import ConfirmationModal from '../../components/ConformationModal';
 
 
 const CreateBot: React.FC = () => {
@@ -96,7 +96,8 @@ const CreateBot: React.FC = () => {
     botSmartness: false,
     appoimentLink: ''
 
-  }; const handleSubmit = () => {
+  };
+  const handleSubmit = () => {
     // Handle form submission logic here
     const formData = new FormData();
     const imageFile: any = base64Image ? base64Image : selectedFileImage;
@@ -123,15 +124,12 @@ const CreateBot: React.FC = () => {
     for (let [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }
-    console.log(dispatch(createBotAction(formData)));
+    dispatch(createBotAction(formData))
   };
   const handleColorClick = (color: any) => {
     if (color === 'rainbow') {
-      setColorPicker(true);
-      // setChatColor(color);
       setShowColorPicker(true);
     } else {
-      setColorPicker(false);
       setChatColor(color);
       setShowColorPicker(false);
     }
@@ -523,7 +521,7 @@ const CreateBot: React.FC = () => {
           </Form>
         )}
       </Formik>
-      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={() => navigate('/mybots')} heading={'Congratulations!!!'} subHeading1={`Your Agent M2.0 Is Ready!`} subHeading2={`Your Marketing Agent is ready for action`} bodyText={'Engage with your bot through testing or chatting, or seamlessly integrate {bot name} into your social media platforms.'} />
+      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={() => navigate('/mybots')} heading={'Congratulations!!!'} subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={'Engage with your bot through testing or chatting, or seamlessly integrate {bot name} into your social media platforms.'} />
 
     </div>
 
