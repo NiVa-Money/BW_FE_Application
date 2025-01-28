@@ -1,49 +1,51 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const initialState: any = {
-   chat: {
-      messages: []
-   },
-   bot: {
-      create: {
-         data: null,
-         loader: false
-      },
-      edit: {
-         data: null,
-         loader: false
-      },
-      delete: {
-         data: null,
-         loader: false
-      },
-      lists: {
-         data: null,
-         loader: false
-      }
-   },
-   whatsappCampaign: {
-      loading: false,
-      success: false,
-      error: null,
-      // campaignId: "",
-   },
-   whatsappIntegration: {
-      secretToken: "",
-      webhookUrl: "",
-      error: null,
-   },
+  chat: {
+    messages: [],
+  },
+  bot: {
+    create: {
+      data: null,
+      loader: false,
+    },
+    edit: {
+      data: null,
+      loader: false,
+    },
+    delete: {
+      data: null,
+      loader: false,
+    },
+    lists: {
+      data: null,
+      loader: false,
+    },
+  },
 
-   integration: {
-      crudIntegration: {
-         loading: false,
-         data: null,
-         error: null,
-      },
-   },
+  whatsappCampaign: {
+    loading: false,
+    success: false,
+    error: null,
+    // campaignId: "",
+  },
+  whatsappIntegration: {
+    secretToken: "",
+    webhookUrl: "",
+    error: null,
+  },
 
-   whatsappTemplates: {
+  integration: {
+    crudIntegration: {
       loading: false,
-      templates: [],
+      data: null,
       error: null,
-      success: false,
-   },
-}
+    },
+  },
+
+  whatsappTemplates: {
+    loading: false,
+    templates: [],
+    error: null,
+    success: false,
+  },
+};
