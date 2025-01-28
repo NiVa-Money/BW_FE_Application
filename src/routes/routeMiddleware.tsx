@@ -139,7 +139,12 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
                         <List component="div" disablePadding>
                           {item.subItems.map((subItem: any) => (
                             <ListItem key={subItem.id} button>
-                              <ListItemText primary={subItem.text} />
+                              <NavLink
+                                to={subItem.path}
+
+                              >
+                                {subItem.text}
+                              </NavLink>
                             </ListItem>
                           ))}
                         </List>

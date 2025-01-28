@@ -1,120 +1,137 @@
-'use client'
+import React, { useState } from "react";
+import { integrations } from "./integrations";
+import WhatsAppIntegration from "./IntegrationApp";
+import CrudIntegration from "./IntegrationApp/crudIntegration";
 
-import React, { useState } from 'react'
-import {
-  Box,
-  Container,
-  Grid,
-  TextField,
-  Typography,
-  InputAdornment,
-  IconButton,
-  Avatar,
-  Tab,
-  Tabs,
-  useMediaQuery,
-  ThemeProvider,
-} from '@mui/material'
-import {
-  Search as SearchIcon,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon,
-} from '@mui/icons-material'
-import { theme, darkTheme } from './theme'
-import { IntegrationCard }from './IntegrationCard'
-import { integrations } from './integrations'
-export default function IntegrationsPage() {
-  const [darkMode, setDarkMode] = useState(false)
-  const [tabValue, setTabValue] = useState(0)
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
-  const handleThemeToggle = () => {
-    setDarkMode(!darkMode)
-  }
-
-  return (
-    <ThemeProvider theme={darkMode ? darkTheme : theme}>
-      <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-          <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Box>
-              <Typography variant="h4" component="h1" sx={{ mb: 1, fontWeight: 600 }}>
-                Integrations
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Select and connect tools you use to integrate with your workflow
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <TextField
-                size="small"
-                placeholder="Search"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ width: isMobile ? 150 : 250 }}
-              />
-              <IconButton onClick={handleThemeToggle} size="small">
-                {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
-              </IconButton>
-              <IconButton size="small">
-                <Avatar
-                  src="/placeholder.svg"
-                  sx={{ width: 32, height: 32 }}
-                />
-              </IconButton>
-            </Box>
-          </Box>
-
-          <Box sx={{ mb: 4, borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs
-              value={tabValue}
-              onChange={(_, newValue) => setTabValue(newValue)}
-              variant={isMobile ? 'scrollable' : 'standard'}
-              scrollButtons={isMobile ? 'auto' : false}
-            >
-              <Tab 
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    All Integrations
-                    <Box
-                      component="span"
-                      sx={{
-                        ml: 1,
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 'full',
-                        bgcolor: 'primary.main',
-                        color: 'primary.contrastText',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {integrations.length}
-                    </Box>
-                  </Box>
-                }
-              />
-              <Tab label="Finance" />
-              <Tab label="Communications" />
-              <Tab label="Storage" />
-            </Tabs>
-          </Box>
-
-          <Grid container spacing={2}>
-            {integrations.map((integration) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={integration.name + integration.variant}>
-                <IntegrationCard {...integration} />
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-    </ThemeProvider>
-  )
+interface Integration {
+  icon: string;
+  name: string;
+  description: string;
+  variant: string;
+  connected?: boolean;
 }
 
+const IntegrationTab: React.FC = () => {
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeIntegration, setActiveIntegration] = useState<string | null>(
+    null
+  ); // State to track the active integration
+  const [showCrudIntegration, setShowCrudIntegration] = useState<boolean>(false); // State to show CrudIntegration component
+
+  // Categorize integrations based on their variant
+  const categories = {
+    all: "All Integrations",
+    communications: "Communications",
+    ecommerce: "E-commerce",
+    social: "Social Media",
+  };
+
+  // Map each category to relevant variants
+  const categoryMapping: { [key: string]: string[] } = {
+    all: [],
+    communications: ["slack", "whatsapp", "linkedin"],
+    ecommerce: ["shopify"],
+    social: ["facebook", "instagram", "tiktok", "x"],
+  };
+
+  // Filter integrations based on the active category
+  const filteredIntegrations =
+    activeCategory === "all"
+      ? integrations
+      : integrations.filter((integration) =>
+          categoryMapping[activeCategory]?.includes(integration.variant)
+        );
+
+  const handleConnectClick = (variant: string) => {
+    // Mark integration as connected and navigate to its component
+    if (variant === "whatsapp") {
+      setActiveIntegration("whatsapp"); // Set WhatsAppIntegration as active
+    }
+  };
+
+   // Handle click on Integration Details button
+   const handleIntegrationDetailsClick = () => {
+    setShowCrudIntegration(true); // Show CrudIntegration when the button is clicked
+  };
+
+  // Render integration cards
+  const renderIntegrationCard = (integration: Integration) => (
+    <div
+      key={integration.name}
+      className="flex flex-col items-center justify-between p-4 bg-white rounded-lg border border-solid border-gray-200 shadow-md min-w-[300px] max-w-[350px]"
+    >
+      <img
+        src={integration.icon}
+        alt={`${integration.name} logo`}
+        className="object-contain w-16 h-16"
+      />
+      <div className="mt-4 text-center">
+        <h3 className="text-lg font-semibold text-gray-800">
+          {integration.name}
+        </h3>
+        <p className="mt-2 text-sm text-gray-500">{integration.description}</p>
+      </div>
+      <div className="flex items-center mt-4 gap-2 w-full">
+        <button
+          onClick={() => handleConnectClick(integration.variant)}
+          className={`flex-1 px-4 py-2 text-sm font-medium rounded-full shadow-md transition-all ${
+            integration.connected
+              ? "bg-green-500 text-white hover:bg-green-600"
+              : "bg-[#65558F] text-white hover:bg-[#65558F]/85"
+          }`}
+        >
+          {integration.connected ? "Connected" : "Connect"}
+        </button>
+        <button 
+        onClick={handleIntegrationDetailsClick}
+        className="flex-1 whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200">
+          Integration Details →
+        </button>
+      </div>
+    </div>
+  );
+
+  // Main render
+  return showCrudIntegration ? (
+    // Show CrudIntegration component when state is set
+    <CrudIntegration />
+  ) : activeIntegration === "whatsapp" ? (
+    <WhatsAppIntegration />
+  ) : (
+    <div className="p-6 bg-white min-h-screen">
+      <header className="mb-6">
+        <h1 className="text-4xl font-bold text-gray-800">Integrations</h1>
+        <p className="mt-2 text-xl text-gray-600">
+          Select and connect tools you use to integrate with your workflow
+        </p>
+      </header>
+
+      <div className="flex flex-wrap items-center gap-4 mb-8">
+        {Object.entries(categories).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setActiveCategory(key)}
+            className={`px-4 py-2 text-sm font-medium rounded-full ${
+              activeCategory === key
+                ? "text-white bg-[#65558F]"
+                : "text-gray-700 bg-gray-100 hover:bg-gray-200"
+            }`}
+          >
+            {label}
+            {key === "all" && (
+              <span className="ml-2 bg-white text-gray-700 px-2 py-1 rounded-full">
+                {integrations.length}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {filteredIntegrations.map(renderIntegrationCard)}
+      </div>
+    </div>
+  );
+};
+
+export default IntegrationTab;

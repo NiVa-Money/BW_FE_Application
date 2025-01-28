@@ -112,5 +112,5 @@ const MyBots: React.FC = () => {
 
         );
     };
-
-    export default MyBots;
+}
+export default MyBots;
