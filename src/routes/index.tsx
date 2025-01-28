@@ -6,14 +6,7 @@ import CreateBot from "../pages/CreateBot";
 import { AreaChartHero } from "../pages/MyChatBot";
 import IntegrationsPage from "../pages/Integration";
 import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
-const MODULE_MAP = {
-  '/dashboard': 1,
-  '/chatBot': 2,
-  '/adminPanel': 9,
-  "/Integration": 5,
-  "/IntegrationApp": 5.1,
-
-};
+import MyBots from "../pages/MyBots";
 
 interface RouteType {
   path: string;
@@ -43,7 +36,9 @@ export const authProtectedRoutes: RouteType[] = [
     path: "/Integration/IntegrationApp",
     component: <WhatsAppIntegration />
   },
-  { path: '/createbot', component: <CreateBot /> }
+  { path: '/createbot', component: <CreateBot /> },
+  { path: '/mybots', component: <MyBots /> }
+
 
 
 ];

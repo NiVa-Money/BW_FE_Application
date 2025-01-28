@@ -2,6 +2,8 @@ import { call, put } from "redux-saga/effects";
 import {
   CREATE_BOT_FAILURE,
   CREATE_BOT_SUCCESS,
+  DELETE_BOT_FAILURE,
+  DELETE_BOT_SUCCESS,
   GET_BOTS_FAILURE,
   GET_BOTS_SUCCESS,
 } from "../actionTypes/botActionsTypes";
@@ -62,12 +64,12 @@ export function* deleteBotSaga({
   try {
     const deleteBotSuccess = yield call(deleteBotService, payload);
     yield put({
-      type: CREATE_BOT_SUCCESS,
+      type: DELETE_BOT_SUCCESS,
       payload: deleteBotSuccess,
     });
   } catch (error: any) {
     yield put({
-      type: CREATE_BOT_FAILURE,
+      type: DELETE_BOT_FAILURE,
       payload: false,
     });
   }

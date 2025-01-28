@@ -37,7 +37,7 @@ export const getBotsService = async (payload: any) => {
 };
 export const deleteBotService = async (payload: any) => {
   try {
-    const response = await axiosInstance.get(
+    const response = await axiosInstance.put(
       `user/deleteBotProfile?botId=${payload.botId}&userId=${payload.userId}`,
       {}
     );

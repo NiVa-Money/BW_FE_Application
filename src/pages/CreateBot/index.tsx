@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { HexColorPicker } from 'react-colorful';
@@ -12,8 +12,11 @@ import FormikFieldInputComponent from '../../components/FormikFieldInputComponen
 import { Button } from '@mui/material';
 import { THEME } from '../../enums';
 import FormikFieldSelectComponent from '../../components/FormikFieldSelectDropdownComponent';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createBotAction } from '../../store/actions/botActions';
+import ConfirmationModal from '../../components/ConformationMOdal';
+import { useNavigate } from 'react-router-dom';
+import { RootState } from '../../store';
 
 
 const CreateBot: React.FC = () => {
@@ -27,8 +30,11 @@ const CreateBot: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [base64Image, setBase64Image] = useState('');
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [base64File, setBase64File] = useState('');
+  const createBotDataRedux = useSelector(
+    (state: RootState) => state.bot?.create?.data
+  );
   const [formValues, setFormValues] = useState<any>({
     botName: '',
     theme: '',
@@ -62,7 +68,8 @@ const CreateBot: React.FC = () => {
       imageUrl: `/assets/bot6.svg`,
     },
   ];
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
   const { botName, theme, botTone, greetingMessage, phoneNumber, email, botSmartness, botIdentity, botLimit, appoimentLink, botFont }: any = formValues
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
@@ -71,6 +78,8 @@ const CreateBot: React.FC = () => {
     const file = new File([blob], 'image.jpg', { type: blob.type });
     setSelectedFileImage(file);
   };
+  const userId: string = localStorage.getItem("user_id");
+
   const validationSchema = Yup.object({
     botName: Yup.string().required('BotName is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
@@ -105,7 +114,7 @@ const CreateBot: React.FC = () => {
     formData.append('docName', filename);
     formData.append('docType', filename.length > 0 ? 'pdf' : '');
     formData.append('customBotImage', imageFile);
-    formData.append('userId', '6780152ce269db8d09b78842');
+    formData.append('userId', userId);
     formData.append('file', docFile);
     formData.append('botFont', botFont);
     formData.append('botTheme', theme);
@@ -114,7 +123,7 @@ const CreateBot: React.FC = () => {
     for (let [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }
-    dispatch(createBotAction(formData));
+    console.log(dispatch(createBotAction(formData)));
   };
   const handleColorClick = (color: any) => {
     if (color === 'rainbow') {
@@ -163,12 +172,30 @@ const CreateBot: React.FC = () => {
       event.preventDefault();
     }
 
-    // Optionally, limit the maximum length
-    // const inputElement = event.target as HTMLInputElement;
-    // if (inputElement.value.length >= 10) {
-    //   event.preventDefault();
-    // }
   };
+  useEffect(() => {
+    if (createBotDataRedux !== null) {
+      const success = createBotDataRedux?.success
+      setIsModalOpen(success)
+      setIsModalOpen({
+        botName: '',
+        theme: '',
+        botTone: '',
+        botFont: '',
+        greetingMessage: '',
+        botIdentity: '',
+        botLimit: '',
+        phoneNumber: '',
+        email: '',
+        botSmartness: false,
+        appoimentLink: ''
+      })
+
+    }
+  }, [createBotDataRedux])
+
+  const handleClose = () => setIsModalOpen(false);
+
   return (
     <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
       <Formik
@@ -496,6 +523,8 @@ const CreateBot: React.FC = () => {
           </Form>
         )}
       </Formik>
+      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={() => navigate('/mybots')} heading={'Congratulations!!!'} subHeading1={`Your Agent M2.0 Is Ready!`} subHeading2={`Your Marketing Agent is ready for action`} bodyText={'Engage with your bot through testing or chatting, or seamlessly integrate {bot name} into your social media platforms.'} />
+
     </div>
 
   );

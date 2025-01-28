@@ -83,7 +83,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
                           </div>
                         }
                       />
-                      {item.subItems ? opendropdown[item.id] ? <ExpandLess /> : <ExpandMore /> : null}
+                      {item.subItems?.length ? item.subItems ? opendropdown[item.id] ? <ExpandLess /> : <ExpandMore /> : null : null}
                     </ListItem>
                     {item.subItems && (
                       <Collapse in={opendropdown[item.id]} timeout="auto" unmountOnExit>
@@ -127,7 +127,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
                     >
                       <ListItemText
                         primary={
-                          <div className="flex">
+                          <div className="flex gap-1">
                             {item?.icon ? item.icon : null} {item.text}
                           </div>
                         }
