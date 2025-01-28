@@ -28,13 +28,13 @@ export const sidebarNavLinks = (moduleMapping: []) => {
             ],
         },
         { id: 3, text: "Bot Builder", path: "/createbot" },
-        { id: 4, text: "Engagement Tab", path: "/engagement-tab" },
+        { id: 4, text: "Engagement Tab", path: "/engagementTab" },
         {
             id: 5,
-            text: "Marketing Tab",
+            text: "Marketing",
             subItems: [
-                { id: 5.1, text: "WhatsApp", path: "/marketing-tab/whatsapp" },
-                { id: 5.1, text: "Instagram", path: "/marketing-tab/instagram" },
+                { id: 5.1, text: "Dashboard", path: "/marketing/dashboard" },
+                { id: 5.2, text: "Campaign", path: "/marketing/campaign" },
 
             ],
         },

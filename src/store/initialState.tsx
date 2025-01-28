@@ -19,5 +19,31 @@ export const initialState: any = {
          data: null,
          loader: false
       }
-   }
+   },
+   whatsappCampaign: {
+      loading: false,
+      success: false,
+      error: null,
+      // campaignId: "",
+   },
+   whatsappIntegration: {
+      secretToken: "",
+      webhookUrl: "",
+      error: null,
+   },
+
+   integration: {
+      crudIntegration: {
+         loading: false,
+         data: null,
+         error: null,
+      },
+   },
+
+   whatsappTemplates: {
+      loading: false,
+      templates: [],
+      error: null,
+      success: false,
+   },
 }

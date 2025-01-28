@@ -6,14 +6,11 @@ import CreateBot from "../pages/CreateBot";
 import { AreaChartHero } from "../pages/MyChatBot";
 import IntegrationsPage from "../pages/Integration";
 import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
-const MODULE_MAP = {
-  '/dashboard': 1,
-  '/chatBot': 2,
-  '/adminPanel': 9,
-  "/Integration": 5,
-  "/IntegrationApp": 5.1,
-
-};
+import IntegrationTab from "../pages/Integration";
+import WhatsApp from "../pages/Marketing/Whatsapp";
+import Campaign from "../pages/Marketing/Campaign";
+import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
+import EngagementTab from "../pages/Engagement";
 
 interface RouteType {
   path: string;
@@ -43,7 +40,15 @@ export const authProtectedRoutes: RouteType[] = [
     path: "/Integration/IntegrationApp",
     component: <WhatsAppIntegration />
   },
-  { path: '/createbot', component: <CreateBot /> }
+  { path: '/createbot', component: <CreateBot /> },
+  { path: '/engagementTab', component: <EngagementTab /> },
+
+  { path: "/marketing/dashboard", component: <MarketingDashboard /> },
+  { path: "/marketing/campaign", component: <Campaign /> },
+  { path: "/marketing/whatsappDashboard", component: <WhatsApp /> },
+
+  { path: "/integration", component: <IntegrationTab /> },
+  { path: "/integration/whatsapp", component: <WhatsAppIntegration /> }
 
 
 ];
