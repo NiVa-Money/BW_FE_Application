@@ -31,8 +31,6 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
   const toggleSidebar = () => setOpen(!open);
   const userData = localStorage.getItem("userData") || JSON.stringify({});
   const moduleMapping = JSON.parse(userData).moduleMap
-  console.log('u', moduleMapping)
-  console.log('moduleMapping', moduleMapping ? moduleMapping : [])
   // const moduleMap = JSON.parse(moduleMapString);
   const location = useLocation(); // Get current location
   const userId = localStorage.getItem("user_id"); // Get user_id from localStorage
@@ -42,15 +40,11 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
   useEffect(() => {
-    console.log('m', moduleMapping)
     const data = sidebarNavLinks(moduleMapping);
-    console.log('data', data)
     setMenuItems(data);
 
   }, []);
-  console.log('menuItems', publicRoutes.includes(location.pathname))
   const isAuthRoute = authProtectedRoutes.some((route) => route.path === location.pathname);
-  console.log('isAuthRoute', isAuthRoute)
   return (
     <div style={{ display: "flex" }}>
       {/* Sidebar */}
@@ -83,7 +77,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
                           </div>
                         }
                       />
-                      {item.subItems ? opendropdown[item.id] ? <ExpandLess /> : <ExpandMore /> : null}
+                      {item.subItems?.length ? item.subItems ? opendropdown[item.id] ? <ExpandLess /> : <ExpandMore /> : null : null}
                     </ListItem>
                     {item.subItems && (
                       <Collapse in={opendropdown[item.id]} timeout="auto" unmountOnExit>
@@ -127,7 +121,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
                     >
                       <ListItemText
                         primary={
-                          <div className="flex">
+                          <div className="flex gap-1">
                             {item?.icon ? item.icon : null} {item.text}
                           </div>
                         }

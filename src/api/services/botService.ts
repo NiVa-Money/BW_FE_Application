@@ -1,5 +1,3 @@
-import { toast } from "react-toastify";
-import { notifyError, notifySuccess } from "../../components/Toast";
 import axiosInstance from "../axiosConfig";
 
 export const createBotProfileService = async (payload: any) => {
@@ -37,7 +35,7 @@ export const getBotsService = async (payload: any) => {
 };
 export const deleteBotService = async (payload: any) => {
   try {
-    const response = await axiosInstance.get(
+    const response = await axiosInstance.put(
       `user/deleteBotProfile?botId=${payload.botId}&userId=${payload.userId}`,
       {}
     );

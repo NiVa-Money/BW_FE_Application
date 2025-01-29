@@ -110,7 +110,8 @@ const Dashboard: React.FC = () => {
   ]
 
 
-  const [firstLayerCards,] = useState([
+
+  const [firstLayerCards] = useState([
     { id: 1, title: 'Resolution Rate', value: '50.44%', icon: '📊', height: "100px", width: "200px" },
     { id: 2, title: 'Pending Queries', value: '10', icon: '💰', height: "100px", width: "200px" },
     { id: 3, title: 'AI vs. Human Resolution Rate', value: '45', height: "100px", width: "200px" },

@@ -11,6 +11,7 @@ import {
   DELETE_BOT,
   DELETE_BOT_SUCCESS,
   DELETE_BOT_FAILURE,
+  RESET_SPECIFIC_STATE,
 } from "../actionTypes/botActionsTypes";
 import { initialState } from "../initialState";
 export default function botProfileReducers(
@@ -89,6 +90,11 @@ export default function botProfileReducers(
       return {
         ...state,
         lists: { data: action.payload, loader: false },
+      };
+    case RESET_SPECIFIC_STATE:
+      return {
+        ...state,
+        [action.state]: { data: null, loader: false }, // Reset to initial state
       };
     default:
       return state;

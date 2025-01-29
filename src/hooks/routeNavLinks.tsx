@@ -27,7 +27,7 @@ export const sidebarNavLinks = (moduleMapping: []) => {
                 { id: 2.2, text: "Live Chats", path: "/live-chat/customs" },
             ],
         },
-        { id: 3, text: "Bot Builder", path: "/createbot" },
+        { id: 3, text: "Bot Builder", path: "/mybots" },
         { id: 4, text: "Engagement Tab", path: "/engagementTab" },
         {
             id: 5,

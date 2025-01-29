@@ -51,6 +51,7 @@ const Login = () => {
           const emailverify = await verifyGoogleUserService({ emailId: response?.user?.email });
           if (emailverify.success) {
             localStorage.setItem('user_id', emailverify.user_id)
+            localStorage.setItem('token', emailverify.token)
             try {
               const email: string = response?.user?.email
                 ? encodeURIComponent(response.user.email)

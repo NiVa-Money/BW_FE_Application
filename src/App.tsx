@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { publicRoutes, authProtectedRoutes } from "./routes"; // Import routes configuration
 import RouteMiddleware from "./routes/routeMiddleware";
 import { ReduxProvider } from "./store/redux-provider";
