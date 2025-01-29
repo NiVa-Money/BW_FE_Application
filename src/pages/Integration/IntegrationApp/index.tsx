@@ -18,6 +18,10 @@ const WhatsAppIntegration: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const dispatch = useDispatch();
+
+  const botList =
+    useSelector((state: any) => state.bot?.lists?.data?.botList) || [];
+
   const { secretToken, webhookUrl } = useSelector(
     (state: any) => state.integration
   ) || { secretToken: "", webhookUrl: "" };
@@ -34,6 +38,7 @@ const WhatsAppIntegration: React.FC = () => {
     }
 
     try {
+      console.log("Form Data:", formData);
       dispatch(saveWhatsapp(formData)); // Trigger API call
       setIsModalOpen(true); // Open modal on success
     } catch (error) {
@@ -42,8 +47,8 @@ const WhatsAppIntegration: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="w-full flex justify-center items-center">
+      <div className="w-full mt-12 justify-center items-center">
         {/* Form Container */}
         <div className="rounded-2xl p-8">
           <div className="flex items-center justify-between mb-6">
@@ -114,7 +119,7 @@ const WhatsAppIntegration: React.FC = () => {
 
             <div>
               {/* Bot Dropdown */}
-              <label className="block text-gray-700 font-medium mb-2">
+              {/* <label className="block text-gray-700 font-medium mb-2">
                 Select bot
               </label>
               <select
@@ -124,7 +129,32 @@ const WhatsAppIntegration: React.FC = () => {
                 }
               >
                 <option value="Bot 1">Bot 1</option>
-              </select>
+              </select> */}
+
+              <label className="block text-gray-700 font-medium mb-2">
+                Select bot
+              </label>
+              {botList.length === 0 ? (
+                <button className="bg-[#65558F] text-white p-3 w-full rounded-lg font-semibold hover:bg-[#65558F]/85 transition-colors">
+                  Create Bot
+                </button>
+              ) : (
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                  onChange={(e) =>
+                    setFormData({ ...formData, botId: e.target.value })
+                  }
+                >
+                  <option value="">Select a bot</option>
+                  {botList.map(
+                    (bot: { _id: string | number; botName: string }) => (
+                      <option key={String(bot._id)} value={String(bot._id)}>
+                        {bot.botName}
+                      </option>
+                    )
+                  )}
+                </select>
+              )}
 
               {/* App ID */}
               <label className="block text-gray-700 font-medium mb-2">
