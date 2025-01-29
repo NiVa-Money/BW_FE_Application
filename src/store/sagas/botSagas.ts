@@ -70,6 +70,21 @@ export function* deleteBotSaga({
       type: DELETE_BOT_SUCCESS,
       payload: deleteBotSuccess,
     });
+    try {
+      const userId = localStorage.getItem("user_id");
+      const getBotsSuccess = yield call(getBotsService, userId);
+      yield put({
+        type: GET_BOTS_SUCCESS,
+        payload: getBotsSuccess,
+      });
+    } catch (error: any) {
+      console.error("Error in getBotsSaga:", error);
+
+      yield put({
+        type: GET_BOTS_FAILURE,
+        payload: error.message,
+      });
+    }
   } catch (error: any) {
     yield put({
       type: DELETE_BOT_FAILURE,

@@ -1,4 +1,15 @@
-import SpeedIcon from '@mui/icons-material/Speed';
+import HomeIcon from '@mui/icons-material/Home';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import GroupsIcon from '@mui/icons-material/Groups';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
+import HelpIcon from '@mui/icons-material/Help';
+import SettingsIcon from '@mui/icons-material/Settings';
 const filterMenuItems = (items, allowedIds) =>
     items?.reduce((acc, item) => {
         // If the item has subItems, filter them
@@ -18,20 +29,22 @@ const filterMenuItems = (items, allowedIds) =>
     }, []);
 export const sidebarNavLinks = (moduleMapping: []) => {
     const menuItems = [
-        { id: 1, text: "Dashboard", icon: <SpeedIcon />, path: "/dashboard" },
+        { id: 1, text: "Dashboard", icon: <HomeIcon />, path: "/dashboard" },
         {
             id: 2,
             text: "Conversation",
+            icon: <QuestionAnswerIcon />,
             subItems: [
                 { id: 2.1, text: "All Chats", path: "/live-chat/all-chats" },
                 { id: 2.2, text: "Live Chats", path: "/live-chat/customs" },
             ],
         },
-        { id: 3, text: "Bot Builder", path: "/mybots" },
-        { id: 4, text: "Engagement Tab", path: "/engagementTab" },
+        { id: 3, text: "Bot Builder", path: "/mybots", icon: <SmartToyIcon /> },
+        { id: 4, text: "Engagement Tab", path: "/engagementTab", icon: <GroupsIcon /> },
         {
             id: 5,
             text: "Marketing",
+            icon: <StorefrontIcon />,
             subItems: [
                 { id: 5.1, text: "Dashboard", path: "/marketing/dashboard" },
                 { id: 5.2, text: "Campaign", path: "/marketing/campaign" },
@@ -40,21 +53,23 @@ export const sidebarNavLinks = (moduleMapping: []) => {
         },
         {
             id: 6,
-            text: "Agent Bots",
+            text: "Agents",
+            icon: <SupportAgentIcon />,
             subItems: [
                 { id: 6.1, text: "My Agent Bots", path: "/mybots" },
                 { id: 6.2, text: "Knowledge Base", path: "/marketing-tab/instagram" },
             ],
         },
-        { id: 7, text: "Workflow", icon: <SpeedIcon />, path: "/workflow" },
-        { id: 8, text: "Reports", icon: <SpeedIcon />, path: "/reports" },
-        { id: 9, text: "Subscription", path: "/subscription" },
-        { id: 10, text: "Integrations", icon: <SpeedIcon />, path: "/integrations" },
-        { id: 11, text: "Help Center", icon: <SpeedIcon />, path: "/help-center" },
+        { id: 7, text: "Workflow", icon: <AccountTreeIcon />, path: "/workflow" },
+        { id: 8, text: "Reports", icon: <AssessmentIcon />, path: "/reports" },
+        { id: 9, text: "Subscription", icon: <AttachMoneyIcon />, path: "/subscription" },
+        { id: 10, text: "Integrations", icon: <IntegrationInstructionsIcon />, path: "/integrations" },
+        { id: 11, text: "Help Center", icon: <HelpIcon />, path: "/help-center" },
 
         {
             id: 12,
             text: "Settings",
+            icon: <SettingsIcon />,
             subItems: [
                 { id: 12.1, text: "Organizational Management", path: "/marketing-tab/whatsapp" },
                 { id: 12.2, text: "Roles & User Management", path: "/marketing-tab/instagram" },

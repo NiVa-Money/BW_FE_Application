@@ -74,7 +74,7 @@ const MyBots: React.FC = () => {
     }, [deleteBotDataRedux])
 
     useEffect(() => {
-        if (botsDataRedux?.length) {
+        if (botsDataRedux?.length && !botsDataLoader) {
             setbotLists(botsDataRedux)
         }
 
@@ -101,12 +101,11 @@ const MyBots: React.FC = () => {
 
 
 
-
     return (
         <div className='flex flex-col w-[100%]'>
-            <button className='self-end bg-[#65558F] text-white p-1 w-[160px] rounded-[100px] mb-2' onClick={createBotHandler}>Create Bot</button>
+            <button className='self-end bg-[#65558F] text-white p-1 w-[160px] rounded-[100px] mb-2 mt-4 mr-4' onClick={createBotHandler}>Create Bot</button>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {botLists.map((item: any) => (
+                {botLists?.map((item: any) => (
                     <div
                         key={item._id} // Always add a key prop when mapping arrays
                         className="m-[15px] max-w-[50%] min-w-[300px] w-[40%] mx-auto my-0 flex justify-center items-center"
