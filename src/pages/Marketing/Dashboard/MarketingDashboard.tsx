@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { Card, CardContent, CardHeader, IconButton } from "@mui/material";
@@ -97,6 +97,7 @@ const MarketingDashboard = () => {
   const [newsData, setNewsData] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFetched, setIsFetched] = useState(false);
 
   const fetchInsights = async () => {
     setLoading(true);
@@ -133,8 +134,20 @@ const MarketingDashboard = () => {
     }
   };
 
+  // useEffect(() => {
+  //   if (!isFetched) {
+  //     fetchInsights();
+  //     setIsFetched(true); // Mark as fetched
+  //   }
+  // }, [isFetched]);
+
+  const isFetchedRef = useRef(false);
+
   useEffect(() => {
-    fetchInsights();
+    if (!isFetchedRef.current) {
+      fetchInsights();
+      isFetchedRef.current = true; // Ensure it doesn't run again
+    }
   }, []);
 
   const handlePrev = () => {
@@ -145,7 +158,7 @@ const MarketingDashboard = () => {
     setCurrentIndex((prev) => (prev === newsData.length - 1 ? 0 : prev + 1));
   };
 
-  const formatNewsForCarousel = () => {
+  const formatNewsForCarousel = useCallback(() => {
     return newsData.map((item) => {
       const match = item.match(/^(\d+\.\s\*\*(.*?)\*\*):(.*)$/s); // Matches title & content
       if (match) {
@@ -156,9 +169,13 @@ const MarketingDashboard = () => {
       const transformedItem = item.replace(/### (.*)/g, "**$1**");
       return { title: "", content: transformedItem.trim() };
     });
-  };
+  }, [newsData]);
 
-  const formattedNews = formatNewsForCarousel();
+  // const formattedNews = formatNewsForCarousel();
+  const formattedNews = useMemo(
+    () => formatNewsForCarousel(),
+    [formatNewsForCarousel]
+  );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">

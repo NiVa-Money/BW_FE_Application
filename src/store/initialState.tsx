@@ -1,27 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const initialState: any = {
-
   chat: {
     messages: [],
   },
   bot: {
-
     create: {
       data: null,
-      loader: false
+      loader: false,
     },
     edit: {
       data: null,
-      loader: false
+      loader: false,
     },
     delete: {
       data: null,
-      loader: false
+      loader: false,
     },
     lists: {
       data: null,
-      loader: false
-    }
+      loader: false,
+    },
   },
+
   whatsappCampaign: {
     loading: false,
     success: false,
@@ -49,4 +49,3 @@ export const initialState: any = {
     success: false,
   },
 };
-

@@ -5,13 +5,14 @@ import { deleteBotAction, getBotsAction, resetBotAction } from '../../store/acti
 import { RootState } from '../../store';
 import { formatDateString } from '../../hooks/functions';
 import { useNavigate } from 'react-router-dom';
+import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
 
 
 
 const MyBots: React.FC = () => {
     const dispatch = useDispatch()
-    const [userId, setUserId] = useState('')
     const [botLists, setbotLists] = useState<any>([])
+    const [userId, setUserId] = useState('')
     const botsDataRedux = useSelector(
         (state: RootState) => state.bot?.lists?.data
     );
@@ -20,6 +21,7 @@ const MyBots: React.FC = () => {
         (state: RootState) => state.bot?.create?.data
 
     );
+    const userIdLocal = localStorage.getItem('user_id')
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -31,7 +33,7 @@ const MyBots: React.FC = () => {
     const createBotHandler = () => {
         navigate('/createbot')
     }
-    const handleOpen = (botId) => {
+    const handleOpen = (botId: string) => {
 
         setIsModalOpen(true)
 
@@ -90,6 +92,13 @@ const MyBots: React.FC = () => {
         }
         dispatch(resetBotAction('create'))
     }, [])
+    useEffect(() => {
+        if (userIdLocal?.length) {
+            setUserId(userIdLocal)
+        }
+    }, [userIdLocal])
+
+
 
 
 
@@ -109,7 +118,7 @@ const MyBots: React.FC = () => {
                             fileName={item?.docName}
                             color={item?.botColor}
                             createdAt={formatDateString(item?.createdAt)}
-                            onDelete={() => handleDelete(item._id)}
+                            onDelete={() => handleOpen(item._id)}
                             onExport={handleExport}
                             onClick={() => handleEdit(item._id)}
                         />
@@ -117,6 +126,7 @@ const MyBots: React.FC = () => {
                 ))}
 
             </div>
+            <DeleteConfirmationModal open={isModalOpen} onClose={() => setIsModalOpen(false)} onDelete={handleDelete} />
         </div>
 
 
