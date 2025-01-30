@@ -92,7 +92,7 @@ export const publicRoutes: RouteType[] = [
   { path: "*", component: <Login /> },
 ];
 console.log('moduleMapping', moduleMapping)
-export const authProtectedRoutes = autRoutes.filter(route => moduleMapping.includes(route.id));
+export const authProtectedRoutes = autRoutes.filter(route => moduleMapping?.includes(route.id));
 
 
 
