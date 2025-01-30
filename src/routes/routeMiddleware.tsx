@@ -173,7 +173,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
             <MenuIcon />
           </IconButton>
           <div className="w-[100%]">
-            <Header />
+            {/* <Header /> */}
             {children}
           </div>
         </main>

@@ -1,7 +1,5 @@
-
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -10,6 +8,8 @@ import {
   deleteWhatsappRequest,
   updateWhatsappRequest,
 } from "../../../store/actions/integrationActions";
+import { RootState } from "../../../store";
+import { getBotsAction } from "../../../store/actions/botActions";
 
 const ConfirmationModal: React.FC<{
   onCancel: () => void;
@@ -49,30 +49,66 @@ const CrudIntegration: React.FC = () => {
   });
 
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
+  const [, setbotLists] = useState<any>([]);
+
+  const botsDataRedux = useSelector(
+    (state: RootState) => state.bot?.lists?.data
+  );
+
+  console.log("botsDataRedux", botsDataRedux); // Debugging
+  const botId = botsDataRedux?.[0]?._id;
+  console.log("botId", botId); // Debugging
+
+  const botsDataLoader = useSelector(
+    (state: RootState) => state.bot?.lists?.loader
+  );
 
   const dispatch = useDispatch();
 
-  // Select botId from Redux and WhatsApp integration state
-  // const botId = useSelector((state: any) => state.bot.botId);
-  const botId = useSelector((state : any) => state.bot?.lists?.data?.[0]?._id);
-  console.log("botId", botId);
+  useEffect(() => {
+    if (
+      Array.isArray(botsDataRedux) &&
+      botsDataRedux.length &&
+      !botsDataLoader
+    ) {
+      const formattedBots = botsDataRedux.map((bot: any) => ({
+        botId: bot._id,
+        botName: bot.botName,
+      }));
+      console.log("Formatted Bots:", formattedBots); // Debugging
+      setbotLists(formattedBots);
+    }
+  }, [botsDataRedux, botsDataLoader]);
+
+  const userIdLocal = localStorage.getItem("user_id");
+
+  useEffect(() => {
+    if (userIdLocal?.length) {
+      dispatch(getBotsAction(userIdLocal));
+    }
+  }, [dispatch, userIdLocal]);
+
+  useEffect(() => {
+    console.log("botId in useEffect:", botId);
+    console.log("Dispatching getWhatsappRequest with botId", botId);
+    if (botId) {
+      dispatch(getWhatsappRequest(botId));
+    } else {
+      console.log("No botId found in Redux state");
+    }
+  }, [botId, dispatch]);
+
   const { loading, data, error } = useSelector(
     (state: any) => state.integration?.crudIntegration || {}
   );
 
+  // const integration = useSelector(
+  //   (state: RootState) => state.integration.whatsappIntegration
+  // );
+
   const secretToken = useSelector(
-    (state: any) => state.integration?.secretToken
+    (state: any) => state.integration?.whatsappIntegration?.secretToken
   );
-  // Fetch WhatsApp data when the component mounts
-  useEffect(() => {
-    console.log("dispatching getWhatsappRequest");
-    if (botId) {
-      console.log("botId", botId);
-      dispatch(getWhatsappRequest(botId));
-    } else {
-      console.log("no botId");
-    }
-  }, [dispatch, botId]);
 
   // Update formData when data is fetched
   useEffect(() => {

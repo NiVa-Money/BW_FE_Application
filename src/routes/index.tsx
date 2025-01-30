@@ -35,7 +35,7 @@ export const authProtectedRoutes: RouteType[] = [
     component: <AdminPanel />
   },
   {
-    path: "/Integration",
+    path: "/integrations",
     component: <IntegrationsPage />
   },
   {

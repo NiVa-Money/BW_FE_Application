@@ -28,16 +28,16 @@ export const initialState: any = {
     error: null,
     // campaignId: "",
   },
-  whatsappIntegration: {
-    secretToken: "",
-    webhookUrl: "",
-    error: null,
-  },
 
   integration: {
     crudIntegration: {
       loading: false,
       data: null,
+      error: null,
+    },
+    whatsappIntegration: {
+      secretToken: "",
+      webhookUrl: "",
       error: null,
     },
   },

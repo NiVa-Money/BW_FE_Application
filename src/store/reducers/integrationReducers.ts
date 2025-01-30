@@ -14,7 +14,7 @@ import {
 import { initialState } from "../initialState";
 
 export const integrationReducer = (
-  state = initialState.whatsappIntegration,
+  state = initialState.integration.whatsappIntegration,
   action: any
 ) => {
   switch (action.type) {
@@ -44,7 +44,7 @@ interface WhatsappState {
 }
 
 export const whatsappcrudReducer = (
-  state = initialState.crudIntegration,
+  state = initialState.integration.crudIntegration,
   action: any
 ): WhatsappState => {
   switch (action.type) {

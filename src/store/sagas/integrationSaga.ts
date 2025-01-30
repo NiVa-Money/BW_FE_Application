@@ -2,7 +2,7 @@
 import { call, put } from "redux-saga/effects";
 import {
   deleteWhatsappService,
-  fetchWhatsappData,
+  getWhatsappData,
   saveWhatsappService,
   updateWhatsappService,
 } from "../../api/services/integrationServices";
@@ -24,7 +24,7 @@ export function* saveWhatsappSaga(action: { payload: any }): SagaIterator {
     const response = yield call(saveWhatsappService, action.payload);
 
     // Extracting secretToken and webhookUrl from response
-    const { secretToken, webhookUrl } = response;
+    const { secretToken, webhookUrl } = response.data;
 
     // Dispatching success action with the extracted data
     yield put(saveWhatsappSuccess({ secretToken, webhookUrl }));
@@ -73,10 +73,10 @@ export function* deleteWhatsappSaga(action: any): SagaIterator {
 
 export function* getWhatsappSaga(action: { payload: string }): any {
   try {
-    const response = yield call(fetchWhatsappData, action.payload);
+    const response = yield call(getWhatsappData, action.payload);
 
     yield put(getWhatsappSuccess(response));
-    const integrationId = response.integrationId;
+    const integrationId = response._id;
     if (integrationId) {
       console.log("Integration ID: ", integrationId);
       yield put(integrationId);

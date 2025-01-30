@@ -12,15 +12,17 @@ import {
   getBotsSaga,
 } from "./botSagas";
 import {
-  SAVE_WHATSAPPINT,
+  SAVE_WHATSAPPINT, // Ensure this is correctly defined in integrationActionTypes
   UPDATE_WHATSAPP_REQUEST,
   DELETE_WHATSAPP_REQUEST,
+  GET_WHATSAPP_REQUEST,
 } from "../actionTypes/integrationActionTypes";
 import { CREATE_WHATSAPP_CAMPAIGN } from "../actionTypes/whatsappCampaignTypes";
 import {
   saveWhatsappSaga,
   updateWhatsappSaga,
   deleteWhatsappSaga,
+  getWhatsappSaga,
 } from "./integrationSaga";
 import { createWhatsAppCampaignSaga } from "./whatsappCampaignSaga";
 
@@ -33,5 +35,6 @@ export default function* rootSaga() {
   yield takeEvery(CREATE_WHATSAPP_CAMPAIGN, createWhatsAppCampaignSaga);
   yield takeEvery(SAVE_WHATSAPPINT, saveWhatsappSaga); // This listens to SAVE_WHATSAPPINT actions
   yield takeEvery(UPDATE_WHATSAPP_REQUEST, updateWhatsappSaga);
+  yield takeEvery(GET_WHATSAPP_REQUEST, getWhatsappSaga);
   yield takeEvery(DELETE_WHATSAPP_REQUEST, deleteWhatsappSaga);
 }
