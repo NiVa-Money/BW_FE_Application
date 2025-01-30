@@ -3,12 +3,16 @@ import createSagaMiddleware from "redux-saga";
 import botProfileReducers from "./reducers/botReducers";
 import rootSaga from "./sagas";
 import whatsappCampaignReducer from "./reducers/whatsappCampaignReducer";
-import { integrationReducer } from "./reducers/integrationReducers";
+import {
+  integrationReducer,
+  whatsappcrudReducer,
+} from "./reducers/integrationReducers";
 const sagaMiddleware = createSagaMiddleware();
 
 const rootReducer = {
   bot: botProfileReducers,
   integration: integrationReducer,
+  crudIntegration: whatsappcrudReducer,
   whatsappCampaign: whatsappCampaignReducer,
 };
 

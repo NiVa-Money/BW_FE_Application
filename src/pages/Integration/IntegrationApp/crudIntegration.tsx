@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
+
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -50,12 +50,12 @@ const CrudIntegration: React.FC = () => {
 
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [, setbotLists] = useState<any>([]);
+  const [whatsappId, setWhatsappId] = useState<string>("");
 
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
 
-  console.log("botsDataRedux", botsDataRedux); // Debugging
   const botId = botsDataRedux?.[0]?._id;
   console.log("botId", botId); // Debugging
 
@@ -89,12 +89,11 @@ const CrudIntegration: React.FC = () => {
   }, [dispatch, userIdLocal]);
 
   useEffect(() => {
-    console.log("botId in useEffect:", botId);
-    console.log("Dispatching getWhatsappRequest with botId", botId);
     if (botId) {
+      console.log("Dispatching getWhatsappRequest for botId:", botId);
       dispatch(getWhatsappRequest(botId));
     } else {
-      console.log("No botId found in Redux state");
+      console.log("No valid botId found");
     }
   }, [botId, dispatch]);
 
@@ -102,35 +101,58 @@ const CrudIntegration: React.FC = () => {
     (state: any) => state.integration?.crudIntegration || {}
   );
 
-  // const integration = useSelector(
-  //   (state: RootState) => state.integration.whatsappIntegration
-  // );
+  console.log("Current data in Redux state:", data); // Check data here
 
   const secretToken = useSelector(
     (state: any) => state.integration?.whatsappIntegration?.secretToken
   );
+  console.log("Secret Token:", secretToken); // Debugging
 
   // Update formData when data is fetched
+  // useEffect(() => {
+  //   console.log("Current data state:", data);
+  //   if (data) {
+  //     console.log("Updating formData with API data:", data);
+  //     setFormData((prevFormData) => ({
+  //       ...prevFormData,
+  //       ...data,
+  //     }));
+  //     if (data._id) {
+  //       console.log("Setting whatsappId:", data._id);
+  //       setWhatsappId(data._id);
+  //     }
+  //   }
+  // }, [data]);
+
   useEffect(() => {
-    if (data) {
+    if (data?.success && data?.data?.length > 0) {
+      const integrationData = data.data[0];
+
+      console.log("Integration Data:", integrationData, data);
       setFormData({
-        botId: data.botId || "",
-        appId: data.appId || "",
-        phoneNumberId: data.phoneNumberId || "",
-        whatsappBusinessAccountId: data.whatsappBusinessAccountId || "",
-        phoneNumber: data.phoneNumber || "",
-        accessToken: data.accessToken || "",
+        botId: integrationData.botId || "",
+        appId: integrationData.appId || "",
+        phoneNumberId: integrationData.phoneNumberId || "",
+        whatsappBusinessAccountId:
+          integrationData.whatsappBusinessAccountId || "",
+        phoneNumber: integrationData.phoneNumber || "",
+        accessToken: integrationData.accessToken || "",
       });
+      setWhatsappId(integrationData._id);
     }
   }, [data]);
 
   const handleUpdate = () => {
-    dispatch(updateWhatsappRequest(formData)); // Dispatch update action
+    console.log("Updating with formData:", formData);
+    dispatch(updateWhatsappRequest(formData));
   };
 
   const handleDelete = () => {
-    if (secretToken) {
-      dispatch(deleteWhatsappRequest(secretToken)); // Use secretToken as the ID
+    if (whatsappId) {
+      console.log("Deleting with whatsappId:", whatsappId);
+      dispatch(deleteWhatsappRequest(whatsappId));
+    } else {
+      console.log("No valid ID found for deletion");
     }
   };
 

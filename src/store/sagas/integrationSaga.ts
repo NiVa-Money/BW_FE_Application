@@ -74,13 +74,10 @@ export function* deleteWhatsappSaga(action: any): SagaIterator {
 export function* getWhatsappSaga(action: { payload: string }): any {
   try {
     const response = yield call(getWhatsappData, action.payload);
+    console.log("getWhatsappSuccess Response: ", response);
 
-    yield put(getWhatsappSuccess(response));
-    const integrationId = response._id;
-    if (integrationId) {
-      console.log("Integration ID: ", integrationId);
-      yield put(integrationId);
-    }
+    // Dispatch action to save the full response in Redux
+    yield put(getWhatsappSuccess(response.data));
   } catch (error) {
     if (error instanceof Error) {
       yield put(getWhatsappFailure(error.message));
