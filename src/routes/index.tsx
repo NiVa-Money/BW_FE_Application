@@ -12,6 +12,7 @@ import Campaign from "../pages/Marketing/Campaign";
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 import EngagementTab from "../pages/Engagement";
 import MyBots from '../pages/MyBots/index';
+import EditBot from "../pages/EditBot";
 
 interface RouteType {
   path: string;
@@ -42,6 +43,8 @@ export const authProtectedRoutes: RouteType[] = [
     component: <WhatsAppIntegration />
   },
   { path: '/createbot', component: <CreateBot /> },
+  { path: '/editbot/:id', component: <EditBot /> },
+
   { path: '/mybots', component: <MyBots /> },
 
   { path: '/engagementTab', component: <EngagementTab /> },

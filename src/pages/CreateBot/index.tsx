@@ -174,20 +174,22 @@ const CreateBot: React.FC = () => {
   useEffect(() => {
     if (createBotDataRedux !== null) {
       const success = createBotDataRedux?.success
-      setIsModalOpen(success)
-      setIsModalOpen({
-        botName: '',
-        theme: '',
-        botTone: '',
-        botFont: '',
-        greetingMessage: '',
-        botIdentity: '',
-        botLimit: '',
-        phoneNumber: '',
-        email: '',
-        botSmartness: false,
-        appoimentLink: ''
-      })
+      if (success) {
+        setIsModalOpen(success)
+        setIsModalOpen({
+          botName: '',
+          theme: '',
+          botTone: '',
+          botFont: '',
+          greetingMessage: '',
+          botIdentity: '',
+          botLimit: '',
+          phoneNumber: '',
+          email: '',
+          botSmartness: false,
+          appoimentLink: ''
+        })
+      }
 
     }
   }, [createBotDataRedux])
@@ -414,7 +416,7 @@ const CreateBot: React.FC = () => {
                       type="file"
                       onChange={handleFileChange}
                       ref={viewerRef}
-                      accept="pdf/*"
+                      accept="application/pdf"
                       id="file-upload"
                       className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
                     />

@@ -15,6 +15,7 @@ import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { NavLink } from "react-router-dom";
 import { sidebarNavLinks } from "../hooks/routeNavLinks";
 import { authProtectedRoutes, publicRoutes } from ".";
+import Header from "../components/header";
 
 interface AuthMiddlewareProps {
   children: React.ReactNode;
@@ -44,7 +45,11 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
     setMenuItems(data);
 
   }, []);
-  const isAuthRoute = authProtectedRoutes.some((route) => route.path === location.pathname);
+  console.log('lo', location.pathname)
+  const isAuthRoute = authProtectedRoutes.some((route) => {
+    const regex = new RegExp(`^${route.path.replace(/:\w+/g, '[^/]+')}$`);
+    return regex.test(location.pathname);
+  });
   return (
     <div style={{ display: "flex" }}>
       {/* Sidebar */}
@@ -126,7 +131,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
                           </div>
                         }
                       />
-                      {item.subItems ? opendropdown[item.id] ? <ExpandLess /> : <ExpandMore /> : null}
+                      {item.subItems?.length ? opendropdown[item.id] ? <ExpandLess /> : <ExpandMore /> : null}
                     </ListItem>
                     {item.subItems && (
                       <Collapse in={opendropdown[item.id]} timeout="auto" unmountOnExit>
@@ -158,7 +163,6 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
         <main
           style={{
             flexGrow: 1,
-            padding: "20px",
             display: "flex",
             alignItems: "flex-start",
             gap: "10px",
@@ -168,7 +172,10 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
             <img src={"/assets/botwot_logo.svg"} alt="Logo" style={{ marginRight: "8px" }} />
             <MenuIcon />
           </IconButton>
-          {children}
+          <div className="w-[100%]">
+            <Header />
+            {children}
+          </div>
         </main>
       ) : (
         children
