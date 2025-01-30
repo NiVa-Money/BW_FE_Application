@@ -101,7 +101,6 @@ const CrudIntegration: React.FC = () => {
     (state: RootState) => state.integration?.crudIntegration?.data
   );
 
-
   console.log("Current data in Redux state:", crudIntegrationData); // Check data here
 
   const secretToken = useSelector(
@@ -126,10 +125,10 @@ const CrudIntegration: React.FC = () => {
   // }, [data]);
 
   useEffect(() => {
-    if (data?.success && data?.data?.length > 0) {
-      const integrationData = data.data[0];
+    if (crudIntegrationData?.success && crudIntegrationData?.data?.length > 0) {
+      const integrationData = crudIntegrationData.data[0];
 
-      console.log("Integration Data:", integrationData, data);
+      console.log("Integration Data:", integrationData, crudIntegrationData);
       setFormData({
         botId: integrationData.botId || "",
         appId: integrationData.appId || "",
@@ -141,7 +140,7 @@ const CrudIntegration: React.FC = () => {
       });
       setWhatsappId(integrationData._id);
     }
-  }, [data]);
+  }, [crudIntegrationData]);
 
   const handleUpdate = () => {
     console.log("Updating with formData:", formData);
@@ -184,9 +183,6 @@ const CrudIntegration: React.FC = () => {
               Delete
             </button>
           </div>
-
-          {loading && <p>Loading...</p>}
-          {error && <p className="text-red-500">Error: {error}</p>}
 
           {/* Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

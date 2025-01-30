@@ -13,11 +13,15 @@ import {
   deleteWhatsappSuccess,
   updateWhatsappFailure,
   updateWhatsappSuccess,
-  getWhatsappFailure,
-  getWhatsappSuccess,
+  // getWhatsappFailure,
+  // getWhatsappSuccess,
 } from "../actions/integrationActions";
 
 import { SagaIterator } from "redux-saga";
+import {
+  GET_WHATSAPP_FAILURE,
+  GET_WHATSAPP_SUCCESS,
+} from "../actionTypes/integrationActionTypes";
 
 export function* saveWhatsappSaga(action: { payload: any }): SagaIterator {
   try {
@@ -71,18 +75,28 @@ export function* deleteWhatsappSaga(action: any): SagaIterator {
   }
 }
 
-export function* getWhatsappSaga(action: { payload: string }): any {
+export function* getWhatsappSaga({
+  payload,
+}: {
+  type: string;
+  payload: any;
+}): Generator<any> {
   try {
-    const response = yield call(getWhatsappData, action.payload);
-    console.log("getWhatsappSuccess Response: ", response);
+    const getWhatsappSuc = yield call(getWhatsappData, payload);
+    console.log("getWhatsappSuccess Response: ", getWhatsappSuc);
 
     // Dispatch action to save the full response in Redux
-    yield put(getWhatsappSuccess(response.data));
-  } catch (error) {
-    if (error instanceof Error) {
-      yield put(getWhatsappFailure(error.message));
-    } else {
-      yield put(getWhatsappFailure("An unknown error occurred"));
-    }
+    // yield put(getWhatsappSuccess(response.data));
+    yield put({
+      type: GET_WHATSAPP_SUCCESS,
+      payload: getWhatsappSuc,
+    });
+  } catch (error: any) {
+    console.error("Error in getWhatsappSuc:", error);
+
+    yield put({
+      type: GET_WHATSAPP_FAILURE,
+      payload: error.message,
+    });
   }
 }

@@ -33,12 +33,10 @@ export const initialState: any = {
     crudIntegration: {
       loading: false,
       data: null,
-      error: null,
     },
     whatsappIntegration: {
       secretToken: "",
       webhookUrl: "",
-      error: null,
     },
   },
 
