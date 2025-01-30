@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import createSagaMiddleware from "redux-saga";
 import botProfileReducers from "./reducers/botReducers";
 import rootSaga from "./sagas";
-import whatsappCampaignReducer from "./reducers/whatsappCampaignReducer";
+import whatsappCampaignReducer, { whatsappTemplateReducer } from "./reducers/whatsappCampaignReducer";
 import {
   integrationReducer,
   whatsappcrudReducer,
@@ -14,6 +14,7 @@ const rootReducer = {
   integration: integrationReducer,
   crudIntegration: whatsappcrudReducer,
   whatsappCampaign: whatsappCampaignReducer,
+  whatsappTemplates: whatsappTemplateReducer,
 };
 
 const store = configureStore({

@@ -67,7 +67,6 @@ export function* createWhatsAppCampaignSaga({
   }
 }
 
-
 export function* fetchWhatsAppTemplatesSaga({ payload }: { payload: any }): Generator<any, void, any> {
   try {
     const response = yield call(fetchWhatsAppTemplatesService, payload);

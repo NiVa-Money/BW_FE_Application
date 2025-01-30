@@ -69,18 +69,20 @@ export const WhatsAppDashboardService = async (campaignId: string) => {
   }
 };
 
-
-export const fetchWhatsAppTemplatesService = async (integrationId: any) => {
+export const fetchWhatsAppTemplatesService = async (secretToken: string) => {
   try {
     const response = await axiosInstance.get(
-      `/whatsapp/template?integrationId=${integrationId}`
+      `/whatsapp/template/integrationId` ,{
+        params: { integrationId : secretToken },
+      }
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching WhatsApp templates:', error);
+    console.error("Error fetching WhatsApp templates:", error);
     throw error;
   }
 };
+
 
 export const createWhatsAppTemplateService = async (templateData: any) => {
   try {

@@ -149,15 +149,6 @@ const WhatsappCampaign: React.FC = () => {
         campaignPayload.contactsUrl = s3Url;
         // Dispatch the campaign creation action with the payload
         dispatch(createWhatsAppCampaignAction(campaignPayload));
-
-        // console.log("campaign response", response);
-        // console.log("campaignId from Redux", campaignId); // Access the campaignId from Redux
-
-        // if (campaignId) {
-        //   alert("Campaign is made and ID retrieved from Redux!");
-        // } else {
-        //   alert("Campaign is made, but no ID returned!");
-        // }
       } else {
         alert("Please upload a contact list");
       }

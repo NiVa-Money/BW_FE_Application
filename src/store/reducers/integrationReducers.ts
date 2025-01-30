@@ -37,16 +37,16 @@ export const integrationReducer = (
   }
 };
 
-interface WhatsappState {
-  loading: boolean;
-  error: string | null;
-  data: any | null;
-}
+// interface WhatsappState {
+//   loading: boolean;
+  
+//   data: any | null;
+// }
 
 export const whatsappcrudReducer = (
   state = initialState.integration,
   action: any
-): WhatsappState => {
+): any => {
   switch (action.type) {
     case UPDATE_WHATSAPP_REQUEST:
     case DELETE_WHATSAPP_REQUEST:
@@ -71,12 +71,13 @@ export const whatsappcrudReducer = (
       };
 
     case GET_WHATSAPP_SUCCESS:
+      console.log("action", action.payload);
       return {
         ...state,
         crudIntegration: {
           loading: false, // Set loading to false after success
           // Clear any errors
-          data: action.payload, // Update the data with the API response
+          data: action.payload.data[0],
         },
       };
 
