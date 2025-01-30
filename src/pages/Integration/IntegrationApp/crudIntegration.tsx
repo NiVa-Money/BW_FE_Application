@@ -97,11 +97,12 @@ const CrudIntegration: React.FC = () => {
     }
   }, [botId, dispatch]);
 
-  const { loading, data, error } = useSelector(
-    (state: any) => state.integration?.crudIntegration || {}
+  const crudIntegrationData = useSelector(
+    (state: RootState) => state.integration?.crudIntegration?.data
   );
 
-  console.log("Current data in Redux state:", data); // Check data here
+
+  console.log("Current data in Redux state:", crudIntegrationData); // Check data here
 
   const secretToken = useSelector(
     (state: any) => state.integration?.whatsappIntegration?.secretToken

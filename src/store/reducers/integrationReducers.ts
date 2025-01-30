@@ -66,8 +66,7 @@ export const whatsappcrudReducer = (
       return {
         ...state,
         crudIntegration: {
-        loading: true, // Set loading to true during the request
-        error: null, // Clear any previous errors
+          loading: true, // Set loading to true during the request
         },
       };
 
@@ -76,7 +75,7 @@ export const whatsappcrudReducer = (
         ...state,
         crudIntegration: {
           loading: false, // Set loading to false after success
-          error: null, // Clear any errors
+          // Clear any errors
           data: action.payload, // Update the data with the API response
         },
       };
@@ -85,9 +84,8 @@ export const whatsappcrudReducer = (
       return {
         ...state,
         crudIntegration: {
-        loading: false, // Set loading to false after failure
-        data: null, // Clear any data
-        error: action.payload, // Set the error message
+          loading: false, // Set loading to false after failure
+          data: null, // Clear any data
         },
       };
 
