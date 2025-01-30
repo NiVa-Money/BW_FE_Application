@@ -41,7 +41,7 @@ export default function botProfileReducers(
       return {
         ...state,
         edit: {
-          ...state.create,
+          ...state.edit,
           loader: true,
         },
       };
@@ -58,26 +58,26 @@ export default function botProfileReducers(
     case DELETE_BOT:
       return {
         ...state,
-        edit: {
-          ...state.create,
+        delete: {
+          ...state.delete,
           loader: true,
         },
       };
     case DELETE_BOT_SUCCESS:
       return {
         ...state,
-        edit: { data: action.payload, loader: true },
+        delete: { data: action.payload, loader: true },
       };
     case DELETE_BOT_FAILURE:
       return {
         ...state,
-        edit: { data: action.payload, loader: false },
+        delete: { data: action.payload, loader: false },
       };
     case GET_BOTS:
       return {
         ...state,
         lists: {
-          ...state.create,
+          ...state.lists,
           loader: true,
         },
       };

@@ -10,7 +10,7 @@ function App() {
       path: route.path,
       element: (
         <RouteMiddleware isProtected={false}>
-          <ReduxProvider>{route.component}</ReduxProvider>
+          {route.component}
         </RouteMiddleware>
       ),
     })),

@@ -3,8 +3,8 @@ import React from "react";
 function AdminPanel() {
   return (
     <div>
-      <h1>AdminPanel</h1>
-      
+      <h1>Coming soon</h1>
+
     </div>
   );
 }
