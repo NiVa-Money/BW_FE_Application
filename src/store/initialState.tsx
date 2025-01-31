@@ -20,6 +20,10 @@ export const initialState: any = {
       data: null,
       loader: false,
     },
+    export: {
+      data: {},
+      loader: false,
+    },
   },
 
   whatsappCampaign: {

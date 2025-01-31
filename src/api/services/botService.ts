@@ -45,3 +45,15 @@ export const deleteBotService = async (payload: any) => {
     throw new Error("Error Deleting Bot profile");
   }
 };
+
+export const exportBotProfileService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post("/user/widget/export/", {
+      botId: payload.botId,
+      userId: payload?.userId,
+    });
+    return response.data;
+  } catch (error: any) {
+    throw new Error("Error exporting bot");
+  }
+};

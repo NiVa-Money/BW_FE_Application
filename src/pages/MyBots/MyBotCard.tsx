@@ -11,8 +11,9 @@ interface CardProps {
     color: string;
     createdAt: string;
     onDelete: () => void;
-    onExport: () => void;
+    onTest: () => void;
     onClick: () => void;
+    onExport: () => void;
 }
 
 const MyBotCard: React.FC<CardProps> = ({
@@ -23,8 +24,9 @@ const MyBotCard: React.FC<CardProps> = ({
     color,
     createdAt,
     onDelete,
-    onExport,
-    onClick
+    onTest,
+    onClick,
+    onExport
 
 }) => {
     return (
@@ -57,11 +59,18 @@ const MyBotCard: React.FC<CardProps> = ({
                             <span>Edit</span>
                         </button>
                         <button
-                            onClick={onExport}
+                            onClick={onTest}
                             className="text-grey-500 hover:text-grey-700 flex items-center flex flex-col justify-end"
                         >
                             <SettingsSuggestIcon />
                             <span>Test</span>
+                        </button>
+                        <button
+                            onClick={onExport}
+                            className="text-grey-500 hover:text-grey-700 flex items-center flex flex-col justify-end"
+                        >
+                            <SettingsSuggestIcon />
+                            <span>Export</span>
                         </button>
                     </div>
                 </div>

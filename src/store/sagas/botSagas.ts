@@ -6,6 +6,8 @@ import {
   DELETE_BOT_SUCCESS,
   EDIT_BOT_FAILURE,
   EDIT_BOT_SUCCESS,
+  EXPORT_BOT_PROFILE_FAILURE,
+  EXPORT_BOT_PROFILE_SUCCESS,
   GET_BOTS_FAILURE,
   GET_BOTS_SUCCESS,
 } from "../actionTypes/botActionsTypes";
@@ -13,6 +15,7 @@ import {
   createBotProfileService,
   deleteBotService,
   editBotProfileService,
+  exportBotProfileService,
   getBotsService,
 } from "../../api/services/botService";
 
@@ -110,6 +113,25 @@ export function* getBotsSaga({
 
     yield put({
       type: GET_BOTS_FAILURE,
+      payload: error.message,
+    });
+  }
+}
+export function* exportBotProfileSaga({
+  payload,
+}: {
+  type: string;
+  payload: any;
+}): Generator<any> {
+  try {
+    const exportedBotProfile = yield call(exportBotProfileService, payload);
+    yield put({
+      type: EXPORT_BOT_PROFILE_SUCCESS,
+      payload: exportedBotProfile,
+    });
+  } catch (error: any) {
+    yield put({
+      type: EXPORT_BOT_PROFILE_FAILURE,
       payload: error.message,
     });
   }
