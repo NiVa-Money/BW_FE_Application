@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { WhatsApp } from "@mui/icons-material";
+import { WhatsApp, Upload, FileUpload } from "@mui/icons-material"; // Import MUI icons
+// import { ArrowDropDown } from "@mui/icons-material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -311,11 +312,7 @@ const WhatsappCampaign: React.FC = () => {
                   <div className="flex-1 shrink self-stretch my-auto basis-0 rotate-[2.4492937051703357e-16rad]">
                     Select
                   </div>
-                  <img
-                    loading="lazy"
-                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/d7a3b5dd0609c745ad372bdf306b2409d8dcd4192e8761806f32a2e0800a69f6?placeholderIfAbsent=true&apiKey=555c811dd3f44fc79b6b2689129389e8"
-                    className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square"
-                  />
+                  <ArrowDropDown className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square" />
                 </div>
               </div> */}
 
@@ -330,14 +327,9 @@ const WhatsappCampaign: React.FC = () => {
                   htmlFor="contact-upload"
                   className="flex gap-2 items-center cursor-pointer"
                 >
-                  <img
-                    loading="lazy"
-                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/99164b9ccb15cd85c49756bfef0c2886ede9266c6fb26304a973774410b942d4"
-                    alt="Upload icon"
-                    className="w-6 aspect-square"
-                  />
+                   <Upload sx={{ fontSize: 24 }} />
                   <span className="ml-2 text-zinc-400">
-                    {contactList ? contactList.name : "Upload"}
+                    {contactList ? contactList.name : "Upload CSV Contact List"}
                   </span>
                 </label>
               </div>
@@ -357,11 +349,7 @@ const WhatsappCampaign: React.FC = () => {
                   <div className="flex-1 shrink self-stretch my-auto basis-0 rotate-[2.4492937051703357e-16rad]">
                     Select
                   </div>
-                  <img
-                    loading="lazy"
-                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/d7a3b5dd0609c745ad372bdf306b2409d8dcd4192e8761806f32a2e0800a69f6?placeholderIfAbsent=true&apiKey=555c811dd3f44fc79b6b2689129389e8"
-                    className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square"
-                  />
+                 <ArrowDropDown className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square" />
                 </div>
               </div> */}
               <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
@@ -375,14 +363,9 @@ const WhatsappCampaign: React.FC = () => {
                   htmlFor="bot-config-upload"
                   className="flex gap-2 items-center cursor-pointer"
                 >
-                  <img
-                    loading="lazy"
-                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/99164b9ccb15cd85c49756bfef0c2886ede9266c6fb26304a973774410b942d4"
-                    alt="Upload icon"
-                    className="w-6 aspect-square"
-                  />
+                  <FileUpload sx={{ fontSize: 24 }} />
                   <span className="ml-2 text-zinc-400">
-                    {botConfigFile ? botConfigFile.name : "Upload"}
+                    {botConfigFile ? botConfigFile.name : " Upload Bot Config PDF"}
                   </span>
                 </label>
               </div>

@@ -124,51 +124,36 @@
 
 // export default EngagementTab;
 
-
 import React from "react";
-import { SentimentSatisfied, Facebook, Instagram, LinkedIn } from "@mui/icons-material";
+import {
+  SentimentSatisfied,
+  Facebook,
+  Instagram,
+  LinkedIn,
+} from "@mui/icons-material";
 
 const EngagementTab: React.FC = () => {
   const platforms = [
-    { name: "Instagram", sentiment: "60% Positive", icon: <Instagram className="text-pink-600" /> },
-    { name: "Facebook", sentiment: "60% Positive", icon: <Facebook className="text-blue-600" /> },
-    { name: "LinkedIn", sentiment: "60% Positive", icon: <LinkedIn className="text-blue-800" /> },
+    {
+      name: "Instagram",
+      sentiment: "60% Positive",
+      icon: <Instagram className="text-pink-600" />,
+    },
+    {
+      name: "Facebook",
+      sentiment: "60% Positive",
+      icon: <Facebook className="text-blue-600" />,
+    },
+    {
+      name: "LinkedIn",
+      sentiment: "60% Positive",
+      icon: <LinkedIn className="text-blue-800" />,
+    },
   ];
 
   return (
-    <div className="flex flex-col w-full p-6 bg-gray-100">
+    <div className="flex flex-col w-full p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <p className="text-sm text-gray-500">Pages / Engagement Tab</p>
-          <h1 className="text-3xl font-bold text-gray-800">Engagement Tab</h1>
-        </div>
-        {/* Search and Icons */}
-        <div className="flex items-center space-x-4">
-          <input
-            type="text"
-            placeholder="Search"
-            className="px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <div className="flex items-center space-x-2">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/281f589b23965a894daf141decf87a1e4bc7c06b60bfa65fb5e5696a684c4ed7?placeholderIfAbsent=true&apiKey=555c811dd3f44fc79b6b2689129389e8"
-              alt="icon"
-              className="w-6 h-6"
-            />
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/dc55d3a4c64d74fb99d07a95881d62da04ecd7eae3e157f618e7b40c2cccd7c3?placeholderIfAbsent=true&apiKey=555c811dd3f44fc79b6b2689129389e8"
-              alt="icon"
-              className="w-6 h-6"
-            />
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/bc5f4dc5d8d6de367820dc78ba2607111505cc0d4c6c32eccef605bd2dfe2de6?placeholderIfAbsent=true&apiKey=555c811dd3f44fc79b6b2689129389e8"
-              alt="icon"
-              className="w-6 h-6"
-            />
-          </div>
-        </div>
-      </div>
 
       {/* Sentiment Analysis */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -179,7 +164,9 @@ const EngagementTab: React.FC = () => {
           >
             <div className="mr-4">{platform.icon}</div>
             <div className="flex flex-col">
-              <h3 className="text-lg font-semibold text-gray-800">{platform.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-800">
+                {platform.name}
+              </h3>
               <p className="text-sm text-green-600">{platform.sentiment}</p>
               <div className="flex w-full mt-1">
                 <div className="flex-1 bg-green-400 h-2 rounded-l-md"></div>
