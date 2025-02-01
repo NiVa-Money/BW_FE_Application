@@ -13,6 +13,9 @@ import {
   DELETE_BOT_SUCCESS,
   DELETE_BOT_FAILURE,
   RESET_SPECIFIC_STATE,
+  EXPORT_BOT_PROFILE,
+  EXPORT_BOT_PROFILE_SUCCESS,
+  EXPORT_BOT_PROFILE_FAILURE,
 } from "../actionTypes/botActionsTypes";
 import { initialState } from "../initialState";
 export default function botProfileReducers(
@@ -96,6 +99,24 @@ export default function botProfileReducers(
       return {
         ...state,
         [action.state]: { data: null, loader: false }, // Reset to initial state
+      };
+    case EXPORT_BOT_PROFILE:
+      return {
+        ...state,
+        export: {
+          ...state.export,
+          loader: true,
+        },
+      };
+    case EXPORT_BOT_PROFILE_SUCCESS:
+      return {
+        ...state,
+        export: { data: action.payload, loader: false },
+      };
+    case EXPORT_BOT_PROFILE_FAILURE:
+      return {
+        ...state,
+        export: { data: action.payload, loader: false },
       };
     default:
       return state;

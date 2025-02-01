@@ -21,7 +21,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     onDelete,
 }) => {
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <Box>
                 <DialogTitle className="h-[150px] flex justify-center items-center bg-[#EBEBEB] relative">
                     <Typography variant="h6" align="center" fontWeight="bold">
@@ -33,7 +33,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                         alt="Robot"
                     />
                 </DialogTitle>
-                <DialogContent className="mt-[20px]">
+                <DialogContent className="m-[20px]">
                     <Box display="flex" flexDirection="column" alignItems="center">
 
                         <Typography variant="body1" align="left" color="textSecondary">

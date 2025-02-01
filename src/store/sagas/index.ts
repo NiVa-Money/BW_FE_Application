@@ -39,6 +39,7 @@ export default function* rootSaga() {
   yield takeEvery(EDIT_BOT, editBotSaga);
   yield takeEvery(GET_BOTS, getBotsSaga);
   yield takeEvery(DELETE_BOT, deleteBotSaga);
+  yield takeEvery(EXPORT_BOT_PROFILE, exportBotProfileSaga);
 
   yield takeEvery(CREATE_WHATSAPP_CAMPAIGN, createWhatsAppCampaignSaga);
   yield takeEvery(FETCH_WHATSAPP_TEMPLATES, fetchWhatsAppTemplatesSaga);
