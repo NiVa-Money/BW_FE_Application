@@ -15,7 +15,9 @@ import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignS
 
 const WhatsappCampaign: React.FC = () => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>("");
-  const [mode, setMode] = useState<"Text" | "Image" | "Template">("Text");
+  // const [mode, setMode] = useState<"Text" | "Image" | "Template">("Text");
+  const [mode, setMode] = useState<"Template">("Template");
+
   const [campaignName, setCampaignName] = useState<string>("");
   const [contactList, setContactList] = useState<File | null>(null);
   const [botConfigFile, setBotConfigFile] = useState<File | null>(null);
@@ -67,7 +69,8 @@ const WhatsappCampaign: React.FC = () => {
     }
   };
 
-  const handleModeChange = (selectedMode: "Text" | "Image" | "Template") => {
+  // const handleModeChange = (selectedMode: "Text" | "Image" | "Template") => {
+  const handleModeChange = (selectedMode: "Template") => {
     setMode(selectedMode);
     setShowTemplate(selectedMode === "Template");
   };
@@ -110,7 +113,6 @@ const WhatsappCampaign: React.FC = () => {
       contactsUrl: "", // Initially empty, will be updated later
       messageType: mode.toLowerCase(),
       messageContent: {
-        text: mode === "Text" ? "Campaign message here" : "",
         template:
           mode === "Template"
             ? {
@@ -125,13 +127,8 @@ const WhatsappCampaign: React.FC = () => {
                 },
               }
             : null,
-        image:
-          mode === "Image"
-            ? {
-                url: "https://example.com/image.png",
-                caption: "Image description",
-              }
-            : null,
+        text: "",
+        image: null,
       },
     };
 
@@ -202,15 +199,14 @@ const WhatsappCampaign: React.FC = () => {
 
             {/* Mode Selection */}
             <div className="flex flex-col w-full mb-4">
-              <label className="text-slate-700">Mode*</label>
-              <p className="text-zinc-500">Select Mode for marketing</p>
+              <label className="text-slate-700">
+                Select or Customize Template*
+              </label>
               <div className="flex gap-0 justify-center items-center w-full mt-4 text-sm font-medium text-center min-h-[48px]">
-                {["Text", "Image", "Template"].map((m) => (
+                {[ "Template"].map((m) => (
                   <div
                     key={m}
-                    onClick={() =>
-                      handleModeChange(m as "Text" | "Image" | "Template")
-                    }
+                    onClick={() => handleModeChange(m as "Template")}
                     className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${
                       mode === m ? "bg-purple-200" : "bg-white"
                     }`}
@@ -222,8 +218,8 @@ const WhatsappCampaign: React.FC = () => {
             </div>
 
             {/* Mode-Specific Input */}
-            <div className="flex flex-col w-full mb-4">
-              {mode === "Text" && (
+            {/* <div className="flex flex-col w-full mb-4">
+              {/* {mode === "Text" && (
                 <div className="flex flex-col w-full mb-4">
                   <label className="text-slate-700 ml-2 mb-2">
                     Message Content *
@@ -233,8 +229,8 @@ const WhatsappCampaign: React.FC = () => {
                     className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
                   />
                 </div>
-              )}
-              {mode === "Image" && (
+              )} */}
+            {/* {mode === "Image" && (
                 <div>
                   <label className="text-slate-700 ml-2">Upload Image *</label>
                   <input
@@ -243,8 +239,8 @@ const WhatsappCampaign: React.FC = () => {
                     className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
                   />
                 </div>
-              )}
-            </div>
+              )} */}
+            {/* </div>  */}
 
             {/* Schedule Date */}
             <div className="flex flex-col w-full mb-4">
@@ -327,7 +323,7 @@ const WhatsappCampaign: React.FC = () => {
                   htmlFor="contact-upload"
                   className="flex gap-2 items-center cursor-pointer"
                 >
-                   <Upload sx={{ fontSize: 24 }} />
+                  <Upload sx={{ fontSize: 24 }} />
                   <span className="ml-2 text-zinc-400">
                     {contactList ? contactList.name : "Upload CSV Contact List"}
                   </span>
@@ -365,7 +361,9 @@ const WhatsappCampaign: React.FC = () => {
                 >
                   <FileUpload sx={{ fontSize: 24 }} />
                   <span className="ml-2 text-zinc-400">
-                    {botConfigFile ? botConfigFile.name : " Upload Bot Config PDF"}
+                    {botConfigFile
+                      ? botConfigFile.name
+                      : " Upload Bot Config PDF"}
                   </span>
                 </label>
               </div>

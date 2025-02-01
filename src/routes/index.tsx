@@ -3,16 +3,12 @@ import SignUp from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
 import AdminPanel from "../pages/AdminPanel";
 import CreateBot from "../pages/CreateBot";
-import { AreaChartHero } from "../pages/MyChatBot";
 import IntegrationsPage from "../pages/Integration";
-import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
-import IntegrationTab from "../pages/Integration";
-import WhatsApp from "../pages/Marketing/Whatsapp";
 import Campaign from "../pages/Marketing/Campaign";
-import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 import EngagementTab from "../pages/Engagement";
 import MyBots from '../pages/MyBots/index';
 import EditBot from "../pages/EditBot";
+import Marketing from "../pages/Marketing/Dashboard";
 
 interface RouteType {
   path: string;
@@ -36,7 +32,7 @@ export const autRoutes: RouteType[] = [
   { id: 3, path: '/createbot', component: <CreateBot /> },
   { id: 3, path: '/editbot/:id', component: <EditBot /> },
   { id: 4, path: '/engagementTab', component: <EngagementTab /> },
-  { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
+  { id: 5.1, path: "/marketing/dashboard", component: <Marketing /> },
   { id: 5.2, path: "/marketing/campaign", component: <Campaign /> },
   { id: 6, path: "/agent", component: <AdminPanel /> },
   {
