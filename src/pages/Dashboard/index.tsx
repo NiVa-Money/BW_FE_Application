@@ -1,4 +1,4 @@
-import React, { useState, CSSProperties } from 'react';
+import React, {  CSSProperties } from 'react';
 import FirstLayerCards from './FirstLayerCards';
 import { AreaChart } from "../../lib/chartUtils"
 import { DonutChart } from "../../lib/chartUtilsDonout"
@@ -111,7 +111,7 @@ const Dashboard: React.FC = () => {
 
 
 
-  const [firstLayerCards] = useState([
+  const firstLayerCards = [
     { id: 1, title: 'Resolution Rate', value: '50.44%', icon: '📊', height: "100px", width: "200px" },
     { id: 2, title: 'Pending Queries', value: '10', icon: '💰', height: "100px", width: "200px" },
     { id: 3, title: 'AI vs. Human Resolution Rate', value: '45', height: "100px", width: "200px" },
@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
     { id: 16, title: 'Net Promoter Score', value: '72', icon: '📊', trend: 'up', change: '+6.3%', height: "100px", width: "200px" },
     { id: 17, title: 'User Engement with thye bot', value: '72', icon: '📊', trend: 'up', change: '+6.3%', height: "100px", width: "200px" },
 
-  ]);
+  ];
 
   const styles: Record<string, CSSProperties> = {
     container: {

@@ -11,7 +11,7 @@ import {
   Stack,
   Divider,
   styled,
-  LinearProgress, 
+  LinearProgress,
 } from "@mui/material";
 import {
   Chat as ChatIcon,
@@ -24,75 +24,107 @@ import {
   WhatsApp as WhatsAppIcon,
   NotificationsActive as AlertIcon,
   Close as CloseIcon,
-  ForwardToInbox as ForwardIcon
+  ForwardToInbox as ForwardIcon,
 } from "@mui/icons-material";
+import { Variant } from "@mui/material/styles/createTypography";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: theme.spacing(2),
-  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
 }));
 
 const QuickReplyChip = styled(Button)(({ theme }) => ({
-  borderRadius: '20px',
-  textTransform: 'none',
+  borderRadius: "20px",
+  textTransform: "none",
   backgroundColor: theme.palette.grey[100],
   color: theme.palette.text.primary,
-  '&:hover': {
+  "&:hover": {
     backgroundColor: theme.palette.grey[200],
-  }
+  },
 }));
 
 const LiveChat: React.FC = (): React.ReactElement => {
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.50', p: 3 }}>
-      <Box sx={{ maxWidth: 'xl', mx: 'auto' }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "white", p: 3 }}>
+      <Box sx={{ maxWidth: "xl", mx: "auto" }}>
         <Grid container spacing={3}>
           {/* Stats Section */}
+
           <Grid item xs={12}>
             <Grid container spacing={2}>
-              <Grid item xs={3}>
-                <StyledPaper sx={{ bgcolor: 'grey.100' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Ques Stats</Typography>
-                    <ChatIcon />
-                  </Box>
-                  <Typography variant="h5">350</Typography>
-                </StyledPaper>
-              </Grid>
-              <Grid item xs={3}>
-                <StyledPaper sx={{ bgcolor: 'grey.100' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Live to AI</Typography>
-                    <PhoneIcon />
-                  </Box>
-                  <Typography variant="h6">Switch with AI</Typography>
-                </StyledPaper>
-              </Grid>
-              <Grid item xs={3}>
-                <StyledPaper sx={{ bgcolor: 'grey.100' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Alert the team</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography>7</Typography>
-                      <AlertIcon />
+              {[
+                { label: "Ques Stats", value: "350", icon: <ChatIcon /> },
+                {
+                  label: "Live to AI",
+                  value: "Switch with AI",
+                  icon: <PhoneIcon />,
+                  variant: "h6",
+                },
+                {
+                  label: "Alert the team",
+                  value: "Emergency",
+                  extra: "7",
+                  icon: <AlertIcon />,
+                  variant: "h6",
+                },
+                {
+                  label: "Transfer",
+                  value: "Transfer/Escalate",
+                  extra: "8",
+                  icon: <ForwardIcon />,
+                  variant: "h6",
+                },
+              ].map((item, index) => (
+                <Grid item xs={3} key={index}>
+                  <StyledPaper
+                    sx={{
+                      bgcolor: "rgba(101, 85, 143, 0.08)",
+                      color: "black",
+                      borderRadius: 3,
+                      p: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                        {item.label}
+                      </Typography>
                     </Box>
-                  </Box>
-                  <Typography variant="h6">Emergency</Typography>
-                </StyledPaper>
-              </Grid>
-              <Grid item xs={3}>
-                <StyledPaper sx={{ bgcolor: 'grey.100' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">Transfer/Escalate</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography>8</Typography>
-                      <ForwardIcon />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        variant={(item.variant as Variant) || "h5"}
+                        sx={{ fontWeight: "bold" }}
+                      >
+                        {item.value}
+                      </Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                      >
+                        {item.extra && (
+                          <Typography
+                            sx={{ fontWeight: "bold", fontSize: "1.5rem" }}
+                          >
+                            {item.extra}
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
-                  <Typography variant="h6">Transfer/Escalate</Typography>
-                </StyledPaper>
-              </Grid>
+                  </StyledPaper>
+                </Grid>
+              ))}
             </Grid>
           </Grid>
 
@@ -102,8 +134,20 @@ const LiveChat: React.FC = (): React.ReactElement => {
             <Grid item xs={12} md={4}>
               <Stack spacing={3}>
                 {/* Customer Details */}
-                <StyledPaper>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <StyledPaper
+                  sx={{
+                    bgcolor: "rgba(101, 85, 143, 0.08)",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+
+                      mb: 3,
+                    }}
+                  >
                     <Typography variant="h6">Customer Detail</Typography>
                     <IconButton size="small">
                       <MoreVertIcon />
@@ -111,16 +155,20 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </Box>
 
                   <Stack spacing={3}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar sx={{ bgcolor: 'primary.light' }}>A</Avatar>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Avatar sx={{ bgcolor: "primary.light" }}>A</Avatar>
                       <Box>
                         <Typography variant="subtitle1">Alex Russo</Typography>
-                        <Typography variant="body2" color="text.secondary">alex.rus@gmail.com</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          alex.rus@gmail.com
+                        </Typography>
                       </Box>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography color="text.secondary">View Tickets:</Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography color="text.secondary">
+                        View Tickets:
+                      </Typography>
                       <Typography fontWeight="medium">3</Typography>
                       <Button
                         startIcon={<HistoryIcon />}
@@ -151,28 +199,48 @@ const LiveChat: React.FC = (): React.ReactElement => {
                 </StyledPaper>
 
                 {/* Ticket Details */}
-                <StyledPaper>
-                  <Typography variant="h6" gutterBottom>Ticket Details</Typography>
-                  <Box sx={{ textAlign: 'center', py: 3 }}>
-                    <Typography variant="h2" sx={{ color: 'text.secondary' }}>33%</Typography>
+                <StyledPaper sx={{ bgcolor: "rgba(101, 85, 143, 0.08)" }}>
+                  <Typography variant="h6" gutterBottom>
+                    Ticket Details
+                  </Typography>
+                  <Box sx={{ textAlign: "center", py: 3 }}>
+                    <Typography variant="h2" sx={{ color: "text.secondary" }}>
+                      33%
+                    </Typography>
                     <Typography color="text.secondary">Satisfaction</Typography>
                   </Box>
                   <Stack spacing={2}>
                     <InfoRow label="Status" value="Open/closed" />
                     <InfoRow label="Date and time" value="01/05/2023 2:23:09" />
                   </Stack>
-                  <Typography variant="subtitle2" sx={{ mt: 2 }}>Details and Consumers</Typography>
+                  <Typography variant="subtitle2" sx={{ mt: 2 }}>
+                    Details and Consumers
+                  </Typography>
                 </StyledPaper>
               </Stack>
             </Grid>
 
             {/* Center Column - Chat */}
             <Grid item xs={12} md={4}>
-              <StyledPaper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 2 }}>
+              <StyledPaper
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  bgcolor: "rgba(101, 85, 143, 0.08)",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    pb: 2,
+                  }}
+                >
                   <Typography variant="h6">Live Chat</Typography>
-                  <Button 
-                    variant="outlined" 
+                  <Button
+                    variant="outlined"
                     size="small"
                     startIcon={<CloseIcon />}
                   >
@@ -182,19 +250,19 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
                 <Divider />
 
-                <Box sx={{ flexGrow: 1, overflow: 'auto', height: 500, py: 2 }}>
+                <Box sx={{ flexGrow: 1, overflow: "auto", height: 200, py: 2 }}>
                   <Stack spacing={2}>
-                    <ChatMessage 
+                    <ChatMessage
                       isBot={true}
                       message="Hi I'm BotWot, How can I assist you today?"
                       time="7:30 pm"
                     />
-                    <ChatMessage 
+                    <ChatMessage
                       isBot={false}
                       message="I need to book an appointment"
                       time="7:31 pm"
                     />
-                    <ChatMessage 
+                    <ChatMessage
                       isBot={true}
                       message="Sure, when do you want to book this appointment?"
                       time="7:32 pm"
@@ -202,17 +270,20 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </Stack>
                 </Box>
 
-                <Divider />
-
-                <Box sx={{ py: 2 }}>
+                <Box sx={{ py: 10 }}>
                   <Stack spacing={2}>
                     <Stack direction="row" spacing={1}>
                       <QuickReplyChip size="small">ok</QuickReplyChip>
                       <QuickReplyChip size="small">fine</QuickReplyChip>
-                      <QuickReplyChip size="small">Fusce nec</QuickReplyChip>
-                      <QuickReplyChip size="small">Lorem ipsum</QuickReplyChip>
+                      <QuickReplyChip size="small">how are you?</QuickReplyChip>
+                      <QuickReplyChip size="small">
+                        can you help me?
+                      </QuickReplyChip>
                     </Stack>
-                    <Paper variant="outlined" sx={{ p: 2, display: 'flex', gap: 1 }}>
+                    <Paper
+                      variant="outlined"
+                      sx={{ p: 2, display: "flex", gap: 1 }}
+                    >
                       <TextField
                         fullWidth
                         placeholder="Message"
@@ -235,24 +306,35 @@ const LiveChat: React.FC = (): React.ReactElement => {
             <Grid item xs={12} md={4}>
               <Stack spacing={3}>
                 {/* Add to workflow */}
-                <StyledPaper>
-                  <Typography variant="h6" gutterBottom>Add to workflow</Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>
-                    Integrate this customer interaction into your workflow for seamless tracking and management
+                <StyledPaper sx={{ bgcolor: "rgba(101, 85, 143, 0.08)" }}>
+                  <Typography variant="h6" gutterBottom>
+                    Add to workflow
                   </Typography>
-                  <Button variant="outlined" fullWidth>Add to workflow</Button>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Integrate this customer interaction into your workflow for
+                    seamless tracking and management
+                  </Typography>
+                  <Button variant="outlined" fullWidth>
+                    Add to workflow
+                  </Button>
                 </StyledPaper>
 
                 {/* Summary and Next steps */}
-                <StyledPaper>
-                  <Typography variant="h6" gutterBottom>Summary and Next steps</Typography>
+                <StyledPaper sx={{ bgcolor: "rgba(101, 85, 143, 0.08)" }}>
+                  <Typography variant="h6" gutterBottom>
+                    Summary and Next steps
+                  </Typography>
                   <Stack spacing={2}>
                     <Box>
-                      <Typography variant="subtitle2">Resolution Likelihood</Typography>
+                      <Typography variant="subtitle2">
+                        Resolution Likelihood
+                      </Typography>
                       <Typography variant="h6">High</Typography>
                     </Box>
                     <Box>
-                      <Typography variant="subtitle2">Retention Probability</Typography>
+                      <Typography variant="subtitle2">
+                        Retention Probability
+                      </Typography>
                       <Typography variant="h6">95%</Typography>
                     </Box>
                     <Button variant="outlined">View Detailed Steps</Button>
@@ -260,19 +342,27 @@ const LiveChat: React.FC = (): React.ReactElement => {
                 </StyledPaper>
 
                 {/* Vulnerability Analysis */}
-                <StyledPaper>
-                  <Typography variant="h6" gutterBottom>Vulnerability Analysis and Sales Intelligence</Typography>
+                <StyledPaper sx={{ bgcolor: "rgba(101, 85, 143, 0.08)" }}>
+                  <Typography variant="h6" gutterBottom>
+                    Vulnerability Analysis and Sales Intelligence
+                  </Typography>
                   <Stack spacing={2}>
                     <Box>
-                      <Typography variant="subtitle2">Potential Risk</Typography>
+                      <Typography variant="subtitle2">
+                        Potential Risk
+                      </Typography>
                       <Typography variant="h6">Low</Typography>
                     </Box>
                     <Box>
-                      <Typography variant="subtitle2">Sales Opportunity</Typography>
+                      <Typography variant="subtitle2">
+                        Sales Opportunity
+                      </Typography>
                       <Typography variant="h6">High</Typography>
                     </Box>
                     <Box>
-                      <Typography variant="subtitle2">Upcoming Trends</Typography>
+                      <Typography variant="subtitle2">
+                        Upcoming Trends
+                      </Typography>
                       <Typography variant="h6">Lorem Ipsum</Typography>
                     </Box>
                     <Button variant="outlined">Explore Insights</Button>
@@ -280,10 +370,17 @@ const LiveChat: React.FC = (): React.ReactElement => {
                 </StyledPaper>
 
                 {/* Customer Satisfaction */}
-                <StyledPaper>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6" sx={{ color: 'error.main', mr: 1 }}>20%</Typography>
-                    <Typography variant="h6">Customer Satisfaction (CSAT)</Typography>
+                <StyledPaper sx={{ bgcolor: "rgba(101, 85, 143, 0.08)" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{ color: "error.main", mr: 1 }}
+                    >
+                      20%
+                    </Typography>
+                    <Typography variant="h6">
+                      Customer Satisfaction (CSAT)
+                    </Typography>
                   </Box>
                   <Box sx={{ mb: 3 }}>
                     <LinearProgress
@@ -292,10 +389,10 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       sx={{
                         height: 10,
                         borderRadius: 5,
-                        bgcolor: '#FFE7E7',
-                        '& .MuiLinearProgress-bar': {
-                          bgcolor: '#4CAF50',
-                        }
+                        bgcolor: "#FFE7E7",
+                        "& .MuiLinearProgress-bar": {
+                          bgcolor: "#4CAF50",
+                        },
                       }}
                     />
                   </Box>
@@ -303,13 +400,18 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     <InfoRow label="Chat Cue" value="Customer is anxious" />
                     <InfoRow label="Reason" value="Order mix up" />
                     <InfoRow label="Next Step" value="Confirm order details" />
-                    <InfoRow label="Predictive AI" value="High likelihood of resolution" />
+                    <InfoRow
+                      label="Predictive AI"
+                      value="High likelihood of resolution"
+                    />
                     <InfoRow label="Emotion" value="Neutral" />
                     <InfoRow label="Intent" value="Inquiry" />
                     <InfoRow label="Sentiment" value="Positive" />
                     <Stack direction="row" spacing={2}>
-                      <Button variant="outlined" fullWidth>Schedule Follow up</Button>
-                      <Button variant="contained" fullWidth color="primary">
+                      <Button variant="outlined" fullWidth>
+                        Schedule Follow up
+                      </Button>
+                      <Button variant="contained" fullWidth color="primary" >
                         Escalate to Manager
                       </Button>
                     </Stack>
@@ -322,7 +424,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
       </Box>
     </Box>
   );
-}
+};
 
 interface InfoRowProps {
   label: string;
@@ -331,7 +433,13 @@ interface InfoRowProps {
 
 function InfoRow({ label, value }: InfoRowProps) {
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
       <Typography color="text.secondary">{label}</Typography>
       <Typography fontWeight="medium">{value}</Typography>
     </Box>
@@ -346,26 +454,35 @@ interface ChatMessageProps {
 
 function ChatMessage({ isBot, message, time }: ChatMessageProps) {
   return (
-    <Box sx={{ display: 'flex', justifyContent: isBot ? 'flex-start' : 'flex-end' }}>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: isBot ? "flex-start" : "flex-end",
+      }}
+    >
       <Paper
         sx={{
-          maxWidth: '70%',
+          maxWidth: "70%",
           p: 2,
-          bgcolor: isBot ? 'grey.50' : 'primary.main',
-          color: isBot ? 'text.primary' : 'white',
-          borderRadius: 3
+          bgcolor: isBot ? "grey.50" : "primary.main",
+          color: isBot ? "text.primary" : "white",
+          borderRadius: 3,
         }}
       >
         {isBot && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.light' }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.light" }}>
               B
             </Avatar>
             <Typography fontWeight="medium">BotWot</Typography>
           </Box>
         )}
         <Typography>{message}</Typography>
-        <Typography variant="caption" color={isBot ? 'text.secondary' : 'inherit'} sx={{ display: 'block', mt: 0.5 }}>
+        <Typography
+          variant="caption"
+          color={isBot ? "text.secondary" : "inherit"}
+          sx={{ display: "block", mt: 0.5 }}
+        >
           {time}
         </Typography>
       </Paper>
