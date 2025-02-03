@@ -11,16 +11,11 @@ import EditBot from "../pages/EditBot";
 import Marketing from "../pages/Marketing/Dashboard";
 import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
 
-interface RouteType {
-  path: string;
-  component: React.ReactNode;
-  exact?: boolean;
-  id?: number;
-}
+
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
 
-export const autRoutes: RouteType[] = [
+export const autRoutes: any[] = [
   {
     id: 1,
     path: "/dashboard",
@@ -90,7 +85,7 @@ export const autRoutes: RouteType[] = [
   // { path: "/integration/whatsapp", component: <WhatsAppIntegration /> }
 ];
 
-export const publicRoutes: RouteType[] = [
+export const publicRoutes: any[] = [
   { path: "/login", component: <Login /> },
   { path: "/Signup", component: <SignUp /> },
   { path: "/", component: <Login /> },
