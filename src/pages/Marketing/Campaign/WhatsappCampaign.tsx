@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { WhatsApp, Upload, FileUpload } from "@mui/icons-material"; // Import MUI icons
 // import { ArrowDropDown } from "@mui/icons-material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
@@ -10,8 +10,12 @@ import CampaignTemplate from "../../../components/CampaignTemplate";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import { createWhatsAppCampaignAction } from "../../../store/actions/whatsappCampaignActions";
+import {
+  createWhatsAppCampaignAction,
+  createWhatsAppTemplateAction,
+} from "../../../store/actions/whatsappCampaignActions";
 import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
+import { text } from "stream/consumers";
 
 const WhatsappCampaign: React.FC = () => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>("");
@@ -25,6 +29,10 @@ const WhatsappCampaign: React.FC = () => {
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
   const [fileName, setFileName] = useState("");
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
+  const [text, setText] = useState("");
+  const [name, setName] = useState("");
+  // const [image, setImage] = useState<string | null>(null);
+  const [customizeScreen, setCustomizeScreen] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -77,6 +85,12 @@ const WhatsappCampaign: React.FC = () => {
 
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
   // const campaignId = useSelector((state: RootState) => state.whatsappCampaign?.campaignId);
+
+  const integrationId = useSelector(
+    (state: RootState) =>
+      state?.crudIntegration?.crudIntegration?.data?.secretToken
+  );
+  console.log("Secret Token:", integrationId);
 
   const handleSave = async () => {
     // Prepare the campaign payload
@@ -155,9 +169,28 @@ const WhatsappCampaign: React.FC = () => {
       alert("Failed to create campaign");
     }
   };
+  const handleCreateTemplate = () => {
+    const templateData = {
+      integrationId, // Ensure this variable is defined
+      name, // Ensure this variable is defined
+      text,
+      // image,
+    };
+    dispatch(createWhatsAppTemplateAction(templateData));
+    setCustomizeScreen(false);
+  };
+
+  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files[0]) {
+      const file = files[0];
+      // setImage(URL.createObjectURL(file));
+      setFileName(file.name); // Store filename
+    }
+  };
 
   React.useEffect(() => {
-    if (success) navigate("/marketing/whatsapp-dash");
+    if (success) navigate("/marketing/dashboard");
   }, [success, navigate]);
 
   const handleGoWizard = () => {
@@ -202,8 +235,8 @@ const WhatsappCampaign: React.FC = () => {
               <label className="text-slate-700">
                 Select or Customize Template*
               </label>
-              <div className="flex gap-0 justify-center items-center w-full mt-4 text-sm font-medium text-center min-h-[48px]">
-                {[ "Template"].map((m) => (
+              <div className="flex gap-0 justify-center items-center w-full mt-4 text-base font-medium text-center min-h-[48px]">
+                {["Template"].map((m) => (
                   <div
                     key={m}
                     onClick={() => handleModeChange(m as "Template")}
@@ -215,7 +248,80 @@ const WhatsappCampaign: React.FC = () => {
                   </div>
                 ))}
               </div>
+
+              <button
+                className="flex gap-2 w-full mt-4  whitespace-nowrap min-h-[45px] justify-center items-center text-base font-medium text-gray-100 bg-[#65558F] rounded-3xl"
+                onClick={() => setCustomizeScreen(true)}
+              >
+                Create Campaign
+              </button>
             </div>
+            {customizeScreen ? (
+              <div className="rounded-lg shadow-sm p-6">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Template Name
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your template name"
+                      className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                    />
+
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Text
+                    </label>
+                    <textarea
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      className="w-full h-32 px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                  <div>
+                    {/* <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Image
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() =>
+                          document.getElementById("file-upload")?.click()
+                        }
+                        className="flex items-center px-4 py-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100"
+                      >
+                        {fileName
+                          ? `Uploaded File: ${fileName}`
+                          : "Upload an image"}
+                      </button>
+
+                      <input
+                        id="file-upload"
+                        type="file"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                      />
+                    </div> */}
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setCustomizeScreen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateTemplate}
+                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
             {/* Mode-Specific Input */}
             {/* <div className="flex flex-col w-full mb-4">
@@ -397,12 +503,9 @@ const WhatsappCampaign: React.FC = () => {
             <div className="flex justify-center mt-4 gap-4">
               <button
                 onClick={handleSave}
-                className="flex gap-2 w-[200px] whitespace-nowrap justify-center items-center text-xl font-medium text-gray-100 bg-[#65558F] rounded-3xl"
+                className="flex gap-2 w-full min-h-[50px] whitespace-nowrap justify-center items-center text-2xl font-medium text-gray-100 bg-[#65558F] rounded-3xl"
               >
                 Save
-              </button>
-              <button className="flex gap-2 w-[200px] whitespace-nowrap border-black justify-center items-center py-2 text-xl font-medium text-black border bg-transparent rounded-3xl">
-                Create New
               </button>
             </div>
           </div>

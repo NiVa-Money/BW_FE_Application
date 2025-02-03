@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { useState, useEffect, ReactNode, useMemo, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  ReactNode,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { Card, CardContent, CardHeader, IconButton } from "@mui/material";
@@ -28,6 +35,8 @@ import axiosInstance from "../../../api/axiosConfig";
 import ReactMarkdown from "react-markdown";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos"; // Left Arrow Icon
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"; // Right Arrow Icon
+import WhatsappDash from "../Whatsapp/WhatsappDashboard";
+import { useNavigate } from "react-router-dom";
 
 const followerData = [
   { day: 1, value: 25000 },
@@ -98,6 +107,9 @@ const MarketingDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFetched, setIsFetched] = useState(false);
+  const [showWhatsappDash, setShowWhatsappDash] = useState(false);
+
+  const navigate = useNavigate();
 
   const fetchInsights = async () => {
     setLoading(true);
@@ -156,6 +168,10 @@ const MarketingDashboard = () => {
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === newsData.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleViewDashboard = () => {
+    navigate(`/marketing/whatsappdashboard`);
   };
 
   const formatNewsForCarousel = useCallback(() => {
@@ -359,9 +375,13 @@ const MarketingDashboard = () => {
                 <WhatsApp sx={{ color: "#25D366" }} />
                 <span className="text-sm font-medium">1 Active campaign</span>
               </div>
-              <button className="text-indigo-600 text-sm">
+              <button
+                className="text-indigo-600 text-sm"
+                onClick={handleViewDashboard}
+              >
                 View dashboard
               </button>
+              {showWhatsappDash && <WhatsappDash totalMessages={0} seenMessages={0} deliveredMessages={0} unreadMessages={0} hotLeads={0} campaignName={""} />}
             </div>
           </div>
         </DashboardCard>

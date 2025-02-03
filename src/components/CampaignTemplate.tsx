@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
@@ -50,12 +51,12 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({ onClose }) => {
   };
 
   const handleCreateTemplate = () => {
-    const templateData = {
-      text,
-      image,
-    };
-    dispatch(createWhatsAppTemplateAction(templateData));
-    setCustomizeScreen(false);
+    // const templateData = {
+    //   text,
+    //   image,
+    // };
+    // dispatch(createWhatsAppTemplateAction(templateData));
+    // setCustomizeScreen(false);
     onClose();
   };
 

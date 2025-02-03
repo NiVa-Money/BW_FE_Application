@@ -1,4 +1,4 @@
-import { takeEvery } from "redux-saga/effects";
+import { takeEvery, takeLatest } from "redux-saga/effects";
 import {
   CREATE_BOT,
   DELETE_BOT,
@@ -35,6 +35,8 @@ import {
   createWhatsAppTemplateSaga,
   fetchWhatsAppTemplatesSaga,
 } from "./whatsappCampaignSaga";
+import { FETCH_WHATSAPP_DASHBOARD_REQUEST } from "../actionTypes/whatsappDashboardActionTypes";
+import { whatsappDashboardSaga } from "./whatsappDashboard";
 
 export default function* rootSaga() {
   yield takeEvery(CREATE_BOT, createBotSaga);
@@ -50,4 +52,5 @@ export default function* rootSaga() {
   yield takeEvery(UPDATE_WHATSAPP_REQUEST, updateWhatsappSaga);
   yield takeEvery(GET_WHATSAPP_REQUEST, getWhatsappSaga);
   yield takeEvery(DELETE_WHATSAPP_REQUEST, deleteWhatsappSaga);
+  yield takeLatest(FETCH_WHATSAPP_DASHBOARD_REQUEST, whatsappDashboardSaga);
 }

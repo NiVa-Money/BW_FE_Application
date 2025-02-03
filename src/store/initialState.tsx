@@ -30,7 +30,7 @@ export const initialState: any = {
     loading: false,
     success: false,
     error: null,
-    // campaignId: "",
+    campaignData: null,
   },
 
   integration: {
@@ -49,5 +49,11 @@ export const initialState: any = {
     templates: [],
     error: null,
     success: false,
+  },
+
+  whatsappDashboard: {
+    loading: false,
+    data: null,
+    error: null,
   },
 };

@@ -50,24 +50,7 @@ export const convertCsvToJsonService = async (formData: FormData) => {
   }
 };
 
-export const WhatsAppDashboardService = async (campaignId: string) => {
-  try {
-    const response = await axiosInstance.post("/marketing/whatsapp/dashboard", {
-      campaignId,
-    });
-    return response.data; // Assuming the response contains the required data
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Error navigating to WhatsApp dashboard:",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    throw error; // Re-throw the error to be handled by the caller
-  }
-};
+
 
 export const fetchWhatsAppTemplatesService = async (integrationId: string) => {
   try {
