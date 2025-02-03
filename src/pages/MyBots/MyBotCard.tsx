@@ -1,6 +1,5 @@
 import React from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
-import { FiDownload } from 'react-icons/fi';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import EditIcon from '@mui/icons-material/Edit';
