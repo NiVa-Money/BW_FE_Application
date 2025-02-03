@@ -109,27 +109,50 @@ const WhatsappCampaign: React.FC = () => {
       contactsUrl: string;
       messageType: string;
       messageContent: {
-        text: string;
+        // text: string;
         template: {
           name: string;
           language: string;
           header: { image: string };
           body: { text: string[] };
         } | null;
-        image: { url: string; caption: string } | null;
+        // image: { url: string; caption: string } | null;
       };
       contactsData?: any;
     }
 
-    const templateContent = selectedTemplate || {
-      name: "order_notification",
-      language: "en",
-      header: { image: "https://example.com/image.png" },
-      body: {
-        text: ["Your order has been shipped!", "Your package is on its way!"],
-      },
-    };
+    const templateContent =
+      mode === "Template"
+        ? selectedTemplate
+          ? {
+              name: selectedTemplate.name,
+              language: selectedTemplate.language || "en",
+              header: { image: selectedTemplate.header }, // header is a string (URL)
 
+              body: {
+                text:
+                  typeof selectedTemplate.body === "string"
+                    ? [selectedTemplate.body]
+                    : Array.isArray(selectedTemplate.body)
+                    ? selectedTemplate.body
+                    : [],
+              },
+            }
+          : {
+              name: "order_notification",
+              language: "en",
+              header: { image: "https://example.com/image.png" },
+              body: {
+                text: [
+                  "Your order has been shipped!",
+                  "Your package is on its way!",
+                ],
+              },
+            }
+        : null;
+    console.log("selected template", selectedTemplate);
+    console.log("templatename:", selectedTemplate.templateName); // Debugging
+    console.log("templateContent:", templateContent); // Debugging
     const campaignPayload: CampaignPayload = {
       campaignName,
       channel: "whatsapp",
@@ -143,8 +166,6 @@ const WhatsappCampaign: React.FC = () => {
       messageType: mode.toLowerCase(),
       messageContent: {
         template: mode === "Template" ? templateContent : null,
-        text: "",
-        image: null,
       },
     };
 

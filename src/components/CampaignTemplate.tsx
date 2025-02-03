@@ -9,6 +9,7 @@ import {
   // createWhatsAppTemplateAction,
 } from "../store/actions/whatsappCampaignActions";
 import { RootState } from "../store";
+import { campaignImageService } from "../api/services/whatsappCampaignService";
 
 type CampaignTemplateProps = {
   onClose: () => void;
@@ -20,8 +21,11 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
   onSelectTemplate,
 }) => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
-  const [text, setText] = useState("");
+  // const [text, setText] = useState("");
   const [_image, setImage] = useState<string | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const dispatch = useDispatch();
 
   const integrationId = useSelector(
@@ -46,33 +50,96 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
     }
   }, [dispatch, integrationId]);
 
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files[0]) {
       const file = files[0];
-      setImage(URL.createObjectURL(file));
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const data = await campaignImageService(formData);
+        setImageUrl(data.imageUrl); // Assuming your backend responds with { imageUrl: 'url' }
+        setFileName(file.name);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
     }
   };
 
+  // const handleTemplateSelect = (template: any) => {
+  //   console.log("Selected template:", template); // Log to inspect the structure
+
+  //   // Ensure templateName exists
+  //   const selectedTemplate = {
+  //     ...template,
+  //     name: template.templateName , // Assign a fallback name if templateName is missing
+  //     body: template.components
+  //       ?.filter((comp: any) => comp.type === "BODY")
+  //       .map((body: any) => body.text)
+  //       .join(" "),
+  //     header: imageUrl ? imageUrl : "", // Pass the imageUrl here
+  //   };
+
+  //   console.log("Selected Template with Name:", selectedTemplate); // Verify if name is correctly passed
+
+  //   setCustomizeScreen(true);
+  // };
+
   const handleTemplateSelect = (template: any) => {
-    // Wrap the template object to ensure it has a valid 'name' field.
-    const selectedTemplate = {
-      ...template,
-      name: template.templateName || "", // Use templateName or fallback to empty string.
-      text : template.components?.filter((comp: any) => comp.type === "BODY").map((body: any) => body.text).join(" "),
-      image : template.components?.filter((comp: any) => comp.type === "HEADER" && comp.format === "IMAGE").map((header: any) => header.example?.header_handle[0]).join(" "),
+    console.log("Selected template:", template);
+
+    const mappedTemplate = {
+      name: template.templateName,
+      body: template.components
+        ?.filter((comp: any) => comp.type === "BODY")
+        .map((body: any) => body.text)
+        .join(" "),
     };
-    console.log("Selected Template with proper name:", selectedTemplate);
-    onSelectTemplate(selectedTemplate);
+
+    setSelectedTemplate(mappedTemplate); // Store template in state
+    setCustomizeScreen(true);
   };
 
-  const handleCreateTemplate = () => {
-    // const templateData = {
-    //   text,
-    //   image,
-    // };
-    // dispatch(createWhatsAppTemplateAction(templateData));
-    // setCustomizeScreen(false);
+  // const handleCreateCampaign = (template: any) => {
+  //   // const templateData = {
+  //   //   text,
+  //   //   image,
+  //   // };
+  //   // dispatch(createWhatsAppTemplateAction(templateData));
+  //   // setCustomizeScreen(false);
+  //   if (imageUrl) {
+  //     console.log("Selected Image URL:", imageUrl);
+  //     const selectedTemplate = {
+  //       ...template, // Reuse the template object that was selected
+  //       name: template.templateName, // Assign a fallback name if templateName is missing
+  //       body: template.components
+  //         ?.filter((comp: any) => comp.type === "BODY")
+  //         .map((body: any) => body.text)
+  //         .join(" "),
+  //       header: imageUrl, // Now set the uploaded image URL as the header
+  //     };
+
+  //     // Pass the finalized template to onSelectTemplate
+  //     onSelectTemplate(selectedTemplate);
+  //     console.log("Selected Templatessss with Name:", selectedTemplate); // Verify if name is correctly passed
+  //   }
+  //   onClose();
+  // };
+
+  const handleCreateCampaign = () => {
+    if (!selectedTemplate) {
+      alert("Please select a template first!");
+      return;
+    }
+
+    const finalTemplate = {
+      ...selectedTemplate,
+      header: imageUrl || "", // Attach uploaded image if available
+    };
+
+    console.log("Final Selected Template:", finalTemplate);
+    onSelectTemplate(finalTemplate);
     onClose();
   };
 
@@ -94,7 +161,7 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
         {customizeScreen ? (
           <div className="rounded-lg shadow-sm p-6">
             <div className="space-y-6">
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Text
                 </label>
@@ -103,10 +170,10 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
                   onChange={(e) => setText(e.target.value)}
                   className="w-full h-32 px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
-              </div>
+              </div> */}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xl font-medium text-gray-700 mb-4">
                   Image
                 </label>
                 <div className="flex items-center space-x-2">
@@ -118,6 +185,11 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
                   >
                     Upload
                   </button>
+                  {fileName && (
+                    <span className="text-gray-700 text-sm ml-2">
+                      {fileName}
+                    </span>
+                  )}
                   <input
                     id="file-upload"
                     type="file"
@@ -137,7 +209,7 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
                 Cancel
               </button>
               <button
-                onClick={handleCreateTemplate}
+                onClick={handleCreateCampaign}
                 className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
               >
                 Done
@@ -154,15 +226,6 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
                 <h3 className="font-medium  text-center text-lg mb-2">
                   {template.templateName}
                 </h3>
-
-                {/* Displaying body text */}
-                {template.components
-                  ?.filter((comp: any) => comp.type === "BODY")
-                  .map((body: any, index: number) => (
-                    <p key={index} className="text-base  text-gray-600 mb-4">
-                      {body.text}
-                    </p>
-                  ))}
 
                 {/* Displaying header image if available */}
                 {template.components?.some(
@@ -186,6 +249,15 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
                       />
                     ))}
 
+                {/* Displaying body text */}
+                {template.components
+                  ?.filter((comp: any) => comp.type === "BODY")
+                  .map((body: any, index: number) => (
+                    <p key={index} className="text-base  text-gray-600 mb-4">
+                      {body.text}
+                    </p>
+                  ))}
+
                 {/* Displaying buttons if available */}
                 {template.components
                   ?.filter((comp: any) => comp.type === "BUTTONS")
@@ -204,12 +276,12 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
                   ))}
 
                 <div className="flex justify-end space-x-3 mt-6">
-                  <button
+                  {/* <button
                     onClick={() => setCustomizeScreen(true)}
                     className="flex-1 px-4 py-2 text-sm font-medium text-purple-600 bg-white border border-purple-200 rounded-md hover:bg-purple-50"
                   >
                     Customize
-                  </button>
+                  </button> */}
                   <button
                     onClick={() => handleTemplateSelect(template)}
                     className="flex-1 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
