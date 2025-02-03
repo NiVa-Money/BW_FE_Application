@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useRef, useState } from "react";
-import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import { HexColorPicker } from "react-colorful";
 import FilePresentIcon from "@mui/icons-material/FilePresent";
@@ -22,7 +22,7 @@ import { useParams } from "react-router-dom";
 const EditBot: React.FC = () => {
   const { id } = useParams();
   console.log("id", id);
-  const [botData, setBotData] = useState<any>({});
+  const [_botData, setBotData] = useState<any>({});
   const botEditDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
@@ -49,7 +49,7 @@ const EditBot: React.FC = () => {
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [base64Image, setBase64Image] = useState("");
 
-  const [base64File, setBase64File] = useState("");
+  const [base64File, _setBase64File] = useState("");
   const [formValues, setFormValues] = useState<any>({
     botName: "",
     theme: "",

@@ -32,7 +32,7 @@ const ExportIntegrationModal: React.FC<ConfirmationModalProps> = ({
             navigator.clipboard
                 .writeText(`<script src="${exportResponse.url}"></script>`)
                 .then(() => setCopySuccess('Copied to clipboard!'))
-                .catch((err) => setCopySuccess('Failed to copy.'));
+                .catch((_err) => setCopySuccess('Failed to copy.'));
         }
     };
     const handleClose = () => {

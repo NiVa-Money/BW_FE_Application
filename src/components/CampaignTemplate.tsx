@@ -17,7 +17,7 @@ type CampaignTemplateProps = {
 const CampaignTemplate: React.FC<CampaignTemplateProps> = ({ onClose }) => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [text, setText] = useState("");
-  const [image, setImage] = useState<string | null>(null);
+  const [_image, setImage] = useState<string | null>(null);
   const dispatch = useDispatch();
 
   const integrationId = useSelector(

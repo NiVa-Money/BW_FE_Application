@@ -33,7 +33,7 @@ const CreateBot: React.FC = () => {
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [base64Image, setBase64Image] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [base64File, setBase64File] = useState('');
+  const [base64File, _setBase64File] = useState('');
   const createBotDataRedux = useSelector(
     (state: RootState) => state.bot?.create?.data
   );

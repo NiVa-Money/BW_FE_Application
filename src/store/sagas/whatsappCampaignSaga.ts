@@ -53,13 +53,12 @@ export function* createWhatsAppCampaignSaga({
   }
 }
 
-export function* fetchWhatsAppTemplatesSaga({
-  payload,
-}: {
+export function* fetchWhatsAppTemplatesSaga(action: {
+  type: string;
   payload: any;
 }): Generator<any, void, any> {
   try {
-    const response = yield call(fetchWhatsAppTemplatesService, payload);
+    const response = yield call(fetchWhatsAppTemplatesService, action.payload);
     yield put({
       type: FETCH_WHATSAPP_TEMPLATES_SUCCESS,
       payload: response,
@@ -73,13 +72,12 @@ export function* fetchWhatsAppTemplatesSaga({
   }
 }
 
-export function* createWhatsAppTemplateSaga({
-  payload,
-}: {
+export function* createWhatsAppTemplateSaga(action: {
+  type: string;
   payload: any;
 }): Generator<any, void, any> {
   try {
-    yield call(createWhatsAppTemplateService, payload);
+    yield call(createWhatsAppTemplateService, action.payload);
     yield put({
       type: CREATE_WHATSAPP_TEMPLATE_SUCCESS,
     });

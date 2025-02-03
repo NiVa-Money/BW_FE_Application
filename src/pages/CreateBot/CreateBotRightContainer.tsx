@@ -18,7 +18,7 @@ interface CreateBotRightContainerProps {
 
 }
 
-const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botName, imageSrc, theme, color = 'white', setFormValues, handleSubmit, font }) => {
+const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botName, imageSrc, theme, setFormValues, handleSubmit, font }) => {
   const messages: any = [
     { id: 1, sender: 'bot', text: "Hi I’m BotWot, How can I assist you today?", time: '7:30 pm' },
     { id: 2, sender: 'user', text: 'I need to book an appointment', time: '7:31 pm' },

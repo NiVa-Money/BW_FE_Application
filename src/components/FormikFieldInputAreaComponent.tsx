@@ -3,12 +3,12 @@
 
 
 import React from 'react';
-import { Chip, TextField } from '@mui/material';
+import {  TextField } from '@mui/material';
 import { FieldProps } from 'formik';
 
-interface FormikChipsFieldProps extends FieldProps {
-  options: { label: string; value: string; }[];
-}
+// interface FormikChipsFieldProps extends FieldProps {
+//   options: { label: string; value: string; }[];
+// }
 
 const FormikFieldInputAreaComponent: React.FC<any> = ({ field, form, ...props }) => {
 

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { ChangeEvent, useState } from "react";
+import React, {  useState } from "react";
 import { WhatsApp, Upload, FileUpload } from "@mui/icons-material"; // Import MUI icons
 // import { ArrowDropDown } from "@mui/icons-material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
@@ -27,7 +27,7 @@ const WhatsappCampaign: React.FC = () => {
   const [botConfigFile, setBotConfigFile] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
-  const [fileName, setFileName] = useState("");
+  const [_fileName, setFileName] = useState("");
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
   const [text, setText] = useState("");
   const [name, setName] = useState("");

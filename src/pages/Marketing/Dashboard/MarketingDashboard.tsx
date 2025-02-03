@@ -107,7 +107,7 @@ const MarketingDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   // const [isFetched, setIsFetched] = useState(false);
-  const [showWhatsappDash, setShowWhatsappDash] = useState(false);
+  const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
 
   const navigate = useNavigate();
 
