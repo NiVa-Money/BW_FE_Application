@@ -12,8 +12,11 @@ import {
   EXPORT_BOT_PROFILE_SUCCESS,
   GET_BOTS_FAILURE,
   GET_BOTS_SUCCESS,
+  TEST_BOT_FAILURE,
+  TEST_BOT_SUCCESS,
 } from "../actionTypes/botActionsTypes";
 import {
+  botTestService,
   createBotProfileService,
   deleteBotService,
   editBotProfileService,
@@ -132,6 +135,25 @@ export function* exportBotProfileSaga({
   } catch (error: any) {
     yield put({
       type: EXPORT_BOT_PROFILE_FAILURE,
+      payload: error.message,
+    });
+  }
+}
+export function* testBotSaga({
+  payload,
+}: {
+  type: string;
+  payload: any;
+}): Generator<any> {
+  try {
+    const testBotResponse = yield call(botTestService, payload);
+    yield put({
+      type: TEST_BOT_SUCCESS,
+      payload: testBotResponse,
+    });
+  } catch (error: any) {
+    yield put({
+      type: TEST_BOT_FAILURE,
       payload: error.message,
     });
   }

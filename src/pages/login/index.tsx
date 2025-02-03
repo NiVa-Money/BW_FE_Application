@@ -23,23 +23,54 @@ const Login = () => {
       setError("Please provide a valid email and password.");
       return;
     }
-
+    else {
+      try {
+        const response = await LoginUserService({ email, password });
+        if (response.success) {
+          console.log('re', response)
+          localStorage.setItem('user_id', response.user_id)
+          localStorage.setItem('token', response.token)
+          localStorage.setItem('userData', JSON.stringify({ moduleMap: response.moduleMap }));
+          navigate("/dashboard");
+          navigate(0)
+        } else {
+          setError(response.message || "Google login failed. Please try again.");
+        }
+      } catch (err) {
+        console.error("Error logging in :", err);
+        setError("An unexpected error occurred.");
+      }
+      finally {
+        setIsLoading(false);
+      }
+    }
     setIsLoading(true);
 
-    try {
-      const response = await LoginUserService({ email, password });
-      if (response.success) {
-        navigate("/dashboard");
-      } else {
-        setError(response.message || "Login failed. Please try again.");
-      }
-    } catch (err) {
-      console.error("Error logging in:", err);
-      setError("An unexpected error occurred. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
   };
+
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!isValidForm()) {
+  //     setError("Please provide a valid email and password.");
+  //     return;
+  //   }
+
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await LoginUserService({ email, password });
+  //     if (response.success) {
+  //       navigate("/dashboard");
+  //     } else {
+  //       setError(response.message || "Login failed. Please try again.");
+  //     }
+  //   } catch (err) {
+  //     console.error("Error logging in:", err);
+  //     setError("An unexpected error occurred. Please try again later.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   // Handle Google login
   const handleGoogleLogin = async () => {
@@ -61,6 +92,7 @@ const Login = () => {
                 localStorage.setItem('userData', JSON.stringify(userProfile))
               }
               navigate("/dashboard");
+              navigate(0)
 
             } catch {
               console.error("Error fetching user detail",);

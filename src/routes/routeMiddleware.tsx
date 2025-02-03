@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import {
   Drawer,
   List,
@@ -28,6 +28,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
   const handleToggle = (id: number) => {
     setOpenDropdown((prev) => ({ ...prev, [id]: !prev[id] }));
   };
+  const navigate = useNavigate()
   const toggleSidebar = () => setOpen(!open);
   const userData = localStorage.getItem("userData") || JSON.stringify({});
   const moduleMapping = JSON.parse(userData).moduleMap
@@ -40,6 +41,12 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
   // If the route is protected and no user_id exists, redirect to login
   if (isProtected && !userId) {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  const logOutHandler = () => {
+    navigate('/')
+    localStorage.clear();
+
+
   }
   useEffect(() => {
     const data = sidebarNavLinks(moduleMapping);
@@ -62,8 +69,8 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
                 <button onClick={toggleSidebar} >
                   <KeyboardBackspaceIcon /> <span>Back</span>
                 </button>
-                <button onClick={() => { }} >
-                  <span>Test Bot</span>
+                <button onClick={logOutHandler} >
+                  <span>Log Out</span>
                 </button>
               </div>
               <List>
@@ -111,8 +118,8 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected 
                 <button onClick={toggleSidebar} >
                   <KeyboardBackspaceIcon /> <span>Back</span>
                 </button>
-                <button onClick={() => { }} >
-                  <span>Test Bot</span>
+                <button onClick={logOutHandler} >
+                  <span>Log Out</span>
                 </button>
               </div>
               <List>

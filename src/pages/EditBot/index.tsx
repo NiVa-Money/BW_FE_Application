@@ -22,7 +22,7 @@ import { useParams } from "react-router-dom";
 const EditBot: React.FC = () => {
   const { id } = useParams();
   console.log("id", id);
-  const [_botData, setBotData] = useState<any>({});
+  const [botData, setBotData] = useState<any>({});
   const botEditDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
@@ -63,6 +63,13 @@ const EditBot: React.FC = () => {
     botSmartness: false,
     appoimentLink: "",
   });
+  const botLimits: any[] = [
+    { label: "50", value: 50 },
+    { label: "100", value: 100 },
+    { label: "200", value: 200 },
+    { label: "400", value: 400 },
+    { label: "530", value: 530 },
+  ]
   const botSamples = [
     {
       imageUrl: `/assets/bot1.svg`,
@@ -205,6 +212,25 @@ const EditBot: React.FC = () => {
     //   event.preventDefault();
     // }
   };
+  useEffect(() => {
+    if (botData.length) {
+      setFormValues({
+        botName: botData[0]?.botName,
+        theme: botData[0]?.boTheme || '',
+        botTone: botData[0]?.botTone || '',
+        botFont: botData[0]?.botFont || '',
+        greetingMessage: botData[0]?.botGreetingMessage,
+        botIdentity: botData[0]?.botIdentity,
+        botLimit: botData[0]?.wordLimitPerMessage,
+        phoneNumber: botData[0]?.supportNumber,
+        email: botData[0]?.supportEmail,
+        botSmartness: botData[0]?.botSmartness,
+        appoimentLink: botData[0]?.appointmentSchedulerLink,
+      });
+    }
+    console.log('b', botData)
+  }, [botData])
+
   return (
     <div className="m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center ">
       <Formik
@@ -243,13 +269,11 @@ const EditBot: React.FC = () => {
                       <button
                         key={color}
                         onClick={() => handleColorClick(color)}
-                        className={`w-8 h-8  rounded-full ${
-                          color === "rainbow"
-                            ? "bg-gradient-to-r from-red-500 via-green-500 to-blue-500"
-                            : ""
-                        }${
-                          chatColor === color ? "border-4 border-gray-400" : ""
-                        }`}
+                        className={`w-8 h-8  rounded-full ${color === "rainbow"
+                          ? "bg-gradient-to-r from-red-500 via-green-500 to-blue-500"
+                          : ""
+                          }${chatColor === color ? "border-4 border-gray-400" : ""
+                          }`}
                         style={{
                           backgroundColor:
                             color !== "rainbow" ? color : undefined,
@@ -401,6 +425,7 @@ const EditBot: React.FC = () => {
                   <Field
                     name="botIdentity"
                     component={FormikFieldToggleComponent}
+                    value={botIdentity}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, botIdentity: value });
                       // Perform additional logic if needed
@@ -467,17 +492,12 @@ const EditBot: React.FC = () => {
                     name="botLimit"
                     placeholder="Enter your Bot Name"
                     component={FormikFieldSelectComponent}
+                    value={botLimits.find((option) => option.value === botLimit) || null}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, botLimit: value });
                       // Perform additional logic if needed
                     }}
-                    options={[
-                      { label: "50", value: 50 },
-                      { label: "100", value: 100 },
-                      { label: "200", value: 200 },
-                      { label: "400", value: 400 },
-                      { label: "530", value: 530 },
-                    ]}
+                    options={botLimits}
                   />
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">

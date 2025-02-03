@@ -21,9 +21,10 @@ export const initialState: any = {
       loader: false,
     },
     export: {
-      data: {},
+      data: null,
       loader: false,
     },
+    test: { data: {}, loader: false }
   },
 
   whatsappCampaign: {

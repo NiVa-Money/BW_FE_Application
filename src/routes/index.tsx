@@ -10,7 +10,8 @@ import MyBots from "../pages/MyBots/index";
 import EditBot from "../pages/EditBot";
 import Marketing from "../pages/Marketing/Dashboard";
 import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
-
+import TestBot from "../pages/TestBot";
+import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -26,6 +27,8 @@ export const autRoutes: any[] = [
   { id: 3, path: "/mybots", component: <MyBots /> },
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
+  { id: 3, path: "/testbot/:id", component: <TestBot /> },
+
   { id: 4, path: "/engagementTab", component: <EngagementTab /> },
   { id: 5.1, path: "/marketing/dashboard", component: <Marketing /> },
   {
@@ -42,6 +45,11 @@ export const autRoutes: any[] = [
       />
     ),
   },
+  { id: 3, path: '/createbot', component: <CreateBot /> },
+  { id: 3, path: '/editbot/:id', component: <EditBot /> },
+  { id: 3, path: '/testbot/:id', component: <TestBot /> },
+  { id: 4, path: '/engagementTab', component: <EngagementTab /> },
+  { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   { id: 5.2, path: "/marketing/campaign", component: <Campaign /> },
   { id: 6, path: "/agent", component: <AdminPanel /> },
   {
