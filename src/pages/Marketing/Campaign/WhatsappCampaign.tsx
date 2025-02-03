@@ -15,7 +15,7 @@ import {
   createWhatsAppTemplateAction,
 } from "../../../store/actions/whatsappCampaignActions";
 import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
-import { text } from "stream/consumers";
+
 
 const WhatsappCampaign: React.FC = () => {
   const [whatsappNumber, setWhatsappNumber] = useState<string>("");
@@ -180,14 +180,14 @@ const WhatsappCampaign: React.FC = () => {
     setCustomizeScreen(false);
   };
 
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files[0]) {
-      const file = files[0];
-      // setImage(URL.createObjectURL(file));
-      setFileName(file.name); // Store filename
-    }
-  };
+  // const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  //   const files = event.target.files;
+  //   if (files && files[0]) {
+  //     const file = files[0];
+  //     // setImage(URL.createObjectURL(file));
+  //     setFileName(file.name); // Store filename
+  //   }
+  // };
 
   React.useEffect(() => {
     if (success) navigate("/marketing/dashboard");

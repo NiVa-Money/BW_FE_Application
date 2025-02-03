@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
@@ -24,7 +26,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botNa
   ];
 
   return (
-    <right-container >
+    <div>
       <div className="flex flex-col h-[100%]">
         <div className='flex justify-end items-center'>
           <label htmlFor="botSmartness" className='text-black mr-2'
@@ -117,7 +119,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botNa
 
         </div>
       </div>
-    </right-container>
+    </div>
 
   );
 };

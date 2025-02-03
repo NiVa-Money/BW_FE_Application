@@ -106,7 +106,7 @@ const MarketingDashboard = () => {
   const [newsData, setNewsData] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isFetched, setIsFetched] = useState(false);
+  // const [isFetched, setIsFetched] = useState(false);
   const [showWhatsappDash, setShowWhatsappDash] = useState(false);
 
   const navigate = useNavigate();
@@ -321,7 +321,7 @@ const MarketingDashboard = () => {
                     outerRadius={80}
                     label
                   >
-                    {geographyData.map((entry, index) => (
+                    {geographyData.map((_entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
@@ -346,7 +346,7 @@ const MarketingDashboard = () => {
                     outerRadius={80}
                     label
                   >
-                    {geographyData.map((entry, index) => (
+                    {geographyData.map((_entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
@@ -442,7 +442,7 @@ const MarketingDashboard = () => {
                   outerRadius={80}
                   label
                 >
-                  {socialData.map((entry, index) => (
+                  {socialData.map((_entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}

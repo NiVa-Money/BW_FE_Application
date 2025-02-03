@@ -6,7 +6,7 @@ import { ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchWhatsAppTemplatesAction,
-  createWhatsAppTemplateAction,
+  // createWhatsAppTemplateAction,
 } from "../store/actions/whatsappCampaignActions";
 import { RootState } from "../store";
 

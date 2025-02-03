@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { CSSProperties } from 'react';
 import { Resizable } from "re-resizable";
 import DatePicker from 'react-datepicker';

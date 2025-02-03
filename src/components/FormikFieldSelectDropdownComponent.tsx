@@ -1,5 +1,5 @@
 import React from 'react';
-import { Select, MenuItem, FormControl, InputLabel, FormHelperText } from '@mui/material';
+import { Select, MenuItem, FormControl } from '@mui/material';
 import { FieldProps } from 'formik';
 
 interface FormikFieldSelectComponentProps extends FieldProps {
@@ -20,7 +20,7 @@ const FormikFieldSelectComponent: React.FC<FormikFieldSelectComponentProps> = ({
     const error = form.touched[name] && form.errors[name]; // To check for errors and display them
 
     // Handle the select dropdown change
-    const handleSelectChange = (selectedValue: string) => {
+    const handleSelectChange = (selectedValue: string | number) => {
         setFieldValue(name, selectedValue); // Update Formik state with the selected value
         if (onChange) {
             onChange(selectedValue); // Optionally call the parent onChange handler

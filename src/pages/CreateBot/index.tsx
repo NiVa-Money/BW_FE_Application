@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useRef, useState } from 'react';
 import { Formik, Field, Form } from 'formik';
 import * as Yup from 'yup';
@@ -78,7 +80,7 @@ const CreateBot: React.FC = () => {
     const file = new File([blob], 'image.jpg', { type: blob.type });
     setSelectedFileImage(file);
   };
-  const userId: string = localStorage.getItem("user_id");
+  const userId: string = localStorage.getItem("user_id") || '';
 
   const validationSchema = Yup.object({
     botName: Yup.string().required('BotName is required'),
@@ -121,7 +123,7 @@ const CreateBot: React.FC = () => {
     formData.append('botTheme', theme);
 
     console.log('Form Submitted:', formValues, formData.entries());
-    for (let [key, value] of formData.entries()) {
+    for (const [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }
     dispatch(createBotAction(formData))
@@ -176,19 +178,7 @@ const CreateBot: React.FC = () => {
       const success = createBotDataRedux?.success
       if (success) {
         setIsModalOpen(success)
-        setIsModalOpen({
-          botName: '',
-          theme: '',
-          botTone: '',
-          botFont: '',
-          greetingMessage: '',
-          botIdentity: '',
-          botLimit: '',
-          phoneNumber: '',
-          email: '',
-          botSmartness: false,
-          appoimentLink: ''
-        })
+        setIsModalOpen(false);
       }
 
     }
@@ -207,7 +197,7 @@ const CreateBot: React.FC = () => {
       >
         {() => (
           <Form className="w-[95%] m-auto h-[95%] grid grid-cols-[60%_40%]">
-            <left-container className="bg-blue">
+            <div className="flex-col">
               <div className="flex-col">
                 <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="botName">Bot Name</label>
@@ -237,7 +227,7 @@ const CreateBot: React.FC = () => {
                       <button
                         key={color}
                         onClick={() => handleColorClick(color)}
-                        className={`w-8 h-8 rounded-[100%] rounded-full ${color === 'rainbow'
+                        className={`w-8 h-8  rounded-full ${color === 'rainbow'
                           ? 'bg-gradient-to-r from-red-500 via-green-500 to-blue-500'
                           : ''
                           }${chatColor === color ? 'border-4 border-gray-400' : ''}`}
@@ -293,7 +283,7 @@ const CreateBot: React.FC = () => {
                             setImageName('');
                             setImageSrc('');
                           }}
-                          className="mr-4 ml-auto bg-none text-[black] text-white"
+                          className="mr-4 ml-auto bg-none text-black"
                         >
                           ×
                         </button> : null}
@@ -407,7 +397,7 @@ const CreateBot: React.FC = () => {
                             setFileName('');
                             setSelectedFile(null);
                           }}
-                          className="mr-4 ml-auto bg-none text-[black] text-white"
+                          className="mr-4 ml-auto bg-none text-black"
                         >
                           ×
                         </button> : null}
@@ -517,7 +507,7 @@ const CreateBot: React.FC = () => {
                   >Add to Workflow</Button>
                 </div>
               </div>
-            </left-container>
+            </div>
             <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} setFormValues={setFormValues} formValues={formValues} handleSubmit={handleSubmit} font={botFont} />
 
           </Form>

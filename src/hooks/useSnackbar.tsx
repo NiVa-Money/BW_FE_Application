@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Snackbar } from '@mui/material';
 
 export const useSnackbar = () => {
     const [open, setOpen] = useState(false);

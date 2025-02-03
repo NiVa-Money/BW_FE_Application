@@ -73,7 +73,11 @@ export function* fetchWhatsAppTemplatesSaga({
   }
 }
 
-export function* createWhatsAppTemplateSaga({ payload }: { payload: any }) {
+export function* createWhatsAppTemplateSaga({
+  payload,
+}: {
+  payload: any;
+}): Generator<any, void, any> {
   try {
     yield call(createWhatsAppTemplateService, payload);
     yield put({

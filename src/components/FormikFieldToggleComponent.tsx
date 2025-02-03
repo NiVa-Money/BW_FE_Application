@@ -22,13 +22,12 @@ const FormikFieldToggleComponent: React.FC<FormikToggleButtonGroupProps> = ({ fi
       value={value}
       exclusive
       // onChange={handleChange}
-      className="rounded-full w-max border h-[35px] border-gray-300 rounded-[50%]"
+      className=" w-max border h-[35px] border-gray-300 rounded-[50%]"
     >
       {options.map((option) => (
         <ToggleButton
           key={option.value}
           value={option.value}
-          required
           onClick={() => handleChipClick(option.value)}
 
           className={`  ${value === option.value

@@ -23,9 +23,14 @@ import {
   GET_WHATSAPP_SUCCESS,
 } from "../actionTypes/integrationActionTypes";
 
-export function* saveWhatsappSaga(action: { payload: any }): SagaIterator {
+export function* saveWhatsappSaga({
+  payload,
+}: {
+  type: string;
+  payload: any;
+}): Generator<any> {
   try {
-    const response = yield call(saveWhatsappService, action.payload);
+    const response = yield call(saveWhatsappService, payload);
 
     // Extracting secretToken and webhookUrl from response
     const { secretToken, webhookUrl } = response.data;

@@ -48,7 +48,7 @@ export default function* rootSaga() {
   yield takeEvery(CREATE_WHATSAPP_CAMPAIGN, createWhatsAppCampaignSaga);
   yield takeEvery(FETCH_WHATSAPP_TEMPLATES, fetchWhatsAppTemplatesSaga);
   yield takeEvery(CREATE_WHATSAPP_TEMPLATE, createWhatsAppTemplateSaga);
-  yield takeEvery(SAVE_WHATSAPPINT, saveWhatsappSaga); // This listens to SAVE_WHATSAPPINT actions
+  yield takeEvery(SAVE_WHATSAPPINT, saveWhatsappSaga);
   yield takeEvery(UPDATE_WHATSAPP_REQUEST, updateWhatsappSaga);
   yield takeEvery(GET_WHATSAPP_REQUEST, getWhatsappSaga);
   yield takeEvery(DELETE_WHATSAPP_REQUEST, deleteWhatsappSaga);
