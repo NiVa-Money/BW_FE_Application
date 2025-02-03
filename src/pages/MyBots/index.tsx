@@ -10,7 +10,6 @@ import ExportIntegrationModal from '../../components/exportIntegrationModal';
 import { notifyError } from '../../components/Toast';
 
 
-
 const MyBots: React.FC = () => {
   const dispatch = useDispatch()
   const [botLists, setbotLists] = useState<any>([])
@@ -66,10 +65,13 @@ const MyBots: React.FC = () => {
     dispatch(deleteBotAction(payloadDelete))
     setIsModalOpen(false);
 
+
   };
 
 
-  const handleTest = () => {
+  const handleTest = (id: string) => {
+    navigate(`/testbot/:${id}`)
+
     console.log('Test action triggered!');
   };
 
@@ -148,7 +150,7 @@ const MyBots: React.FC = () => {
               color={item?.botColor}
               createdAt={formatDateString(item?.createdAt)}
               onDelete={() => handleOpen(item._id)}
-              onTest={handleTest}
+              onTest={() => handleTest(item?._id)}
               onExport={() => handleExport(item._id)}
               onClick={() => handleEdit(item._id)}
 

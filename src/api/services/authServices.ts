@@ -3,17 +3,6 @@ import axiosInstance from "../axiosConfig";
 export const LoginUserService = async (payload: any) => {
   try {
     const response = await axiosInstance.post("/user/login", payload);
-
-    // Extract data from response.body
-    const { user_id, token, orgName, roleName, moduleMap } = response.data.body;
-
-    // Save to localStorage
-    localStorage.setItem("user_id", user_id);
-    localStorage.setItem("token", token);
-    localStorage.setItem("orgName", orgName);
-    localStorage.setItem("roleName", roleName);
-    localStorage.setItem("moduleMap", JSON.stringify(moduleMap));
-
     return response.data;
   } catch (error: any) {
     const errorMessage =

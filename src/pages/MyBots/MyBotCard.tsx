@@ -1,8 +1,8 @@
 import React from 'react';
 import { FaTrashAlt } from 'react-icons/fa';
-import { FiDownload } from 'react-icons/fi';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
-
+import IosShareIcon from '@mui/icons-material/IosShare';
+import EditIcon from '@mui/icons-material/Edit';
 interface CardProps {
     name: string;
     description: string;
@@ -55,7 +55,7 @@ const MyBotCard: React.FC<CardProps> = ({
                             onClick={onClick}
                             className="text-green-500 hover:text-green-700 flex items-center flex flex-col justify-end"
                         >
-                            <FiDownload />
+                            <EditIcon />
                             <span>Edit</span>
                         </button>
                         <button
@@ -67,9 +67,9 @@ const MyBotCard: React.FC<CardProps> = ({
                         </button>
                         <button
                             onClick={onExport}
-                            className="text-grey-500 hover:text-grey-700 flex items-center flex flex-col justify-end"
+                            className="text-blue-500 hover:text-grey-700 flex items-center flex flex-col justify-end"
                         >
-                            <SettingsSuggestIcon />
+                            <IosShareIcon />
                             <span>Export</span>
                         </button>
                     </div>

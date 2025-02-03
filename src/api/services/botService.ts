@@ -58,3 +58,13 @@ export const exportBotProfileService = async (payload: any) => {
     throw new Error("Error exporting bot");
   }
 };
+export const botTestService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post("/user/sessionChatV2", {
+      data: JSON.stringify(payload),
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error("Error in Creating Bot");
+  }
+};

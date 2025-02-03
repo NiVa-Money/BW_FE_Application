@@ -6,6 +6,7 @@ import {
   EXPORT_BOT_PROFILE,
   GET_BOTS,
   RESET_SPECIFIC_STATE,
+  TEST_BOT,
 } from "../actionTypes/botActionsTypes";
 
 export const createBotAction = (payload: any) => ({
@@ -32,4 +33,9 @@ export const resetBotAction = (state: any) => ({
 export const exportBotProfileServiceAction = (data: any) => ({
   type: EXPORT_BOT_PROFILE,
   payload: data,
+});
+
+export const botTestAction = (payload: any) => ({
+  type: TEST_BOT,
+  payload,
 });

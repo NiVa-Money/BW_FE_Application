@@ -17,8 +17,6 @@ import {
 import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
 
 const WhatsappCampaign: React.FC = () => {
-  const [whatsappNumber, setWhatsappNumber] = useState<string>("");
-  // const [mode, setMode] = useState<"Text" | "Image" | "Template">("Text");
   const [mode, setMode] = useState<"Template">("Template");
 
   const [campaignName, setCampaignName] = useState<string>("");
@@ -261,9 +259,8 @@ const WhatsappCampaign: React.FC = () => {
                   <div
                     key={m}
                     onClick={() => handleModeChange(m as "Template")}
-                    className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${
-                      mode === m ? "bg-purple-200" : "bg-white"
-                    }`}
+                    className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${mode === m ? "bg-purple-200" : "bg-white"
+                      }`}
                   >
                     {m}
                   </div>

@@ -5,6 +5,7 @@ import {
   EDIT_BOT,
   EXPORT_BOT_PROFILE,
   GET_BOTS,
+  TEST_BOT,
 } from "../actionTypes/botActionsTypes";
 import {
   createBotSaga,
@@ -12,6 +13,7 @@ import {
   editBotSaga,
   exportBotProfileSaga,
   getBotsSaga,
+  testBotSaga,
 } from "./botSagas";
 import {
   SAVE_WHATSAPPINT, // Ensure this is correctly defined in integrationActionTypes
@@ -44,7 +46,6 @@ export default function* rootSaga() {
   yield takeEvery(GET_BOTS, getBotsSaga);
   yield takeEvery(DELETE_BOT, deleteBotSaga);
   yield takeEvery(EXPORT_BOT_PROFILE, exportBotProfileSaga);
-
   yield takeEvery(CREATE_WHATSAPP_CAMPAIGN, createWhatsAppCampaignSaga);
   yield takeEvery(FETCH_WHATSAPP_TEMPLATES, fetchWhatsAppTemplatesSaga);
   yield takeEvery(CREATE_WHATSAPP_TEMPLATE, createWhatsAppTemplateSaga);
@@ -53,4 +54,5 @@ export default function* rootSaga() {
   yield takeEvery(GET_WHATSAPP_REQUEST, getWhatsappSaga);
   yield takeEvery(DELETE_WHATSAPP_REQUEST, deleteWhatsappSaga);
   yield takeLatest(FETCH_WHATSAPP_DASHBOARD_REQUEST, whatsappDashboardSaga);
+  yield takeEvery(TEST_BOT, testBotSaga);
 }
