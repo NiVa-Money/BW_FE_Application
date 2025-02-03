@@ -14,7 +14,7 @@ import {
 import { initialState } from "../initialState";
 
 export const integrationReducer = (
-  state = initialState.whatsappIntegration,
+  state = initialState.integration.whatsappIntegration,
   action: any
 ) => {
   switch (action.type) {
@@ -37,33 +37,59 @@ export const integrationReducer = (
   }
 };
 
-interface WhatsappState {
-  loading: boolean;
-  error: string | null;
-  data: any | null;
-}
+// interface WhatsappState {
+//   loading: boolean;
+  
+//   data: any | null;
+// }
 
 export const whatsappcrudReducer = (
-  state = initialState.crudIntegration,
+  state = initialState.integration,
   action: any
-): WhatsappState => {
+): any => {
   switch (action.type) {
     case UPDATE_WHATSAPP_REQUEST:
     case DELETE_WHATSAPP_REQUEST:
       return { ...state, loading: true, error: null };
+
     case UPDATE_WHATSAPP_SUCCESS:
       return { ...state, loading: false, data: action.payload };
+
     case DELETE_WHATSAPP_SUCCESS:
       return { ...state, loading: false, data: null };
+
     case UPDATE_WHATSAPP_FAILURE:
     case DELETE_WHATSAPP_FAILURE:
       return { ...state, loading: false, error: action.payload };
+
     case GET_WHATSAPP_REQUEST:
-      return { ...state, loading: true, error: null };
+      return {
+        ...state,
+        crudIntegration: {
+          loading: true, // Set loading to true during the request
+        },
+      };
+
     case GET_WHATSAPP_SUCCESS:
-      return { ...state, loading: false, data: action.payload };
+      console.log("action", action.payload);
+      return {
+        ...state,
+        crudIntegration: {
+          loading: false, // Set loading to false after success
+          // Clear any errors
+          data: action.payload.data[0],
+        },
+      };
+
     case GET_WHATSAPP_FAILURE:
-      return { ...state, loading: false, error: action.payload };
+      return {
+        ...state,
+        crudIntegration: {
+          loading: false, // Set loading to false after failure
+          data: null, // Clear any data
+        },
+      };
+
     default:
       return state;
   }

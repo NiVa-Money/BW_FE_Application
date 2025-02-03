@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Modal from "./IntegrationModal";
 import { saveWhatsapp } from "../../../store/actions/integrationActions";
+import { RootState } from "../../../store";
+import { getBotsAction } from "../../../store/actions/botActions";
 
 const WhatsAppIntegration: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -13,17 +16,43 @@ const WhatsAppIntegration: React.FC = () => {
     whatsappBusinessAccountId: "",
     phoneNumber: "",
     accessToken: "",
+    countryCode: "",
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [botLists, setbotLists] = useState<any>([]);
 
+  const botsDataRedux = useSelector(
+    (state: RootState) => state.bot?.lists?.data
+  );
+  const botsDataLoader = useSelector(
+    (state: RootState) => state.bot?.lists?.loader
+  );
   const dispatch = useDispatch();
-  const { secretToken, webhookUrl } = useSelector(
-    (state: any) => state.integration
-  ) || { secretToken: "", webhookUrl: "" };
+  const navigate = useNavigate();
 
-  console.log("secret token", secretToken);
-  console.log("webookurl", webhookUrl);
+  useEffect(() => {
+    if (
+      Array.isArray(botsDataRedux) &&
+      botsDataRedux.length &&
+      !botsDataLoader
+    ) {
+      const formattedBots = botsDataRedux.map((bot: any) => ({
+        _id: bot._id,
+        botName: bot.botName,
+      }));
+      console.log("Formatted Bots:", formattedBots); // Debugging
+      setbotLists(formattedBots);
+    }
+  }, [botsDataRedux, botsDataLoader]);
+
+  const userIdLocal = localStorage.getItem("user_id");
+
+  useEffect(() => {
+    if (userIdLocal?.length) {
+      dispatch(getBotsAction(userIdLocal));
+    }
+  }, [dispatch, userIdLocal]);
 
   const handleSubmit = async () => {
     const { phoneNumber, appId, accessToken } = formData;
@@ -34,16 +63,33 @@ const WhatsAppIntegration: React.FC = () => {
     }
 
     try {
+      console.log("Form Data:", formData);
       dispatch(saveWhatsapp(formData)); // Trigger API call
-      setIsModalOpen(true); // Open modal on success
+      if (secretToken && webhookUrl) {
+        setIsModalOpen(true); // Only open the modal if the data is available
+      }
     } catch (error) {
       console.error("Error saving WhatsApp data:", error);
     }
   };
 
+  const integration = useSelector((state: RootState) => state.integration);
+
+  console.log("Integration Data:", integration); // Debugging
+
+  const secretToken = useSelector(
+    (state: any) => state.integration?.secretToken || ""
+  );
+
+  console.log("Secret Token:", secretToken); // Debugging
+  const webhookUrl = useSelector(
+    (state: any) => state.integration?.webhookUrl || ""
+  );
+  console.log("Webhook URL:", webhookUrl); // Debugging
+
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="w-full flex justify-center items-center">
+      <div className="w-full mt-12 justify-center items-center">
         {/* Form Container */}
         <div className="rounded-2xl p-8">
           <div className="flex items-center justify-between mb-6">
@@ -85,9 +131,19 @@ const WhatsAppIntegration: React.FC = () => {
                 WhatsApp number
               </label>
               <div className="flex items-center mb-4">
-                <span className="bg-gray-100 border border-gray-300 rounded-l-lg px-3 py-2">
-                  +91
-                </span>
+                <select
+                  className="bg-gray-100 border border-gray-300 rounded-l-lg px-3 py-2"
+                  value={formData.countryCode}
+                  onChange={(e) =>
+                    setFormData({ ...formData, countryCode: e.target.value })
+                  }
+                >
+                  <option value="+1">(+1)</option>
+                  <option value="+971">(+971)</option>
+                  <option value="+234">(+234)</option>
+                  <option value="+91">(+91)</option>
+                </select>
+
                 <input
                   type="text"
                   placeholder="Enter your WhatsApp number"
@@ -95,6 +151,7 @@ const WhatsAppIntegration: React.FC = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, phoneNumber: e.target.value })
                   }
+                  value={formData.phoneNumber}
                 />
               </div>
 
@@ -113,18 +170,33 @@ const WhatsAppIntegration: React.FC = () => {
             </div>
 
             <div>
-              {/* Bot Dropdown */}
               <label className="block text-gray-700 font-medium mb-2">
                 Select bot
               </label>
-              <select
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-                onChange={(e) =>
-                  setFormData({ ...formData, botId: e.target.value })
-                }
-              >
-                <option value="Bot 1">Bot 1</option>
-              </select>
+              {botLists.length === 0 ? (
+                <button
+                  onClick={() => navigate("/createbot")}
+                  className="bg-[#65558F] text-white p-3 w-full rounded-lg font-semibold hover:bg-[#65558F]/85 transition-colors"
+                >
+                  Create Bot
+                </button>
+              ) : (
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                  onChange={(e) =>
+                    setFormData({ ...formData, botId: e.target.value })
+                  }
+                >
+                  <option value="">Select a bot</option>
+                  {botLists.map(
+                    (bot: { _id: string | number; botName: string }) => (
+                      <option key={String(bot._id)} value={String(bot._id)}>
+                        {bot.botName}
+                      </option>
+                    )
+                  )}
+                </select>
+              )}
 
               {/* App ID */}
               <label className="block text-gray-700 font-medium mb-2">
@@ -176,7 +248,10 @@ const WhatsAppIntegration: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        data={{ secretToken, webhookUrl }}
+        data={{
+          secretToken: integration?.secretToken,
+          webhookUrl: integration?.webhookUrl,
+        }}
       />
     </div>
   );

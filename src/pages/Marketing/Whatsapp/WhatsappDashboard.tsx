@@ -1,4 +1,5 @@
-import { FC, useState , useEffect ,  } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { FC, useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -21,9 +22,9 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { WhatsAppDashboardService } from "../../../api/services/whatsappCampaignService";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
+import { fetchWhatsAppDashboardRequest } from "../../../store/actions/whatsappDashboardActions";
 
 interface DashboardProps {
   totalMessages: number;
@@ -52,9 +53,12 @@ const WhatsappDash: FC<DashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const totalPages = 5;
 
-  const { campaignId } = useSelector((state: RootState) => state.whatsappCampaign);
-  console.log("Current state:", useSelector((state: RootState) => state.whatsappCampaign));
+  const { campaignId } = useSelector(
+    (state: RootState) => state.whatsappCampaign.campaignData.campaignId
+  );
+ console.log("whatsapp dash id", campaignId);
 
+  const dispatch = useDispatch();
 
   const responseData = [
     { day: "Sunday", campaign1: 200, campaign2: 0 },
@@ -84,20 +88,23 @@ const WhatsappDash: FC<DashboardProps> = ({
   useEffect(() => {
     if (campaignId) {
       console.log("whatsapp dash id", campaignId);
-      WhatsAppDashboardService(campaignId)
-        .then((data) => {
+      const fetchData = async () => {
+        try {
+          const data = dispatch(fetchWhatsAppDashboardRequest(campaignId));
           console.log("Dashboard data:", data);
           // Process the data and update state here if needed
           setLoading(false); // Set loading to false once the data is fetched
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error("Error fetching data:", error);
           setLoading(false); // Stop loading if there's an error
-        });
+        }
+      };
+
+      fetchData();
     } else if (!loading) {
       console.error("Campaign ID is null");
     }
-  }, [campaignId, loading]);
+  }, []);
 
   return (
     <div className="p-6">

@@ -30,6 +30,7 @@ export default function whatsappCampaignReducer(
         ...state,
         loading: false,
         success: true,
+        campaignData: action.payload,
         error: null,
       };
     case CREATE_WHATSAPP_CAMPAIGN_FAILURE:

@@ -50,44 +50,31 @@ export const convertCsvToJsonService = async (formData: FormData) => {
   }
 };
 
-export const WhatsAppDashboardService = async (campaignId: string) => {
+
+
+export const fetchWhatsAppTemplatesService = async (integrationId: string) => {
   try {
-    const response = await axiosInstance.post("/marketing/whatsapp/dashboard", {
-      campaignId,
+    const response = await axiosInstance.get(`/whatsapp/template`, {
+      params: { integrationId },
     });
-    return response.data; // Assuming the response contains the required data
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Error navigating to WhatsApp dashboard:",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
-    throw error; // Re-throw the error to be handled by the caller
-  }
-};
+    console.log("Templates fetched:", response.data);
 
-
-export const fetchWhatsAppTemplatesService = async (integrationId: any) => {
-  try {
-    const response = await axiosInstance.get(
-      `/whatsapp/template?integrationId=${integrationId}`
-    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching WhatsApp templates:', error);
+    console.error("Error fetching WhatsApp templates:", error);
     throw error;
   }
 };
 
 export const createWhatsAppTemplateService = async (templateData: any) => {
   try {
-    const response = await axiosInstance.post('/whatsapp/template', templateData);
+    const response = await axiosInstance.post(
+      "/whatsapp/template",
+      templateData
+    );
     return response.data;
   } catch (error) {
-    console.error('Error creating WhatsApp template:', error);
+    console.error("Error creating WhatsApp template:", error);
     throw error;
   }
 };

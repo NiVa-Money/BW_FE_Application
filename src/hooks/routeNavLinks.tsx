@@ -1,20 +1,21 @@
-import HomeIcon from '@mui/icons-material/Home';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import GroupsIcon from '@mui/icons-material/Groups';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
-import HelpIcon from '@mui/icons-material/Help';
-import SettingsIcon from '@mui/icons-material/Settings';
-const filterMenuItems = (items, allowedIds) =>
-  items?.reduce((acc, item) => {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import HomeIcon from "@mui/icons-material/Home";
+import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import GroupsIcon from "@mui/icons-material/Groups";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
+import HelpIcon from "@mui/icons-material/Help";
+import SettingsIcon from "@mui/icons-material/Settings";
+const filterMenuItems = (items: any[], allowedIds: string | any[]) =>
+  items?.reduce((acc: any[], item: { subItems: any[]; id: any; }) => {
     // If the item has subItems, filter them
     const subItems = item.subItems
-      ? item.subItems.filter((subItem) => allowedIds?.includes(subItem.id))
+      ? item.subItems.filter((subItem: { id: any; }) => allowedIds?.includes(subItem.id))
       : null;
 
     // Include the item if its ID or any subItem's ID is in allowedIds

@@ -30,19 +30,17 @@ export const initialState: any = {
     loading: false,
     success: false,
     error: null,
-    // campaignId: "",
-  },
-  whatsappIntegration: {
-    secretToken: "",
-    webhookUrl: "",
-    error: null,
+    campaignData: null,
   },
 
   integration: {
     crudIntegration: {
       loading: false,
       data: null,
-      error: null,
+    },
+    whatsappIntegration: {
+      secretToken: "",
+      webhookUrl: "",
     },
   },
 
@@ -51,5 +49,11 @@ export const initialState: any = {
     templates: [],
     error: null,
     success: false,
+  },
+
+  whatsappDashboard: {
+    loading: false,
+    data: null,
+    error: null,
   },
 };

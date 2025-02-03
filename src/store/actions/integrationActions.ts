@@ -62,7 +62,6 @@ export const deleteWhatsappFailure = (error: any) => ({
   payload: error,
 });
 
-
 export const getWhatsappRequest = (botId: string) => ({
   type: GET_WHATSAPP_REQUEST,
   payload: botId,

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { call, put } from "redux-saga/effects";
 import {
   CREATE_BOT_FAILURE,
@@ -20,7 +22,6 @@ import {
 } from "../../api/services/botService";
 
 export function* createBotSaga({
-  type,
   payload,
 }: {
   type: string;
@@ -41,7 +42,6 @@ export function* createBotSaga({
   }
 }
 export function* editBotSaga({
-  type,
   payload,
 }: {
   type: string;
@@ -61,7 +61,6 @@ export function* editBotSaga({
   }
 }
 export function* deleteBotSaga({
-  type,
   payload,
 }: {
   type: string;
@@ -95,8 +94,9 @@ export function* deleteBotSaga({
     });
   }
 }
+
+
 export function* getBotsSaga({
-  type,
   payload,
 }: {
   type: string;

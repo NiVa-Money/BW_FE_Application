@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { CREATE_WHATSAPP_CAMPAIGN, CREATE_WHATSAPP_TEMPLATE, FETCH_WHATSAPP_TEMPLATES } from "../actionTypes/whatsappCampaignTypes";
+import {
+  CREATE_WHATSAPP_CAMPAIGN,
+  CREATE_WHATSAPP_TEMPLATE,
+  FETCH_WHATSAPP_TEMPLATES,
+} from "../actionTypes/whatsappCampaignTypes";
 
 export const createWhatsAppCampaignAction = (payload: any) => ({
   type: CREATE_WHATSAPP_CAMPAIGN,
   payload,
 });
-
 
 export const fetchWhatsAppTemplatesAction = (payload: any) => ({
   type: FETCH_WHATSAPP_TEMPLATES,

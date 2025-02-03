@@ -2,7 +2,7 @@
 import { call, put } from "redux-saga/effects";
 import {
   deleteWhatsappService,
-  fetchWhatsappData,
+  getWhatsappData,
   saveWhatsappService,
   updateWhatsappService,
 } from "../../api/services/integrationServices";
@@ -13,18 +13,22 @@ import {
   deleteWhatsappSuccess,
   updateWhatsappFailure,
   updateWhatsappSuccess,
-  getWhatsappFailure,
-  getWhatsappSuccess,
+  // getWhatsappFailure,
+  // getWhatsappSuccess,
 } from "../actions/integrationActions";
 
 import { SagaIterator } from "redux-saga";
+import {
+  GET_WHATSAPP_FAILURE,
+  GET_WHATSAPP_SUCCESS,
+} from "../actionTypes/integrationActionTypes";
 
 export function* saveWhatsappSaga(action: { payload: any }): SagaIterator {
   try {
     const response = yield call(saveWhatsappService, action.payload);
 
     // Extracting secretToken and webhookUrl from response
-    const { secretToken, webhookUrl } = response;
+    const { secretToken, webhookUrl } = response.data;
 
     // Dispatching success action with the extracted data
     yield put(saveWhatsappSuccess({ secretToken, webhookUrl }));
@@ -71,21 +75,28 @@ export function* deleteWhatsappSaga(action: any): SagaIterator {
   }
 }
 
-export function* getWhatsappSaga(action: { payload: string }): any {
+export function* getWhatsappSaga({
+  payload,
+}: {
+  type: string;
+  payload: any;
+}): Generator<any> {
   try {
-    const response = yield call(fetchWhatsappData, action.payload);
+    const getWhatsappSuc = yield call(getWhatsappData, payload);
+    console.log("getWhatsappSuccess Response: ", getWhatsappSuc);
 
-    yield put(getWhatsappSuccess(response));
-    const integrationId = response.integrationId;
-    if (integrationId) {
-      console.log("Integration ID: ", integrationId);
-      yield put(integrationId);
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      yield put(getWhatsappFailure(error.message));
-    } else {
-      yield put(getWhatsappFailure("An unknown error occurred"));
-    }
+    // Dispatch action to save the full response in Redux
+    // yield put(getWhatsappSuccess(response.data));
+    yield put({
+      type: GET_WHATSAPP_SUCCESS,
+      payload: getWhatsappSuc,
+    });
+  } catch (error: any) {
+    console.error("Error in getWhatsappSuc:", error);
+
+    yield put({
+      type: GET_WHATSAPP_FAILURE,
+      payload: error.message,
+    });
   }
 }

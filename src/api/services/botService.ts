@@ -33,6 +33,7 @@ export const getBotsService = async (payload: any) => {
     throw new Error("Error fetching user profile");
   }
 };
+
 export const deleteBotService = async (payload: any) => {
   try {
     const response = await axiosInstance.put(
