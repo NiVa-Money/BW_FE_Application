@@ -116,6 +116,7 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
                 selected={new Date()}
                 onChange={(date) => console.log(date)}
                 dateFormat="yyyy-MM-dd"
+                selectsMultiple 
               />
             </div>
           )}
