@@ -12,9 +12,13 @@ import { RootState } from "../store";
 
 type CampaignTemplateProps = {
   onClose: () => void;
+  onSelectTemplate: (template: any) => void;
 };
 
-const CampaignTemplate: React.FC<CampaignTemplateProps> = ({ onClose }) => {
+const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
+  onClose,
+  onSelectTemplate,
+}) => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [text, setText] = useState("");
   const [_image, setImage] = useState<string | null>(null);
@@ -48,6 +52,18 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({ onClose }) => {
       const file = files[0];
       setImage(URL.createObjectURL(file));
     }
+  };
+
+  const handleTemplateSelect = (template: any) => {
+    // Wrap the template object to ensure it has a valid 'name' field.
+    const selectedTemplate = {
+      ...template,
+      name: template.templateName || "", // Use templateName or fallback to empty string.
+      text : template.components?.filter((comp: any) => comp.type === "BODY").map((body: any) => body.text).join(" "),
+      image : template.components?.filter((comp: any) => comp.type === "HEADER" && comp.format === "IMAGE").map((header: any) => header.example?.header_handle[0]).join(" "),
+    };
+    console.log("Selected Template with proper name:", selectedTemplate);
+    onSelectTemplate(selectedTemplate);
   };
 
   const handleCreateTemplate = () => {
@@ -193,6 +209,12 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({ onClose }) => {
                     className="flex-1 px-4 py-2 text-sm font-medium text-purple-600 bg-white border border-purple-200 rounded-md hover:bg-purple-50"
                   >
                     Customize
+                  </button>
+                  <button
+                    onClick={() => handleTemplateSelect(template)}
+                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
+                  >
+                    Select
                   </button>
                 </div>
               </div>
