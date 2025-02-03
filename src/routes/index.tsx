@@ -10,6 +10,7 @@ import MyBots from "../pages/MyBots/index";
 import EditBot from "../pages/EditBot";
 import Marketing from "../pages/Marketing/Dashboard";
 import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
+import LiveChat from "../pages/Conversation/LiveChat";
 
 interface RouteType {
   path: string;
@@ -27,7 +28,7 @@ export const autRoutes: RouteType[] = [
     component: <Dashboard />,
   },
   { id: 2.1, path: "/live-chat/all-chats", component: <AdminPanel /> },
-  { id: 2.2, path: "/live-chat/customs", component: <AdminPanel /> },
+  { id: 2.2, path: "/live-chat/customs", component: <LiveChat /> },
   { id: 3, path: "/mybots", component: <MyBots /> },
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
