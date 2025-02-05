@@ -27,7 +27,6 @@ export const autRoutes: any[] = [
   { id: 3, path: "/mybots", component: <MyBots /> },
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
-  { id: 3, path: "/testbot/:id", component: <TestBot /> },
 
   { id: 4, path: "/engagementTab", component: <EngagementTab /> },
   { id: 5.1, path: "/marketing/dashboard", component: <Marketing /> },
