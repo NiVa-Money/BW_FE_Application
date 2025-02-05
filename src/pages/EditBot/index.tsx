@@ -10,7 +10,6 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import FormikFieldChipComponent from "../../components/FormikFieldChipComponent";
 import FormikFieldToggleComponent from "../../components/FormikFieldToggleComponent";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
-import { Button } from "@mui/material";
 import { THEME } from "../../enums";
 import FormikFieldSelectComponent from "../../components/FormikFieldSelectDropdownComponent";
 import { useDispatch, useSelector } from "react-redux";
