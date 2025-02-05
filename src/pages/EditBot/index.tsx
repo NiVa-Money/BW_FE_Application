@@ -525,7 +525,7 @@ const EditBot: React.FC = () => {
                   />
                 </div>
 
-                <div className=" flex flex-col w-[85%] mb-3 text-black">
+                {/* <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label>Agent Creation</label>
 
                   <Button
@@ -562,7 +562,7 @@ const EditBot: React.FC = () => {
                   >
                     Add to Workflow
                   </Button>
-                </div>
+                </div> */}
               </div>
             </div>
             <CreateBotRightContainer

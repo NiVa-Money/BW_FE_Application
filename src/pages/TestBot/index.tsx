@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import { Button, TextField } from '@mui/material';
-import { useParams } from 'react-router-dom';
 import { botTestAction, resetBotAction } from '../../store/actions/botActions';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -9,13 +8,17 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 
 
-const TestBot: React.FC = () => {
+const TestBot: React.FC<any> = ({
+    botId,
+    onClose
+
+}) => {
     const [message, setMessage] = useState('')
     const [sessionMessages, setSessionMessages] = useState([]);
 
     const userIdLocal = localStorage.getItem('user_id');
-    const { id } = useParams();
-    const botParamId = id?.replace(':', '');
+
+    const botParamId = botId;
     const botSessionId = useSelector(
         (state: RootState) => state.bot?.test?.data?.sessionId
     );
@@ -38,6 +41,7 @@ const TestBot: React.FC = () => {
     const closeTestBotHandler = () => {
         dispatch(resetBotAction('test'))
         setSessionMessages([])
+        onClose()
 
     }
     const senMessageHandler = () => {
@@ -66,8 +70,8 @@ const TestBot: React.FC = () => {
 
 
     return (
-        <div className='flex flex-col w-[100%] justify-center items-center mt-[50px]'>
-            <div className=' flex flex-col h-[75vh] w-[450px] bg-[#1e1b20] rounded-[12px]'>
+        <div className='flex flex-col w-[100%] justify-center items-center '>
+            <div className=' flex flex-col h-[75vh] w-[450px] bg-[#1e1b20] '>
                 <div className='flex justify-between h-[80px] bg-[#000000] p-[15px]'>
                     <div>
                         <h3 className='text-white text-[1.5rem]'>{botReduxName}</h3>
@@ -88,7 +92,7 @@ const TestBot: React.FC = () => {
                         </div>
                     ))}
                 </div>
-                <div className='flex  justify-between items-center  rounded-[12px] m-[12px]'>
+                <div className='flex  justify-between items-center  m-[12px]'>
                     <TextField
                         type="text"
                         id="message"
