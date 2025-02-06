@@ -15,6 +15,7 @@ import TestBot from "../pages/TestBot";
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 import IntegrationList from "../pages/Integration/IntegrationApp/integrationsList";
 import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
+import CrudIntegration from "../pages/Integration/IntegrationApp/crudIntegration";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -83,6 +84,11 @@ export const autRoutes: any[] = [
     id: 10,
     path: "/createintegration",
     component: <WhatsAppIntegration />,
+  },
+  {
+    id: 10,
+    path: "/editintegration",
+    component: <CrudIntegration />,
   },
   { id: 11, component: <AdminPanel />, path: "/help-center" },
 

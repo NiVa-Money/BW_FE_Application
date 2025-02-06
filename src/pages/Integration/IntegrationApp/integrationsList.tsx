@@ -17,43 +17,52 @@ interface Integration {
   businessAccountId: string;
 }
 
-const IntegrationCard = ({ integration }: { integration: Integration }) => (
-  <div className="bg-white p-6 rounded-lg mb-4 border border-gray-200 shadow-sm">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-6">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-          alt="WhatsApp Icon"
-          className="w-16 h-16"
-        />
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {Object.entries(integration).map(
-            ([key, value]) =>
-              key !== "id" &&
-              key !== "status" && (
-                <div
-                  key={key}
-                  className="flex justify-center flex-col whitespace-nowrap"
-                >
-                  <p className="text-sm font-medium text-gray-500">
-                    {key.replace(/([A-Z])/g, " $1").toUpperCase()}
-                  </p>
-                  <p className="text-base font-semibold text-gray-800">
-                    {value}
-                  </p>
-                </div>
-              )
-          )}
+const IntegrationCard = ({ integration }: { integration: Integration }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="bg-white p-6 rounded-lg mb-4 border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+            alt="WhatsApp Icon"
+            className="w-16 h-16"
+          />
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {Object.entries(integration).map(
+              ([key, value]) =>
+                key !== "id" &&
+                key !== "status" && (
+                  <div
+                    key={key}
+                    className="flex justify-center flex-col whitespace-nowrap"
+                  >
+                    <p className="text-sm font-medium text-gray-500">
+                      {key.replace(/([A-Z])/g, " $1").toUpperCase()}
+                    </p>
+                    <p className="text-base font-semibold text-gray-800">
+                      {value}
+                    </p>
+                  </div>
+                )
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              // Navigate to /editintegration with the integration id
+              navigate(`/editintegration/${integration.id}`);
+            }}
+            className="text-green-500 hover:text-green-700 flex items-center gap-2"
+          >
+            <EditIcon /> Edit
+          </button>
         </div>
       </div>
-      <div className="flex items-center gap-4">
-        <button className="text-green-500 hover:text-green-700 flex items-center gap-2">
-          <EditIcon /> Edit
-        </button>
-      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function IntegrationList() {
   const dispatch = useDispatch();
