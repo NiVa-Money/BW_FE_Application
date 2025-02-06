@@ -75,6 +75,23 @@ export const campaignImageService = async (formData: FormData) => {
   }
 };
 
+export const fetchCampaignService = async () => {
+  try {
+    const response = await axiosInstance.get(`/marketing/Campaigns`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching campaigns:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error; 
+  }
+};
+
 export const fetchWhatsAppTemplatesService = async (integrationId: string) => {
   try {
     const response = await axiosInstance.get(`/whatsapp/template`, {
