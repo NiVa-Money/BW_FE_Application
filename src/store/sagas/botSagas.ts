@@ -30,7 +30,6 @@ export function* createBotSaga({
   type: string;
   payload: any;
 }): Generator<any> {
-  console.log("calling create saga");
   try {
     const createBotSuccess = yield call(createBotProfileService, payload);
     yield put({
@@ -97,7 +96,6 @@ export function* deleteBotSaga({
     });
   }
 }
-
 
 export function* getBotsSaga({
   payload,

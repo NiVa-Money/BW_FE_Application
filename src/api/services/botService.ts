@@ -29,7 +29,6 @@ export const getBotsService = async (payload: any) => {
     );
     return response.data;
   } catch (error: any) {
-    console.log("e", error);
     throw new Error("Error fetching user profile");
   }
 };
@@ -42,7 +41,6 @@ export const deleteBotService = async (payload: any) => {
     );
     return response.data;
   } catch (error: any) {
-    console.log("e", error);
     throw new Error("Error Deleting Bot profile");
   }
 };

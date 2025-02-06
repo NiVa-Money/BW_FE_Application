@@ -80,7 +80,6 @@ const MyBots: React.FC = () => {
     setBotId(id)
     setIsTestOpen(true)
 
-    console.log('Test action triggered!');
   };
 
   const handleExport = (botId: string) => {

@@ -130,7 +130,6 @@ export default function botProfileReducers(
         },
       };
     case TEST_BOT_SUCCESS:
-      console.log("action", action);
       return {
         ...state,
         test: { data: action.payload, loader: false },

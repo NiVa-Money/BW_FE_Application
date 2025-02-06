@@ -8,6 +8,7 @@ import {
     Typography,
     Box,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 interface ConfirmationModalProps {
     open: boolean;
@@ -29,6 +30,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     subHeading2
 
 }) => {
+    const navigate = useNavigate()
+    const closeBotHandler = () => {
+        navigate('/mybots')
+        onClose()
+    }
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <Box>
@@ -56,7 +62,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: "end", gap: 1, mt: 2 }}>
-                    <Button onClick={onClose} variant="outlined" color="primary" className="rounded-[100px]">
+                    <Button onClick={closeBotHandler} variant="outlined" color="primary" className="rounded-[100px]">
                         View Bots
                     </Button>
                     <Button

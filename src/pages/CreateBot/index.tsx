@@ -121,10 +121,7 @@ const CreateBot: React.FC = () => {
     formData.append('botFont', botFont);
     formData.append('botTheme', theme);
 
-    console.log('Form Submitted:', formValues, formData.entries());
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
+
     dispatch(createBotAction(formData))
   };
   const handleColorClick = (color: any) => {
@@ -147,10 +144,8 @@ const CreateBot: React.FC = () => {
     }
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('e', e.target)
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
-    console.log('for', { ...formValues, [name]: value })
   };
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -177,14 +172,45 @@ const CreateBot: React.FC = () => {
       const success = createBotDataRedux?.success
       if (success) {
         setIsModalOpen(success)
+
+
       }
 
     }
   }, [createBotDataRedux])
   const handleConfirmation = () => {
-    navigate('/mybots')
+    setIsModalOpen(false)
+    setFormValues({
+      theme: '',
+      botTone: '',
+      botFont: '',
+      greetingMessage: '',
+      botIdentity: '',
+      phoneNumber: '',
+      email: '',
+      botSmartness: false,
+      appoimentLink: ''
+    })
+    setImageName('')
+    setFileName('')
+    navigate('/integrations')
   }
-  const handleClose = () => setIsModalOpen(false);
+  const handleClose = () => {
+    setFormValues({
+      theme: '',
+      botTone: '',
+      botFont: '',
+      greetingMessage: '',
+      botIdentity: '',
+      phoneNumber: '',
+      email: '',
+      botSmartness: false,
+      appoimentLink: ''
+    })
+    setImageName('')
+    setFileName('')
+    setIsModalOpen(false)
+  };
 
   return (
     <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
@@ -513,7 +539,7 @@ const CreateBot: React.FC = () => {
           </Form>
         )}
       </Formik>
-      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={'Engage with your bot through testing or chatting, or seamlessly integrate {bot name} into your social media platforms.'} />
+      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`} />
 
     </div>
 

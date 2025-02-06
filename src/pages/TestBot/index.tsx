@@ -45,7 +45,6 @@ const TestBot: React.FC<any> = ({
 
     }
     const senMessageHandler = () => {
-        console.log('callll')
         setMessage('')
         message?.length &&
             dispatch(botTestAction({
