@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Login from "../pages/login";
 import SignUp from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
@@ -12,6 +13,8 @@ import Marketing from "../pages/Marketing/Dashboard";
 import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
 import TestBot from "../pages/TestBot";
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
+import IntegrationList from "../pages/Integration/IntegrationApp/integrationsList";
+import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -70,6 +73,16 @@ export const autRoutes: any[] = [
     id: 10,
     path: "/integrations",
     component: <IntegrationsPage />,
+  },
+  {
+    id: 10,
+    path: "/integrationList",
+    component: <IntegrationList />,
+  },
+  {
+    id: 10,
+    path: "/createintegration",
+    component: <WhatsAppIntegration />,
   },
   { id: 11, component: <AdminPanel />, path: "/help-center" },
 
