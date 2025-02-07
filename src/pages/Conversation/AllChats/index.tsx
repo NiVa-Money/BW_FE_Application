@@ -10,6 +10,7 @@ import {
   getAllSession,
 } from "../../../store/actions/conversationActions";
 import { RootState } from "../../../store";
+import { getBotsAction } from "../../../store/actions/botActions";
 
 interface Message {
   content: string;
@@ -51,13 +52,41 @@ const AllChats = () => {
   );
 
   console.log("advanceFeatureData", advanceFeatureData);
+
+  const [botLists, setbotLists] = useState<any>([]);
+
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
+  );
+  const botsDataLoader = useSelector(
+    (state: RootState) => state.bot?.lists?.loader
   );
 
   const botId = botsDataRedux?.[0]?._id;
   console.log("botId", botId); // Debugging
-  const userId: string = localStorage.getItem("user_id") || "";
+
+  useEffect(() => {
+    if (
+      Array.isArray(botsDataRedux) &&
+      botsDataRedux.length &&
+      !botsDataLoader
+    ) {
+      const formattedBots = botsDataRedux.map((bot: any) => ({
+        _id: bot._id,
+        botName: bot.botName,
+      }));
+      console.log("Formatted Bots:", formattedBots); // Debugging
+      setbotLists(formattedBots);
+    }
+  }, [botsDataRedux, botsDataLoader]);
+
+  const userId = localStorage.getItem("user_id");
+
+  useEffect(() => {
+    if (userId?.length) {
+      dispatch(getBotsAction(userId));
+    }
+  }, [dispatch, userId]);
 
   const getChatHistory = () => {
     const data = {
@@ -76,11 +105,13 @@ const AllChats = () => {
     if (botsDataRedux?.botId?.length) {
       getChatHistory();
     }
-  }, []);
+  }, [botsDataRedux?.botId?.length, dispatch, getChatHistory]);
 
   // const sessionId = "67548fa305be64afbeb82463";
-  const [sessionId, setSessionId] = useState('');
-  const allSessions = useSelector((state: RootState) => state?.userChat?.sessionChat?.sessions || []);
+  const [sessionId, setSessionId] = useState("");
+  const allSessions = useSelector(
+    (state: RootState) => state?.userChat?.sessionChat?.sessions || []
+  );
 
   useEffect(() => {
     if (allSessions.length > 0) {
@@ -200,6 +231,19 @@ const AllChats = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-64 bg-white p-4 border-r">
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">
+            Select bot
+          </label>
+          <select className="w-full p-3 border border-gray-300 rounded-lg mb-4">
+            <option value="">Select a bot</option>
+            {botLists.map((bot: { _id: string | number; botName: string }) => (
+              <option key={String(bot._id)} value={String(bot._id)}>
+                {bot.botName}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="space-y-4">
           {Array(9)
             .fill(0)
