@@ -4,7 +4,11 @@ import SendIcon from "@mui/icons-material/Send";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-import { getAdvanceFeature } from "../../../store/actions/conversationActions";
+import {
+  filteredSession,
+  getAdvanceFeature,
+  getAllSession,
+} from "../../../store/actions/conversationActions";
 import { RootState } from "../../../store";
 
 interface Message {
@@ -47,17 +51,51 @@ const AllChats = () => {
   );
 
   console.log("advanceFeatureData", advanceFeatureData);
+  const botsDataRedux = useSelector(
+    (state: RootState) => state.bot?.lists?.data
+  );
 
-  const sessionId = "67548fa305be64afbeb82463";
-  // const [sessionId, setSessionId] = useState('');
+  const botId = botsDataRedux?.[0]?._id;
+  console.log("botId", botId); // Debugging
+  const userId: string = localStorage.getItem("user_id") || "";
+
+  const getChatHistory = () => {
+    const data = {
+      userId: userId,
+      botId: botId,
+    };
+    dispatch(getAllSession(data));
+  };
+
+  useEffect(() => {
+    const data = {
+      filteredSessions: [],
+      sessionId: null,
+    };
+    dispatch(filteredSession(data));
+    if (botsDataRedux?.botId?.length) {
+      getChatHistory();
+    }
+  }, []);
+
+  // const sessionId = "67548fa305be64afbeb82463";
+  const [sessionId, setSessionId] = useState('');
+  const allSessions = useSelector((state: RootState) => state?.userChat?.sessionChat?.sessions || []);
+
+  useEffect(() => {
+    if (allSessions.length > 0) {
+      const latestSessionId = allSessions[0]._id; // Assuming the latest session is at index 0
+      setSessionId(latestSessionId);
+      localStorage.setItem("session_id", latestSessionId); // Store session ID in localStorage if needed
+    }
+  }, [allSessions]);
+
   useEffect(() => {
     if (sessionId) {
       console.log("Dispatching getAdvanceFeature with sessionId:", sessionId);
       dispatch(getAdvanceFeature(sessionId));
     }
   }, [dispatch, sessionId]);
-  
-  
 
   const [analysisSections, setAnalysisSections] = useState<AnalysisSection[]>([
     // {
