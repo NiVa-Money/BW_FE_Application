@@ -24,7 +24,7 @@ export const initialState: any = {
       data: null,
       loader: false,
     },
-    test: { data: {}, loader: false }
+    test: { data: {}, loader: false },
   },
 
   whatsappCampaign: {
@@ -56,5 +56,27 @@ export const initialState: any = {
     loading: false,
     data: null,
     error: null,
+  },
+
+  userChat: {
+    session: {
+      data: [],
+      loader: false,
+    },
+    allSession: {
+      data: [],
+      loader: false,
+    },
+
+    sessionChat: {
+      data: [],
+      sessionId: null,
+      loader: false,
+      lastMessageFrom: "receiver",
+    },
+    advanceFeature: {
+      data: {},
+      loader: false,
+    },
   },
 };

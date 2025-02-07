@@ -18,6 +18,7 @@ import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
 import CrudIntegration from "../pages/Integration/IntegrationApp/crudIntegration";
 import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
 import Campaign from "../pages/Marketing/Campaign";
+import AllChats from "../pages/Conversation/AllChats";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -28,7 +29,7 @@ export const autRoutes: any[] = [
     path: "/dashboard",
     component: <Dashboard />,
   },
-  { id: 2.1, path: "/live-chat/all-chats", component: <AdminPanel /> },
+  { id: 2.1, path: "/live-chat/all-chats", component: <AllChats /> },
   { id: 2.2, path: "/live-chat/customs", component: <LiveChat /> },
   { id: 3, path: "/mybots", component: <MyBots /> },
   { id: 3, path: "/createbot", component: <CreateBot /> },
