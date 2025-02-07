@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { WhatsApp, Upload, FileUpload } from "@mui/icons-material"; // Import MUI icons
 // import { ArrowDropDown } from "@mui/icons-material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
@@ -16,10 +16,7 @@ import {
 } from "../../../store/actions/whatsappCampaignActions";
 import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
 
-
 const WhatsappCampaign: React.FC = () => {
-  const [whatsappNumber, setWhatsappNumber] = useState<string>("");
-  // const [mode, setMode] = useState<"Text" | "Image" | "Template">("Text");
   const [mode, setMode] = useState<"Template">("Template");
 
   const [campaignName, setCampaignName] = useState<string>("");
@@ -33,13 +30,20 @@ const WhatsappCampaign: React.FC = () => {
   const [name, setName] = useState("");
   // const [image, setImage] = useState<string | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null); // New state
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Handlers for user inputs
-  const handleWhatsappNumberChange = (value: string) => {
-    setWhatsappNumber(value);
+  const phoneNumberId = useSelector(
+    (state: RootState) =>
+      state?.crudIntegration?.crudIntegration?.data?.phoneNumberId
+  );
+  console.log(" phoneNumberId:", phoneNumberId); // Debugging
+
+  const handleSelectTemplate = (template: any) => {
+    setSelectedTemplate(template);
+    setShowTemplate(false);
   };
 
   const handleCampaignNameChange = (
@@ -103,22 +107,54 @@ const WhatsappCampaign: React.FC = () => {
       contactsUrl: string;
       messageType: string;
       messageContent: {
-        text: string;
+        // text: string;
         template: {
           name: string;
           language: string;
           header: { image: string };
           body: { text: string[] };
         } | null;
-        image: { url: string; caption: string } | null;
+        // image: { url: string; caption: string } | null;
       };
       contactsData?: any;
     }
 
+    const templateContent =
+      mode === "Template"
+        ? selectedTemplate
+          ? {
+              name: selectedTemplate.name,
+              language: selectedTemplate.language || "en",
+              header: { image: selectedTemplate.header }, // header is a string (URL)
+
+              body: {
+                text:
+                  typeof selectedTemplate.body === "string"
+                    ? [selectedTemplate.body]
+                    : Array.isArray(selectedTemplate.body)
+                    ? selectedTemplate.body
+                    : [],
+              },
+            }
+          : {
+              name: "order_notification",
+              language: "en",
+              header: { image: "https://example.com/image.png" },
+              body: {
+                text: [
+                  "Your order has been shipped!",
+                  "Your package is on its way!",
+                ],
+              },
+            }
+        : null;
+    console.log("selected template", selectedTemplate);
+    console.log("templatename:", selectedTemplate.templateName); // Debugging
+    console.log("templateContent:", templateContent); // Debugging
     const campaignPayload: CampaignPayload = {
       campaignName,
       channel: "whatsapp",
-      phoneNumberId: whatsappNumber === "Number1" ? 1234567890 : 9876543210,
+      phoneNumberId: phoneNumberId,
       schedule: scheduleDate ? scheduleDate.toISOString() : "",
       endDate: scheduleDate
         ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
@@ -127,22 +163,7 @@ const WhatsappCampaign: React.FC = () => {
       contactsUrl: "", // Initially empty, will be updated later
       messageType: mode.toLowerCase(),
       messageContent: {
-        template:
-          mode === "Template"
-            ? {
-                name: "order_notification",
-                language: "en",
-                header: { image: "https://example.com/image.png" },
-                body: {
-                  text: [
-                    "Your order has been shipped!",
-                    "Your package is on its way!",
-                  ],
-                },
-              }
-            : null,
-        text: "",
-        image: null,
+        template: mode === "Template" ? templateContent : null,
       },
     };
 
@@ -216,18 +237,16 @@ const WhatsappCampaign: React.FC = () => {
           {/* Left Section */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">
             <div className="flex flex-col w-full mb-4">
-              <label className="leading-snug text-slate-700">
-                Choose WhatsApp Number *
+              <label className="leading-snug text-slate-700 mb-2">
+                Choose WhatsApp Number ID *
               </label>
-              <select
-                value={whatsappNumber}
-                onChange={(e) => handleWhatsappNumberChange(e.target.value)}
-                className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md text-slate-700"
-              >
-                <option value="">Select</option>
-                <option value="Number1">+1234567890</option>
-                <option value="Number2">+9876543210</option>
-              </select>
+              <input
+                type="text"
+                value={phoneNumberId}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="PhoneNumberID"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+              />
             </div>
 
             {/* Mode Selection */}
@@ -240,9 +259,8 @@ const WhatsappCampaign: React.FC = () => {
                   <div
                     key={m}
                     onClick={() => handleModeChange(m as "Template")}
-                    className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${
-                      mode === m ? "bg-purple-200" : "bg-white"
-                    }`}
+                    className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${mode === m ? "bg-purple-200" : "bg-white"
+                      }`}
                   >
                     {m}
                   </div>
@@ -510,7 +528,10 @@ const WhatsappCampaign: React.FC = () => {
             </div>
           </div>
           {showTemplate && (
-            <CampaignTemplate onClose={() => setShowTemplate(false)} />
+            <CampaignTemplate
+              onClose={() => setShowTemplate(false)}
+              onSelectTemplate={handleSelectTemplate}
+            />
           )}
           {/* WhatsApp Preview */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">

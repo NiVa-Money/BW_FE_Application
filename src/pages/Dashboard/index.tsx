@@ -1,4 +1,4 @@
-import React, {  CSSProperties } from 'react';
+import React, { CSSProperties } from 'react';
 import FirstLayerCards from './FirstLayerCards';
 import { AreaChart } from "../../lib/chartUtils"
 import { DonutChart } from "../../lib/chartUtilsDonout"

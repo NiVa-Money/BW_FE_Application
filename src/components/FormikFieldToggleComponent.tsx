@@ -5,14 +5,16 @@ import { FieldProps } from 'formik';
 interface FormikToggleButtonGroupProps extends FieldProps {
   options: { label: string; value: string }[];
   onChange?: (value: string) => void;
+  val?: string
 }
 
-const FormikFieldToggleComponent: React.FC<FormikToggleButtonGroupProps> = ({ field, form, options, onChange }) => {
-  const { name, value } = field;
+const FormikFieldToggleComponent: React.FC<FormikToggleButtonGroupProps> = ({ field, form, options, onChange, val }) => {
+  const { name, value = val } = field;
   const { setFieldValue } = form;
 
   const handleChipClick = (selectedValue: string) => {
-    setFieldValue(name, selectedValue); // Update Formik state
+    const newValue = { value: selectedValue }; // Store as an object
+    setFieldValue(name, newValue); // Update Formik state
     if (onChange) {
       onChange(selectedValue); // Call parent onChange handler
     }

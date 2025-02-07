@@ -16,6 +16,9 @@ import {
   EXPORT_BOT_PROFILE,
   EXPORT_BOT_PROFILE_SUCCESS,
   EXPORT_BOT_PROFILE_FAILURE,
+  TEST_BOT,
+  TEST_BOT_SUCCESS,
+  TEST_BOT_FAILURE,
 } from "../actionTypes/botActionsTypes";
 import { initialState } from "../initialState";
 export default function botProfileReducers(
@@ -117,6 +120,24 @@ export default function botProfileReducers(
       return {
         ...state,
         export: { data: action.payload, loader: false },
+      };
+    case TEST_BOT:
+      return {
+        ...state,
+        test: {
+          ...state.test,
+          loader: true,
+        },
+      };
+    case TEST_BOT_SUCCESS:
+      return {
+        ...state,
+        test: { data: action.payload, loader: false },
+      };
+    case TEST_BOT_FAILURE:
+      return {
+        ...state,
+        test: { data: action.payload, loader: false },
       };
     default:
       return state;

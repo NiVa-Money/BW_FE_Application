@@ -29,7 +29,6 @@ export const getBotsService = async (payload: any) => {
     );
     return response.data;
   } catch (error: any) {
-    console.log("e", error);
     throw new Error("Error fetching user profile");
   }
 };
@@ -42,7 +41,6 @@ export const deleteBotService = async (payload: any) => {
     );
     return response.data;
   } catch (error: any) {
-    console.log("e", error);
     throw new Error("Error Deleting Bot profile");
   }
 };
@@ -56,5 +54,15 @@ export const exportBotProfileService = async (payload: any) => {
     return response.data;
   } catch (error: any) {
     throw new Error("Error exporting bot");
+  }
+};
+export const botTestService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post("/user/sessionChatV2", {
+      data: JSON.stringify(payload),
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error("Error in Creating Bot");
   }
 };

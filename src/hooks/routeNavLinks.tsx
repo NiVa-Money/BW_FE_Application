@@ -75,9 +75,7 @@ export const sidebarNavLinks = (moduleMapping: []) => {
 
   ];
 
-  console.log('allowedIds', moduleMapping)
   const filteredMenuItems = filterMenuItems(menuItems, moduleMapping);
-  console.log("filteredMenuItems", filteredMenuItems);
 
   return filteredMenuItems;
 };

@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
 import ExportIntegrationModal from '../../components/exportIntegrationModal';
 import { notifyError } from '../../components/Toast';
-
+import TestBotModal from '../../components/TestBotModal';
 
 
 const MyBots: React.FC = () => {
@@ -19,6 +19,8 @@ const MyBots: React.FC = () => {
     success: boolean;
     url: string;
   } | null>(null);
+  const [botId, setBotId] = useState('')
+
   const exportS = useSelector(
     (state: RootState) => state?.bot?.export?.data
   );
@@ -34,7 +36,7 @@ const MyBots: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-
+  const [isTestOpen, setIsTestOpen] = useState(false)
 
   const [payloadDelete, setPayloadDelete] = useState({})
   const navigate = useNavigate();
@@ -43,6 +45,10 @@ const MyBots: React.FC = () => {
   );
   const createBotHandler = () => {
     navigate('/createbot')
+  }
+  const handleTestClose = () => {
+    dispatch(resetBotAction('test'))
+    setIsTestOpen(false)
   }
   const handleOpen = (botId: string) => {
 
@@ -66,11 +72,14 @@ const MyBots: React.FC = () => {
     dispatch(deleteBotAction(payloadDelete))
     setIsModalOpen(false);
 
+
   };
 
 
-  const handleTest = () => {
-    console.log('Test action triggered!');
+  const handleTest = (id: string) => {
+    setBotId(id)
+    setIsTestOpen(true)
+
   };
 
   const handleExport = (botId: string) => {
@@ -104,7 +113,7 @@ const MyBots: React.FC = () => {
   }, [deleteBotDataRedux])
 
   useEffect(() => {
-    if (botsDataRedux?.length && !botsDataLoader) {
+    if (botsDataRedux) {
       setbotLists(botsDataRedux)
     }
 
@@ -148,7 +157,7 @@ const MyBots: React.FC = () => {
               color={item?.botColor}
               createdAt={formatDateString(item?.createdAt)}
               onDelete={() => handleOpen(item._id)}
-              onTest={handleTest}
+              onTest={() => handleTest(item?._id)}
               onExport={() => handleExport(item._id)}
               onClick={() => handleEdit(item._id)}
 
@@ -159,6 +168,7 @@ const MyBots: React.FC = () => {
       </div>
       <DeleteConfirmationModal open={isModalOpen} onClose={() => setIsModalOpen(false)} onDelete={handleDelete} />
       <ExportIntegrationModal open={isExportModalOpen} onClose={closeExportModal} exportResponse={exportResponse} />
+      <TestBotModal open={isTestOpen} onClose={handleTestClose} botId={botId} />
     </div>
 
 

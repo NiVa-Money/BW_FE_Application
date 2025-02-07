@@ -10,21 +10,24 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import FormikFieldChipComponent from "../../components/FormikFieldChipComponent";
 import FormikFieldToggleComponent from "../../components/FormikFieldToggleComponent";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
-import { Button } from "@mui/material";
 import { THEME } from "../../enums";
 import FormikFieldSelectComponent from "../../components/FormikFieldSelectDropdownComponent";
 import { useDispatch, useSelector } from "react-redux";
 import { editBotAction } from "../../store/actions/botActions";
 import CreateBotRightContainer from "../CreateBot/CreateBotRightContainer";
 import { RootState } from "../../store";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import ConfirmationModal from "../../components/ConformationModal";
 
 const EditBot: React.FC = () => {
   const { id } = useParams();
-  console.log("id", id);
-  const [_botData, setBotData] = useState<any>({});
+  const [botData, setBotData] = useState<any>({});
   const botEditDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const editBotDataRedux = useSelector(
+    (state: RootState) => state.bot?.create?.data
   );
   useEffect(() => {
     if (botEditDataRedux?.length && id != undefined) {
@@ -37,7 +40,6 @@ const EditBot: React.FC = () => {
     }
   }, [botEditDataRedux, id]);
 
-  console.log("botEditDataRedux", botEditDataRedux);
   const imgViewerRef = useRef(null);
   const viewerRef = useRef(null);
   const [imageName, setImageName] = useState("");
@@ -48,7 +50,7 @@ const EditBot: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [base64Image, setBase64Image] = useState("");
-
+  const [botId, setBotId] = useState('')
   const [base64File, _setBase64File] = useState("");
   const [formValues, setFormValues] = useState<any>({
     botName: "",
@@ -62,7 +64,15 @@ const EditBot: React.FC = () => {
     email: "",
     botSmartness: false,
     appoimentLink: "",
+    docId: ''
   });
+  const botLimits: any[] = [
+    { label: "50", value: 50 },
+    { label: "100", value: 100 },
+    { label: "200", value: 200 },
+    { label: "400", value: 400 },
+    { label: "530", value: 530 },
+  ]
   const botSamples = [
     {
       imageUrl: `/assets/bot1.svg`,
@@ -96,6 +106,7 @@ const EditBot: React.FC = () => {
     botLimit,
     appoimentLink,
     botFont,
+    docId
   }: any = formValues;
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
@@ -104,12 +115,15 @@ const EditBot: React.FC = () => {
     const file = new File([blob], "image.jpg", { type: blob.type });
     setSelectedFileImage(file);
   };
+  const userId: string = localStorage.getItem("user_id") || '';
+
   const validationSchema = Yup.object({
     botName: Yup.string().required("BotName is required"),
     email: Yup.string()
       .email("Invalid email format")
       .required("Email is required"),
   });
+  const navigate = useNavigate()
   const initialValues: any = {
     name: "",
     theme: "",
@@ -140,16 +154,14 @@ const EditBot: React.FC = () => {
     formData.append("docName", filename);
     formData.append("docType", filename.length > 0 ? "pdf" : "");
     formData.append("customBotImage", imageFile);
-    formData.append("userId", "6780152ce269db8d09b78842");
+    formData.append("userId", userId);
     formData.append("file", docFile);
     formData.append("botFont", botFont);
     formData.append("botTheme", theme);
-    formData.append("botId", "botid");
+    formData.append("botId", botId);
+    formData.append('docId', docId);
 
-    console.log("Form Submitted:", formValues, formData.entries());
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
+
     dispatch(editBotAction(formData));
   };
   const handleColorClick = (color: any) => {
@@ -175,10 +187,8 @@ const EditBot: React.FC = () => {
     }
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("e", e.target);
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
-    console.log("for", { ...formValues, [name]: value });
   };
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -205,6 +215,71 @@ const EditBot: React.FC = () => {
     //   event.preventDefault();
     // }
   };
+  const handleClose = () => {
+    setFormValues({
+      theme: '',
+      botTone: '',
+      botFont: '',
+      greetingMessage: '',
+      botIdentity: '',
+      phoneNumber: '',
+      email: '',
+      botSmartness: false,
+      appoimentLink: ''
+    })
+    setImageName('')
+    setFileName('')
+    setIsModalOpen(false)
+  };
+  const handleConfirmation = () => {
+    setIsModalOpen(false)
+    setFormValues({
+      theme: '',
+      botTone: '',
+      botFont: '',
+      greetingMessage: '',
+      botIdentity: '',
+      phoneNumber: '',
+      email: '',
+      botSmartness: false,
+      appoimentLink: ''
+    })
+    setImageName('')
+    setFileName('')
+    navigate('/integrations')
+  }
+  useEffect(() => {
+    if (editBotDataRedux !== null) {
+      const success = editBotDataRedux?.success
+      if (success) {
+        setIsModalOpen(success)
+
+
+      }
+
+    }
+  }, [editBotDataRedux])
+  useEffect(() => {
+    if (botData.length) {
+      setFormValues({
+        botName: botData[0]?.botName,
+        theme: botData[0]?.boTheme || THEME.dark,
+        botTone: botData[0]?.botTone || '',
+        botFont: botData[0]?.botFont || 'Poppins',
+        greetingMessage: botData[0]?.botGreetingMessage,
+        botIdentity: botData[0]?.botIdentity,
+        botLimit: botData[0]?.wordLimitPerMessage,
+        phoneNumber: botData[0]?.supportNumber,
+        email: botData[0]?.supportEmail,
+        botSmartness: botData[0]?.botSmartness,
+        appoimentLink: botData[0]?.appointmentSchedulerLink,
+        docId: botData[0]?.docId
+      });
+      setFileName(botData[0]?.docName)
+      setSelectedFileImage(botData[0].botURL)
+      setBotId(botData[0]._id)
+    }
+  }, [botData])
   return (
     <div className="m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center ">
       <Formik
@@ -243,13 +318,11 @@ const EditBot: React.FC = () => {
                       <button
                         key={color}
                         onClick={() => handleColorClick(color)}
-                        className={`w-8 h-8  rounded-full ${
-                          color === "rainbow"
-                            ? "bg-gradient-to-r from-red-500 via-green-500 to-blue-500"
-                            : ""
-                        }${
-                          chatColor === color ? "border-4 border-gray-400" : ""
-                        }`}
+                        className={`w-8 h-8  rounded-full ${color === "rainbow"
+                          ? "bg-gradient-to-r from-red-500 via-green-500 to-blue-500"
+                          : ""
+                          }${chatColor === color ? "border-4 border-gray-400" : ""
+                          }`}
                         style={{
                           backgroundColor:
                             color !== "rainbow" ? color : undefined,
@@ -330,6 +403,7 @@ const EditBot: React.FC = () => {
                   <Field
                     name="theme"
                     component={FormikFieldChipComponent}
+                    defaultValue={botData[0]?.botTheme || 'dark'}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, theme: value });
                       // Perform additional logic if needed
@@ -353,10 +427,10 @@ const EditBot: React.FC = () => {
 
                   <Field
                     name="botTone"
+                    val={botTone}
                     component={FormikFieldToggleComponent}
                     onChange={(value: string) => {
-                      setFormValues({ ...formValues, botTone: value });
-                      // Perform additional logic if needed
+                      setFormValues({ ...formValues, botTone: value }); // Store directly as botTone
                     }}
                     options={[
                       { label: "Formal Tone", value: "formal" },
@@ -364,6 +438,7 @@ const EditBot: React.FC = () => {
                       { label: "Enthusiastic Tone", value: "enthusiastic" },
                     ]}
                   />
+
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="botFont">Bot Font</label>
@@ -401,6 +476,7 @@ const EditBot: React.FC = () => {
                   <Field
                     name="botIdentity"
                     component={FormikFieldToggleComponent}
+                    value={botIdentity}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, botIdentity: value });
                       // Perform additional logic if needed
@@ -467,17 +543,12 @@ const EditBot: React.FC = () => {
                     name="botLimit"
                     placeholder="Enter your Bot Name"
                     component={FormikFieldSelectComponent}
+                    value={botLimits.find((option) => option.value === botLimit) || null}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, botLimit: value });
                       // Perform additional logic if needed
                     }}
-                    options={[
-                      { label: "50", value: 50 },
-                      { label: "100", value: 100 },
-                      { label: "200", value: 200 },
-                      { label: "400", value: 400 },
-                      { label: "530", value: 530 },
-                    ]}
+                    options={botLimits}
                   />
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
@@ -505,7 +576,7 @@ const EditBot: React.FC = () => {
                   />
                 </div>
 
-                <div className=" flex flex-col w-[85%] mb-3 text-black">
+                {/* <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label>Agent Creation</label>
 
                   <Button
@@ -542,7 +613,7 @@ const EditBot: React.FC = () => {
                   >
                     Add to Workflow
                   </Button>
-                </div>
+                </div> */}
               </div>
             </div>
             <CreateBotRightContainer
@@ -558,6 +629,8 @@ const EditBot: React.FC = () => {
           </Form>
         )}
       </Formik>
+      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`} />
+
     </div>
   );
 };

@@ -11,7 +11,6 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import FormikFieldChipComponent from '../../components/FormikFieldChipComponent';
 import FormikFieldToggleComponent from '../../components/FormikFieldToggleComponent';
 import FormikFieldInputComponent from '../../components/FormikFieldInputComponent';
-import { Button } from '@mui/material';
 import { THEME } from '../../enums';
 import FormikFieldSelectComponent from '../../components/FormikFieldSelectDropdownComponent';
 import { useDispatch, useSelector } from 'react-redux';
@@ -122,10 +121,7 @@ const CreateBot: React.FC = () => {
     formData.append('botFont', botFont);
     formData.append('botTheme', theme);
 
-    console.log('Form Submitted:', formValues, formData.entries());
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
+
     dispatch(createBotAction(formData))
   };
   const handleColorClick = (color: any) => {
@@ -148,10 +144,8 @@ const CreateBot: React.FC = () => {
     }
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('e', e.target)
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
-    console.log('for', { ...formValues, [name]: value })
   };
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -178,13 +172,45 @@ const CreateBot: React.FC = () => {
       const success = createBotDataRedux?.success
       if (success) {
         setIsModalOpen(success)
-        setIsModalOpen(false);
+
+
       }
 
     }
   }, [createBotDataRedux])
-
-  const handleClose = () => setIsModalOpen(false);
+  const handleConfirmation = () => {
+    setIsModalOpen(false)
+    setFormValues({
+      theme: '',
+      botTone: '',
+      botFont: '',
+      greetingMessage: '',
+      botIdentity: '',
+      phoneNumber: '',
+      email: '',
+      botSmartness: false,
+      appoimentLink: ''
+    })
+    setImageName('')
+    setFileName('')
+    navigate('/integrations')
+  }
+  const handleClose = () => {
+    setFormValues({
+      theme: '',
+      botTone: '',
+      botFont: '',
+      greetingMessage: '',
+      botIdentity: '',
+      phoneNumber: '',
+      email: '',
+      botSmartness: false,
+      appoimentLink: ''
+    })
+    setImageName('')
+    setFileName('')
+    setIsModalOpen(false)
+  };
 
   return (
     <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
@@ -476,7 +502,7 @@ const CreateBot: React.FC = () => {
                   />
                 </div>
 
-                <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                {/* <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label >Agent Creation</label>
 
                   <Button variant="text" className='bg-[#65558F] w-[150px] self-start rounded-[100px]'
@@ -505,7 +531,7 @@ const CreateBot: React.FC = () => {
                       },
                     }}
                   >Add to Workflow</Button>
-                </div>
+                </div> */}
               </div>
             </div>
             <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} setFormValues={setFormValues} formValues={formValues} handleSubmit={handleSubmit} font={botFont} />
@@ -513,7 +539,7 @@ const CreateBot: React.FC = () => {
           </Form>
         )}
       </Formik>
-      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={() => navigate('/mybots')} heading={'Congratulations!!!'} subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={'Engage with your bot through testing or chatting, or seamlessly integrate {bot name} into your social media platforms.'} />
+      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`} />
 
     </div>
 

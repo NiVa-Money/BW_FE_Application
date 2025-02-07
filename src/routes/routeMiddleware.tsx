@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import {
   Drawer,
   List,
@@ -12,7 +11,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
+import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { NavLink } from "react-router-dom";
 import { sidebarNavLinks } from "../hooks/routeNavLinks";
 import { authProtectedRoutes, publicRoutes } from ".";
@@ -22,62 +21,63 @@ interface AuthMiddlewareProps {
   isProtected: boolean; // Indicate whether the route is protected
 }
 
-const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
-  children,
-  isProtected,
-}) => {
+const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({ children, isProtected }) => {
   const [open, setOpen] = useState(false); // State to manage the sidebar's open/close state
-  const [opendropdown, setOpenDropdown] = React.useState<{
-    [key: number]: boolean;
-  }>({});
+  const [opendropdown, setOpenDropdown] = React.useState<{ [key: number]: boolean }>({});
   const [menuItems, setMenuItems] = useState<any>([]);
   const handleToggle = (id: number) => {
     setOpenDropdown((prev) => ({ ...prev, [id]: !prev[id] }));
   };
+  const navigate = useNavigate()
   const toggleSidebar = () => setOpen(!open);
   const userData = localStorage.getItem("userData") || JSON.stringify({});
-  const moduleMapping = JSON.parse(userData).moduleMap;
+  const moduleMapping = JSON.parse(userData).moduleMap
   // const moduleMap = JSON.parse(moduleMapString);
-  const location = useLocation(); // Get current location
+  const location = useLocation();
+  const pathname: string = location?.pathname
+  // Get current location
   const userId = localStorage.getItem("user_id"); // Get user_id from localStorage
-
-  useEffect(() => {
-    const data = sidebarNavLinks(moduleMapping);
-    setMenuItems(data);
-  }, [moduleMapping]);
 
   // If the route is protected and no user_id exists, redirect to login
   if (isProtected && !userId) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
+  const logOutHandler = () => {
+    navigate('/')
+    localStorage.clear();
 
-  console.log("lo", location.pathname);
+
+  }
+  useEffect(() => {
+    const data = sidebarNavLinks(moduleMapping);
+    setMenuItems(data);
+
+  }, []);
   const isAuthRoute = authProtectedRoutes.some((route) => {
-    const regex = new RegExp(`^${route.path.replace(/:\w+/g, "[^/]+")}$`);
-    return regex.test(location.pathname);
+    const regex = new RegExp(`^${route.path.replace(/:\w+/g, '[^/]+')}$`);
+    return regex.test(pathname);
   });
   return (
     <div style={{ display: "flex" }}>
       {/* Sidebar */}
-      {publicRoutes.map((route) => route.path).includes(location.pathname) ? (
+      {publicRoutes.includes(pathname) ?
         <Drawer open={open} onClose={toggleSidebar} variant="temporary">
           <div style={{ width: 250 }} className="flex flex-col">
-            <div
-              style={{ width: 250, padding: "16px" }}
-              className="flex flex-col bg-white h-full"
-            >
+
+            <div style={{ width: 250, padding: "16px" }} className="flex flex-col bg-white h-full">
               <div className="flex justify-between gap-1">
-                <button onClick={toggleSidebar}>
+                <button onClick={toggleSidebar} >
                   <KeyboardBackspaceIcon /> <span>Back</span>
                 </button>
-                <button onClick={() => {}}>
-                  <span>Test Bot</span>
+                <button onClick={logOutHandler} >
+                  <span>Log Out</span>
                 </button>
               </div>
               <List>
                 {menuItems?.map((item: any) => (
                   <React.Fragment key={item.id}>
                     <ListItem
+
                       component={item.subItems ? "div" : NavLink}
                       to={!item.subItems ? item.path || "/" : undefined}
                       onClick={() => item.subItems && handleToggle(item.id)}
@@ -89,22 +89,10 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                           </div>
                         }
                       />
-                      {item.subItems?.length ? (
-                        item.subItems ? (
-                          opendropdown[item.id] ? (
-                            <ExpandLess />
-                          ) : (
-                            <ExpandMore />
-                          )
-                        ) : null
-                      ) : null}
+                      {item.subItems?.length ? item.subItems ? opendropdown[item.id] ? <ExpandLess /> : <ExpandMore /> : null : null}
                     </ListItem>
                     {item.subItems && (
-                      <Collapse
-                        in={opendropdown[item.id]}
-                        timeout="auto"
-                        unmountOnExit
-                      >
+                      <Collapse in={opendropdown[item.id]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
                           {item.subItems.map((subItem: any) => (
                             <ListItem key={subItem.id} component="button">
@@ -120,27 +108,25 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
               </List>
             </div>
           </div>
-        </Drawer>
-      ) : null}
-      {isAuthRoute ? (
+        </Drawer> : null}
+      {isAuthRoute ?
         <Drawer open={open} onClose={toggleSidebar} variant="temporary">
           <div style={{ width: 250 }} className="flex flex-col">
-            <div
-              style={{ width: 250, padding: "16px" }}
-              className="flex flex-col bg-white h-full"
-            >
+
+            <div style={{ width: 250, padding: "16px" }} className="flex flex-col bg-white h-full">
               <div className="flex justify-between gap-1">
-                <button onClick={toggleSidebar}>
+                <button onClick={toggleSidebar} >
                   <KeyboardBackspaceIcon /> <span>Back</span>
                 </button>
-                <button onClick={() => {}}>
-                  <span>Test Bot</span>
+                <button onClick={logOutHandler} >
+                  <span>Log Out</span>
                 </button>
               </div>
               <List>
                 {menuItems?.map((item: any) => (
                   <React.Fragment key={item.id}>
                     <ListItem
+
                       component={item.subItems ? "div" : NavLink}
                       to={!item.subItems ? item.path || "/" : undefined}
                       onClick={() => item.subItems && handleToggle(item.id)}
@@ -152,24 +138,17 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                           </div>
                         }
                       />
-                      {item.subItems?.length ? (
-                        opendropdown[item.id] ? (
-                          <ExpandLess />
-                        ) : (
-                          <ExpandMore />
-                        )
-                      ) : null}
+                      {item.subItems?.length ? opendropdown[item.id] ? <ExpandLess /> : <ExpandMore /> : null}
                     </ListItem>
                     {item.subItems && (
-                      <Collapse
-                        in={opendropdown[item.id]}
-                        timeout="auto"
-                        unmountOnExit
-                      >
+                      <Collapse in={opendropdown[item.id]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
                           {item.subItems.map((subItem: any) => (
                             <ListItem key={subItem.id} component="button">
-                              <NavLink to={subItem.path}>
+                              <NavLink
+                                to={subItem.path}
+
+                              >
                                 {subItem.text}
                               </NavLink>
                             </ListItem>
@@ -183,8 +162,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
               </List>
             </div>
           </div>
-        </Drawer>
-      ) : null}
+        </Drawer> : null}
 
       {/* Main content */}
 
@@ -198,15 +176,10 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
           }}
         >
           <IconButton onClick={toggleSidebar} color="primary">
-            <img
-              src={"/assets/botwot_logo.svg"}
-              alt="Logo"
-              style={{ marginRight: "8px" }}
-            />
+            <img src={"/assets/botwot_logo.svg"} alt="Logo" style={{ marginRight: "8px" }} />
             <MenuIcon />
           </IconButton>
           <div className="w-[100%]">
-            {/* <Header /> */}
             {children}
           </div>
         </main>
