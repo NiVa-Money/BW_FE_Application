@@ -28,7 +28,6 @@ const CommonTable: React.FC<TableProps> = ({
   height = "300px",
 }) => {
   const [page, setPage] = useState(1);
-
   const totalPages = Math.ceil(rows.length / rowsPerPage);
 
   const handlePageChange = (
@@ -44,11 +43,12 @@ const CommonTable: React.FC<TableProps> = ({
         component={Paper}
         sx={{
           maxHeight: height,
+          minHeight: "100px", // Ensures table is visible even when empty
           borderRadius: "12px",
         }}
       >
         <Table stickyHeader sx={{ minWidth: 650 }} size="small">
-          {/* Table Header */}
+          {/* Always render Table Header */}
           <TableHead>
             <TableRow sx={{ backgroundColor: "#F5F5F5" }}>
               {headers.map((header, index) => (
@@ -62,7 +62,11 @@ const CommonTable: React.FC<TableProps> = ({
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={headers.length} align="center">
+                <TableCell
+                  colSpan={headers.length}
+                  align="center"
+                  sx={{ height: "62px" }}
+                >
                   No data available
                 </TableCell>
               </TableRow>
@@ -85,7 +89,8 @@ const CommonTable: React.FC<TableProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
-      {/* Pagination Controls */}
+
+      {/* ✅ Pagination only appears if rows exist */}
       {totalPages > 1 && rows.length > 0 && (
         <Stack spacing={2} className="flex mt-2 justify-center items-center">
           <Pagination
