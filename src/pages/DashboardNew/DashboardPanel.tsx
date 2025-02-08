@@ -219,9 +219,9 @@ const DashboardPanel = () => {
       };
     }
     const sentiments = [
-      { name: "Positive", value: stats.data.sentiments.Good || 10 },
-      { name: "Negative", value: stats.data.sentiments.Bad || 10 },
-      { name: "Neutral", value: stats.data.sentiments.Neutral || 10 },
+      { name: "Positive", value: stats.data.sentiments.Good || 1 },
+      { name: "Negative", value: stats.data.sentiments.Bad || 1 },
+      { name: "Neutral", value: stats.data.sentiments.Neutral || 1 },
     ];
     const averageHandlingTime = [
       {

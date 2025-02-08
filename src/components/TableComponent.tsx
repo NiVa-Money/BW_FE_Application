@@ -25,7 +25,6 @@ const CommonTable: React.FC<TableProps> = ({
   rows,
   rowsPerPage = 7,
   width = "100%",
-  height = "300px",
 }) => {
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(rows.length / rowsPerPage);
