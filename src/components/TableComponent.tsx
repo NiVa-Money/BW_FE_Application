@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
@@ -27,13 +27,13 @@ const CommonTable: React.FC<TableProps> = ({
   width = "100%",
   height = "300px",
 }) => {
-  const [page, setPage] = useState(0);
+  // const [page, setPage] = useState(0);
 
   const totalPages = Math.ceil(rows.length / rowsPerPage);
 
-  const handleNext = () =>
-    setPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev));
-  const handlePrev = () => setPage((prev) => (prev > 0 ? prev - 1 : prev));
+  // const handleNext = () =>
+  //   setPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev));
+  // const handlePrev = () => setPage((prev) => (prev > 0 ? prev - 1 : prev));
 
   return (
     <div style={{ width }} className="overflow-hidden">
@@ -69,7 +69,7 @@ const CommonTable: React.FC<TableProps> = ({
           {/* Table Body */}
           <TableBody>
             {rows
-              .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+              // .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
               .map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {headers.map((header, colIndex) => (

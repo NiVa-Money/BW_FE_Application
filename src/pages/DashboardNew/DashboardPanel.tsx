@@ -184,120 +184,6 @@ const chartdata2 = [
     solved: 30,
   },
 ];
-const chartdata4 = [
-  {
-    name: "Bot1",
-    resolved: 10,
-    unresolved: 15,
-  },
-  {
-    name: "Bot1",
-    resolved: 12,
-    unresolved: 25,
-  },
-  {
-    name: "Bot2",
-    resolved: 5,
-    unresolved: 21,
-  },
-  {
-    name: "Bot3",
-    resolved: 35,
-    unresolved: 45,
-  },
-  {
-    name: "Bot4",
-    resolved: 11,
-    unresolved: 12,
-  },
-  {
-    name: "Bot5",
-    resolved: 50,
-    unresolved: 30,
-  },
-];
-const chartdata5 = [
-  {
-    name: "Page A",
-    uv: 590,
-    pv: 800,
-    amt: 1400,
-  },
-  {
-    name: "Page B",
-    uv: 868,
-    pv: 967,
-    amt: 1506,
-  },
-  {
-    name: "Page C",
-    uv: 1397,
-    pv: 1098,
-    amt: 989,
-  },
-  {
-    name: "Page D",
-    uv: 1480,
-    pv: 1200,
-    amt: 1228,
-  },
-  {
-    name: "Page E",
-    uv: 1520,
-    pv: 1108,
-    amt: 1100,
-  },
-  {
-    name: "Page F",
-    uv: 1400,
-    pv: 680,
-    amt: 1700,
-  },
-];
-// const chartdata6 = [
-//   {
-//     months: "January",
-//     dataset1: 100,
-//     dataset2: 150,
-//     dataset3: 120,
-//     dataset4: 231,
-//   },
-//   {
-//     months: "Febuary",
-//     dataset1: 110,
-//     dataset2: 145,
-//     dataset3: 172,
-//     dataset4: 231,
-//   },
-//   {
-//     months: "March",
-//     dataset1: 170,
-//     dataset2: 195,
-//     dataset3: 102,
-//     dataset4: 231,
-//   },
-//   {
-//     months: "April",
-//     dataset1: 109,
-//     dataset2: 153,
-//     dataset3: 182,
-//     dataset4: 231,
-//   },
-//   {
-//     months: "May",
-//     dataset1: 180,
-//     dataset2: 195,
-//     dataset3: 132,
-//     dataset4: 231,
-//   },
-//   {
-//     months: "June",
-//     dataset1: 150,
-//     dataset2: 135,
-//     dataset3: 122,
-//     dataset4: 231,
-//   },
-// ];
 
 const firstTableHeaders = ["ID", "Name", "Age", "Actions"];
 
@@ -331,8 +217,7 @@ const performanceBar = [
 
 const DashboardPanel = () => {
   const [botId, setBotId] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  // const [error, setError] = useState<string | null>(null);
+  // const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState<DashboardResponse | null>(null);
 
   const userIdLocal = localStorage.getItem("user_id");
@@ -344,7 +229,7 @@ const DashboardPanel = () => {
   const fetchData = async () => {
     if (!botId) return;
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       const response: DashboardResponse = await dashBoardDataService({
         startDate: null,
         endDate: null,
@@ -355,9 +240,8 @@ const DashboardPanel = () => {
       }
     } catch (err) {
       console.error("Error Calling Dashboard API :", err);
-      // setError("An unexpected error occurred.");
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -438,7 +322,7 @@ const DashboardPanel = () => {
             labelLine={false}
             fill="#8884d8"
           >
-            {constructedChartsData?.sentiments.map((entry, index) => (
+            {constructedChartsData?.sentiments.map((_, index) => (
               <Cell
                 key={`cell-${index}`}
                 fill={[COLORS.LIGHTGREEN, COLORS.GRAY, COLORS.BLUE][index % 3]}
