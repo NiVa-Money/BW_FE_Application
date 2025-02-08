@@ -14,7 +14,7 @@ import { COLORS } from "../constants/index";
 
 interface TableProps {
   headers: string[];
-  rows: Array<{ [key: string]: React.ReactNode }>;
+  rows: any;
   rowsPerPage?: number;
   width?: string | number;
   height?: string | number;
@@ -23,7 +23,7 @@ interface TableProps {
 const CommonTable: React.FC<TableProps> = ({
   headers,
   rows,
-  rowsPerPage = 5,
+  rowsPerPage = 7,
   width = "100%",
   height = "300px",
 }) => {
@@ -42,15 +42,13 @@ const CommonTable: React.FC<TableProps> = ({
       <TableContainer
         component={Paper}
         sx={{
-          maxHeight: height,
-          minHeight: "100px", // Ensures table is visible even when empty
-          borderRadius: "12px",
+          borderRadius: "8px",
         }}
       >
         <Table stickyHeader sx={{ minWidth: 650 }} size="small">
           {/* Always render Table Header */}
           <TableHead>
-            <TableRow sx={{ backgroundColor: "#F5F5F5" }}>
+            <TableRow>
               {headers.map((header, index) => (
                 <TableCell key={index} sx={{ color: COLORS.GRAY }}>
                   {header}
