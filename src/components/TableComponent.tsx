@@ -59,28 +59,34 @@ const CommonTable: React.FC<TableProps> = ({
             </TableRow>
           </TableHead>
 
-          {/* Table Body */}
           <TableBody>
-            {rows
-              .slice((page - 1) * rowsPerPage, page * rowsPerPage) // Slice rows based on pagination
-              .map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
-                  {headers.map((header, colIndex) => (
-                    <TableCell
-                      key={colIndex}
-                      sx={{ borderBottom: "0px solid #E0E0E0" }}
-                    >
-                      {row[header]}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+            {rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={headers.length} align="center">
+                  No data available
+                </TableCell>
+              </TableRow>
+            ) : (
+              rows
+                .slice((page - 1) * rowsPerPage, page * rowsPerPage)
+                .map((row, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    {headers.map((header, colIndex) => (
+                      <TableCell
+                        key={colIndex}
+                        sx={{ borderBottom: "0px solid #E0E0E0" }}
+                      >
+                        {row[header]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-
       {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {totalPages > 1 && rows.length > 0 && (
         <Stack spacing={2} className="flex mt-2 justify-center items-center">
           <Pagination
             size="small"

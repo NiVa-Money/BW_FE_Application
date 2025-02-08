@@ -214,9 +214,7 @@ const performanceBar = [
   {
     id: 2,
     title: "Human Performance",
-    component: (
-      <CommonTable headers={firstTableHeaders} rows={firstTableRows} />
-    ),
+    component: <CommonTable headers={firstTableHeaders} rows={[]} />,
   },
 ];
 
