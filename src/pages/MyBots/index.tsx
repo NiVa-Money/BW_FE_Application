@@ -130,6 +130,10 @@ const MyBots: React.FC = () => {
       dispatch(getBotsAction(userId))
     }
     dispatch(resetBotAction('create'))
+    dispatch(resetBotAction('edit'))
+    dispatch(resetBotAction('delete'))
+
+
   }, [])
   useEffect(() => {
     if (userIdLocal?.length) {

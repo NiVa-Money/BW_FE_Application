@@ -4,13 +4,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import { HexColorPicker } from "react-colorful";
-import FilePresentIcon from "@mui/icons-material/FilePresent";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import FormikFieldChipComponent from "../../components/FormikFieldChipComponent";
 import FormikFieldToggleComponent from "../../components/FormikFieldToggleComponent";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
-import { THEME } from "../../enums";
+import { BOTICONS, THEME } from "../../enums";
 import FormikFieldSelectComponent from "../../components/FormikFieldSelectDropdownComponent";
 import { useDispatch, useSelector } from "react-redux";
 import { editBotAction } from "../../store/actions/botActions";
@@ -27,7 +26,7 @@ const EditBot: React.FC = () => {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const editBotDataRedux = useSelector(
-    (state: RootState) => state.bot?.create?.data
+    (state: RootState) => state.bot?.edit?.data
   );
   useEffect(() => {
     if (botEditDataRedux?.length && id != undefined) {
@@ -39,15 +38,15 @@ const EditBot: React.FC = () => {
       setBotData(data);
     }
   }, [botEditDataRedux, id]);
-
+  console.log('bot', botData)
   const imgViewerRef = useRef(null);
-  const viewerRef = useRef(null);
   const [imageName, setImageName] = useState("");
   const [chatColor, setChatColor] = useState("#5D39AD");
+  const [, setColorPicker] = useState<any>(false);
   const [showColorPicker, setShowColorPicker] = useState<any>(false);
   const [imageSrc, setImageSrc] = useState("/assets/bot1.svg");
   const [filename, setFileName] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [, setSelectedFile] = useState<File | null>(null);
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [base64Image, setBase64Image] = useState("");
   const [botId, setBotId] = useState('')
@@ -106,7 +105,8 @@ const EditBot: React.FC = () => {
     botLimit,
     appoimentLink,
     botFont,
-    docId
+    docId,
+    botIconOption
   }: any = formValues;
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
@@ -140,7 +140,7 @@ const EditBot: React.FC = () => {
     // Handle form submission logic here
     const formData = new FormData();
     const imageFile: any = base64Image ? base64Image : selectedFileImage;
-    const docFile: any = base64File ? base64File : selectedFile;
+    // const docFile: any = base64File ? base64File : selectedFile;
     formData.append("botName", botName);
     formData.append("botTone", botTone);
     formData.append("botColor", chatColor);
@@ -155,9 +155,9 @@ const EditBot: React.FC = () => {
     formData.append("docType", filename.length > 0 ? "pdf" : "");
     formData.append("customBotImage", imageFile);
     formData.append("userId", userId);
-    formData.append("file", docFile);
-    formData.append("botFont", botFont);
-    formData.append("botTheme", theme);
+    // formData.append("file", docFile);
+    // formData.append("botFont", botFont);
+    // formData.append("botTheme", theme);
     formData.append("botId", botId);
     formData.append('docId', docId);
 
@@ -166,11 +166,10 @@ const EditBot: React.FC = () => {
   };
   const handleColorClick = (color: any) => {
     if (color === "rainbow") {
-      // setColorPicker(true);
-      // setChatColor(color);
+      setColorPicker(true);
       setShowColorPicker(true);
     } else {
-      // setColorPicker(false);
+      setColorPicker(false);
       setChatColor(color);
       setShowColorPicker(false);
     }
@@ -225,7 +224,9 @@ const EditBot: React.FC = () => {
       phoneNumber: '',
       email: '',
       botSmartness: false,
-      appoimentLink: ''
+      appoimentLink: '',
+      botIconOption: BOTICONS.list
+
     })
     setImageName('')
     setFileName('')
@@ -242,7 +243,9 @@ const EditBot: React.FC = () => {
       phoneNumber: '',
       email: '',
       botSmartness: false,
-      appoimentLink: ''
+      appoimentLink: '',
+      botIconOption: BOTICONS.list
+
     })
     setImageName('')
     setFileName('')
@@ -264,7 +267,7 @@ const EditBot: React.FC = () => {
       setFormValues({
         botName: botData[0]?.botName,
         theme: botData[0]?.boTheme || THEME.dark,
-        botTone: botData[0]?.botTone || '',
+        botTone: botData[0]?.botTone,
         botFont: botData[0]?.botFont || 'Poppins',
         greetingMessage: botData[0]?.botGreetingMessage,
         botIdentity: botData[0]?.botIdentity,
@@ -273,7 +276,8 @@ const EditBot: React.FC = () => {
         email: botData[0]?.supportEmail,
         botSmartness: botData[0]?.botSmartness,
         appoimentLink: botData[0]?.appointmentSchedulerLink,
-        docId: botData[0]?.docId
+        docId: botData[0]?.knowledgeBaseId,
+        filename: botData[0]?.docName
       });
       setFileName(botData[0]?.docName)
       setSelectedFileImage(botData[0].botURL)
@@ -281,7 +285,7 @@ const EditBot: React.FC = () => {
     }
   }, [botData])
   return (
-    <div className="m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center ">
+    <div className="m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center " onClick={() => (showColorPicker ? setShowColorPicker(false) : '')}>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -340,63 +344,82 @@ const EditBot: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3 text-black">
-                  <label htmlFor="botIcon">Choose Profile</label>
-                  <div className="grid grid-cols-6 gap-1 items-center">
-                    {/* Add bot profile images here */}
-                    {botSamples.map((item, idx) => (
-                      <img
-                        key={idx}
-                        src={item.imageUrl}
-                        alt="logo"
-                        width={"100%"}
-                        height={50}
-                        onClick={() => handleBotSampleClick(item)}
-                      />
-                    ))}
-                  </div>
+                <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                  <label htmlFor="theme"> Choose Bot Icon</label>
+
+                  <Field
+                    name="botIconOption"
+                    component={FormikFieldChipComponent}
+                    onChange={(value: string) => {
+                      setFormValues({ ...formValues, botIconOption: value });
+                      // Perform additional logic if needed
+                    }}
+                    options={[
+                      { label: 'List', value: BOTICONS.list, },
+                      { label: 'Custom', value: BOTICONS.custom, },
+                    ]}
+                  />
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3 text-black">
-                  <label>Choose Image</label>
-
-                  <div className="relative h-[50px]">
-                    <div className="flex items-center h-[100%] w-full rounded-[12px] bg-[#F3F2F6] absolute ">
-                      <div className="flex justify-start items-center ml-4">
-                        {imageName?.length ? (
-                          <img
-                            src={imageSrc}
-                            alt="logo"
-                            width={20}
-                            height={20}
-                          />
-                        ) : null}
-
-                        <span className="mr-2 ml-2">
-                          {imageName?.length ? imageName : "Choose File"}
-                        </span>
-                      </div>
-                      {imageName?.length ? (
-                        <button
-                          onClick={() => {
-                            setImageName("");
-                            setImageSrc("");
-                          }}
-                          className="mr-4 ml-auto bg-none text-black"
-                        >
-                          ×
-                        </button>
-                      ) : null}
+                {botIconOption == BOTICONS.list ?
+                  <div className=" flex flex-col w-[85%] mb-3 text-black">
+                    <label htmlFor="botIcon">Choose Profile</label>
+                    <div className="grid grid-cols-6 gap-1 items-center">
+                      {/* Add bot profile images here */}
+                      {botSamples.map((item, idx) => (
+                        <img
+                          key={idx}
+                          src={item.imageUrl}
+                          alt="logo"
+                          width={"100%"}
+                          height={50}
+                          onClick={() => handleBotSampleClick(item)}
+                        />
+                      ))}
                     </div>
-                    <input
-                      type="file"
-                      onChange={handleImageUpload}
-                      ref={imgViewerRef}
-                      accept="image/*"
-                      id="file-upload-image"
-                      className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
-                    />
-                  </div>
-                </div>
+                  </div> : null}
+                {botIconOption == BOTICONS.custom ?
+
+                  <div className=" flex flex-col w-[85%] mb-3 text-black">
+                    <label>Choose Image</label>
+
+                    <div className="relative h-[50px]">
+                      <div className="flex items-center h-[100%] w-full rounded-[12px] bg-[#F3F2F6] absolute ">
+                        <div className="flex justify-start items-center ml-4">
+                          {imageName?.length ? (
+                            <img
+                              src={imageSrc}
+                              alt="logo"
+                              width={20}
+                              height={20}
+                            />
+                          ) : null}
+
+                          <span className="mr-2 ml-2">
+                            {imageName?.length ? imageName : "Choose File"}
+                          </span>
+                        </div>
+                        {imageName?.length ? (
+                          <button
+                            onClick={() => {
+                              setImageName("");
+                              setImageSrc("");
+                            }}
+                            className="mr-4 ml-auto bg-none text-black"
+                          >
+                            ×
+                          </button>
+                        ) : null}
+                      </div>
+                      <input
+                        type="file"
+                        onChange={handleImageUpload}
+                        ref={imgViewerRef}
+                        accept="image/*"
+                        id="file-upload-image"
+                        className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
+                      />
+                    </div>
+                  </div> : null}
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="theme">Choose theme</label>
 
@@ -427,7 +450,7 @@ const EditBot: React.FC = () => {
 
                   <Field
                     name="botTone"
-                    val={botTone}
+                    value={botTone}
                     component={FormikFieldToggleComponent}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, botTone: value }); // Store directly as botTone
@@ -451,9 +474,9 @@ const EditBot: React.FC = () => {
                       // Perform additional logic if needed
                     }}
                     options={[
-                      { label: "Poppins", value: "Poppins" },
-                      { label: "Montserrat", value: "Montserrat" },
-                      { label: "Times Roman", value: "Times Roman" },
+                      { label: 'Serif', value: 'serif' },
+                      { label: 'Monospace', value: 'monospace' },
+                      { label: 'Cursive', value: 'cursive' },
                     ]}
                   />
                 </div>
@@ -488,7 +511,7 @@ const EditBot: React.FC = () => {
                     ]}
                   />
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3 text-black">
+                {/* <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label>Knowledge Base</label>
 
                   <div className="relative h-[50px]">
@@ -521,7 +544,7 @@ const EditBot: React.FC = () => {
                       className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
                     />
                   </div>
-                </div>
+                </div> */}
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label>Appointment Link</label>
                   <Field
@@ -543,7 +566,7 @@ const EditBot: React.FC = () => {
                     name="botLimit"
                     placeholder="Enter your Bot Name"
                     component={FormikFieldSelectComponent}
-                    value={botLimits.find((option) => option.value === botLimit) || null}
+                    value={botLimits.find((option) => option.value === botLimit)}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, botLimit: value });
                       // Perform additional logic if needed
