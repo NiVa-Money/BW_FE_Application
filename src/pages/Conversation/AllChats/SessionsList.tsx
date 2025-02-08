@@ -21,7 +21,6 @@ const SessionsList: React.FC<any> = ({ botLists, onSessionSelect }) => {
     const channelNameImages = { whatsapp: '/assets/whatsapp.png', instagram: '/assets/instagramLogo.svg', website: '/assets/website.png' }
     const getBotSession = (e) => {
         const botId = e.target.value;
-        console.log(e.target.value)
         dispatch(getAllSession({ botId: botId, userId: userIdLocal }))
     }
     useEffect(() => {
@@ -30,7 +29,6 @@ const SessionsList: React.FC<any> = ({ botLists, onSessionSelect }) => {
         }
     }, [sessionsDataRedux])
 
-    console.log('botLists', botLists)
     return (
         <div className="w-64 bg-white p-4 border-r">
             <div>

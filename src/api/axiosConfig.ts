@@ -17,7 +17,6 @@ axiosInstance.interceptors.request.use(
       };
     }
 
-    console.log("Request Config:", config);
     return config;
   },
   (error) => {

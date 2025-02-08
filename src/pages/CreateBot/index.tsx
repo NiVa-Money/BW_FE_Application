@@ -11,7 +11,7 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import FormikFieldChipComponent from '../../components/FormikFieldChipComponent';
 import FormikFieldToggleComponent from '../../components/FormikFieldToggleComponent';
 import FormikFieldInputComponent from '../../components/FormikFieldInputComponent';
-import { THEME } from '../../enums';
+import { BOTICONS, THEME } from '../../enums';
 import FormikFieldSelectComponent from '../../components/FormikFieldSelectDropdownComponent';
 import { useDispatch, useSelector } from 'react-redux';
 import { createBotAction } from '../../store/actions/botActions';
@@ -25,6 +25,7 @@ const CreateBot: React.FC = () => {
   const viewerRef = useRef(null);
   const [imageName, setImageName] = useState('');
   const [chatColor, setChatColor] = useState('#5D39AD');
+  const [, setColorPicker] = useState<any>(false);
   const [showColorPicker, setShowColorPicker] = useState<any>(false);
   const [imageSrc, setImageSrc] = useState('/assets/bot1.svg');
   const [filename, setFileName] = useState('');
@@ -47,7 +48,8 @@ const CreateBot: React.FC = () => {
     phoneNumber: '',
     email: '',
     botSmartness: false,
-    appoimentLink: ''
+    appoimentLink: '',
+    botIconOption: BOTICONS.list
   });
   const botSamples = [
     {
@@ -71,7 +73,7 @@ const CreateBot: React.FC = () => {
   ];
   const dispatch = useDispatch();
   const navigate = useNavigate()
-  const { botName, theme, botTone, greetingMessage, phoneNumber, email, botSmartness, botIdentity, botLimit, appoimentLink, botFont }: any = formValues
+  const { botName, theme, botTone, greetingMessage, phoneNumber, email, botSmartness, botIdentity, botLimit, appoimentLink, botFont, botIconOption }: any = formValues
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
     const response = await fetch(item?.imageUrl);
@@ -95,7 +97,8 @@ const CreateBot: React.FC = () => {
     phoneNumber: '',
     email: '',
     botSmartness: false,
-    appoimentLink: ''
+    appoimentLink: '',
+    botIconOption: BOTICONS.list
 
   };
   const handleSubmit = () => {
@@ -126,8 +129,11 @@ const CreateBot: React.FC = () => {
   };
   const handleColorClick = (color: any) => {
     if (color === 'rainbow') {
+      setColorPicker(true);
+
       setShowColorPicker(true);
     } else {
+      setColorPicker(false);
       setChatColor(color);
       setShowColorPicker(false);
     }
@@ -213,7 +219,7 @@ const CreateBot: React.FC = () => {
   };
 
   return (
-    <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '>
+    <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center ' onClick={() => (showColorPicker ? setShowColorPicker(false) : '')}>
       <Formik
 
         initialValues={initialValues}
@@ -272,58 +278,77 @@ const CreateBot: React.FC = () => {
                   </div>
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black" >
-                  <label htmlFor="botIcon">Choose Profile</label>
-                  <div className="grid grid-cols-6 gap-1 items-center">
-                    {/* Add bot profile images here */}
-                    {botSamples.map((item, idx) => (
-                      <img
-                        key={idx}
-                        src={item.imageUrl}
-                        alt="logo"
-                        width={'100%'}
-                        height={50}
-                        onClick={() => handleBotSampleClick(item)}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className=" flex flex-col w-[85%] mb-3 text-black" >
-                  <label >Choose Image</label>
+                  <label htmlFor="theme"> Choose Bot Icon</label>
 
-                  <div className="relative h-[50px]">
-                    <div className="flex items-center h-[100%] w-full rounded-[12px] bg-[#F3F2F6] absolute ">
-                      <div className='flex justify-start items-center ml-4'>
-                        {imageName?.length ? <img
-                          src={imageSrc}
+                  <Field
+                    name="botIconOption"
+                    component={FormikFieldChipComponent}
+                    onChange={(value: string) => {
+                      setFormValues({ ...formValues, botIconOption: value });
+                      // Perform additional logic if needed
+                    }}
+                    options={[
+                      { label: 'List', value: BOTICONS.list, },
+                      { label: 'Custom', value: BOTICONS.custom, },
+                    ]}
+                  />
+                </div>
+                {botIconOption == BOTICONS.list ?
+                  <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                    <label htmlFor="botIcon">Choose Profile</label>
+                    <div className="grid grid-cols-6 gap-1 items-center">
+                      {/* Add bot profile images here */}
+                      {botSamples.map((item, idx) => (
+                        <img
+                          key={idx}
+                          src={item.imageUrl}
                           alt="logo"
-                          width={20}
-                          height={20}
-                        /> : null}
-
-                        <span className="mr-2 ml-2">
-                          {imageName?.length ? imageName : 'Choose File'}
-                        </span></div>
-                      {imageName?.length ?
-                        <button
-                          onClick={() => {
-                            setImageName('');
-                            setImageSrc('');
-                          }}
-                          className="mr-4 ml-auto bg-none text-black"
-                        >
-                          ×
-                        </button> : null}
+                          width={'100%'}
+                          height={50}
+                          onClick={() => handleBotSampleClick(item)}
+                        />
+                      ))}
                     </div>
-                    <input
-                      type="file"
-                      onChange={handleImageUpload}
-                      ref={imgViewerRef}
-                      accept="image/*"
-                      id="file-upload-image"
-                      className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
-                    />
-                  </div>
-                </div>
+                  </div> : null}
+                {botIconOption == BOTICONS.custom ?
+
+                  <div className=" flex flex-col w-[85%] mb-3 text-black" >
+                    <label >Choose Image</label>
+
+                    <div className="relative h-[50px]">
+                      <div className="flex items-center h-[100%] w-full rounded-[12px] bg-[#F3F2F6] absolute ">
+                        <div className='flex justify-start items-center ml-4'>
+                          {imageName?.length ? <img
+                            src={imageSrc}
+                            alt="logo"
+                            width={20}
+                            height={20}
+                          /> : null}
+
+                          <span className="mr-2 ml-2">
+                            {imageName?.length ? imageName : 'Choose File'}
+                          </span></div>
+                        {imageName?.length ?
+                          <button
+                            onClick={() => {
+                              setImageName('');
+                              setImageSrc('');
+                            }}
+                            className="mr-4 ml-auto bg-none text-black"
+                          >
+                            ×
+                          </button> : null}
+                      </div>
+                      <input
+                        type="file"
+                        onChange={handleImageUpload}
+                        ref={imgViewerRef}
+                        accept="image/*"
+                        id="file-upload-image"
+                        className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
+                      />
+                    </div>
+                  </div> : null}
                 <div className=" flex flex-col w-[85%] mb-3 text-black" >
                   <label htmlFor="theme">Choose theme</label>
 
@@ -368,9 +393,9 @@ const CreateBot: React.FC = () => {
                       // Perform additional logic if needed
                     }}
                     options={[
-                      { label: 'Poppins', value: 'Poppins' },
-                      { label: 'Montserrat', value: 'Montserrat' },
-                      { label: 'Times Roman', value: 'Times Roman' },
+                      { label: 'Serif', value: 'serif' },
+                      { label: 'Monospace', value: 'monospace' },
+                      { label: 'Cursive', value: 'cursive' },
                     ]}
                   />
                 </div>
