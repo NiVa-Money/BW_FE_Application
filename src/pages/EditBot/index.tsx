@@ -486,9 +486,10 @@ const EditBot: React.FC = () => {
                   <label htmlFor="botIdentity">Bot Identity</label>
 
                   <Field
+                    id={botId}
                     name="botIdentity"
                     component={FormikFieldToggleComponent}
-                    value={botIdentity}
+                    value={botIdentity?.length ? botIdentity : botIdentity}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, botIdentity: value });
                       // Perform additional logic if needed
