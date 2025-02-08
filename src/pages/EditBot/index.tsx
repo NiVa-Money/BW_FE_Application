@@ -46,11 +46,10 @@ const EditBot: React.FC = () => {
   const [showColorPicker, setShowColorPicker] = useState<any>(false);
   const [imageSrc, setImageSrc] = useState("/assets/bot1.svg");
   const [filename, setFileName] = useState("");
-  const [, setSelectedFile] = useState<File | null>(null);
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [base64Image, setBase64Image] = useState("");
   const [botId, setBotId] = useState('')
-  const [base64File, _setBase64File] = useState("");
+  const [, _setBase64File] = useState("");
   const [formValues, setFormValues] = useState<any>({
     botName: "",
     theme: "",
@@ -189,17 +188,7 @@ const EditBot: React.FC = () => {
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
   };
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file && file.size <= 10 * 1024 * 1024) {
-      setSelectedFile(file);
-      setFileName(file.name);
-    } else {
-      alert("File must be a PDF and less than 10MB");
-    }
-  };
+
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const charCode = event.key;
 
