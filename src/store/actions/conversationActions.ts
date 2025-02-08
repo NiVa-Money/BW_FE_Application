@@ -1,42 +1,45 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ADVANCE_FEATURE, USER_ALL_SESSION, USER_SESSION_HISTORY } from "../actionTypes/conversationActionsTypes";
+import {
+  ADVANCE_FEATURE,
+  USER_ALL_SESSION,
+  USER_SESSION_HISTORY,
+} from "../actionTypes/conversationActionsTypes";
 
-export const getAllSession = (userId: any) => ({
-    type: USER_ALL_SESSION,
-    payload: userId,
+export const getAllSession = (payload: any) => ({
+  type: USER_ALL_SESSION,
+  payload,
+});
+
+export const getAdvanceFeature = (payload: any) => ({
+  type: ADVANCE_FEATURE,
+  payload,
+});
+
+export const filteredSession = (payload: any) => {
+  const processedSessions: any = [];
+
+  payload?.filteredSessions[0]?.sessions.forEach((session: any) => {
+    if (session.question) {
+      processedSessions.push({
+        text: session.question,
+        sender: "user",
+      });
+    }
+    if (session.answer) {
+      processedSessions.push({
+        text: session.answer,
+        sender: "other",
+      });
+    }
   });
 
-  export const getAdvanceFeature = (payload: any) => ({
-    type: ADVANCE_FEATURE,
-    payload,
-  });
-
-
-  export const filteredSession = (payload: any) => {
-    const processedSessions: any = [];
-  
-    payload?.filteredSessions[0]?.sessions.forEach((session: any) => {
-      if (session.question) {
-        processedSessions.push({
-          text: session.question,
-          sender: 'user',
-        });
-      }
-      if (session.answer) {
-        processedSessions.push({
-          text: session.answer,
-          sender: 'other',
-        });
-      }
-    });
-  
-    const data = {
-      sessionData: processedSessions,
-      sessionId: payload.sessionId,
-    };
-  
-    return {
-      type: USER_SESSION_HISTORY,
-      payload: data,
-    };
+  const data = {
+    sessionData: processedSessions,
+    sessionId: payload.sessionId,
   };
+
+  return {
+    type: USER_SESSION_HISTORY,
+    payload: data,
+  };
+};

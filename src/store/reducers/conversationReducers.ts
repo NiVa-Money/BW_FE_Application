@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   USER_ALL_SESSION,
-  GET_USER_All_SESSION_SUCCESS,
-  GET_USER_All_SESSION_FAILURE,
+  USER_All_SESSION_SUCCESS,
+  USER_All_SESSION_FAILURE,
   ADVANCE_FEATURE,
   ADVANCE_FEATURE_FAILURE,
   ADVANCE_FEATURE_SUCCESS,
@@ -19,12 +19,12 @@ export default function userChatReducers(
         ...state,
         allSession: { data: action.payload, loader: false },
       };
-    case GET_USER_All_SESSION_SUCCESS:
+    case USER_All_SESSION_SUCCESS:
       return {
         ...state,
         allSession: { data: action.payload, loader: true },
       };
-    case GET_USER_All_SESSION_FAILURE:
+    case USER_All_SESSION_FAILURE:
       return {
         ...state,
         allSession: { data: action.payload, loader: false },

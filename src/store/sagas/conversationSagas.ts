@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { put, call } from "redux-saga/effects";
-import { getAdvanceFeatureService, getUserAllSessionService } from "../../api/services/conversationServices";
 import {
-  GET_USER_All_SESSION_SUCCESS,
-  GET_USER_All_SESSION_FAILURE,
+  getAdvanceFeatureService,
+  getUserAllSessionService,
+} from "../../api/services/conversationServices";
+import {
+  USER_All_SESSION_SUCCESS,
+  USER_All_SESSION_FAILURE,
   ADVANCE_FEATURE_FAILURE,
   ADVANCE_FEATURE_SUCCESS,
 } from "../actionTypes/conversationActionsTypes";
@@ -13,21 +16,21 @@ import { notifyError } from "../../components/Toast";
 export function* getUserAllSessionSaga({
   payload,
 }: {
+  type: string;
   payload: any;
 }): Generator<any> {
   try {
     const userChat = yield call(getUserAllSessionService, payload);
     yield put({
-      type: GET_USER_All_SESSION_SUCCESS,
+      type: USER_All_SESSION_SUCCESS,
       payload: userChat,
     });
   } catch {
     yield put({
-      type: GET_USER_All_SESSION_FAILURE,
+      type: USER_All_SESSION_FAILURE,
     });
   }
 }
-
 
 export function* getAdvanceFeatureSaga({
   payload,
