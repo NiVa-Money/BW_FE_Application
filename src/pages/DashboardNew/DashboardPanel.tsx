@@ -22,6 +22,7 @@ import { RootState } from "../../store";
 import { getBotsAction } from "../../store/actions/botActions";
 import { useDispatch, useSelector } from "react-redux";
 import { dashBoardDataService } from "../../api/services/dashboardServices";
+import Loader from "../../components/Loader";
 
 interface StatsCardProps {
   title: string;
@@ -30,7 +31,7 @@ interface StatsCardProps {
 }
 
 interface DashboardResponse {
-  sucess: boolean;
+  success: boolean;
   data: {
     liveVsEndedSessions: {
       live: number;
@@ -43,7 +44,9 @@ interface DashboardResponse {
       consumed: number;
     };
     resolutionRate: number;
-    channelWiseConversaction: ChannelMetrics[];
+    escalationRate: number;
+    aiVsHumanResolutionRate: { ai: number; human: number };
+    channelWiseConversation: ChannelMetrics[];
     sentiments: Sentiments;
     aiAgentMetrics: AIAgentMetric[];
     channelWiseResolutionMetrics: ChannelMetrics[];
@@ -74,6 +77,7 @@ interface AIAgentMetric {
   totalWebSessions: number;
   resolvedSession: number;
 }
+
 interface DashboardHeaderProps {
   headerData: {
     resolutionRate: number;
@@ -112,6 +116,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
     </Paper>
   );
 };
+
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
   const processedStats = headerData
     ? [
@@ -217,8 +222,8 @@ const performanceBar = [
 
 const DashboardPanel = () => {
   const [botId, setBotId] = useState("");
-  // const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState<DashboardResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const userIdLocal = localStorage.getItem("user_id");
   const dispatch = useDispatch();
@@ -229,19 +234,19 @@ const DashboardPanel = () => {
   const fetchData = async () => {
     if (!botId) return;
     try {
-      // setIsLoading(true);
+      setIsLoading(true);
       const response: DashboardResponse = await dashBoardDataService({
         startDate: null,
         endDate: null,
         botIds: [botId],
       });
-      if (response?.sucess) {
+      if (response?.success) {
         setStats(response);
       }
     } catch (err) {
       console.error("Error Calling Dashboard API :", err);
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -272,10 +277,11 @@ const DashboardPanel = () => {
       },
     ];
     return {
-      totalConversation: stats.data.channelWiseConversaction,
+      totalConversation: stats.data.channelWiseConversation,
       sentiments: sentiments,
       resolvedChats: stats.data.channelWiseResolutionMetrics,
       averageHandlingTime,
+      aiAgentMetrics: stats.data.aiAgentMetrics,
     };
   }, [stats]);
 
@@ -284,9 +290,13 @@ const DashboardPanel = () => {
       id: 1,
       title: "Total Conversation",
       component: (
-        <LineChart data={constructedChartsData?.totalConversation}>
+        <LineChart
+          width={500}
+          height={300}
+          data={constructedChartsData?.totalConversation}
+        >
           <XAxis dataKey="date" />
-          <YAxis dataKey="" />
+          <YAxis />
           <Tooltip />
           <Line type="linear" dataKey="web" stroke={COLORS.GRAY} />
           <Line type="linear" dataKey="whatsapp" stroke={COLORS.BLUE} />
@@ -298,7 +308,7 @@ const DashboardPanel = () => {
       id: 2,
       title: "Escalation Rate",
       component: (
-        <BarChart data={chartdata2}>
+        <BarChart width={500} height={300} data={chartdata2}>
           <CartesianGrid strokeDasharray="5 5" />
           <XAxis dataKey="name" />
           <YAxis />
@@ -312,7 +322,7 @@ const DashboardPanel = () => {
       id: 3,
       title: "Customer Sentiment Analysis",
       component: (
-        <PieChart>
+        <PieChart width={500} height={300}>
           <Pie
             data={constructedChartsData?.sentiments}
             dataKey="value"
@@ -338,9 +348,13 @@ const DashboardPanel = () => {
       id: 4,
       title: "Resolved Chats",
       component: (
-        <LineChart data={constructedChartsData?.resolvedChats}>
+        <LineChart
+          width={500}
+          height={300}
+          data={constructedChartsData?.resolvedChats}
+        >
           <XAxis dataKey="date" />
-          <YAxis dataKey="" />
+          <YAxis />
           <Tooltip />
           <Line type="linear" dataKey="web" stroke={COLORS.GRAY} />
           <Line type="linear" dataKey="whatsapp" stroke={COLORS.BLUE} />
@@ -359,7 +373,11 @@ const DashboardPanel = () => {
       id: 6,
       title: "Average Handling Time",
       component: (
-        <BarChart data={constructedChartsData?.averageHandlingTime}>
+        <BarChart
+          width={500}
+          height={300}
+          data={constructedChartsData?.averageHandlingTime}
+        >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
@@ -372,27 +390,26 @@ const DashboardPanel = () => {
     },
   ];
 
-  //  Set BotId when botsDataRedux is available
   useEffect(() => {
     if (botsDataRedux?.length) {
       setBotId(botsDataRedux[0]._id); // By default BOT 1 Selected
     }
   }, [botsDataRedux]);
 
-  //  Dispatch action to get bots when userIdLocal is available
   useEffect(() => {
     if (userIdLocal) {
       dispatch(getBotsAction(userIdLocal));
     }
   }, [userIdLocal]);
 
-  // Fetch data whenever botId changes
   useEffect(() => {
     fetchData();
   }, [botId]);
 
   return (
     <div className="">
+      <Loader loading={isLoading} />
+
       {constructedHeaderData && (
         <DashboardHeader headerData={constructedHeaderData} />
       )}

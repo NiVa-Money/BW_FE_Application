@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -27,13 +27,16 @@ const CommonTable: React.FC<TableProps> = ({
   width = "100%",
   height = "300px",
 }) => {
-  // const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
 
   const totalPages = Math.ceil(rows.length / rowsPerPage);
 
-  // const handleNext = () =>
-  //   setPage((prev) => (prev < totalPages - 1 ? prev + 1 : prev));
-  // const handlePrev = () => setPage((prev) => (prev > 0 ? prev - 1 : prev));
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+  };
 
   return (
     <div style={{ width }} className="overflow-hidden">
@@ -44,22 +47,12 @@ const CommonTable: React.FC<TableProps> = ({
           borderRadius: "12px",
         }}
       >
-        <Table
-          stickyHeader
-          sx={{ minWidth: 650 }}
-          size="small"
-          aria-label="a dense table"
-        >
+        <Table stickyHeader sx={{ minWidth: 650 }} size="small">
           {/* Table Header */}
           <TableHead>
             <TableRow sx={{ backgroundColor: "#F5F5F5" }}>
               {headers.map((header, index) => (
-                <TableCell
-                  key={index}
-                  sx={{
-                    color: COLORS.GRAY,
-                  }}
-                >
+                <TableCell key={index} sx={{ color: COLORS.GRAY }}>
                   {header}
                 </TableCell>
               ))}
@@ -69,7 +62,7 @@ const CommonTable: React.FC<TableProps> = ({
           {/* Table Body */}
           <TableBody>
             {rows
-              // .slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+              .slice((page - 1) * rowsPerPage, page * rowsPerPage) // Slice rows based on pagination
               .map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {headers.map((header, colIndex) => (
@@ -87,9 +80,17 @@ const CommonTable: React.FC<TableProps> = ({
       </TableContainer>
 
       {/* Pagination Controls */}
-      <Stack spacing={10} className="flex mt-2 justify-center items-center">
-        <Pagination size="small" count={totalPages} color="primary" />
-      </Stack>
+      {totalPages > 1 && (
+        <Stack spacing={2} className="flex mt-2 justify-center items-center">
+          <Pagination
+            size="small"
+            count={totalPages}
+            color="primary"
+            page={page}
+            onChange={handlePageChange}
+          />
+        </Stack>
+      )}
     </div>
   );
 };
