@@ -44,17 +44,24 @@ interface DashboardResponse {
       consumed: number;
     };
     resolutionRate: number;
-    escalationRate: number;
+    escalationRate: BotStats[];
     aiVsHumanResolutionRate: { ai: number; human: number };
     channelWiseConversation: ChannelMetrics[];
     sentiments: Sentiments;
     aiAgentMetrics: AIAgentMetric[];
+    chatTrafficOverview: any[];
     channelWiseResolutionMetrics: ChannelMetrics[];
     avarageHandlingTime: {
       web: number;
       whatsapp: number;
     };
   };
+}
+
+interface BotStats {
+  name: string;
+  escalated: number;
+  solved: number;
 }
 
 interface ChannelMetrics {
@@ -157,67 +164,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
   );
 };
 
-const chartdata2 = [
-  {
-    name: "Bot1",
-    escalated: 10,
-    solved: 15,
-  },
-  {
-    name: "Bot1",
-    escalated: 12,
-    solved: 25,
-  },
-  {
-    name: "Bot2",
-    escalated: 5,
-    solved: 21,
-  },
-  {
-    name: "Bot3",
-    escalated: 35,
-    solved: 45,
-  },
-  {
-    name: "Bot4",
-    escalated: 11,
-    solved: 12,
-  },
-  {
-    name: "Bot5",
-    escalated: 50,
-    solved: 30,
-  },
-];
-
-const firstTableHeaders = ["ID", "Name", "Age", "Actions"];
-
-const firstTableRows = [
-  { ID: 1, Name: "Alice", Age: 25, Actions: <button>Edit</button> },
-  { ID: 2, Name: "Bob", Age: 30, Actions: <button>Edit</button> },
-  { ID: 3, Name: "Charlie", Age: 28, Actions: <button>Edit</button> },
-  { ID: 4, Name: "Charlie", Age: 28, Actions: <button>Edit</button> },
-  { ID: 5, Name: "Charlie", Age: 28, Actions: <button>Edit</button> },
-  { ID: 6, Name: "Ashish", Age: 28, Actions: <button>Edit</button> },
-  { ID: 7, Name: "Shudanshu", Age: 28, Actions: <button>Edit</button> },
-  { ID: 8, Name: "Sneha", Age: 28, Actions: <button>Edit</button> },
-];
-
-const performanceBar = [
-  {
-    id: 1,
-    title: "Chat Traffic Overview",
-    component: (
-      <CommonTable headers={firstTableHeaders} rows={firstTableRows} />
-    ),
-  },
-  {
-    id: 2,
-    title: "Human Performance",
-    component: <CommonTable headers={firstTableHeaders} rows={[]} />,
-  },
-];
-
 const DashboardPanel = () => {
   const [botId, setBotId] = useState("");
   const [stats, setStats] = useState<DashboardResponse | null>(null);
@@ -261,7 +207,17 @@ const DashboardPanel = () => {
   }, [stats]);
 
   const constructedChartsData = useMemo(() => {
-    if (!stats) return null;
+    if (!stats) {
+      return {
+        totalConversation: [],
+        sentiments: [],
+        resolvedChats: [],
+        averageHandlingTime: [],
+        aiAgentPerformance: [],
+        escalationMatrix: [],
+        chatTrafficOverview: [],
+      };
+    }
     const sentiments = [
       { name: "Positive", value: stats.data.sentiments.Good || 10 },
       { name: "Negative", value: stats.data.sentiments.Bad || 10 },
@@ -279,9 +235,22 @@ const DashboardPanel = () => {
       sentiments: sentiments,
       resolvedChats: stats.data.channelWiseResolutionMetrics,
       averageHandlingTime,
-      aiAgentMetrics: stats.data.aiAgentMetrics,
+      aiAgentPerformance: stats.data.aiAgentMetrics,
+      escalationMatrix: stats.data.escalationRate,
+      chatTrafficOverview: stats.data.chatTrafficOverview,
     };
   }, [stats]);
+
+  const firstTableHeaders =
+    constructedChartsData && constructedChartsData.chatTrafficOverview
+      ? Object.keys(constructedChartsData.chatTrafficOverview[0] || {})
+      : [];
+
+  const aiAgentPerformanceHeaders =
+    constructedChartsData?.aiAgentPerformance?.length > 0
+      ? Object.keys(constructedChartsData.aiAgentPerformance[0] || {})
+      : [];
+
 
   const chartItems = [
     {
@@ -298,7 +267,11 @@ const DashboardPanel = () => {
           <Tooltip />
           <Line type="linear" dataKey="web" stroke={COLORS.GRAY} />
           <Line type="linear" dataKey="whatsapp" stroke={COLORS.BLUE} />
-          <Legend iconType="square" />
+          <Legend
+            verticalAlign="top"
+            iconType="square"
+            wrapperStyle={{ paddingBottom: 10 }}
+          />
         </LineChart>
       ),
     },
@@ -306,11 +279,16 @@ const DashboardPanel = () => {
       id: 2,
       title: "Escalation Rate",
       component: (
-        <BarChart width={500} height={300} data={chartdata2}>
+        <BarChart
+          width={500}
+          height={300}
+          data={constructedChartsData?.escalationMatrix}
+        >
           <CartesianGrid strokeDasharray="5 5" />
           <XAxis dataKey="name" />
           <YAxis />
-          <Legend />
+          <Tooltip />
+          <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: 10 }} />
           <Bar dataKey="escalated" stackId="a" fill={COLORS.BLUE} />
           <Bar dataKey="solved" stackId="a" fill={COLORS.GRAY} />
         </BarChart>
@@ -338,7 +316,11 @@ const DashboardPanel = () => {
             ))}
           </Pie>
           <Tooltip />
-          <Legend iconType="square" />
+          <Legend
+            verticalAlign="top"
+            iconType="square"
+            wrapperStyle={{ paddingBottom: 10 }}
+          />
         </PieChart>
       ),
     },
@@ -356,7 +338,11 @@ const DashboardPanel = () => {
           <Tooltip />
           <Line type="linear" dataKey="web" stroke={COLORS.GRAY} />
           <Line type="linear" dataKey="whatsapp" stroke={COLORS.BLUE} />
-          <Legend iconType="square" />
+          <Legend
+            verticalAlign="top"
+            iconType="square"
+            wrapperStyle={{ paddingBottom: 10 }}
+          />
         </LineChart>
       ),
     },
@@ -364,7 +350,10 @@ const DashboardPanel = () => {
       id: 5,
       title: "Chat Traffic Overview",
       component: (
-        <CommonTable headers={firstTableHeaders} rows={firstTableRows} />
+        <CommonTable
+          headers={firstTableHeaders}
+          rows={constructedChartsData?.chatTrafficOverview}
+        />
       ),
     },
     {
@@ -380,11 +369,30 @@ const DashboardPanel = () => {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Legend />
+          <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: 10 }} />
+
           <Bar dataKey="whatsapp" fill={COLORS.BLUE} />
           <Bar dataKey="website" fill={COLORS.GRAY} />
         </BarChart>
       ),
+    },
+  ];
+
+  const performanceBar = [
+    {
+      id: 1,
+      title: "Chat Traffic Overview",
+      component: (
+        <CommonTable
+          headers={aiAgentPerformanceHeaders}
+          rows={constructedChartsData?.aiAgentPerformance}
+        />
+      ),
+    },
+    {
+      id: 2,
+      title: "Human Performance",
+      component: <CommonTable headers={aiAgentPerformanceHeaders} rows={[]} />,
     },
   ];
 
