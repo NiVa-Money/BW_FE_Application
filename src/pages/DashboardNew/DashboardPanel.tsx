@@ -251,7 +251,6 @@ const DashboardPanel = () => {
       ? Object.keys(constructedChartsData.aiAgentPerformance[0] || {})
       : [];
 
-
   const chartItems = [
     {
       id: 1,
@@ -265,8 +264,18 @@ const DashboardPanel = () => {
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip />
-          <Line type="linear" dataKey="web" stroke={COLORS.GRAY} />
-          <Line type="linear" dataKey="whatsapp" stroke={COLORS.BLUE} />
+          <Line
+            type="linear"
+            dataKey="web"
+            strokeWidth={2}
+            stroke={COLORS.GRAY}
+          />
+          <Line
+            type="linear"
+            dataKey="whatsapp"
+            strokeWidth={2}
+            stroke={COLORS.BLUE}
+          />
           <Legend
             verticalAlign="top"
             iconType="square"
@@ -316,11 +325,7 @@ const DashboardPanel = () => {
             ))}
           </Pie>
           <Tooltip />
-          <Legend
-            verticalAlign="top"
-            iconType="square"
-            wrapperStyle={{ paddingBottom: 10 }}
-          />
+          <Legend iconType="square" wrapperStyle={{ paddingBottom: 10 }} />
         </PieChart>
       ),
     },
@@ -336,8 +341,19 @@ const DashboardPanel = () => {
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip />
-          <Line type="linear" dataKey="web" stroke={COLORS.GRAY} />
-          <Line type="linear" dataKey="whatsapp" stroke={COLORS.BLUE} />
+
+          <Line
+            type="monotone"
+            dataKey="web"
+            strokeWidth={2}
+            stroke={COLORS.GRAY}
+          />
+          <Line
+            type="monotone"
+            dataKey="whatsapp"
+            strokeWidth={2}
+            stroke={COLORS.BLUE}
+          />
           <Legend
             verticalAlign="top"
             iconType="square"
