@@ -9,3 +9,13 @@ export const dashBoardMetricService = async (payload: any) => {
     throw new Error("Error fetching user profile");
   }
 };
+
+export const dashBoardDataService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post(`/dashboard/static`, payload);
+    return response.data;
+  } catch (error: any) {
+    console.log("e", error);
+    throw new Error("Error fetching user profile");
+  }
+};
