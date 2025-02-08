@@ -10,6 +10,7 @@ import {
 } from "../../../store/actions/integrationActions";
 import { RootState } from "../../../store";
 import { getBotsAction } from "../../../store/actions/botActions";
+import { useNavigate } from "react-router-dom";
 
 const ConfirmationModal: React.FC<{
   onCancel: () => void;
@@ -63,6 +64,7 @@ const CrudIntegration: React.FC = () => {
   );
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (
@@ -129,6 +131,7 @@ const CrudIntegration: React.FC = () => {
   const handleUpdate = () => {
     console.log("Updating with formData:", formData);
     dispatch(updateWhatsappRequest(formData));
+    navigate('/integrations');
   };
 
   const handleDelete = () => {
@@ -158,7 +161,7 @@ const CrudIntegration: React.FC = () => {
               onClick={handleUpdate}
               className="bg-[#65558F] w-[200px] ml-44 text-white px-6 py-3 rounded-3xl font-semibold hover:bg-[#65558F]/85"
             >
-              Edit
+              Save
             </button>
             <button
               onClick={() => setIsDeleteConfirm(true)}

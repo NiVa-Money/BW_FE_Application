@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { WhatsApp, Upload, FileUpload } from "@mui/icons-material"; // Import MUI icons
 // import { ArrowDropDown } from "@mui/icons-material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
@@ -31,6 +31,7 @@ const WhatsappCampaign: React.FC = () => {
   // const [image, setImage] = useState<string | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null); // New state
+  const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState(""); 
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -86,6 +87,22 @@ const WhatsappCampaign: React.FC = () => {
     setMode(selectedMode);
     setShowTemplate(selectedMode === "Template");
   };
+  const integrationsData = useSelector(
+    (state: RootState) => state?.crudIntegration?.crudIntegration?.data
+  );
+  // Convert integration data to an array (if it's not already)
+  const integrationList = integrationsData
+    ? Array.isArray(integrationsData)
+      ? integrationsData
+      : [integrationsData]
+    : [];
+
+  // Optionally default the dropdown to the first available phoneNumberId
+  useEffect(() => {
+    if (integrationList.length > 0 && !selectedPhoneNumberId) {
+      setSelectedPhoneNumberId(integrationList[0].phoneNumberId.toString());
+    }
+  }, [integrationList, selectedPhoneNumberId]);
 
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
   // const campaignId = useSelector((state: RootState) => state.whatsappCampaign?.campaignId);
@@ -154,7 +171,7 @@ const WhatsappCampaign: React.FC = () => {
     const campaignPayload: CampaignPayload = {
       campaignName,
       channel: "whatsapp",
-      phoneNumberId: phoneNumberId,
+      phoneNumberId: selectedPhoneNumberId ? Number(selectedPhoneNumberId) : 0,
       schedule: scheduleDate ? scheduleDate.toISOString() : "",
       endDate: scheduleDate
         ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
@@ -236,7 +253,7 @@ const WhatsappCampaign: React.FC = () => {
         <div className="flex flex-wrap gap-4 mt-10">
           {/* Left Section */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">
-            <div className="flex flex-col w-full mb-4">
+            {/* <div className="flex flex-col w-full mb-4">
               <label className="leading-snug text-slate-700 mb-2">
                 Choose WhatsApp Number ID *
               </label>
@@ -247,6 +264,26 @@ const WhatsappCampaign: React.FC = () => {
                 placeholder="PhoneNumberID"
                 className="w-full p-3 border border-gray-300 rounded-lg mb-4"
               />
+            </div> */}
+            <div className="flex flex-col w-full mb-4">
+              <label className="leading-snug text-slate-700 mb-2">
+                Choose WhatsApp Number ID *
+              </label>
+              <select
+                value={selectedPhoneNumberId}
+                onChange={(e) => setSelectedPhoneNumberId(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+              >
+                <option value="">Select a WhatsApp Number ID</option>
+                {integrationList.map((integration) => (
+                  <option
+                    key={integration.phoneNumberId}
+                    value={integration.phoneNumberId}
+                  >
+                    {integration.phoneNumberId}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Mode Selection */}
@@ -259,8 +296,9 @@ const WhatsappCampaign: React.FC = () => {
                   <div
                     key={m}
                     onClick={() => handleModeChange(m as "Template")}
-                    className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${mode === m ? "bg-purple-200" : "bg-white"
-                      }`}
+                    className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${
+                      mode === m ? "bg-purple-200" : "bg-white"
+                    }`}
                   >
                     {m}
                   </div>

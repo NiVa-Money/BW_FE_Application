@@ -1,3 +1,152 @@
+// import { useEffect } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import EditIcon from "@mui/icons-material/Edit";
+// import AddIcon from "@mui/icons-material/Add";
+// import { getWhatsappRequest } from "../../../store/actions/integrationActions";
+// import { RootState } from "../../../store";
+// import { useNavigate } from "react-router-dom";
+
+// interface Integration {
+//   id: string;
+//   botId: string;
+//   userId: string;
+//   appId: string;
+//   phoneNumberId: string;
+//   phoneNumber: string;
+//   whatsappBusinessAccountId: string;
+//   whatsappName: string;
+//   accessToken: string;
+//   verificationStatus: boolean;
+//   webhookUrl: string;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
+// export default function IntegrationList() {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+//   const crudIntegrationData = useSelector(
+//     (state: RootState) => state?.crudIntegration?.crudIntegration?.data
+//   );
+
+//   useEffect(() => {
+//     dispatch(getWhatsappRequest(""));
+//   }, [dispatch]);
+
+//   const integrationArray = crudIntegrationData
+//     ? Array.isArray(crudIntegrationData)
+//       ? crudIntegrationData
+//       : [crudIntegrationData]
+//     : [];
+
+//   return (
+//     <div className="p-8 mt-10 min-h-screen">
+//       <div className="max-w-7xl mx-auto">
+//         <div className="flex justify-between items-center mb-8">
+//           <h2 className="text-3xl font-bold text-gray-900">
+//             Active Integrations
+//           </h2>
+//           <button
+//             className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
+//             onClick={() => navigate("/createintegration")}
+//           >
+//             <AddIcon /> Add Integration
+//           </button>
+//         </div>
+
+//         {integrationArray.length > 0 ? (
+//           <div className="overflow-x-auto">
+//             <table className="min-w-full border-collapse border border-gray-300">
+//               <thead className="bg-gray-100">
+//                 <tr>
+//                   <th className="border border-gray-300 px-4 py-2">App ID</th>
+//                   <th className="border border-gray-300 px-4 py-2">
+//                     Phone Number ID
+//                   </th>
+//                   <th className="border border-gray-300 px-4 py-2">
+//                     Business Account ID
+//                   </th>
+//                   <th className="border border-gray-300 px-4 py-2">
+//                     Phone Number
+//                   </th>
+//                   <th className="border border-gray-300 px-4 py-2">
+//                     WhatsApp Name
+//                   </th>
+//                   <th className="border border-gray-300 px-4 py-2">
+//                     Access Token
+//                   </th>
+//                   <th className="border border-gray-300 px-4 py-2">
+//                     Webhook URL
+//                   </th>
+//                   <th className="border border-gray-300 px-4 py-2">
+//                     Verification Status
+//                   </th>
+//                   <th className="border border-gray-300 px-4 py-2">
+//                     Created At
+//                   </th>
+//                   <th className="border border-gray-300 px-4 py-2">Actions</th>
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 {integrationArray.map((integration: Integration) => (
+//                   <tr key={integration.id} className="border border-gray-300">
+//                     <td className="border border-gray-300 px-4 py-2">
+//                       {integration.appId}
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2">
+//                       {integration.phoneNumberId}
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2">
+//                       {integration.whatsappBusinessAccountId}
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2">
+//                       {integration.phoneNumber}
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2">
+//                       {integration.whatsappName}
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2 max-w-[200px] truncate">
+//                       <span title={integration.accessToken}>
+//                         {integration.accessToken.substring(0, 15)}...
+//                       </span>
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2 max-w-[200px] truncate">
+//                       <span title={integration.webhookUrl}>
+//                         {integration.webhookUrl.substring(0, 30)}...
+//                       </span>
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2">
+//                       {integration.verificationStatus
+//                         ? "✅ Verified"
+//                         : "❌ Not Verified"}
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2">
+//                       {integration.createdAt}
+//                     </td>
+//                     <td className="border border-gray-300 px-4 py-2 text-center">
+//                       <button
+//                         onClick={() =>
+//                           navigate(`/editintegration/${integration.id}`)
+//                         }
+//                         className="text-green-500 hover:text-green-700 flex items-center gap-2"
+//                       >
+//                         <EditIcon /> Edit
+//                       </button>
+//                     </td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         ) : (
+//           <p className="text-gray-500">No integrations found.</p>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import EditIcon from "@mui/icons-material/Edit";
@@ -7,62 +156,22 @@ import { RootState } from "../../../store";
 import { useNavigate } from "react-router-dom";
 
 interface Integration {
-  id: number;
-  provider: string;
-  bot: string;
-  mobileNumber: string;
-  mobileNumberId: string;
-  status: string;
+  id: string;
+  botId: string;
+  botName : string;
+  userId: string;
   appId: string;
-  businessAccountId: string;
+  phoneNumberId: string;
+  phoneNumber: string;
+  whatsappBusinessAccountId: string;
+  whatsappName: string;
+  accessToken: string;
+  verificationStatus: boolean;
+  webhookUrl: string;
+  secretToken: string;
+  createdAt: string;
+  updatedAt: string;
 }
-
-const IntegrationCard = ({ integration }: { integration: Integration }) => {
-  const navigate = useNavigate();
-  return (
-    <div className="bg-white p-6 rounded-lg mb-4 border border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-            alt="WhatsApp Icon"
-            className="w-16 h-16"
-          />
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {Object.entries(integration).map(
-              ([key, value]) =>
-                key !== "id" &&
-                key !== "status" && (
-                  <div
-                    key={key}
-                    className="flex justify-center flex-col whitespace-nowrap"
-                  >
-                    <p className="text-sm font-medium text-gray-500">
-                      {key.replace(/([A-Z])/g, " $1").toUpperCase()}
-                    </p>
-                    <p className="text-base font-semibold text-gray-800">
-                      {value}
-                    </p>
-                  </div>
-                )
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => {
-              // Navigate to /editintegration with the integration id
-              navigate(`/editintegration/${integration.id}`);
-            }}
-            className="text-green-500 hover:text-green-700 flex items-center gap-2"
-          >
-            <EditIcon /> Edit
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function IntegrationList() {
   const dispatch = useDispatch();
@@ -72,38 +181,78 @@ export default function IntegrationList() {
   );
 
   useEffect(() => {
-    // Dispatch the action without sending botId
-    dispatch(getWhatsappRequest("")); // Empty string or null for botId
+    dispatch(getWhatsappRequest(""));
   }, [dispatch]);
 
-  const handleAddIntegration = () => {
-    navigate("/createintegration"); // Navigate to /createintegration
-  };
+  const integrationArray = crudIntegrationData
+    ? Array.isArray(crudIntegrationData)
+      ? crudIntegrationData
+      : [crudIntegrationData]
+    : [];
 
   return (
     <div className="p-8 mt-10 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">
-            Active Integrations
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-900">Active Integrations</h2>
           <button
             className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
-            onClick={handleAddIntegration} // Show WhatsAppIntegration component when clicked
+            onClick={() => navigate("/createintegration")}
           >
             <AddIcon /> Add Integration
           </button>
         </div>
 
-        <div>
-          {crudIntegrationData && crudIntegrationData.length > 0 ? (
-            crudIntegrationData.map((integration: Integration) => (
-              <IntegrationCard key={integration.id} integration={integration} />
-            ))
-          ) : (
-            <p className="text-gray-500">No integrations found.</p>
-          )}
-        </div>
+        {integrationArray.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {integrationArray.map((integration: Integration) => (
+              <div key={integration.id} className="bg-white shadow-md w-[500px] rounded-lg p-6 border border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-800">{integration.whatsappName}</h3>
+                <p className="text-sm text-gray-500">Bot Name: <span className="font-medium">{integration.botName
+                }</span></p>
+                
+                <div className="mt-4 space-y-2 whitespace-nowrap">  
+                  <p><span className="font-medium text-gray-700 whitespace-nowrap">App ID:</span> {integration.appId}</p>
+                  <p><span className="font-medium text-gray-700">Phone Number:</span> {integration.phoneNumber}</p>
+                  <p><span className="font-medium text-gray-700">Business Account ID:</span> {integration.whatsappBusinessAccountId}</p>
+                  <p>
+                    <span className="font-medium text-gray-700 whitespace-nowrap">Access Token:</span>{" "}
+                    <span className="truncate block w-64" title={integration.accessToken}>
+                      {integration.accessToken}
+                    </span>
+                  </p>
+                  <p>
+                  <span className="font-medium text-gray-700">Secret Token :</span>{" "}
+                    <span className="truncate block w-70 mb-2" title={integration.secretToken}>
+                      {integration.secretToken}
+                    </span>
+                    <span className="font-medium text-gray-700">Webhook URL:</span>{" "}
+                    <span className="truncate block w-70" title={integration.webhookUrl}>
+                      {integration.webhookUrl}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="font-medium text-gray-700">Verification Status:</span>{" "}
+                    {integration.verificationStatus ? "✅ Verified" : "❌ Not Verified"}
+                  </p>
+                  <p className="text-sm text-gray-500">Created At: {integration.createdAt}</p>
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    // onClick={() => navigate(`/editintegration/${integration.botId}`)}
+                    onClick={() => navigate(`/editintegration`)}
+                    className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-blue-700 transition-colors"
+                  >
+                    <EditIcon /> Edit
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center">No integrations found.</p>
+        )}
       </div>
     </div>
   );
