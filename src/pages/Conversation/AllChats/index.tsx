@@ -5,14 +5,13 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  filteredSession,
   getAdvanceFeature,
   getAllSession,
 } from "../../../store/actions/conversationActions";
 import { RootState } from "../../../store";
 import { getBotsAction } from "../../../store/actions/botActions";
-import SessionsList from "./sessionsList";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import SessionsList from "./SessionsList";
 
 
 
@@ -23,7 +22,7 @@ interface AnalysisSection {
 }
 
 const AllChats = () => {
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [, setSelectedSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any>([
 
   ]);
@@ -93,8 +92,7 @@ const AllChats = () => {
     }
   }, [botsDataRedux?.botId?.length]);
 
-  // const sessionId = "67548fa305be64afbeb82463";
-  const [sessionId, setSessionId] = useState("");
+  const [, setSessionId] = useState("");
   const allSessions = useSelector(
     (state: RootState) => state?.userChat?.sessionChat?.sessions || []
   );
