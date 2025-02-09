@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
-import { Paper, Typography } from "@mui/material";
+import { Paper, Typography, Button, Card, CardContent } from "@mui/material";
 import ChartContainer from "./ChartContainer";
 import {
   Bar,
@@ -23,6 +23,8 @@ import { getBotsAction } from "../../store/actions/botActions";
 import { useDispatch, useSelector } from "react-redux";
 import { dashBoardDataService } from "../../api/services/dashboardServices";
 import Loader from "../../components/Loader";
+import DateRangePicker from "../../components/DateRangePicker";
+import { useNavigate } from "react-router-dom";
 
 interface StatsCardProps {
   title: string;
@@ -171,6 +173,8 @@ const DashboardPanel = () => {
 
   const userIdLocal = localStorage.getItem("user_id");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
@@ -412,6 +416,11 @@ const DashboardPanel = () => {
     },
   ];
 
+  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
+    // console.log("Start Date:", startDate);
+    // console.log("End Date:", endDate);
+  };
+
   useEffect(() => {
     if (botsDataRedux?.length) {
       setBotId(botsDataRedux[0]._id); // By default BOT 1 Selected
@@ -431,6 +440,40 @@ const DashboardPanel = () => {
   return (
     <div className="">
       <Loader loading={isLoading} />
+
+      <div className="flex justify-between items-center mb-4">
+        <Card
+          className="flex items-center justify-between p-4 border max-w-xl "
+          sx={{
+            borderColor: COLORS.DARKGRAY,
+            borderRadius: "12px",
+            boxShadow: "none",
+          }}
+        >
+          <CardContent className="flex-1" sx={{ padding: 0 }}>
+            <Typography variant="subtitle1">
+              AI Insight and Recommendation
+            </Typography>
+            <Typography variant="body2" className="mt-1">
+              Discover intelligent insights powered by AI to enhance your
+              decision-making process and drive efficiency.
+            </Typography>
+          </CardContent>
+          <Button
+            variant="contained"
+            sx={{
+              "&.MuiButtonBase-root": {
+                backgroundColor: COLORS.VIOLET,
+                borderRadius: 5,
+              },
+            }}
+            onClick={() => navigate("/createbot")}
+          >
+            Create an Agent
+          </Button>
+        </Card>
+        <DateRangePicker onDateRangeChange={handleDateRangeChange} />
+      </div>
 
       {constructedHeaderData && (
         <DashboardHeader headerData={constructedHeaderData} />
