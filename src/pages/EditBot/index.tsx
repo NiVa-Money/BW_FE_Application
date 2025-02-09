@@ -4,19 +4,21 @@ import React, { useEffect, useRef, useState } from "react";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import { HexColorPicker } from "react-colorful";
+import DoneIcon from '@mui/icons-material/Done';
+import { Chip } from '@mui/material';
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import FormikFieldChipComponent from "../../components/FormikFieldChipComponent";
-import FormikFieldToggleComponent from "../../components/FormikFieldToggleComponent";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
 import { BOTICONS, THEME } from "../../enums";
-import FormikFieldSelectComponent from "../../components/FormikFieldSelectDropdownComponent";
 import { useDispatch, useSelector } from "react-redux";
 import { editBotAction } from "../../store/actions/botActions";
 import CreateBotRightContainer from "../CreateBot/CreateBotRightContainer";
 import { RootState } from "../../store";
 import { useNavigate, useParams } from "react-router-dom";
 import ConfirmationModal from "../../components/ConformationModal";
+import { MenuItem, Select, ToggleButton } from "@mui/material";
+import { ToggleButtonGroup } from '@mui/material';
 
 const EditBot: React.FC = () => {
   const { id } = useParams();
@@ -134,6 +136,8 @@ const EditBot: React.FC = () => {
     email: "",
     botSmartness: false,
     appoimentLink: "",
+    botIconOption: BOTICONS.list
+
   };
   const handleSubmit = () => {
     // Handle form submission logic here
@@ -257,7 +261,7 @@ const EditBot: React.FC = () => {
         botName: botData[0]?.botName,
         theme: botData[0]?.boTheme || THEME.dark,
         botTone: botData[0]?.botTone,
-        botFont: botData[0]?.botFont || 'Poppins',
+        botFont: botData[0]?.botFont || 'serif',
         greetingMessage: botData[0]?.botGreetingMessage,
         botIdentity: botData[0]?.botIdentity,
         botLimit: botData[0]?.wordLimitPerMessage,
@@ -411,14 +415,44 @@ const EditBot: React.FC = () => {
                   </div> : null}
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="theme">Choose theme</label>
+                  <div className="flex space-x-2">
 
-                  <Field
+                    {[
+                      {
+                        label: "Light",
+                        value: THEME.light,
+                        icon: <LightModeIcon />,
+                      },
+                      {
+                        label: "Dark",
+                        value: THEME.dark,
+                        icon: <BedtimeIcon />,
+                      },
+                    ].map((option) => (
+
+                      <Chip
+                        key={option.value}
+                        label={
+                          <div className="flex items-center space-x-1">
+                            {option.value === theme ? <DoneIcon /> : null}
+                            <span>{option.label}</span>
+                            {option.icon}
+                          </div>
+                        }
+                        clickable
+
+                        onClick={() => setFormValues({ ...formValues, theme: option.value })}
+                        className={`rounded-full px-4 py-1 ${theme === option.value ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
+                          }`}
+                      />
+                    ))}
+                  </div>
+                  {/* <Field
                     name="theme"
                     component={FormikFieldChipComponent}
                     defaultValue={botData[0]?.botTheme || 'dark'}
                     onChange={(value: string) => {
                       setFormValues({ ...formValues, theme: value });
-                      // Perform additional logic if needed
                     }}
                     options={[
                       {
@@ -432,30 +466,93 @@ const EditBot: React.FC = () => {
                         icon: <BedtimeIcon />,
                       },
                     ]}
-                  />
+                  /> */}
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="botTone">Bot Tone</label>
-
-                  <Field
-                    name="botTone"
+                  <ToggleButtonGroup
                     value={botTone}
-                    component={FormikFieldToggleComponent}
-                    onChange={(value: string) => {
-                      setFormValues({ ...formValues, botTone: value }); // Store directly as botTone
-                    }}
-                    options={[
+                    exclusive
+                    className=" w-max border h-[35px] border-gray-300 rounded-[50%]"
+                  >
+                    {[
                       { label: "Formal Tone", value: "formal" },
                       { label: "Casual Tone", value: "casual" },
                       { label: "Enthusiastic Tone", value: "enthusiastic" },
-                    ]}
-                  />
+                    ].map((option) => (
+
+                      <ToggleButton
+                        key={option.value}
+                        name="botTone"
+                        value={botTone}
+                        onClick={() => setFormValues({ ...formValues, botTone: option.value })}
+
+                        sx={{
+                          '&.Mui-selected': {
+                            backgroundColor: '#EADDFF',
+                            color: 'black',
+                            border: 'none',
+                            '&:hover': {
+                              backgroundColor: '#EADDFF',
+                              border: 'none',
+                            },
+                          },
+                          '&.MuiButtonBase-root': {
+                            backgroundColor: botTone === option.value ? '#EADDFF' : 'white',
+                            borderColor: botTone === option.value ? '#8540f4' : '#454545f',
+
+                          },
+                        }}
+
+                      >
+                        <span>{option.label}</span>
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+
 
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="botFont">Bot Font</label>
+                  <ToggleButtonGroup
+                    value={botFont}
+                    exclusive
+                    className=" w-max border h-[35px] border-gray-300 rounded-[50%]"
+                  >
+                    {[
+                      { label: 'Serif', value: 'serif' },
+                      { label: 'Monospace', value: 'monospace' },
+                      { label: 'Cursive', value: 'cursive' },
+                    ].map((option) => (
 
-                  <Field
+                      <ToggleButton
+                        key={option.value}
+                        value={botFont}
+                        onClick={() => setFormValues({ ...formValues, botFont: option.value })}
+
+                        sx={{
+                          '&.Mui-selected': {
+                            backgroundColor: '#EADDFF',
+                            color: 'black',
+                            border: 'none',
+                            '&:hover': {
+                              backgroundColor: '#EADDFF',
+                              border: 'none',
+                            },
+                          },
+                          '&.MuiButtonBase-root': {
+                            backgroundColor: botFont === option.value ? '#EADDFF' : 'white',
+                            borderColor: botFont === option.value ? '#8540f4' : '#454545f',
+
+                          },
+                        }}
+
+                      >
+                        <span>{option.label}</span>
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+                  {/* <Field
                     name="botFont"
                     component={FormikFieldToggleComponent}
                     onChange={(value: string) => {
@@ -467,7 +564,7 @@ const EditBot: React.FC = () => {
                       { label: 'Monospace', value: 'monospace' },
                       { label: 'Cursive', value: 'cursive' },
                     ]}
-                  />
+                  /> */}
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="greetingMessage">Bot Greeting Message</label>
@@ -484,22 +581,46 @@ const EditBot: React.FC = () => {
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="botIdentity">Bot Identity</label>
-
-                  <Field
-                    id={botId}
-                    name="botIdentity"
-                    component={FormikFieldToggleComponent}
-                    value={botIdentity?.length ? botIdentity : botIdentity}
-                    onChange={(value: string) => {
-                      setFormValues({ ...formValues, botIdentity: value });
-                      // Perform additional logic if needed
-                    }}
-                    options={[
+                  <ToggleButtonGroup
+                    value={botIdentity}
+                    exclusive
+                    className=" w-max border h-[35px] border-gray-300 rounded-[50%]"
+                  >
+                    {[
                       { label: "Customer Service", value: "Customer Service" },
                       { label: "Sales", value: "Sales" },
                       { label: "Human Resource", value: "Human Resource" },
-                    ]}
-                  />
+                    ].map((option) => (
+
+                      <ToggleButton
+                        key={option.value}
+                        name="botIdentity"
+                        value={botIdentity}
+                        onClick={() => setFormValues({ ...formValues, botIdentity: option.value })}
+
+                        sx={{
+                          '&.Mui-selected': {
+                            backgroundColor: '#EADDFF',
+                            color: 'black',
+                            border: 'none',
+                            '&:hover': {
+                              backgroundColor: '#EADDFF',
+                              border: 'none',
+                            },
+                          },
+                          '&.MuiButtonBase-root': {
+                            backgroundColor: botIdentity === option.value ? '#EADDFF' : 'white',
+                            borderColor: botIdentity === option.value ? '#8540f4' : '#454545f',
+
+                          },
+                        }}
+
+                      >
+                        <span>{option.label}</span>
+                      </ToggleButton>
+                    ))}
+                  </ToggleButtonGroup>
+
                 </div>
                 {/* <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label>Knowledge Base</label>
@@ -549,20 +670,30 @@ const EditBot: React.FC = () => {
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="botLimit">Bot Limit per Message</label>
-
-                  <Field
-                    type="text"
-                    id="name"
-                    name="botLimit"
-                    placeholder="Enter your Bot Name"
-                    component={FormikFieldSelectComponent}
-                    value={botLimits.find((option) => option.value === botLimit)}
-                    onChange={(value: string) => {
-                      setFormValues({ ...formValues, botLimit: value });
-                      // Perform additional logic if needed
+                  <Select
+                    value={botLimit || ''}
+                    name='botLimit'
+                    onChange={handleChange}
+                    sx={{
+                      '&.MuiInputBase-root': {
+                        backgroundColor: '#F3F2F6',
+                        height: '35px',
+                      },
+                      '& .MuiOutlinedInput-root': {
+                        height: '35px',
+                        '& .MuiOutlinedInput-input': {
+                          height: '35px',
+                        },
+                      },
                     }}
-                    options={botLimits}
-                  />
+                  >
+                    {botLimits.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label>Support Contact</label>
@@ -638,6 +769,7 @@ const EditBot: React.FC = () => {
               formValues={formValues}
               handleSubmit={handleSubmit}
               font={botFont}
+              botSmartness={botSmartness}
             />
           </Form>
         )}

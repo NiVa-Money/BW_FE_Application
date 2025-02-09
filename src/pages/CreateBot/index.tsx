@@ -171,7 +171,7 @@ const CreateBot: React.FC = () => {
     if (!/^\d$/.test(charCode)) {
       event.preventDefault();
     }
-
+    FormikFieldChipComponent
   };
   useEffect(() => {
     if (createBotDataRedux !== null) {
@@ -195,7 +195,9 @@ const CreateBot: React.FC = () => {
       phoneNumber: '',
       email: '',
       botSmartness: false,
-      appoimentLink: ''
+      appoimentLink: '',
+      botIconOption: BOTICONS.list
+
     })
     setImageName('')
     setFileName('')
@@ -559,7 +561,7 @@ const CreateBot: React.FC = () => {
                 </div> */}
               </div>
             </div>
-            <CreateBotRightContainer imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} setFormValues={setFormValues} formValues={formValues} handleSubmit={handleSubmit} font={botFont} />
+            <CreateBotRightContainer botSmartness={botSmartness} imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} setFormValues={setFormValues} formValues={formValues} handleSubmit={handleSubmit} font={botFont} />
 
           </Form>
         )}

@@ -3,9 +3,7 @@
 import React from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import { Button } from '@mui/material';
-import { Field } from 'formik';
-import FormikFieldSwitchComponent from '../../components/FormikFieldSwitchComponent';
+import { Button, FormControlLabel, Switch } from '@mui/material';
 interface CreateBotRightContainerProps {
   botName?: string;
   imageSrc?: any;
@@ -14,11 +12,12 @@ interface CreateBotRightContainerProps {
   setFormValues: any;
   formValues: any;
   handleSubmit: any;
-  font: string
+  font: string;
+  botSmartness: string;
 
 }
 
-const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botName, imageSrc, theme, setFormValues, handleSubmit, font, color }) => {
+const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botName, imageSrc, theme, setFormValues, formValues, handleSubmit, font, color, botSmartness }) => {
   const messages: any = [
     { id: 1, sender: 'bot', text: "Hi I’m BotWot, How can I assist you today?", time: '7:30 pm' },
     { id: 2, sender: 'user', text: 'I need to book an appointment', time: '7:31 pm' },
@@ -30,19 +29,20 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botNa
         <div className='flex justify-end items-center'>
           <label htmlFor="botSmartness" className='text-black mr-2'
           >Bot Smartness</label>
-
-          <Field
-            name="botSmartness"
-            component={FormikFieldSwitchComponent}
-
-            onChange={(value: boolean) => {
-              setFormValues((prev: any) => ({
-                ...prev,
-                botSmartness: value,
-              }));
-              // You can perform additional logic here if needed
-            }}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={Boolean(botSmartness)}
+                value={botSmartness}
+                onClick={(e) => setFormValues({ ...formValues, botSmartness: e.target })}
+                name='botSmartness' // Link switch to Formik field
+                color="primary" // Customize the color
+              />
+            }
+            label=''
+          // Display the label next to the switch
           />
+
           <Button variant="text" type='submit' className='bg-[#65558F] w-[134px] self-end rounded-[100px]' onClick={handleSubmit}
             sx={{
               '&.MuiButtonBase-root': {
