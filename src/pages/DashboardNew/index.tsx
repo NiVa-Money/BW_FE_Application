@@ -5,7 +5,7 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <Container maxWidth="xl" sx={{ p: 3 }}>
-        <Typography variant="h5">Dashboard</Typography>
+        <Typography variant="h5" className="pb-2">Dashboard</Typography>
         <DashboardPanel />
       </Container>
     </>

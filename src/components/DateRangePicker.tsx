@@ -107,11 +107,11 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         anchorEl={buttonRef}
         onClose={() => setPopoverOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
         sx={{ "& .MuiPopover-paper": { overflow: "visible" } }}
       >
         <Paper className="p-4">
-          <Typography variant="h6" className="mb-2">
+          <Typography variant="h6" className="pb-2">
             Select Date Range
           </Typography>
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
