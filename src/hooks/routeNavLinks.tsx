@@ -49,7 +49,6 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       subItems: [
         { id: 5.1, text: "Dashboard", path: "/marketing/dashboard" },
         { id: 5.2, text: "Campaign", path: "/marketing/campaign" },
-
       ],
     },
     {

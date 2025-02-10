@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { FC, useState, useEffect } from "react";
 import {
   LineChart,
@@ -35,14 +37,7 @@ interface DashboardProps {
   campaignName: string;
 }
 
-const WhatsappDash: FC<DashboardProps> = ({
-  totalMessages = 3500,
-  seenMessages = 1230,
-  deliveredMessages = 3000,
-  unreadMessages = 1000,
-  hotLeads = 100,
-  campaignName = "Campaign #1",
-}) => {
+const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [date, setDate] = useState<Date | null>(null);
   const [country, setCountry] = useState("");
@@ -53,32 +48,47 @@ const WhatsappDash: FC<DashboardProps> = ({
   const [loading, setLoading] = useState(true);
   const totalPages = 5;
 
-  const { campaignId } = useSelector(
-    (state: RootState) => state.whatsappCampaign.campaignData.campaignId
+  const {
+    campaignWiseMessagesMetrics,
+    dateWiseMetrics,
+    engagementRateMetrics,
+  } = useSelector(
+    (state: RootState) => state?.whatsappDashboard?.dashboardData.data
   );
- console.log("whatsapp dash id", campaignId);
+
+  console.log(
+    "whatsapp data",
+    campaignWiseMessagesMetrics,
+    dateWiseMetrics,
+    engagementRateMetrics
+  );
+
+  const campaignMetrics = campaignWiseMessagesMetrics?.[0];
+  const campaignId = useSelector(
+    (state: RootState) =>
+      state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp?.[0]
+        ?.campaignId
+  );
+  const [totalMessages, setTotalMessages] = useState(0);
+  const [seenMessages, setSeenMessages] = useState(0);
+  const [deliveredMessages, setDeliveredMessages] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [hotLeads, setHotLeads] = useState(0);
+
+  console.log("whatsapp dash id", campaignId);
 
   const dispatch = useDispatch();
 
-  const responseData = [
-    { day: "Sunday", campaign1: 200, campaign2: 0 },
-    { day: "Monday", campaign1: 200, campaign2: 300 },
-    { day: "Tuesday", campaign1: 100, campaign2: 50 },
-    { day: "Wednesday", campaign1: 100, campaign2: 200 },
-    { day: "Thursday", campaign1: 350, campaign2: 100 },
-    { day: "Friday", campaign1: 250, campaign2: 200 },
-    { day: "Saturday", campaign1: 50, campaign2: 100 },
-  ];
-
-  const engagementData = [
-    { day: "1", value: 25000 },
-    { day: "2", value: 45000 },
-    { day: "3", value: 35000 },
-    { day: "4", value: 85000 },
-    { day: "5", value: 65000 },
-    { day: "6", value: 55000 },
-    { day: "7", value: 45000 },
-  ];
+  useEffect(() => {
+    if (campaignMetrics) {
+      setTotalMessages(campaignMetrics.total ?? 0);
+      setSeenMessages(campaignMetrics.read ?? 0);
+      setDeliveredMessages(campaignMetrics.delivered ?? 0);
+      setUnreadMessages(campaignMetrics.failed ?? 0);
+      setHotLeads(campaignMetrics.replied ?? 0);
+      setCampaign(campaignMetrics.campaignName ?? "");
+    }
+  }, [campaignMetrics]);
 
   const setScheduleDate = (newValue: Date | null): void => {
     setDate(newValue);
@@ -88,23 +98,31 @@ const WhatsappDash: FC<DashboardProps> = ({
   useEffect(() => {
     if (campaignId) {
       console.log("whatsapp dash id", campaignId);
-      const fetchData = async () => {
-        try {
-          const data = dispatch(fetchWhatsAppDashboardRequest(campaignId));
-          console.log("Dashboard data:", data);
-          // Process the data and update state here if needed
-          setLoading(false); // Set loading to false once the data is fetched
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          setLoading(false); // Stop loading if there's an error
-        }
-      };
-
-      fetchData();
+      try {
+        dispatch(fetchWhatsAppDashboardRequest(campaignId));
+        console.log("API response:", campaignWiseMessagesMetrics);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch WhatsApp dashboard data", error);
+      }
     } else if (!loading) {
       console.error("Campaign ID is null");
     }
-  }, []);
+  }, [campaignId]);
+
+  const NoDataMessage = () => (
+    <div className="flex justify-center items-center h-32 text-black">
+      No data available
+    </div>
+  );
+
+  const isChartDataEmpty = (data: any) => {
+    return (
+      !data ||
+      data.length === 0 ||
+      data.every((item: any) => Object.values(item).every((val) => val === 0))
+    );
+  };
 
   return (
     <div className="p-6">
@@ -142,9 +160,13 @@ const WhatsappDash: FC<DashboardProps> = ({
               label="Campaign Name"
               className="bg-white border border-[#65558F] rounded-full text-sm"
             >
-              <MenuItem value="Campaign #1">Campaign #1</MenuItem>
-              <MenuItem value="Campaign #2">Campaign #2</MenuItem>
-              <MenuItem value="Campaign #3">Campaign #3</MenuItem>
+              {campaignWiseMessagesMetrics?.map(
+                (campaignItem: { campaignName: string }, index: number) => (
+                  <MenuItem key={index} value={campaignItem.campaignName}>
+                    {campaignItem.campaignName}
+                  </MenuItem>
+                )
+              )}
             </Select>
           </FormControl>
 
@@ -188,35 +210,38 @@ const WhatsappDash: FC<DashboardProps> = ({
               </div>
             </div>
           </div>
-          <BarChart width={350} height={300} data={responseData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="day" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="campaign1" fill="#60A5FA" name="Campaign 1" />
-            <Bar dataKey="campaign2" fill="#9CA3AF" name="Campaign 2" />
-          </BarChart>
+          {isChartDataEmpty(dateWiseMetrics) ? (
+            <NoDataMessage />
+          ) : (
+            <BarChart width={350} height={300} data={dateWiseMetrics}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="campaignName" fill="#60A5FA" name="Campaign Name" />
+            </BarChart>
+          )}
         </div>
 
         {/* Text Insights */}
         <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-lg font-medium">Text Insights</h3>
+              <h3 className="text-lg font-medium">Campaign Insights</h3>
               <p className="text-sm text-[#65558F]">
                 Leveraging AI analysis, alongside conversion data and research
                 results
               </p>
             </div>
-            <button className="p-2">
-              <img src="/api/placeholder/24/24" alt="" className="w-6" />
-            </button>
           </div>
           <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
+            {[
+              "AI-driven audience segmentation",
+              "Optimized ad performance metrics",
+              "Customer behavior trend analysis",
+            ].map((text, i) => (
               <div key={i} className="flex items-center gap-2">
-                <img src="/api/placeholder/24/24" alt="" className="w-6" />
-                <span>Lorem Ipsum</span>
+                <span>{text}</span>
               </div>
             ))}
           </div>
@@ -237,13 +262,17 @@ const WhatsappDash: FC<DashboardProps> = ({
           {/* Engagement Rate Chart */}
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
             <h3 className="text-lg font-medium mb-4">Engagement Rate</h3>
-            <LineChart width={350} height={200} data={engagementData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="value" stroke="#8884d8" />
-            </LineChart>
+            {isChartDataEmpty(engagementRateMetrics) ? (
+              <NoDataMessage />
+            ) : (
+              <LineChart width={350} height={200} data={engagementRateMetrics}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="campaignName" stroke="#8884d8" />
+              </LineChart>
+            )}
           </div>
         </div>
       </div>

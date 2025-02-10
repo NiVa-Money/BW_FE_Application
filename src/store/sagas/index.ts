@@ -24,6 +24,7 @@ import {
 import {
   CREATE_WHATSAPP_CAMPAIGN,
   CREATE_WHATSAPP_TEMPLATE,
+  FETCH_WHATSAPP_CAMPAIGNS,
   FETCH_WHATSAPP_TEMPLATES,
 } from "../actionTypes/whatsappCampaignTypes";
 import {
@@ -35,6 +36,7 @@ import {
 import {
   createWhatsAppCampaignSaga,
   createWhatsAppTemplateSaga,
+  fetchWhatsappCampaignsSaga,
   fetchWhatsAppTemplatesSaga,
 } from "./whatsappCampaignSaga";
 import { FETCH_WHATSAPP_DASHBOARD_REQUEST } from "../actionTypes/whatsappDashboardActionTypes";
@@ -55,6 +57,7 @@ export default function* rootSaga() {
   yield takeEvery(DELETE_BOT, deleteBotSaga);
   yield takeEvery(EXPORT_BOT_PROFILE, exportBotProfileSaga);
   yield takeEvery(CREATE_WHATSAPP_CAMPAIGN, createWhatsAppCampaignSaga);
+  yield takeEvery(FETCH_WHATSAPP_CAMPAIGNS, fetchWhatsappCampaignsSaga);
   yield takeEvery(FETCH_WHATSAPP_TEMPLATES, fetchWhatsAppTemplatesSaga);
   yield takeEvery(CREATE_WHATSAPP_TEMPLATE, createWhatsAppTemplateSaga);
   yield takeEvery(SAVE_WHATSAPPINT, saveWhatsappSaga);

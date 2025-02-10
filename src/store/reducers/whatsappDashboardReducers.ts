@@ -7,7 +7,7 @@ export const whatsappDashboardReducer = (state = initialState.whatsappDashboard,
       case FETCH_WHATSAPP_DASHBOARD_REQUEST:
         return { ...state, loading: true, error: null };
       case FETCH_WHATSAPP_DASHBOARD_SUCCESS:
-        return { ...state, loading: false, data: action.payload };
+        return { ...state, loading: false, dashboardData: action.payload };
       case FETCH_WHATSAPP_DASHBOARD_FAILURE:
         return { ...state, loading: false, error: action.payload };
       default:
