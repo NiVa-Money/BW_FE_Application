@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import {
   createWhatsAppTemplateAction,
 } from "../../../store/actions/whatsappCampaignActions";
 import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
+import { getWhatsappRequest } from "../../../store/actions/integrationActions";
 
 const WhatsappCampaign: React.FC = () => {
   const [mode, setMode] = useState<"Template">("Template");
@@ -90,6 +92,10 @@ const WhatsappCampaign: React.FC = () => {
   const integrationsData = useSelector(
     (state: RootState) => state?.crudIntegration?.crudIntegration?.data
   );
+
+  useEffect(() => {
+    dispatch(getWhatsappRequest(""));
+  }, [dispatch]);
   // Convert integration data to an array (if it's not already)
   const integrationList = integrationsData
     ? Array.isArray(integrationsData)
