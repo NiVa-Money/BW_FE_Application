@@ -8,6 +8,7 @@ import {
   whatsappcrudReducer,
 } from "./reducers/integrationReducers";
 import userChatReducers from "./reducers/conversationReducers";
+import { whatsappDashboardReducer } from "./reducers/whatsappDashboardReducers";
 const sagaMiddleware = createSagaMiddleware();
 
 const rootReducer = {
@@ -16,6 +17,7 @@ const rootReducer = {
   crudIntegration: whatsappcrudReducer,
   whatsappCampaign: whatsappCampaignReducer,
   whatsappTemplates: whatsappTemplateReducer,
+  whatsappDashboard : whatsappDashboardReducer,
   userChat: userChatReducers,
 };
 

@@ -54,8 +54,9 @@ export const initialState: any = {
 
   whatsappDashboard: {
     loading: false,
-    data: null,
     error: null,
+    dashboardData: [], 
+    messages: [],
   },
 
   userChat: {

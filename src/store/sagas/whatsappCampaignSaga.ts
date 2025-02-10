@@ -1,10 +1,10 @@
- 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { call, put } from "redux-saga/effects";
 
 import {
   createWhatsAppCampaignService,
   createWhatsAppTemplateService,
+  fetchCampaignService,
   fetchWhatsAppTemplatesService,
 } from "../../api/services/whatsappCampaignService";
 import { notifyError } from "../../components/Toast";
@@ -15,6 +15,8 @@ import {
   CREATE_WHATSAPP_TEMPLATE_SUCCESS,
   FETCH_WHATSAPP_TEMPLATES_FAILURE,
   FETCH_WHATSAPP_TEMPLATES_SUCCESS,
+  FETCH_WHATSAPP_CAMPAIGNS_SUCCESS,
+  FETCH_WHATSAPP_CAMPAIGNS_FAILURE,
 } from "../actionTypes/whatsappCampaignTypes";
 import axios from "axios";
 
@@ -50,6 +52,22 @@ export function* createWhatsAppCampaignSaga({
       type: CREATE_WHATSAPP_CAMPAIGN_FAILURE,
       payload: error.message || "An error occurred",
     });
+  }
+}
+
+export function* fetchWhatsappCampaignsSaga(): Generator<any, void, any> {
+  try {
+    const response = yield call(fetchCampaignService); // Corrected call
+    yield put({
+      type: FETCH_WHATSAPP_CAMPAIGNS_SUCCESS,
+      payload: response,
+    });
+  } catch (error) {
+    yield put({
+      type: FETCH_WHATSAPP_CAMPAIGNS_FAILURE,
+      payload: (error as Error).message || "Failed to fetch templates.",
+    });
+    notifyError("Failed to fetch WhatsApp campaigns."); // Updated error message
   }
 }
 

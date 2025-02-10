@@ -3,7 +3,7 @@ import axiosInstance from "../axiosConfig";
 import axios from "axios";
 
 /* Service to call the WhatsApp Campaign API */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export const createWhatsAppCampaignService = async (campaignData: any) => {
   try {
     const response = await axiosInstance.post(

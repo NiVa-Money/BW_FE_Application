@@ -244,14 +244,16 @@ const MarketingDashboard = () => {
 
         <DashboardCard title="Social Media Trends">
           <div className="space-y-4">
-            {Array(3)
-              .fill(0)
-              .map((_, i) => (
-                <div key={i} className="flex items-center space-x-2">
-                  <TrendingUp fontSize="small" color="primary" />
-                  <span className="text-sm">Lorem Ipsum</span>
-                </div>
-              ))}
+            {[
+              "Short-form videos are dominating engagement",
+              "Brands leveraging AI for personalized content",
+              "Influencer collaborations driving higher ROI",
+            ].map((trend, i) => (
+              <div key={i} className="flex items-center space-x-2">
+                <TrendingUp fontSize="small" color="primary" />
+                <span className="text-sm">{trend}</span>
+              </div>
+            ))}
           </div>
         </DashboardCard>
 
@@ -381,7 +383,16 @@ const MarketingDashboard = () => {
               >
                 View dashboard
               </button>
-              {showWhatsappDash && <WhatsappDash totalMessages={0} seenMessages={0} deliveredMessages={0} unreadMessages={0} hotLeads={0} campaignName={""} />}
+              {showWhatsappDash && (
+                <WhatsappDash
+                  totalMessages={0}
+                  seenMessages={0}
+                  deliveredMessages={0}
+                  unreadMessages={0}
+                  hotLeads={0}
+                  campaignName={""}
+                />
+              )}
             </div>
           </div>
         </DashboardCard>

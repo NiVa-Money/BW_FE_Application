@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { FC, useState, useEffect } from "react";
 import {
   LineChart,
@@ -24,7 +26,12 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import { fetchWhatsAppDashboardRequest } from "../../../store/actions/whatsappDashboardActions";
+import {
+  fetchWhatsAppDashboardRequest,
+  fetchWhatsAppMessagesRequest,
+} from "../../../store/actions/whatsappDashboardActions";
+import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 interface DashboardProps {
   totalMessages: number;
@@ -35,14 +42,7 @@ interface DashboardProps {
   campaignName: string;
 }
 
-const WhatsappDash: FC<DashboardProps> = ({
-  totalMessages = 3500,
-  seenMessages = 1230,
-  deliveredMessages = 3000,
-  unreadMessages = 1000,
-  hotLeads = 100,
-  campaignName = "Campaign #1",
-}) => {
+const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [date, setDate] = useState<Date | null>(null);
   const [country, setCountry] = useState("");
@@ -51,34 +51,59 @@ const WhatsappDash: FC<DashboardProps> = ({
   const [sentiment, setSentiment] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const totalPages = 5;
-
-  const { campaignId } = useSelector(
-    (state: RootState) => state.whatsappCampaign.campaignData.campaignId
-  );
- console.log("whatsapp dash id", campaignId);
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const responseData = [
-    { day: "Sunday", campaign1: 200, campaign2: 0 },
-    { day: "Monday", campaign1: 200, campaign2: 300 },
-    { day: "Tuesday", campaign1: 100, campaign2: 50 },
-    { day: "Wednesday", campaign1: 100, campaign2: 200 },
-    { day: "Thursday", campaign1: 350, campaign2: 100 },
-    { day: "Friday", campaign1: 250, campaign2: 200 },
-    { day: "Saturday", campaign1: 50, campaign2: 100 },
-  ];
+  const {
+    campaignWiseMessagesMetrics,
+    dateWiseMetrics,
+    engagementRateMetrics,
+  } = useSelector(
+    (state: RootState) => state?.whatsappDashboard?.dashboardData?.data || {}
+  );
 
-  const engagementData = [
-    { day: "1", value: 25000 },
-    { day: "2", value: 45000 },
-    { day: "3", value: 35000 },
-    { day: "4", value: 85000 },
-    { day: "5", value: 65000 },
-    { day: "6", value: 55000 },
-    { day: "7", value: 45000 },
-  ];
+  console.log(
+    "whatsapp data",
+    campaignWiseMessagesMetrics,
+    dateWiseMetrics,
+    engagementRateMetrics
+  );
+
+  const messages = useSelector(
+    (state: RootState) => state.whatsappDashboard?.messages || []
+  );
+  const totalPages = useSelector((state: RootState) =>
+    Math.ceil(state.whatsappDashboard?.messages?.total / 10)
+  );
+
+  useEffect(() => {
+    dispatch(fetchWhatsAppMessagesRequest());
+  }, []);
+
+  const campaignMetrics = campaignWiseMessagesMetrics?.[0];
+  const campaignId = useSelector(
+    (state: RootState) =>
+      state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp?.[0]
+        ?.campaignId
+  );
+  const [totalMessages, setTotalMessages] = useState(0);
+  const [seenMessages, setSeenMessages] = useState(0);
+  const [deliveredMessages, setDeliveredMessages] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [hotLeads, setHotLeads] = useState(0);
+
+  console.log("whatsapp dash id", campaignId);
+
+  useEffect(() => {
+    if (campaignMetrics) {
+      setTotalMessages(campaignMetrics.total ?? 0);
+      setSeenMessages(campaignMetrics.read ?? 0);
+      setDeliveredMessages(campaignMetrics.delivered ?? 0);
+      setUnreadMessages(campaignMetrics.failed ?? 0);
+      setHotLeads(campaignMetrics.replied ?? 0);
+      setCampaign(campaignMetrics.campaignName ?? "");
+    }
+  }, [campaignMetrics]);
 
   const setScheduleDate = (newValue: Date | null): void => {
     setDate(newValue);
@@ -88,23 +113,32 @@ const WhatsappDash: FC<DashboardProps> = ({
   useEffect(() => {
     if (campaignId) {
       console.log("whatsapp dash id", campaignId);
-      const fetchData = async () => {
-        try {
-          const data = dispatch(fetchWhatsAppDashboardRequest(campaignId));
-          console.log("Dashboard data:", data);
-          // Process the data and update state here if needed
-          setLoading(false); // Set loading to false once the data is fetched
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          setLoading(false); // Stop loading if there's an error
-        }
-      };
-
-      fetchData();
+      try {
+        dispatch(fetchWhatsAppDashboardRequest(campaignId));
+        console.log("API response:", campaignWiseMessagesMetrics);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch WhatsApp dashboard data", error);
+      }
     } else if (!loading) {
       console.error("Campaign ID is null");
     }
-  }, []);
+  }, [campaignId]);
+
+
+  const NoDataMessage = () => (
+    <div className="flex justify-center items-center h-32 text-black">
+      No data available
+    </div>
+  );
+
+  const isChartDataEmpty = (data: any) => {
+    return (
+      !data ||
+      data.length === 0 ||
+      data.every((item: any) => Object.values(item).every((val) => val === 0))
+    );
+  };
 
   return (
     <div className="p-6">
@@ -142,9 +176,13 @@ const WhatsappDash: FC<DashboardProps> = ({
               label="Campaign Name"
               className="bg-white border border-[#65558F] rounded-full text-sm"
             >
-              <MenuItem value="Campaign #1">Campaign #1</MenuItem>
-              <MenuItem value="Campaign #2">Campaign #2</MenuItem>
-              <MenuItem value="Campaign #3">Campaign #3</MenuItem>
+              {campaignWiseMessagesMetrics?.map(
+                (campaignItem: { campaignName: string }, index: number) => (
+                  <MenuItem key={index} value={campaignItem.campaignName}>
+                    {campaignItem.campaignName}
+                  </MenuItem>
+                )
+              )}
             </Select>
           </FormControl>
 
@@ -188,35 +226,38 @@ const WhatsappDash: FC<DashboardProps> = ({
               </div>
             </div>
           </div>
-          <BarChart width={350} height={300} data={responseData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="day" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="campaign1" fill="#60A5FA" name="Campaign 1" />
-            <Bar dataKey="campaign2" fill="#9CA3AF" name="Campaign 2" />
-          </BarChart>
+          {isChartDataEmpty(dateWiseMetrics) ? (
+            <NoDataMessage />
+          ) : (
+            <BarChart width={350} height={300} data={dateWiseMetrics}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="campaignName" fill="#60A5FA" name="Campaign Name" />
+            </BarChart>
+          )}
         </div>
 
         {/* Text Insights */}
         <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-lg font-medium">Text Insights</h3>
+              <h3 className="text-lg font-medium">Campaign Insights</h3>
               <p className="text-sm text-[#65558F]">
                 Leveraging AI analysis, alongside conversion data and research
                 results
               </p>
             </div>
-            <button className="p-2">
-              <img src="/api/placeholder/24/24" alt="" className="w-6" />
-            </button>
           </div>
           <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
+            {[
+              "AI-driven audience segmentation",
+              "Optimized ad performance metrics",
+              "Customer behavior trend analysis",
+            ].map((text, i) => (
               <div key={i} className="flex items-center gap-2">
-                <img src="/api/placeholder/24/24" alt="" className="w-6" />
-                <span>Lorem Ipsum</span>
+                <span>{text}</span>
               </div>
             ))}
           </div>
@@ -227,7 +268,10 @@ const WhatsappDash: FC<DashboardProps> = ({
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-medium">Create a New Campaign</h3>
-              <button className="flex items-center justify-center gap-2 px-6 py-2 bg-[#65558F] text-white rounded-full">
+              <button
+                onClick={() => navigate("/marketing/createcampaign")}
+                className="flex items-center justify-center gap-2 px-6 py-2 bg-[#65558F] text-white rounded-full"
+              >
                 <AddIcon className="w-[18px]" />
                 Create Campaign
               </button>
@@ -237,13 +281,17 @@ const WhatsappDash: FC<DashboardProps> = ({
           {/* Engagement Rate Chart */}
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
             <h3 className="text-lg font-medium mb-4">Engagement Rate</h3>
-            <LineChart width={350} height={200} data={engagementData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="value" stroke="#8884d8" />
-            </LineChart>
+            {isChartDataEmpty(engagementRateMetrics) ? (
+              <NoDataMessage />
+            ) : (
+              <LineChart width={350} height={200} data={engagementRateMetrics}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="campaignName" stroke="#8884d8" />
+              </LineChart>
+            )}
           </div>
         </div>
       </div>
@@ -331,16 +379,32 @@ const WhatsappDash: FC<DashboardProps> = ({
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: 10 }).map((_, i) => (
-              <tr key={i} className="border-t">
-                <td className="py-3">Name</td>
-                <td>Sentiment</td>
-                <td>Intent</td>
-                <td>Response</td>
-                <td>Sent</td>
-                <td>Campaign</td>
+            {messages.length > 0 ? (
+              messages.map((msg, i) => (
+                <tr key={i} className="border-t">
+                  <td className="py-3">{msg.receiverName || "N/A"}</td>
+                  <td>{msg.status}</td>
+                  <td>{msg.replied}</td>
+                  <td>
+                    {msg.status === "failed"
+                      ? msg.failedReason || "Unknown"
+                      : "-"}
+                  </td>
+                  <td>
+                    {msg.time
+                      ? format(new Date(msg.time), "yyyy-MM-dd HH:mm")
+                      : "N/A"}
+                  </td>
+                  <td>{msg.campaignName || "N/A"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center py-4">
+                  No data available
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         {/* Pagination */}
@@ -357,7 +421,7 @@ const WhatsappDash: FC<DashboardProps> = ({
               key={i}
               onClick={() => setPage(i + 1)}
               className={`w-8 h-8 rounded-full ${
-                page === i + 1 ? "bg-[#65558F] text-white" : "bg-gray-100"
+                page === i + 1 ? "bg-[#65558F] text-black" : "bg-gray-100"
               }`}
             >
               {i + 1}

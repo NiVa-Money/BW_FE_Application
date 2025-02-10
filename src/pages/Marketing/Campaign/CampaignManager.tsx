@@ -1,107 +1,138 @@
-import ImportExportIcon from "@mui/icons-material/ImportExport";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import { RootState } from "../../../store";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { fetchCampaignService } from "../../../api/services/whatsappCampaignService";
+import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 
-const tableHeaders = [
-  { label: "Template name", icon: ImportExportIcon },
-  { label: "Category type", icon: ImportExportIcon },
-  { label: "Language", icon: ImportExportIcon },
-  { label: "Status", icon: ImportExportIcon },
-  { label: "Message delivered", icon: HelpOutlineIcon },
-  { label: "Message response rate", icon: HelpOutlineIcon },
-  { label: "Top blocking reasons", icon: HelpOutlineIcon },
-  { label: "Last edited", icon: KeyboardArrowDownIcon },
-];
+interface Campaign {
+  campaignId: string;
+  userId: string;
+  status: string;
+  channelName: string;
+  scheduleAt: string;
+  scheduleEndAt: string;
+  phoneNumberId: number;
+  messageType: string;
+  messageContent: {
+    template: {
+      name: string;
+      language: string;
+      header?: {
+        image?: string;
+      };
+      body: {
+        text: string[];
+      };
+    };
+  };
+  contactsUrl: string;
+}
 
-const CampaignManager = () => {
-  const cellClass = "p-4 text-left font-medium text-gray-600";
-  const rowClass = "border-b hover:bg-gray-50";
+export default function CampaignManager() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const [campaigns, setCampaigns] = useState([]);
+  const campaignData = useSelector(
+    (state: RootState) =>
+      state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp
+  );
 
   useEffect(() => {
-    const fetchCampaigns = async () => {
-      try {
-        const response = await fetchCampaignService();
-        setCampaigns(response.data?.campaigns?.whatsapp || []);
-      } catch (error) {
-        console.error("Error fetching campaigns:", error);
-      }
-    };
-    fetchCampaigns();
-  }, []);
+    dispatch(fetchCampaignsAction({ payload: {} }));
+  }, [dispatch]);
 
-  const handleAddCampaign = () => {
-    navigate("/marketing/createcampaign");
-  };
+  const campaignArray = campaignData
+    ? Array.isArray(campaignData)
+      ? campaignData
+      : [campaignData]
+    : [];
 
   return (
-    <div className="p-8 mt-10 min-h-screen bg-white">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Active Campaigns</h2>
-        <button
-          className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
-          onClick={handleAddCampaign}
-        >
-          <AddIcon /> Add Campaigns
-        </button>
-      </div>
-      <div className="flex justify-center items-center w-full">
-        {campaigns.length === 0 ? (
-          <div className="text-center text-gray-500 text-lg py-10">
-            No campaigns available, create new campaign
+    <div className="p-8 mt-10 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Active Campaigns</h2>
+          <button
+            className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
+            onClick={() => navigate("/marketing/createcampaign")}
+          >
+            <AddIcon /> Add Campaign
+          </button>
+        </div>
+
+        {campaignArray.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {campaignArray.map((campaign: Campaign) => (
+              <div
+                key={campaign.campaignId}
+                className="bg-white shadow-md w-[500px] rounded-lg p-6 border border-gray-200"
+              >
+                <h3 className="text-xl font-semibold text-gray-800">
+                  {campaign.messageContent.template.name}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Status: <span className="font-medium">{campaign.status}</span>
+                </p>
+                <p className="text-sm text-gray-500">
+                  Scheduled:{" "}
+                  <span className="font-medium">
+                    {new Date(campaign.scheduleAt).toLocaleString()}
+                  </span>{" "}
+                  -{" "}
+                  <span className="font-medium">
+                    {new Date(campaign.scheduleEndAt).toLocaleString()}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-500">
+                  Channel:{" "}
+                  <span className="font-medium">{campaign.channelName}</span>
+                </p>
+                <p className="text-sm text-gray-500">
+                  Message Type:{" "}
+                  <span className="font-medium">{campaign.messageType}</span>
+                </p>
+
+                {campaign.messageContent.template.header?.image && (
+                  <div className="mt-2">
+                    <img
+                      src={campaign.messageContent.template.header.image}
+                      alt="Template Header"
+                      className="w-full h-40 object-cover rounded-md"
+                    />
+                  </div>
+                )}
+
+                <p className="text-sm text-gray-500 mt-2">
+                  Message:{" "}
+                  <span className="font-medium">
+                    {campaign.messageContent.template.body.text.join(" ")}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Contacts URL:{" "}
+                  <a
+                    href={campaign.contactsUrl}
+                    className="text-blue-600 underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Contacts
+                  </a>
+                </p>
+
+                <div className="mt-4 flex justify-end">
+                  <button className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-purple-400 transition-colors">
+                    <EditIcon /> Edit
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <table className="border-collapse">
-            <thead>
-              <tr className="border-b">
-                {tableHeaders.map(({ label, icon: Icon }) => (
-                  <th key={label} className={cellClass}>
-                    <div className="flex items-center gap-1">
-                      {label} <Icon className="h-4 w-4" />
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {campaigns.map((campaign) => (
-                <tr key={campaign.name} className={rowClass}>
-                  <td className="p-4 text-blue-600">{campaign.name}</td>
-                  <td className="p-4">{campaign.type}</td>
-                  <td className="p-4">
-                    <div>
-                      <div>{campaign.language}</div>
-                      <div className="text-sm text-gray-500">
-                        {campaign.preview}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                      {campaign.status}
-                    </span>
-                  </td>
-                  <td className="p-4">{campaign.messageDelivered}</td>
-                  <td className="p-4">
-                    {campaign.messageResponse.percentage}% (
-                    {campaign.messageResponse.total})
-                  </td>
-                  <td className="p-4">{campaign.topBlocking || "—"}</td>
-                  <td className="p-4">{campaign.lastEdited}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <p className="text-gray-500 text-center">No Campaigns found.</p>
         )}
       </div>
     </div>
   );
-};
-
-export default CampaignManager;
+}
