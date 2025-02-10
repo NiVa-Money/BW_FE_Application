@@ -309,7 +309,7 @@ const WhatsappCampaign: React.FC = () => {
                 className="flex gap-2 w-full mt-4  whitespace-nowrap min-h-[45px] justify-center items-center text-base font-medium text-gray-100 bg-[#65558F] rounded-3xl"
                 onClick={() => setCustomizeScreen(true)}
               >
-                Create Campaign
+                Create Template
               </button>
             </div>
             {customizeScreen ? (
@@ -510,7 +510,7 @@ const WhatsappCampaign: React.FC = () => {
                  <ArrowDropDown className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square" />
                 </div>
               </div> */}
-            <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
+            {/* <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
               <input
                 type="file"
                 onChange={handlePdfUpload}
@@ -528,7 +528,7 @@ const WhatsappCampaign: React.FC = () => {
                     : " Upload Bot Config PDF"}
                 </span>
               </label>
-            </div>
+            </div> */}
             {/* </div> */}
 
             {/* AI Wizard */}

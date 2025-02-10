@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { FC, useState, useEffect } from "react";
@@ -11,6 +10,7 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
+  ResponsiveContainer,
 } from "recharts";
 import AddIcon from "@mui/icons-material/Add";
 import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
@@ -32,6 +32,7 @@ import {
 } from "../../../store/actions/whatsappDashboardActions";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { COLORS } from "../../../constants";
 
 interface DashboardProps {
   totalMessages: number;
@@ -45,13 +46,13 @@ interface DashboardProps {
 const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [date, setDate] = useState<Date | null>(null);
-  const [country, setCountry] = useState("");
-  const [time, setTime] = useState("");
-  const [category, setCategory] = useState("");
-  const [sentiment, setSentiment] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
+  const [selectedCampaignName, setSelectedCampaignName] = useState("");
+
   const dispatch = useDispatch();
 
   const {
@@ -70,7 +71,8 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   );
 
   const messages = useSelector(
-    (state: RootState) => state.whatsappDashboard?.messages || []
+    (state: RootState) =>
+      state.whatsappDashboard?.messages?.data?.messages || []
   );
   const totalPages = useSelector((state: RootState) =>
     Math.ceil(state.whatsappDashboard?.messages?.total / 10)
@@ -125,25 +127,16 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     }
   }, [campaignId]);
 
-
   const NoDataMessage = () => (
     <div className="flex justify-center items-center h-32 text-black">
       No data available
     </div>
   );
 
-  const isChartDataEmpty = (data: any) => {
-    return (
-      !data ||
-      data.length === 0 ||
-      data.every((item: any) => Object.values(item).every((val) => val === 0))
-    );
-  };
-
   return (
     <div className="p-6">
       {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3  lg:grid-cols-6 gap-4">
         <StatsCard
           title="Total Send Messages"
           value={totalMessages}
@@ -208,7 +201,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
         {/* Response Rate Chart */}
         <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">Response Rate</h3>
             <div className="flex items-center space-x-4">
               <div className="flex items-center text-sm">
                 <span
@@ -226,17 +218,26 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               </div>
             </div>
           </div>
-          {isChartDataEmpty(dateWiseMetrics) ? (
-            <NoDataMessage />
-          ) : (
-            <BarChart width={350} height={300} data={dateWiseMetrics}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="campaignName" fill="#60A5FA" name="Campaign Name" />
-            </BarChart>
-          )}
+          <ChartCard title="Response Rate">
+            {dateWiseMetrics?.length ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={dateWiseMetrics}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="messages" fill={COLORS.BLUE} name="Messages" />
+                  <Bar
+                    dataKey="messages"
+                    fill={COLORS.LIGHTGREEN}
+                    name="Messages"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <NoDataMessage />
+            )}
+          </ChartCard>
         </div>
 
         {/* Text Insights */}
@@ -280,18 +281,30 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
 
           {/* Engagement Rate Chart */}
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
-            <h3 className="text-lg font-medium mb-4">Engagement Rate</h3>
-            {isChartDataEmpty(engagementRateMetrics) ? (
-              <NoDataMessage />
-            ) : (
-              <LineChart width={350} height={200} data={engagementRateMetrics}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="campaignName" stroke="#8884d8" />
-              </LineChart>
-            )}
+            <ChartCard title="Engagement Rate">
+              {engagementRateMetrics?.length ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={engagementRateMetrics}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="engagement"
+                      stroke={COLORS.GRAY}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="engagement"
+                      stroke={COLORS.LIGHTVIOLET}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <NoDataMessage />
+              )}
+            </ChartCard>
           </div>
         </div>
       </div>
@@ -303,84 +316,92 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
         </div>
         <div className="flex font-bold gap-4  mb-2">
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>India</InputLabel>
+            <InputLabel>Campaign Name</InputLabel>
             <Select
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              label="India"
+              value={selectedCampaignName}
+              onChange={(e) => setSelectedCampaignName(e.target.value)}
+              label="Campaign Name"
               className="bg-gray-100 rounded-full"
             >
-              <MenuItem value="India">India</MenuItem>
-              {/* Add other country options */}
+              <MenuItem value="">All</MenuItem>
+              {Array.from(
+                new Set(
+                  messages.map(
+                    (msg: { campaignName: string }) => msg.campaignName
+                  )
+                )
+              ).map((campaign: string, index: number) => (
+                <MenuItem key={index} value={campaign}>
+                  {campaign}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Past 24 Hours</InputLabel>
+            <InputLabel>Receiver Number</InputLabel>
             <Select
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              label="Past 24 Hours"
+              value={selectedReceiverNumber}
+              onChange={(e) => setSelectedReceiverNumber(e.target.value)}
+              label="Receiver Number"
               className="bg-gray-100 rounded-full"
             >
-              <MenuItem value="24h">Past 24 Hours</MenuItem>
-              {/* Add other time options */}
+              <MenuItem value="">All</MenuItem>
+              {Array.from(
+                new Set(
+                  messages.map(
+                    (msg: { receiverNumber: string }) => msg.receiverNumber
+                  )
+                )
+              ).map((receiver: string, index: number) => (
+                <MenuItem key={index} value={receiver}>
+                  {receiver}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>All Categories</InputLabel>
+            <InputLabel>Status</InputLabel>
             <Select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              label="All Categories"
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              label="Status"
               className="bg-gray-100 rounded-full"
             >
-              <MenuItem value="all">All Categories</MenuItem>
-              {/* Add other category options */}
-            </Select>
-          </FormControl>
-
-          <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Positive</InputLabel>
-            <Select
-              value={sentiment}
-              onChange={(e) => setSentiment(e.target.value)}
-              label="Positive"
-              className="bg-gray-100 rounded-full"
-            >
-              <MenuItem value="positive">Positive</MenuItem>
-              {/* Add other sentiment options */}
-            </Select>
-          </FormControl>
-
-          <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Campaign</InputLabel>
-            <Select
-              value={campaign}
-              onChange={(e) => setCampaign(e.target.value)}
-              label="Campaign"
-              className="bg-gray-100 rounded-full"
-            >
-              <MenuItem value="campaign">Campaign</MenuItem>
-              {/* Add other campaign options */}
+              <MenuItem value="">All</MenuItem>
+              {Array.from(
+                new Set(messages.map((msg: { status: string }) => msg.status))
+              ).map((status: string, index: number) => (
+                <MenuItem key={index} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </div>
         <table className="w-full">
           <thead>
             <tr className="text-left font-semibold text-[#65558F]">
-              <th className="py-2">Name</th>
-              <th>Sentiment</th>
-              <th>Intent</th>
+              <th className="py-2">Receiver Name</th>
+              <th>Status</th>
               <th>Response</th>
+              <th>Failed Reason</th>
               <th>Sent</th>
               <th>Campaign</th>
             </tr>
           </thead>
           <tbody>
-            {messages.length > 0 ? (
-              messages.map((msg, i) => (
+            {messages
+              .filter(
+                (msg) =>
+                  (!selectedCampaignName ||
+                    msg.campaignName === selectedCampaignName) &&
+                  (!selectedReceiverNumber ||
+                    msg.receiverNumber === selectedReceiverNumber) &&
+                  (!selectedStatus || msg.status === selectedStatus)
+              )
+              .map((msg, i) => (
                 <tr key={i} className="border-t">
                   <td className="py-3">{msg.receiverName || "N/A"}</td>
                   <td>{msg.status}</td>
@@ -397,14 +418,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                   </td>
                   <td>{msg.campaignName || "N/A"}</td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="text-center py-4">
-                  No data available
-                </td>
-              </tr>
-            )}
+              ))}
           </tbody>
         </table>
         {/* Pagination */}
@@ -451,11 +465,23 @@ const StatsCard: FC<StatsCardProps> = ({ icon, title, value }) => (
     {/* Icon and Title aligned horizontally */}
     <div className="flex items-center gap-2">
       <div className="text-[#65558F] ">{icon}</div>
-      <p className="text-base whitespace-nowrap text-[#65558F]">{title}</p>
+      <p className="text-base text-[#65558F]">{title}</p>
     </div>
 
     {/* Value displayed below the icon/title */}
     <p className="text-xl font-medium ml-auto">{value.toLocaleString()}</p>
+  </div>
+);
+
+interface ChartCardProps {
+  title: string;
+  children: JSX.Element;
+}
+
+const ChartCard: FC<ChartCardProps> = ({ title, children }) => (
+  <div className=" shadow-md p-4 rounded-lg">
+    <h3 className="text-lg font-medium mb-4">{title}</h3>
+    {children}
   </div>
 );
 

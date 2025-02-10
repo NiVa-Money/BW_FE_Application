@@ -22,8 +22,8 @@ interface Campaign {
       header?: {
         image?: string;
       };
-      body: {
-        text: string[];
+      body?: {
+        text?: string[];
       };
     };
   };
@@ -106,7 +106,8 @@ export default function CampaignManager() {
                 <p className="text-sm text-gray-500 mt-2">
                   Message:{" "}
                   <span className="font-medium">
-                    {campaign.messageContent.template.body.text.join(" ")}
+                    {campaign.messageContent.template.body?.text?.join(" ") ||
+                      "No message"}
                   </span>
                 </p>
                 <p className="text-sm text-gray-500 mt-2">

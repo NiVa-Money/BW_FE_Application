@@ -279,7 +279,10 @@ const MarketingDashboard = () => {
                 </p>
               </div>
             </div>
-            <button className="w-full bg-[#65558F] text-white py-2 rounded-lg">
+            <button
+              onClick={() => navigate("/marketing/createcampaign")}
+              className="w-full bg-[#65558F] text-white py-2 rounded-lg"
+            >
               Create a WhatsApp Campaign
             </button>
           </div>

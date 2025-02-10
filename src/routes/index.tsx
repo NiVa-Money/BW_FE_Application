@@ -9,7 +9,6 @@ import IntegrationsPage from "../pages/Integration";
 import EngagementTab from "../pages/Engagement";
 import MyBots from "../pages/MyBots/index";
 import EditBot from "../pages/EditBot";
-import Marketing from "../pages/Marketing/Dashboard";
 import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
 import LiveChat from "../pages/Conversation/LiveChat";
 import TestBot from "../pages/TestBot";
@@ -37,7 +36,7 @@ export const autRoutes: any[] = [
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
 
   { id: 4, path: "/engagementTab", component: <EngagementTab /> },
-  { id: 5.1, path: "/marketing/dashboard", component: <Marketing /> },
+  { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   {
     id: 5.1,
     path: "/marketing/whatsappdashboard",
