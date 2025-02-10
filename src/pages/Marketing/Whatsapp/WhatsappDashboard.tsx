@@ -26,8 +26,12 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import { fetchWhatsAppDashboardRequest } from "../../../store/actions/whatsappDashboardActions";
+import {
+  fetchWhatsAppDashboardRequest,
+  fetchWhatsAppMessagesRequest,
+} from "../../../store/actions/whatsappDashboardActions";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 interface DashboardProps {
   totalMessages: number;
@@ -47,15 +51,15 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [sentiment, setSentiment] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const totalPages = 5;
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const {
     campaignWiseMessagesMetrics,
     dateWiseMetrics,
     engagementRateMetrics,
   } = useSelector(
-    (state: RootState) => state?.whatsappDashboard?.dashboardData.data
+    (state: RootState) => state?.whatsappDashboard?.dashboardData?.data || {}
   );
 
   console.log(
@@ -64,6 +68,17 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     dateWiseMetrics,
     engagementRateMetrics
   );
+
+  const messages = useSelector(
+    (state: RootState) => state.whatsappDashboard?.messages || []
+  );
+  const totalPages = useSelector((state: RootState) =>
+    Math.ceil(state.whatsappDashboard?.messages?.total / 10)
+  );
+
+  useEffect(() => {
+    dispatch(fetchWhatsAppMessagesRequest());
+  }, []);
 
   const campaignMetrics = campaignWiseMessagesMetrics?.[0];
   const campaignId = useSelector(
@@ -78,8 +93,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [hotLeads, setHotLeads] = useState(0);
 
   console.log("whatsapp dash id", campaignId);
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (campaignMetrics) {
@@ -111,6 +124,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
       console.error("Campaign ID is null");
     }
   }, [campaignId]);
+
 
   const NoDataMessage = () => (
     <div className="flex justify-center items-center h-32 text-black">
@@ -365,16 +379,32 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: 10 }).map((_, i) => (
-              <tr key={i} className="border-t">
-                <td className="py-3">Name</td>
-                <td>Sentiment</td>
-                <td>Intent</td>
-                <td>Response</td>
-                <td>Sent</td>
-                <td>Campaign</td>
+            {messages.length > 0 ? (
+              messages.map((msg, i) => (
+                <tr key={i} className="border-t">
+                  <td className="py-3">{msg.receiverName || "N/A"}</td>
+                  <td>{msg.status}</td>
+                  <td>{msg.replied}</td>
+                  <td>
+                    {msg.status === "failed"
+                      ? msg.failedReason || "Unknown"
+                      : "-"}
+                  </td>
+                  <td>
+                    {msg.time
+                      ? format(new Date(msg.time), "yyyy-MM-dd HH:mm")
+                      : "N/A"}
+                  </td>
+                  <td>{msg.campaignName || "N/A"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center py-4">
+                  No data available
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         {/* Pagination */}
@@ -391,7 +421,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               key={i}
               onClick={() => setPage(i + 1)}
               className={`w-8 h-8 rounded-full ${
-                page === i + 1 ? "bg-[#65558F] text-white" : "bg-gray-100"
+                page === i + 1 ? "bg-[#65558F] text-black" : "bg-gray-100"
               }`}
             >
               {i + 1}
