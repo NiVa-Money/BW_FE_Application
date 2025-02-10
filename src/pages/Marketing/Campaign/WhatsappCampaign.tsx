@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { WhatsApp, Upload, FileUpload } from "@mui/icons-material"; // Import MUI icons
+import { WhatsApp, Upload } from "@mui/icons-material"; // Import MUI icons
 // import { ArrowDropDown } from "@mui/icons-material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -23,7 +23,7 @@ const WhatsappCampaign: React.FC = () => {
 
   const [campaignName, setCampaignName] = useState<string>("");
   const [contactList, setContactList] = useState<File | null>(null);
-  const [botConfigFile, setBotConfigFile] = useState<File | null>(null);
+  // const [botConfigFile, setBotConfigFile] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
   const [_fileName, setFileName] = useState("");
@@ -71,18 +71,18 @@ const WhatsappCampaign: React.FC = () => {
     }
   };
 
-  const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  // const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
 
-    if (file && file.type !== "application/pdf") {
-      alert("Only PDF files are allowed.");
-      event.target.value = ""; // Clear the file input
-      setFileName(""); // Clear the file name state
-    } else if (file) {
-      setBotConfigFile(file); // Set the bot configuration file
-      setFileName(file.name); // Update the file name to show in both inputs
-    }
-  };
+  //   if (file && file.type !== "application/pdf") {
+  //     alert("Only PDF files are allowed.");
+  //     event.target.value = ""; // Clear the file input
+  //     setFileName(""); // Clear the file name state
+  //   } else if (file) {
+  //     setBotConfigFile(file); // Set the bot configuration file
+  //     setFileName(file.name); // Update the file name to show in both inputs
+  //   }
+  // };
 
   // const handleModeChange = (selectedMode: "Text" | "Image" | "Template") => {
   const handleModeChange = (selectedMode: "Template") => {
