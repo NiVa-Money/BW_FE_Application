@@ -45,7 +45,6 @@ const Login = () => {
           );
         }
       } catch (err) {
-        console.error("Error logging in :", err);
         setError("An unexpected error occurred.");
       } finally {
         setIsLoading(false);
@@ -54,33 +53,8 @@ const Login = () => {
     setIsLoading(true);
   };
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!isValidForm()) {
-  //     setError("Please provide a valid email and password.");
-  //     return;
-  //   }
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     const response = await LoginUserService({ email, password });
-  //     if (response.success) {
-  //       navigate("/dashboard");
-  //     } else {
-  //       setError(response.message || "Login failed. Please try again.");
-  //     }
-  //   } catch (err) {
-  //     console.error("Error logging in:", err);
-  //     setError("An unexpected error occurred. Please try again later.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   // Handle Google login
   const handleGoogleLogin = async () => {
-    debugger;
     setIsLoading(true);
     try {
       const response = await loginWithGoogle();
@@ -153,7 +127,7 @@ const Login = () => {
                   } else {
                     setError(
                       response.message ||
-                        "Google login failed. Please try again."
+                      "Google login failed. Please try again."
                     );
                   }
                 } catch (error) {

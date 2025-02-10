@@ -56,8 +56,6 @@ export const LoginverifyGoogleLogin = async (payload: any) => {
 
     return response;
   } catch (error: any) {
-    console.log("authService", error);
-
     throw new Error(error);
   }
 };

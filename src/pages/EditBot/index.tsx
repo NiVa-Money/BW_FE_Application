@@ -40,7 +40,6 @@ const EditBot: React.FC = () => {
       setBotData(data);
     }
   }, [botEditDataRedux, id]);
-  console.log('bot', botData)
   const imgViewerRef = useRef(null);
   const [imageName, setImageName] = useState("");
   const [chatColor, setChatColor] = useState("#5D39AD");

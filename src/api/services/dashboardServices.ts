@@ -5,7 +5,6 @@ export const dashBoardMetricService = async (payload: any) => {
     const response = await axiosInstance.get(`user/metrics?=${payload}`, {});
     return response.data;
   } catch (error: any) {
-    console.log("e", error);
     throw new Error("Error fetching user profile");
   }
 };
@@ -15,7 +14,6 @@ export const dashBoardDataService = async (payload: any) => {
     const response = await axiosInstance.post(`/dashboard/static`, payload);
     return response.data;
   } catch (error: any) {
-    console.log("e", error);
     throw new Error("Error fetching user profile");
   }
 };

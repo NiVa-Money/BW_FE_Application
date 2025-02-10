@@ -82,8 +82,6 @@ export function* deleteBotSaga({
         payload: getBotsSuccess,
       });
     } catch (error: any) {
-      console.error("Error in getBotsSaga:", error);
-
       yield put({
         type: GET_BOTS_FAILURE,
         payload: error.message,
@@ -110,8 +108,6 @@ export function* getBotsSaga({
       payload: getBotsSuccess,
     });
   } catch (error: any) {
-    console.error("Error in getBotsSaga:", error);
-
     yield put({
       type: GET_BOTS_FAILURE,
       payload: error.message,
