@@ -13,6 +13,7 @@ export default defineConfig({
   base: "/",
   server: {
     port: 3000,
+    allowedHosts: ['uatapp.botwot.io']
   },
   css: {
     postcss: {
