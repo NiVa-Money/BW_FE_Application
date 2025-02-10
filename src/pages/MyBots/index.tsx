@@ -27,7 +27,7 @@ const MyBots: React.FC = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-  const deleteBotDataRedux = useSelector(
+  const createBotRedux = useSelector(
 
     (state: RootState) => state.bot?.create?.data
 
@@ -103,14 +103,14 @@ const MyBots: React.FC = () => {
 
   useEffect(() => {
 
-    if (deleteBotDataRedux !== null) {
-      const success = deleteBotDataRedux?.success
-      if (success) {
+    if (createBotRedux !== null) {
+      const success = createBotRedux?.success
+      if (success && userIdLocal?.length) {
         dispatch(getBotsAction(userId))
       }
     }
 
-  }, [deleteBotDataRedux])
+  }, [createBotRedux])
 
   useEffect(() => {
     if (botsDataRedux) {
@@ -130,15 +130,16 @@ const MyBots: React.FC = () => {
       dispatch(getBotsAction(userId))
     }
     dispatch(resetBotAction('create'))
+    dispatch(resetBotAction('edit'))
+    dispatch(resetBotAction('delete'))
+
+
   }, [])
   useEffect(() => {
     if (userIdLocal?.length) {
       setUserId(userIdLocal)
     }
   }, [userIdLocal])
-
-
-
 
   return (
     <div className='flex flex-col w-[100%]'>

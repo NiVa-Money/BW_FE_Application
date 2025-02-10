@@ -117,6 +117,12 @@ const TestBot: React.FC<any> = ({
                                 }
                             },
                         }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault(); // Prevents adding a new line
+                                senMessageHandler();
+                            }
+                        }}
                         fullWidth
                     />
 

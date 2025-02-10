@@ -23,11 +23,13 @@ export const editBotProfileService = async (payload: any) => {
 
 export const getBotsService = async (payload: any) => {
   try {
-    const response = await axiosInstance.get(
-      `user/getUserBotProfiles?userId=${payload}`,
-      {}
-    );
-    return response.data;
+    if (payload?.length) {
+      const response = await axiosInstance.get(
+        `user/getUserBotProfiles?userId=${payload}`,
+        {}
+      );
+      return response.data;
+    }
   } catch (error: any) {
     throw new Error("Error fetching user profile");
   }

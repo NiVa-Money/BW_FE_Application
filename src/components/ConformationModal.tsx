@@ -33,7 +33,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     const navigate = useNavigate()
     const closeBotHandler = () => {
         navigate('/mybots')
-        onClose()
     }
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

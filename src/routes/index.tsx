@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Login from "../pages/login";
 import SignUp from "../pages/Signup";
-import Dashboard from "../pages/Dashboard";
+// import Dashboard from "../pages/Dashboard";
+import DashBoard from "../pages/DashboardNew";
 import AdminPanel from "../pages/AdminPanel";
 import CreateBot from "../pages/CreateBot";
 import IntegrationsPage from "../pages/Integration";
@@ -27,7 +28,7 @@ export const autRoutes: any[] = [
   {
     id: 1,
     path: "/dashboard",
-    component: <Dashboard />,
+    component: <DashBoard />,
   },
   { id: 2.1, path: "/live-chat/all-chats", component: <AllChats /> },
   { id: 2.2, path: "/live-chat/customs", component: <LiveChat /> },
@@ -51,10 +52,10 @@ export const autRoutes: any[] = [
       />
     ),
   },
-  { id: 3, path: '/createbot', component: <CreateBot /> },
-  { id: 3, path: '/editbot/:id', component: <EditBot /> },
-  { id: 3, path: '/testbot/:id', component: <TestBot /> },
-  { id: 4, path: '/engagementTab', component: <EngagementTab /> },
+  { id: 3, path: "/createbot", component: <CreateBot /> },
+  { id: 3, path: "/editbot/:id", component: <EditBot /> },
+  { id: 3, path: "/testbot/:id", component: <TestBot /> },
+  { id: 4, path: "/engagementTab", component: <EngagementTab /> },
   { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
