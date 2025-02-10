@@ -167,7 +167,6 @@ const AllChats = () => {
       )
     );
   };
-  console.log('messages', messages)
   return (
     <div className="flex h-screen bg-gray-100">
       <SessionsList botLists={botLists} onSessionSelect={handleSessionSelection} />
