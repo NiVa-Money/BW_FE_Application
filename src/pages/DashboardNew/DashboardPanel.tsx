@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
-import { Paper, Typography } from "@mui/material";
+import { Paper, Typography, Button, Card, CardContent } from "@mui/material";
 import ChartContainer from "./ChartContainer";
 import {
   Bar,
@@ -23,6 +23,8 @@ import { getBotsAction } from "../../store/actions/botActions";
 import { useDispatch, useSelector } from "react-redux";
 import { dashBoardDataService } from "../../api/services/dashboardServices";
 import Loader from "../../components/Loader";
+import DateRangePicker from "../../components/DateRangePicker";
+import { useNavigate } from "react-router-dom";
 
 interface StatsCardProps {
   title: string;
@@ -134,7 +136,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
         },
         {
           title: "Live chat Vs ended the chat",
-          content: `Live: ${headerData.liveVsEndedSessions.live}%, Ended: ${headerData.liveVsEndedSessions.ended}%`,
+          content: `Live: ${
+            headerData.liveVsEndedSessions.live * 10
+          }%, Ended: ${headerData.liveVsEndedSessions.ended * 10}%`,
         },
         {
           title: "AI vs. Human Resolution Rate",
@@ -171,6 +175,8 @@ const DashboardPanel = () => {
 
   const userIdLocal = localStorage.getItem("user_id");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
@@ -397,7 +403,7 @@ const DashboardPanel = () => {
   const performanceBar = [
     {
       id: 1,
-      title: "Chat Traffic Overview",
+      title: "Agent Performance",
       component: (
         <CommonTable
           headers={aiAgentPerformanceHeaders}
@@ -411,6 +417,26 @@ const DashboardPanel = () => {
       component: <CommonTable headers={aiAgentPerformanceHeaders} rows={[]} />,
     },
   ];
+
+  const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
+    console.log("Start Date:", startDate);
+    console.log("End Date:", endDate);
+    try {
+      setIsLoading(true);
+      const response: DashboardResponse = await dashBoardDataService({
+        startDate: startDate,
+        endDate: endDate,
+        botIds: [botId],
+      });
+      if (response?.success) {
+        setStats(response);
+      }
+    } catch (err) {
+      console.error("Error Calling Dashboard API :", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (botsDataRedux?.length) {
@@ -432,6 +458,40 @@ const DashboardPanel = () => {
     <div className="">
       <Loader loading={isLoading} />
 
+      <div className="flex justify-between items-center mb-4">
+        <Card
+          className="flex items-center justify-between p-4 border max-w-xl "
+          sx={{
+            borderColor: COLORS.DARKGRAY,
+            borderRadius: "12px",
+            boxShadow: "none",
+          }}
+        >
+          <CardContent className="flex-1" sx={{ padding: 0 }}>
+            <Typography variant="subtitle1">
+              AI Insight and Recommendation
+            </Typography>
+            <Typography variant="body2" className="mt-1">
+              Discover intelligent insights powered by AI to enhance your
+              decision-making process and drive efficiency.
+            </Typography>
+          </CardContent>
+          <Button
+            variant="contained"
+            sx={{
+              "&.MuiButtonBase-root": {
+                backgroundColor: COLORS.VIOLET,
+                borderRadius: 5,
+              },
+            }}
+            onClick={() => navigate("/createbot")}
+          >
+            Create an Agent
+          </Button>
+        </Card>
+        <DateRangePicker onDateRangeChange={handleDateRangeChange} />
+      </div>
+
       {constructedHeaderData && (
         <DashboardHeader headerData={constructedHeaderData} />
       )}
@@ -450,7 +510,7 @@ const DashboardPanel = () => {
       </div>
 
       <ChartContainer
-        extraSX={{ backgroundColor: COLORS.LIGHTGRAY }}
+        extraSX={{ backgroundColor: COLORS.LIGHTGRAY, textAlign: "center" }}
         isMultiple
         component={performanceBar}
       />

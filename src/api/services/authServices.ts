@@ -45,20 +45,20 @@ export const LoginverifyGoogleLogin = async (payload: any) => {
     const response = await axiosInstance.post("/user/signup", payload);
 
     // Extract data from response.body
-    const { user_id, token, orgName, roleName, moduleMap } = response.data.body;
+    // const { user_id, token, orgName, roleName, moduleMap } = response.data.body;
 
-    // Save to localStorage
-    localStorage.setItem("user_id", user_id);
-    localStorage.setItem("token", token);
-    localStorage.setItem("orgName", orgName);
-    localStorage.setItem("roleName", roleName);
-    localStorage.setItem("moduleMap", JSON.stringify(moduleMap));
+    // // Save to localStorage
+    // localStorage.setItem("user_id", user_id);
+    // localStorage.setItem("token", token);
+    // localStorage.setItem("orgName", orgName);
+    // localStorage.setItem("roleName", roleName);
+    // localStorage.setItem("moduleMap", JSON.stringify(moduleMap));
 
-    return response.data;
+    return response;
   } catch (error: any) {
-    const errorMessage =
-      error?.response?.data?.error || "Login failed. Please try again.";
-    throw new Error(errorMessage);
+    console.log("authService", error);
+
+    throw new Error(error);
   }
 };
 
@@ -67,7 +67,7 @@ export const verifyGoogleUserService = async (payload: any) => {
     const response = await axiosInstance.post("/user/signup/verify", payload);
     return response.data;
   } catch (error) {
-    throw new Error("Error in verifying otp");
+    throw new Error("Failed in Google Verification");
   }
 };
 export const getUserProfileService = async (payload: any) => {

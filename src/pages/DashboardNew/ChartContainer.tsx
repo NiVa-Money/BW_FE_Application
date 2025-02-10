@@ -16,9 +16,9 @@ const ChartContainer: React.FC<ChartContainerProps> = (props) => {
     // Multi-chart layout
     return (
       <Paper sx={{ p: 3, ...props.extraSX }}>
-        <Box>
+        <Box >
           {props.component.map((item, index) => (
-            <Box key={index} sx={{ flex: 1 }}>
+            <Box key={index} sx={{ flex: 1 }} className="mb-3">
               <Typography variant="h6" component="h3">
                 {item.title}
               </Typography>

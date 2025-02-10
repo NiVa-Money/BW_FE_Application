@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUserProfileService, LoginUserService, verifyGoogleUserService } from "../../api/services/authServices";
+import {
+  getUserProfileService,
+  LoginUserService,
+  LoginverifyGoogleLogin,
+  verifyGoogleUserService,
+} from "../../api/services/authServices";
 import { Link } from "react-router-dom";
 import { loginWithGoogle } from "../../components/firebase/firebaseConfig";
 
@@ -22,30 +27,31 @@ const Login = () => {
     if (!isValidForm()) {
       setError("Please provide a valid email and password.");
       return;
-    }
-    else {
+    } else {
       try {
         const response = await LoginUserService({ email, password });
         if (response.success) {
-          console.log('re', response)
-          localStorage.setItem('user_id', response.user_id)
-          localStorage.setItem('token', response.token)
-          localStorage.setItem('userData', JSON.stringify({ moduleMap: response.moduleMap }));
+          localStorage.setItem("user_id", response.user_id);
+          localStorage.setItem("token", response.token);
+          localStorage.setItem(
+            "userData",
+            JSON.stringify({ moduleMap: response.moduleMap })
+          );
           navigate("/dashboard");
-          navigate(0)
+          navigate(0);
         } else {
-          setError(response.message || "Google login failed. Please try again.");
+          setError(
+            response.message || "Google login failed. Please try again."
+          );
         }
       } catch (err) {
         console.error("Error logging in :", err);
         setError("An unexpected error occurred.");
-      }
-      finally {
+      } finally {
         setIsLoading(false);
       }
     }
     setIsLoading(true);
-
   };
 
   // const handleSubmit = async (e: React.FormEvent) => {
@@ -74,37 +80,94 @@ const Login = () => {
 
   // Handle Google login
   const handleGoogleLogin = async () => {
+    debugger;
     setIsLoading(true);
     try {
       const response = await loginWithGoogle();
       if (response.success) {
         try {
-          const emailverify = await verifyGoogleUserService({ emailId: response?.user?.email });
+          const emailverify = await verifyGoogleUserService({
+            emailId: response?.user?.email,
+          });
           if (emailverify.success) {
-            localStorage.setItem('user_id', emailverify.user_id)
-            localStorage.setItem('token', emailverify.token)
+            localStorage.setItem("user_id", emailverify.user_id);
+            localStorage.setItem("token", emailverify.token);
             try {
               const email: string = response?.user?.email
                 ? encodeURIComponent(response.user.email)
-                : '';
-              const userProfile = await getUserProfileService(email)
+                : "";
+              const userProfile = await getUserProfileService(email);
               if (userProfile) {
-                localStorage.setItem('userData', JSON.stringify(userProfile))
+                localStorage.setItem("userData", JSON.stringify(userProfile));
               }
               navigate("/dashboard");
-              navigate(0)
-
+              navigate(0);
             } catch {
-              console.error("Error fetching user detail",);
+              console.error("Error fetching user detail");
             }
           } else {
-            setError(response.message || "Google login failed. Please try again.");
+            setError(
+              response.message || "Google login failed. Please try again."
+            );
           }
         } catch (err) {
+          if (err) {
+            try {
+              const [firstName, ...rest] =
+                response?.user.displayName.split(" ");
+              const lastName = rest.join("");
+
+              const payload = {
+                firstName,
+                lastName,
+                emailId: response?.user?.email,
+                mobileNo: "",
+              };
+
+              const signUpGoogle = await LoginverifyGoogleLogin(payload);
+
+              if (signUpGoogle?.data?.success) {
+                try {
+                  const emailverify = await verifyGoogleUserService({
+                    emailId: payload?.emailId,
+                  });
+                  if (emailverify.success) {
+                    localStorage.setItem("user_id", emailverify.user_id);
+                    localStorage.setItem("token", emailverify.token);
+                    try {
+                      const email: string = response?.user?.email
+                        ? encodeURIComponent(response.user.email)
+                        : "";
+                      const userProfile = await getUserProfileService(email);
+                      if (userProfile) {
+                        localStorage.setItem(
+                          "userData",
+                          JSON.stringify(userProfile)
+                        );
+                      }
+                      navigate("/dashboard");
+                      navigate(0);
+                    } catch {
+                      console.error("Error fetching user detail");
+                    }
+                  } else {
+                    setError(
+                      response.message ||
+                        "Google login failed. Please try again."
+                    );
+                  }
+                } catch (error) {
+                  console.log("Error while Verify", error);
+                }
+              }
+            } catch (error) {
+              console.log("Error:", error);
+            }
+          }
+
           console.error("Error logging in with Google:", err);
           setError("An unexpected error occurred during Google login.");
         }
-
       } else {
         setError(response.message || "Google login failed. Please try again.");
       }
