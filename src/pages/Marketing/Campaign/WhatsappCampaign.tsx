@@ -31,7 +31,7 @@ const WhatsappCampaign: React.FC = () => {
   // const [image, setImage] = useState<string | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null); // New state
-  const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState(""); 
+  const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -493,7 +493,7 @@ const WhatsappCampaign: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col w-full font-[number:var(--sds-typography-body-font-weight-regular)] text-[length:var(--sds-typography-body-size-medium)]">
+            {/* <div className="flex flex-col w-full font-[number:var(--sds-typography-body-font-weight-regular)] text-[length:var(--sds-typography-body-size-medium)]">
               <div className="leading-snug mt-4 text-[color:var(--sds-color-text-default-default)]">
                 Bot Configuration
               </div>
@@ -510,26 +510,26 @@ const WhatsappCampaign: React.FC = () => {
                  <ArrowDropDown className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square" />
                 </div>
               </div> */}
-              <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
-                <input
-                  type="file"
-                  onChange={handlePdfUpload}
-                  className="hidden"
-                  id="bot-config-upload"
-                />
-                <label
-                  htmlFor="bot-config-upload"
-                  className="flex gap-2 items-center cursor-pointer"
-                >
-                  <FileUpload sx={{ fontSize: 24 }} />
-                  <span className="ml-2 text-zinc-400">
-                    {botConfigFile
-                      ? botConfigFile.name
-                      : " Upload Bot Config PDF"}
-                  </span>
-                </label>
-              </div>
+            <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
+              <input
+                type="file"
+                onChange={handlePdfUpload}
+                className="hidden"
+                id="bot-config-upload"
+              />
+              <label
+                htmlFor="bot-config-upload"
+                className="flex gap-2 items-center cursor-pointer"
+              >
+                <FileUpload sx={{ fontSize: 24 }} />
+                <span className="ml-2 text-zinc-400">
+                  {botConfigFile
+                    ? botConfigFile.name
+                    : " Upload Bot Config PDF"}
+                </span>
+              </label>
             </div>
+            {/* </div> */}
 
             {/* AI Wizard */}
             <div

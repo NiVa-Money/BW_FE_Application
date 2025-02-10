@@ -27,6 +27,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { fetchWhatsAppDashboardRequest } from "../../../store/actions/whatsappDashboardActions";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardProps {
   totalMessages: number;
@@ -47,6 +48,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const totalPages = 5;
+  const navigate = useNavigate();
 
   const {
     campaignWiseMessagesMetrics,
@@ -252,7 +254,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-medium">Create a New Campaign</h3>
-              <button className="flex items-center justify-center gap-2 px-6 py-2 bg-[#65558F] text-white rounded-full">
+              <button
+                onClick={() => navigate("/marketing/createcampaign")}
+                className="flex items-center justify-center gap-2 px-6 py-2 bg-[#65558F] text-white rounded-full"
+              >
                 <AddIcon className="w-[18px]" />
                 Create Campaign
               </button>

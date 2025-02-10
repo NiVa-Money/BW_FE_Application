@@ -363,7 +363,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       <Typography variant="subtitle2">
                         Upcoming Trends
                       </Typography>
-                      <Typography variant="h6">Lorem Ipsum</Typography>
+                      <Typography variant="h6">AI-driven analytics are shaping data-driven decision-making.</Typography>
                     </Box>
                     <Button variant="outlined">Explore Insights</Button>
                   </Stack>

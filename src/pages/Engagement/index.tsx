@@ -246,7 +246,7 @@ const EngagementTab = () => {
             <div className="flex justify-between items-start mt-24 gap-6">
               {/* Quick Replies on the Left */}
               <div className="flex flex-col mt-10 gap-2">
-                {["ok", "fine", "Fusce nec", "Lorem ipsum"].map(
+                {["Okay", "Fine", "That works.", "Tell me more."].map(
                   (text, index) => (
                     <button
                       key={index}
@@ -283,7 +283,7 @@ const EngagementTab = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-black">Predictive AI</span>
-                    <span>High  resolution</span>
+                    <span>High resolution</span>
                   </div>
                 </div>
                 <hr className="my-2 border-gray-400" />
@@ -392,7 +392,7 @@ const EngagementTab = () => {
               {[
                 { label: "Potential Risk", value: "Low" },
                 { label: "Sales Opportunity", value: "High" },
-                { label: "Upcoming Trends", value: "Lorem Ipsum" },
+                { label: "Upcoming Trends", value: "AI-driven automation is gaining traction" },
                 { label: "Resolution Likelihood", value: "High" },
                 { label: "Retention Probability", value: "95%" },
               ].map((item, index) => (
