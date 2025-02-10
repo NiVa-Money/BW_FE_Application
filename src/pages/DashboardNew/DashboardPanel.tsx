@@ -136,7 +136,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
         },
         {
           title: "Live chat Vs ended the chat",
-          content: `Live: ${headerData.liveVsEndedSessions.live}%, Ended: ${headerData.liveVsEndedSessions.ended}%`,
+          content: `Live: ${
+            headerData.liveVsEndedSessions.live * 10
+          }%, Ended: ${headerData.liveVsEndedSessions.ended * 10}%`,
         },
         {
           title: "AI vs. Human Resolution Rate",
@@ -401,7 +403,7 @@ const DashboardPanel = () => {
   const performanceBar = [
     {
       id: 1,
-      title: "Chat Traffic Overview",
+      title: "Agent Performance",
       component: (
         <CommonTable
           headers={aiAgentPerformanceHeaders}
@@ -508,7 +510,7 @@ const DashboardPanel = () => {
       </div>
 
       <ChartContainer
-        extraSX={{ backgroundColor: COLORS.LIGHTGRAY }}
+        extraSX={{ backgroundColor: COLORS.LIGHTGRAY, textAlign: "center" }}
         isMultiple
         component={performanceBar}
       />
