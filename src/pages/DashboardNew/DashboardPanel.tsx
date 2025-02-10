@@ -416,9 +416,24 @@ const DashboardPanel = () => {
     },
   ];
 
-  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
-    // console.log("Start Date:", startDate);
-    // console.log("End Date:", endDate);
+  const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
+    console.log("Start Date:", startDate);
+    console.log("End Date:", endDate);
+    try {
+      setIsLoading(true);
+      const response: DashboardResponse = await dashBoardDataService({
+        startDate: startDate,
+        endDate: endDate,
+        botIds: [botId],
+      });
+      if (response?.success) {
+        setStats(response);
+      }
+    } catch (err) {
+      console.error("Error Calling Dashboard API :", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {

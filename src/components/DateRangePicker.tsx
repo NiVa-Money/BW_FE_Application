@@ -10,6 +10,8 @@ import {
   Paper,
 } from "@mui/material";
 import { subDays, format } from "date-fns";
+import { COLORS } from "../constants";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 
 interface DateRangePickerProps {
   onDateRangeChange: (startDate: Date, endDate: Date) => void;
@@ -94,10 +96,22 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         onClose={() => setMenuOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         transformOrigin={{ vertical: "top", horizontal: "left" }}
+        sx={{
+          "& .MuiList-root": {
+            backgroundColor: COLORS.LIGHTVIOLET,
+            minWidth: 220,
+          },
+        }}
       >
         {[...Object.keys(DATE_RANGES), "Specific Date Range"].map((range) => (
           <MenuItem key={range} onClick={() => handleRangeSelect(range)}>
-            {range}
+            {range === "Specific Date Range" ? (
+              <p>
+                {range} <ArrowRightIcon />
+              </p>
+            ) : (
+              range
+            )}
           </MenuItem>
         ))}
       </Menu>
