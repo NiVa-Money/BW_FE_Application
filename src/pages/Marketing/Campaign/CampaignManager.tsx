@@ -8,6 +8,7 @@ import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignAct
 
 interface Campaign {
   campaignId: string;
+  campaignName: string;
   userId: string;
   status: string;
   channelName: string;
@@ -68,8 +69,11 @@ export default function CampaignManager() {
                 key={campaign.campaignId}
                 className="bg-white shadow-md w-[500px] rounded-lg p-6 border border-gray-200"
               >
-                <h3 className="text-xl font-semibold text-gray-800">
+                {/* <h3 className="text-xl font-semibold text-gray-800">
                   {campaign.messageContent.template.name}
+                </h3> */}
+                <h3 className="text-xl font-semibold text-gray-800">
+                  {campaign.campaignName}
                 </h3>
                 <p className="text-sm text-gray-500">
                   Status: <span className="font-medium">{campaign.status}</span>
