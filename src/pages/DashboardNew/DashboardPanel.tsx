@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Paper, Typography, Button, Card, CardContent } from "@mui/material";
-import ChartContainer from "./ChartContainer";
-import CommonTable from "../../components/TableComponent";
 import { COLORS } from "../../constants";
 import { RootState } from "../../store";
 import { getBotsAction } from "../../store/actions/botActions";
@@ -10,8 +8,12 @@ import { dashBoardDataService } from "../../api/services/dashboardServices";
 import Loader from "../../components/Loader";
 import DateRangePicker from "../../components/DateRangePicker";
 import { useNavigate } from "react-router-dom";
-import { StatsCardProps, DashboardResponse, DashboardHeaderProps } from "./types";
-import ChartItems from "./ChartItems"; // Import the new component
+import {
+  StatsCardProps,
+  DashboardResponse,
+  DashboardHeaderProps,
+} from "./types";
+import ChartItems from "./ChartItems";
 
 // StatsCard Component
 const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
@@ -102,7 +104,10 @@ const DashboardPanel = () => {
   );
 
   // Fetch dashboard data
-  const fetchData = async (startDate: Date | null = null, endDate: Date | null = null) => {
+  const fetchData = async (
+    startDate: Date | null = null,
+    endDate: Date | null = null
+  ) => {
     if (!botId) return;
     try {
       setIsLoading(true);
