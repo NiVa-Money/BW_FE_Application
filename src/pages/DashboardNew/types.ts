@@ -19,7 +19,7 @@ export interface DashboardMetrics {
   aiAgentMetrics: AIAgentMetrics[];
   chatTrafficOverview: any[];
   channelWiseResolutionMetrics: ChannelMetrics[];
-  averageHandlingTime: HandlingTimeMetrics;
+  avarageHandlingTime: HandlingTimeMetrics;
 }
 
 export interface SessionMetrics {
