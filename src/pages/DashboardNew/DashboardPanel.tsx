@@ -1,21 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import "react-datepicker/dist/react-datepicker.css";
 import { Paper, Typography, Button, Card, CardContent } from "@mui/material";
 import ChartContainer from "./ChartContainer";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 import CommonTable from "../../components/TableComponent";
 import { COLORS } from "../../constants";
 import { RootState } from "../../store";
@@ -25,12 +10,10 @@ import { dashBoardDataService } from "../../api/services/dashboardServices";
 import Loader from "../../components/Loader";
 import DateRangePicker from "../../components/DateRangePicker";
 import { useNavigate } from "react-router-dom";
-import {
-  StatsCardProps,
-  DashboardResponse,
-  DashboardHeaderProps,
-} from "./types";
+import { StatsCardProps, DashboardResponse, DashboardHeaderProps } from "./types";
+import ChartItems from "./ChartItems"; // Import the new component
 
+// StatsCard Component
 const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
   return (
     <Paper
@@ -60,6 +43,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
   );
 };
 
+// DashboardHeader Component
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
   const processedStats = headerData
     ? [
@@ -88,6 +72,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
         { title: "Escalation Rate", content: `${headerData.escalationRate}%` },
       ]
     : [];
+
   return (
     <div className="flex justify-between items-center mb-4 gap-4">
       {processedStats.map((stat, index) => (
@@ -102,6 +87,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
   );
 };
 
+// DashboardPanel Component
 const DashboardPanel = () => {
   const [botId, setBotId] = useState("");
   const [stats, setStats] = useState<DashboardResponse | null>(null);
@@ -115,25 +101,27 @@ const DashboardPanel = () => {
     (state: RootState) => state.bot?.lists?.data
   );
 
-  const fetchData = async () => {
+  // Fetch dashboard data
+  const fetchData = async (startDate: Date | null = null, endDate: Date | null = null) => {
     if (!botId) return;
     try {
       setIsLoading(true);
       const response: DashboardResponse = await dashBoardDataService({
-        startDate: null,
-        endDate: null,
+        startDate,
+        endDate,
         botIds: [botId],
       });
       if (response?.success) {
         setStats(response);
       }
     } catch (err) {
-      console.error("Error Calling Dashboard API :", err);
+      console.error("Error Calling Dashboard API:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Construct header data
   const constructedHeaderData = useMemo(() => {
     if (!stats) return null;
 
@@ -146,6 +134,7 @@ const DashboardPanel = () => {
     };
   }, [stats]);
 
+  // Construct charts data
   const constructedChartsData = useMemo(() => {
     if (!stats) {
       return {
@@ -158,11 +147,13 @@ const DashboardPanel = () => {
         chatTrafficOverview: [],
       };
     }
+
     const sentiments = [
       { name: "Positive", value: stats.data.sentiments.Good || 1 },
       { name: "Negative", value: stats.data.sentiments.Bad || 1 },
       { name: "Neutral", value: stats.data.sentiments.Neutral || 1 },
     ];
+
     const averageHandlingTime = [
       {
         name: "Bot1",
@@ -170,9 +161,10 @@ const DashboardPanel = () => {
         website: stats.data.avarageHandlingTime.web,
       },
     ];
+
     return {
       totalConversation: stats.data.channelWiseConversation,
-      sentiments: sentiments,
+      sentiments,
       resolvedChats: stats.data.channelWiseResolutionMetrics,
       averageHandlingTime,
       aiAgentPerformance: stats.data.aiAgentMetrics,
@@ -181,220 +173,37 @@ const DashboardPanel = () => {
     };
   }, [stats]);
 
-  const firstTableHeaders =
-    constructedChartsData && constructedChartsData.chatTrafficOverview
-      ? Object.keys(constructedChartsData.chatTrafficOverview[0] || {})
-      : [];
-
-  const aiAgentPerformanceHeaders =
-    constructedChartsData?.aiAgentPerformance?.length > 0
-      ? Object.keys(constructedChartsData.aiAgentPerformance[0] || {})
-      : [];
-
-  const chartItems = [
-    {
-      id: 1,
-      title: "Total Conversation",
-      component: (
-        <LineChart
-          width={500}
-          height={300}
-          data={constructedChartsData?.totalConversation}
-        >
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
-          <Line
-            type="linear"
-            dataKey="web"
-            strokeWidth={2}
-            stroke={COLORS.GRAY}
-          />
-          <Line
-            type="linear"
-            dataKey="whatsapp"
-            strokeWidth={2}
-            stroke={COLORS.BLUE}
-          />
-          <Legend
-            verticalAlign="top"
-            iconType="square"
-            wrapperStyle={{ paddingBottom: 10 }}
-          />
-        </LineChart>
-      ),
-    },
-    {
-      id: 2,
-      title: "Escalation Rate",
-      component: (
-        <BarChart
-          width={500}
-          height={300}
-          data={constructedChartsData?.escalationMatrix}
-        >
-          <CartesianGrid strokeDasharray="5 5" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: 10 }} />
-          <Bar dataKey="escalated" stackId="a" fill={COLORS.BLUE} />
-          <Bar dataKey="solved" stackId="a" fill={COLORS.GRAY} />
-        </BarChart>
-      ),
-    },
-    {
-      id: 3,
-      title: "Customer Sentiment Analysis",
-      component: (
-        <PieChart width={500} height={300}>
-          <Pie
-            data={constructedChartsData?.sentiments}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            fill="#8884d8"
-          >
-            {constructedChartsData?.sentiments.map((_, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={[COLORS.LIGHTGREEN, COLORS.GRAY, COLORS.BLUE][index % 3]}
-              />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend iconType="square" wrapperStyle={{ paddingBottom: 10 }} />
-        </PieChart>
-      ),
-    },
-    {
-      id: 4,
-      title: "Resolved Chats",
-      component: (
-        <LineChart
-          width={500}
-          height={300}
-          data={constructedChartsData?.resolvedChats}
-        >
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
-
-          <Line
-            type="monotone"
-            dataKey="web"
-            strokeWidth={2}
-            stroke={COLORS.GRAY}
-          />
-          <Line
-            type="monotone"
-            dataKey="whatsapp"
-            strokeWidth={2}
-            stroke={COLORS.BLUE}
-          />
-          <Legend
-            verticalAlign="top"
-            iconType="square"
-            wrapperStyle={{ paddingBottom: 10 }}
-          />
-        </LineChart>
-      ),
-    },
-    {
-      id: 5,
-      title: "Chat Traffic Overview",
-      component: (
-        <CommonTable
-          headers={firstTableHeaders}
-          rows={constructedChartsData?.chatTrafficOverview}
-        />
-      ),
-    },
-    {
-      id: 6,
-      title: "Average Handling Time",
-      component: (
-        <BarChart
-          width={500}
-          height={300}
-          data={constructedChartsData?.averageHandlingTime}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: 10 }} />
-
-          <Bar dataKey="whatsapp" fill={COLORS.BLUE} />
-          <Bar dataKey="website" fill={COLORS.GRAY} />
-        </BarChart>
-      ),
-    },
-  ];
-
-  const performanceBar = [
-    {
-      id: 1,
-      title: "Agent Performance",
-      component: (
-        <CommonTable
-          headers={aiAgentPerformanceHeaders}
-          rows={constructedChartsData?.aiAgentPerformance}
-        />
-      ),
-    },
-    {
-      id: 2,
-      title: "Human Performance",
-      component: <CommonTable headers={aiAgentPerformanceHeaders} rows={[]} />,
-    },
-  ];
-
+  // Handle date range change
   const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
-    console.log("Start Date:", startDate);
-    console.log("End Date:", endDate);
-    try {
-      setIsLoading(true);
-      const response: DashboardResponse = await dashBoardDataService({
-        startDate: startDate,
-        endDate: endDate,
-        botIds: [botId],
-      });
-      if (response?.success) {
-        setStats(response);
-      }
-    } catch (err) {
-      console.error("Error Calling Dashboard API :", err);
-    } finally {
-      setIsLoading(false);
-    }
+    await fetchData(startDate, endDate);
   };
 
+  // Set default bot ID
   useEffect(() => {
     if (botsDataRedux?.length) {
-      setBotId(botsDataRedux[0]._id); // By default BOT 1 Selected
+      setBotId(botsDataRedux[0]._id); // Default to the first bot
     }
   }, [botsDataRedux]);
 
+  // Fetch bots data
   useEffect(() => {
     if (userIdLocal) {
       dispatch(getBotsAction(userIdLocal));
     }
   }, [userIdLocal]);
 
+  // Fetch dashboard data on bot ID change
   useEffect(() => {
     fetchData();
   }, [botId]);
 
   return (
-    <div className="">
+    <div>
       <Loader loading={isLoading} />
 
       <div className="flex justify-between items-center mb-4">
         <Card
-          className="flex items-center justify-between p-4 border max-w-xl "
+          className="flex items-center justify-between p-4 border max-w-xl"
           sx={{
             borderColor: COLORS.DARKGRAY,
             borderRadius: "12px",
@@ -426,28 +235,15 @@ const DashboardPanel = () => {
         <DateRangePicker onDateRangeChange={handleDateRangeChange} />
       </div>
 
+      {/* Header */}
       {constructedHeaderData && (
         <DashboardHeader headerData={constructedHeaderData} />
       )}
 
-      <div className="grid grid-cols-3 gap-5 mb-4">
-        {constructedChartsData &&
-          chartItems.map((item) => (
-            <div key={item.id}>
-              <ChartContainer
-                extraSX={{ backgroundColor: COLORS.LIGHTGRAY }}
-                title={item.title}
-                component={item.component}
-              />
-            </div>
-          ))}
-      </div>
-
-      <ChartContainer
-        extraSX={{ backgroundColor: COLORS.LIGHTGRAY, textAlign: "center" }}
-        isMultiple
-        component={performanceBar}
-      />
+      {/* Chart Items and Performance Bar */}
+      {constructedChartsData && (
+        <ChartItems constructedChartsData={constructedChartsData} />
+      )}
     </div>
   );
 };
