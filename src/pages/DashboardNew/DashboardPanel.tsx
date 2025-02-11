@@ -25,77 +25,11 @@ import { dashBoardDataService } from "../../api/services/dashboardServices";
 import Loader from "../../components/Loader";
 import DateRangePicker from "../../components/DateRangePicker";
 import { useNavigate } from "react-router-dom";
-
-interface StatsCardProps {
-  title: string;
-  content: string;
-  iconSrc?: string;
-}
-
-interface DashboardResponse {
-  success: boolean;
-  data: {
-    liveVsEndedSessions: {
-      live: number;
-      ended: number;
-      total: number;
-    };
-    messages: {
-      total: number;
-      left: number;
-      consumed: number;
-    };
-    resolutionRate: number;
-    escalationRate: BotStats[];
-    aiVsHumanResolutionRate: { ai: number; human: number };
-    channelWiseConversation: ChannelMetrics[];
-    sentiments: Sentiments;
-    aiAgentMetrics: AIAgentMetric[];
-    chatTrafficOverview: any[];
-    channelWiseResolutionMetrics: ChannelMetrics[];
-    avarageHandlingTime: {
-      web: number;
-      whatsapp: number;
-    };
-  };
-}
-
-interface BotStats {
-  name: string;
-  escalated: number;
-  solved: number;
-}
-
-interface ChannelMetrics {
-  date: string;
-  whatsapp: number;
-  web: number;
-}
-
-interface Sentiments {
-  Good: number;
-  Neutral: number;
-  Bad: number;
-}
-
-interface AIAgentMetric {
-  date: string;
-  agentName: string;
-  totalSessions: number;
-  totalWhatsappSessions: number;
-  totalWebSessions: number;
-  resolvedSession: number;
-}
-
-interface DashboardHeaderProps {
-  headerData: {
-    resolutionRate: number;
-    messages: { total: number; left: number; consumed: number };
-    liveVsEndedSessions: { live: number; ended: number; total: number };
-    escalationRate: number;
-    aiVsHumanResolutionRate: { ai: number; human: number };
-  };
-}
+import {
+  StatsCardProps,
+  DashboardResponse,
+  DashboardHeaderProps,
+} from "./types";
 
 const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
   return (
