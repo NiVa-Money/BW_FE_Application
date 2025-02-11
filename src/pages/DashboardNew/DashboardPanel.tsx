@@ -51,7 +51,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
     ? [
         {
           title: "Resolution Rate",
-          content: `${headerData.resolutionRate}%`,
+          content: `${headerData.resolutionRate.toFixed(2)}%`,
           iconSrc: "/assets/icons/three-bars.svg",
         },
         {

@@ -34,8 +34,21 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
     ? Object.keys(constructedChartsData.chatTrafficOverview[0])
     : [];
 
+  const formatCamelCase = (camelCaseString) => {
+    if (!camelCaseString || typeof camelCaseString !== "string") {
+      return camelCaseString;
+    }
+    // Add a space before capital letters and capitalize the first letter
+    const formattedString = camelCaseString
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase());
+
+    return formattedString.trim(); // Remove any leading/trailing spaces
+  };
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
-    ? Object.keys(constructedChartsData.aiAgentPerformance[0])
+    ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map((header) =>
+        formatCamelCase(header)
+      )
     : [];
 
   const chartItems = [
@@ -51,9 +64,23 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip />
-          <Line type="linear" dataKey="web" strokeWidth={2} stroke={COLORS.GRAY} />
-          <Line type="linear" dataKey="whatsapp" strokeWidth={2} stroke={COLORS.BLUE} />
-          <Legend verticalAlign="top" iconType="square" wrapperStyle={{ paddingBottom: 10 }} />
+          <Line
+            type="linear"
+            dataKey="web"
+            strokeWidth={2}
+            stroke={COLORS.GRAY}
+          />
+          <Line
+            type="linear"
+            dataKey="whatsapp"
+            strokeWidth={2}
+            stroke={COLORS.BLUE}
+          />
+          <Legend
+            verticalAlign="top"
+            iconType="square"
+            wrapperStyle={{ paddingBottom: 10 }}
+          />
         </LineChart>
       ),
     },
@@ -114,9 +141,23 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip />
-          <Line type="monotone" dataKey="web" strokeWidth={2} stroke={COLORS.GRAY} />
-          <Line type="monotone" dataKey="whatsapp" strokeWidth={2} stroke={COLORS.BLUE} />
-          <Legend verticalAlign="top" iconType="square" wrapperStyle={{ paddingBottom: 10 }} />
+          <Line
+            type="monotone"
+            dataKey="web"
+            strokeWidth={2}
+            stroke={COLORS.GRAY}
+          />
+          <Line
+            type="monotone"
+            dataKey="whatsapp"
+            strokeWidth={2}
+            stroke={COLORS.BLUE}
+          />
+          <Legend
+            verticalAlign="top"
+            iconType="square"
+            wrapperStyle={{ paddingBottom: 10 }}
+          />
         </LineChart>
       ),
     },
