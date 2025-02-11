@@ -77,7 +77,7 @@ export const whatsappcrudReducer = (
         crudIntegration: {
           loading: false, // Set loading to false after success
           // Clear any errors
-          data: action.payload.data[0],
+          data: action.payload.data,
         },
       };
 

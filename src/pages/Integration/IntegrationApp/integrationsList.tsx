@@ -61,7 +61,7 @@ export default function IntegrationList() {
             {integrationArray.map((integration: Integration) => (
               <div
                 key={integration.id}
-                className="bg-white shadow-md w-[500px] rounded-lg p-6 border border-gray-200"
+                 className="bg-white shadow-md rounded-lg p-6 border border-gray-200 w-full max-w-[400px] mx-auto"
               >
                 <h3 className="text-xl font-semibold text-gray-800">
                   {integration.whatsappName}

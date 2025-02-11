@@ -67,7 +67,7 @@ export default function CampaignManager() {
             {campaignArray.map((campaign: Campaign) => (
               <div
                 key={campaign.campaignId}
-                className="bg-white shadow-md w-[500px] rounded-lg p-6 border border-gray-200"
+                className="bg-white shadow-md rounded-lg p-6 border border-gray-200 w-full max-w-[400px] mx-auto"
               >
                 {/* <h3 className="text-xl font-semibold text-gray-800">
                   {campaign.messageContent.template.name}
