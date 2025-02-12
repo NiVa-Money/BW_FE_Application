@@ -408,7 +408,8 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               <th className="py-3 px-4">Receiver Name</th>
               <th className="py-3 px-4">Receiver Number</th>
               <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4">Response</th>
+              <th className="py-3 px-4">Replied</th>
+              <th className="py-3 px-4">Replied at</th>
               <th className="py-3 px-4">Sent</th>
               <th className="py-3 px-4">Intent</th>
               <th className="py-3 px-4">Sentiment</th>
@@ -437,6 +438,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                     receiverNumber: string;
                     status: string;
                     replied: string;
+                    repliedAt : string;
                     time: string;
                     intent: string;
                     sentiment: string;
@@ -450,6 +452,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                     <td className="py-3 px-4">{msg.receiverNumber || "-"}</td>
                     <td className="py-3 px-4">{msg.status || "-"}</td>
                     <td className="py-3 px-4">{msg.replied || "-"}</td>
+                    <td className="py-3 px-4">{msg.repliedAt || "-"}</td>
                     <td className="py-3 px-4">
                       {msg.time
                         ? format(new Date(msg.time), "yyyy-MM-dd HH:mm")
