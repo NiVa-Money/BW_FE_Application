@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
@@ -57,7 +56,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [date, setDate] = useState<Date | null>(null);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
   const [selectedCampaignName, setSelectedCampaignName] = useState("");
@@ -97,7 +95,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   useEffect(() => {
     if (campaignId) {
       dispatch(fetchWhatsAppDashboardRequest(campaignId));
-      setLoading(false);
     }
   }, [campaignId, dispatch]);
 
