@@ -47,7 +47,7 @@ interface DashboardProps {
 const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [date, setDate] = useState<Date | null>(null);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(2);
   const [limit, _setLimit] = useState(10);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
@@ -77,13 +77,20 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     (state: RootState) => state.whatsappDashboard?.messages?.data?.total || 0
   );
 
-  const totalPages = Math.ceil(totalMessages / limit); // Calculate total pages dynamically
+  const totalPages = Math.ceil(totalMessages / limit); 
+
+  const campaignData = useSelector(
+    (state: RootState) =>
+      state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp
+  );
 
   const selectedCampaignId =
-    messages.find(
+    campaignData.find(
       (msg: { campaignName: string }) =>
         msg.campaignName === selectedCampaignName
     )?.campaignId || "";
+
+  console.log("select campaign id ", selectedCampaignId);
 
   useEffect(() => {
     if (selectedCampaignName) {
@@ -121,14 +128,16 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   ]);
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
+    if (limit == totalMessages) {
       setPage(newPage);
+    } else {
+      setPage(1);
     }
   };
 
   const generatePageNumbers = () => {
-    if (totalPages <= 2) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (totalMessages === 10) {
+      return Array.from({ length: page + 1 }, (_, i) => i + 1);
     }
     return [1, 2];
   };

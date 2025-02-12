@@ -34,7 +34,9 @@ export const whatsAppDashboardMessagesService = async (params: {
       "/marketing/whatsapp/messages-overview",
       params // Send full request object
     );
+    
     return response.data; // Assuming the response contains the required data
+
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(
