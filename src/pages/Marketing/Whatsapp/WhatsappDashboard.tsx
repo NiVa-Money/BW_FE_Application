@@ -75,30 +75,59 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   );
   const totalPages = Math.ceil(totalMessages / limit); // Calculate total pages dynamically
 
+  // const handlePageChange = (newPage: number) => {
+  //   console.log("Changing to page:", newPage);
+  //   setPage(newPage);
+  //   dispatch(fetchWhatsAppMessagesRequest(newPage));
+  // };
+
+  // const generatePageNumbers = () => {
+  //   const pages = [];
+  //   const totalPagesToShow = Math.max(10, totalPages); // Ensure at least 10 pages show
+
+  //   for (let i = 1; i <= totalPagesToShow; i++) {
+  //     pages.push(i);
+  //   }
+
+  //   return pages;
+  // };
+
+  useEffect(() => {
+    if (selectedCampaignName) {
+      dispatch(
+        fetchWhatsAppMessagesRequest({
+          page,
+          limit,
+          filter: {
+            campaignIds: campaignId ? [campaignId] : [], 
+            receiverNumber: selectedReceiverNumber,
+            status: selectedStatus,
+          },
+        })
+      );
+    }
+  }, [selectedCampaignName , page, limit , selectedReceiverNumber, selectedStatus, dispatch]);
+
   const handlePageChange = (newPage: number) => {
-    console.log("Changing to page:", newPage);
-    setPage(newPage);
-    dispatch(fetchWhatsAppMessagesRequest(newPage));
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
   };
 
   const generatePageNumbers = () => {
-    const pages = [];
-    const totalPagesToShow = Math.max(10, totalPages); // Ensure at least 10 pages show
-
-    for (let i = 1; i <= totalPagesToShow; i++) {
-      pages.push(i);
+    if (totalPages <= 2) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-
-    return pages;
+    return [1, 2];
   };
 
-  // On mount, fetch messages (and dashboard data when campaign id is available)
-  useEffect(() => {
-    console.log("Fetching data for page:", page);
-    dispatch(fetchWhatsAppMessagesRequest(page));
-  }, [dispatch, page]);
+  // // On mount, fetch messages (and dashboard data when campaign id is available)
+  // useEffect(() => {
+  //   console.log("Fetching data for page:", page);
+  //   dispatch(fetchWhatsAppMessagesRequest(page));
+  // }, [dispatch, page]);
 
-  // (Optional) Fetch campaign id and then dashboard data.
+  //  Fetch campaign id and then dashboard data.
   const campaignId = useSelector(
     (state: RootState) =>
       state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp?.[0]
@@ -438,7 +467,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                     receiverNumber: string;
                     status: string;
                     replied: string;
-                    repliedAt : string;
+                    repliedAt: string;
                     time: string;
                     intent: string;
                     sentiment: string;

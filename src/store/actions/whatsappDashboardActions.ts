@@ -9,7 +9,22 @@ export const fetchWhatsAppDashboardRequest = (campaignId: any) => ({
   payload: campaignId,
 });
 
-export const fetchWhatsAppMessagesRequest = (page: number) => ({
+// export const fetchWhatsAppMessagesRequest = (page: number) => ({
+//   type: FETCH_WHATSAPP_MESSAGES_REQUEST,
+//   payload: { page },
+// });
+
+
+export const fetchWhatsAppMessagesRequest = (params: {
+  page: number;
+  limit?: number;
+  filter?: {
+    campaignIds?: string[];
+    receiverNumber?: string;
+    status?: string;
+  };
+}) => ({
   type: FETCH_WHATSAPP_MESSAGES_REQUEST,
-  payload: { page },
+  payload: params,
 });
+

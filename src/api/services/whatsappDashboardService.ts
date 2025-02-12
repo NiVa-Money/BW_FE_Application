@@ -20,11 +20,19 @@ export const whatsAppDashboardService = async (campaignId: string) => {
   }
 };
 
-export const whatsAppDashboardMessagesService = async (page: number) => {
+export const whatsAppDashboardMessagesService = async (params: {
+  page: number;
+  limit?: number;
+  filter?: {
+    campaignIds?: string[];
+    receiverNumber?: string;
+    status?: string;
+  };
+}) => {
   try {
     const response = await axiosInstance.post(
       "/marketing/whatsapp/messages-overview",
-      { page }
+      params // Send full request object
     );
     return response.data; // Assuming the response contains the required data
   } catch (error) {
