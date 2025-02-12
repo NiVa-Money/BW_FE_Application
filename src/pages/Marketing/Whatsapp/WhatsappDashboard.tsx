@@ -1,15 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
-  FC,
-  useState,
-  useEffect,
-  useMemo,
-  Key,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-} from "react";
+import { FC, useState, useEffect, useMemo, Key } from "react";
 import {
   LineChart,
   Line,
@@ -56,6 +48,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [date, setDate] = useState<Date | null>(null);
   const [page, setPage] = useState(1);
+  const [limit, _setLimit] = useState(10);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
   const [selectedCampaignName, setSelectedCampaignName] = useState("");
@@ -77,14 +70,33 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     (state: RootState) =>
       state.whatsappDashboard?.messages?.data?.messages || []
   );
-  const totalPages = useSelector((state: RootState) =>
-    Math.ceil((state.whatsappDashboard?.messages?.total || 0) / 10)
+  const totalMessages = useSelector(
+    (state: RootState) => state.whatsappDashboard?.messages?.data?.total || 0
   );
+  const totalPages = Math.ceil(totalMessages / limit); // Calculate total pages dynamically
+
+  const handlePageChange = (newPage: number) => {
+    console.log("Changing to page:", newPage);
+    setPage(newPage);
+    dispatch(fetchWhatsAppMessagesRequest(newPage));
+  };
+
+  const generatePageNumbers = () => {
+    const pages = [];
+    const totalPagesToShow = Math.max(10, totalPages); // Ensure at least 10 pages show
+
+    for (let i = 1; i <= totalPagesToShow; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
 
   // On mount, fetch messages (and dashboard data when campaign id is available)
   useEffect(() => {
-    dispatch(fetchWhatsAppMessagesRequest());
-  }, [dispatch]);
+    console.log("Fetching data for page:", page);
+    dispatch(fetchWhatsAppMessagesRequest(page));
+  }, [dispatch, page]);
 
   // (Optional) Fetch campaign id and then dashboard data.
   const campaignId = useSelector(
@@ -246,7 +258,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                   <Tooltip />
                   <Bar
                     dataKey="value"
-                    fill={COLORS.BLUE}
+                    fill={COLORS.VIOLET}
                     name="Response Rate"
                   />
                 </BarChart>
@@ -391,13 +403,16 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
         </div>
         <table className="w-full">
           <thead>
-            <tr className="text-left font-semibold text-[#65558F]">
-              <th className="py-2">Receiver Name</th>
-              <th>Status</th>
-              <th>Response</th>
-              <th>Failed Reason</th>
-              <th>Sent</th>
-              <th>Campaign</th>
+            <tr className="text-left font-semibold whitespace-nowrap text-[#65558F]">
+              <th className="py-3 px-4">Campaign Name</th>
+              <th className="py-3 px-4">Receiver Name</th>
+              <th className="py-3 px-4">Receiver Number</th>
+              <th className="py-3 px-4">Status</th>
+              <th className="py-3 px-4">Response</th>
+              <th className="py-3 px-4">Sent</th>
+              <th className="py-3 px-4">Intent</th>
+              <th className="py-3 px-4">Sentiment</th>
+              <th className="py-3 px-4">Failed Reason</th>
             </tr>
           </thead>
           <tbody>
@@ -417,70 +432,76 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               .map(
                 (
                   msg: {
-                    receiverName: any;
-                    status:
-                      | string
-                      | number
-                      | boolean
-                      | ReactElement<any, string | any>
-                      | Iterable<ReactNode>;
-                    replied:
-                      | string
-                      | number
-                      | boolean
-                      | ReactElement<any, string | any>
-                      | Iterable<ReactNode>
-                      | ReactPortal;
-                    failedReason: any;
-                    time: string | number | Date;
-                    campaignName: any;
+                    campaignName: string;
+                    receiverName: string;
+                    receiverNumber: string;
+                    status: string;
+                    replied: string;
+                    time: string;
+                    intent: string;
+                    sentiment: string;
+                    failedReason: string;
                   },
                   i: Key
                 ) => (
-                  <tr key={i} className="border-t">
-                    <td className="py-3">{msg.receiverName || "N/A"}</td>
-                    <td>{msg.status}</td>
-                    <td>{msg.replied}</td>
-                    <td>
-                      {msg.status === "failed"
-                        ? msg.failedReason || "Unknown"
-                        : "-"}
-                    </td>
-                    <td>
+                  <tr key={i} className="border-t even:bg-gray-50">
+                    <td className="py-3 px-4">{msg.campaignName || "N/A"}</td>
+                    <td className="py-3 px-4">{msg.receiverName || "-"}</td>
+                    <td className="py-3 px-4">{msg.receiverNumber || "-"}</td>
+                    <td className="py-3 px-4">{msg.status || "-"}</td>
+                    <td className="py-3 px-4">{msg.replied || "-"}</td>
+                    <td className="py-3 px-4">
                       {msg.time
                         ? format(new Date(msg.time), "yyyy-MM-dd HH:mm")
                         : "N/A"}
                     </td>
-                    <td>{msg.campaignName || "N/A"}</td>
+                    <td className="py-3 px-4">{msg.intent || "-"}</td>
+                    <td className="py-3 px-4">{msg.sentiment || "-"}</td>
+                    <td className="py-3 px-4">
+                      {msg.status === "failed"
+                        ? msg.failedReason || "Unknown"
+                        : "-"}
+                    </td>
                   </tr>
                 )
               )}
           </tbody>
         </table>
+
         {/* Pagination */}
         <div className="flex justify-center mt-4 gap-2">
           <button
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            className="h-8 rounded-full w-[100px] bg-white"
-            disabled={page === 1}
+            onClick={() => handlePageChange(page - 1)}
+            className={`px-4 py-2 ${
+              page === 1
+                ? "opacity-50 cursor-not-allowed"
+                : "bg-[#65558F] text-white rounded-full"
+            }`}
           >
             Prev
           </button>
-          {Array.from({ length: totalPages }).map((_, i) => (
+
+          {generatePageNumbers().map((p) => (
             <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`w-8 h-8 rounded-full ${
-                page === i + 1 ? "bg-[#65558F] text-black" : "bg-gray-100"
+              key={p}
+              onClick={() => handlePageChange(p)}
+              className={`px-3 py-1 ${
+                p === page
+                  ? "bg-[#65558F] text-white rounded-full"
+                  : "text-[#65558F]"
               }`}
             >
-              {i + 1}
+              {p}
             </button>
           ))}
+
           <button
-            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-            className="h-8 rounded-full w-[100px] bg-white"
-            disabled={page === totalPages}
+            onClick={() => handlePageChange(page + 1)}
+            className={`px-4 py-2 ${
+              page === totalPages
+                ? "opacity-50 cursor-not-allowed"
+                : "bg-[#65558F] text-white rounded-full"
+            }`}
           >
             Next
           </button>

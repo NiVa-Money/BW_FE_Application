@@ -9,6 +9,7 @@ export const fetchWhatsAppDashboardRequest = (campaignId: any) => ({
   payload: campaignId,
 });
 
-export const fetchWhatsAppMessagesRequest = () => ({
+export const fetchWhatsAppMessagesRequest = (page: number) => ({
   type: FETCH_WHATSAPP_MESSAGES_REQUEST,
+  payload: { page },
 });
