@@ -51,7 +51,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
     ? [
         {
           title: "Resolution Rate",
-          content: `${headerData.resolutionRate.toFixed(2)}%`,
+          content: `${
+            (headerData.resolutionRate &&
+              headerData.resolutionRate?.toFixed(2)) ||
+            0
+          }%`,
           iconSrc: "/assets/icons/three-bars.svg",
         },
         {
@@ -92,6 +96,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
 // DashboardPanel Component
 const DashboardPanel = () => {
   const [botId, setBotId] = useState("");
+  const [botName, setBotName] = useState("");
   const [stats, setStats] = useState<DashboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -161,7 +166,7 @@ const DashboardPanel = () => {
 
     const averageHandlingTime = [
       {
-        name: "Bot1",
+        name: botName,
         whatsapp: stats.data.avarageHandlingTime.whatsapp,
         website: stats.data.avarageHandlingTime.web,
       },
@@ -187,6 +192,7 @@ const DashboardPanel = () => {
   useEffect(() => {
     if (botsDataRedux?.length) {
       setBotId(botsDataRedux[0]._id); // Default to the first bot
+      setBotName(botsDataRedux[0].botName); // Default to the first bot
     }
   }, [botsDataRedux]);
 
