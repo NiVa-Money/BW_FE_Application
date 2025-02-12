@@ -78,7 +78,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
       state.whatsappDashboard?.messages?.data?.messages || []
   );
   const totalPages = useSelector((state: RootState) =>
-    Math.ceil(state.whatsappDashboard?.messages?.total / 10)
+    Math.ceil((state.whatsappDashboard?.messages?.total || 0) / 10)
   );
 
   // On mount, fetch messages (and dashboard data when campaign id is available)
@@ -122,7 +122,9 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const totalMessagesValue = currentCampaignMetrics?.total || 0;
   const seenMessagesValue = currentCampaignMetrics?.read || 0;
   const deliveredMessagesValue = currentCampaignMetrics?.delivered || 0;
-  const unreadMessagesValue = currentCampaignMetrics?.failed || 0;
+  const unreadMessagesValue =
+    (currentCampaignMetrics?.failed || 0) + (currentCampaignMetrics?.sent || 0);
+
   const hotLeadsValue = currentCampaignMetrics?.replied || 0;
 
   // Transform dateWiseMetrics for the Response Rate Chart using the selected campaign name as key
@@ -171,7 +173,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
           icon={<Message />}
         />
         <StatsCard
-          title="Not Read"
+          title="Not Delivered Messages"
           value={unreadMessagesValue}
           icon={<MarkEmailUnread />}
         />
