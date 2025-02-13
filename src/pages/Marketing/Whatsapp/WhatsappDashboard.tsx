@@ -54,6 +54,8 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [selectedCampaignName, setSelectedCampaignName] = useState("");
   const [selectedIntent, setSelectedIntent] = useState("");
   const [selectedSentiment, setSelectedSentiment] = useState("");
+  const [selectedReplied , setSelectedReplied] = useState("");
+
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -101,6 +103,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
         status: selectedStatus,
         intent: selectedIntent,
         sentiment: selectedSentiment,
+        replied: selectedReplied,
       };
 
       console.log(
@@ -131,6 +134,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     dispatch,
     selectedIntent,
     selectedSentiment,
+    selectedReplied,
   ]);
 
   const handlePageChange = (newPage: number) => {
@@ -487,6 +491,25 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               ))}
             </Select>
           </FormControl>
+
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Replied</InputLabel>
+            <Select
+              value={selectedReplied}
+              onChange={(e) => setSelectedReplied(e.target.value)}
+              label="Replied"
+              className="bg-gray-100 rounded-full"
+            >
+              <MenuItem value="">All</MenuItem>
+              {Array.from(
+                new Set(messages.map((msg: { replied: string }) => msg.replied))
+              ).map((replied: string, index: number) => (
+                <MenuItem key={index} value={replied}>
+                  {replied}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
         <table className="w-full">
           <thead>
@@ -512,14 +535,16 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                   status: string;
                   intent : string;
                   sentiment : string;
+                  replied : string;
                 }) =>
                   (!selectedCampaignName ||
                     msg.campaignName === selectedCampaignName) &&
                   (!selectedReceiverNumber ||
                     msg.receiverNumber === selectedReceiverNumber) &&
                   (!selectedStatus || msg.status === selectedStatus) &&
-                  (!selectedIntent || msg.intent === selectedIntent) &&
-                  (!selectedSentiment || msg.sentiment === selectedSentiment)
+                  (!selectedIntent || msg.intent === selectedIntent) && 
+                  (!selectedSentiment || msg.sentiment === selectedSentiment) &&
+                  (!selectedReplied || msg.replied === selectedReplied)
               )
               .map(
                 (
