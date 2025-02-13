@@ -52,6 +52,8 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
   const [selectedCampaignName, setSelectedCampaignName] = useState("");
+  const [selectedIntent, setSelectedIntent] = useState("");
+  const [selectedSentiment, setSelectedSentiment] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -77,7 +79,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     (state: RootState) => state.whatsappDashboard?.messages?.data?.total || 0
   );
 
-  const totalPages = Math.ceil(totalMessages / limit); 
+  const totalPages = Math.ceil(totalMessages / limit);
 
   const campaignData = useSelector(
     (state: RootState) =>
@@ -97,6 +99,8 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
       const filters: any = {
         receiverNumber: selectedReceiverNumber,
         status: selectedStatus,
+        intent: selectedIntent,
+        sentiment: selectedSentiment,
       };
 
       console.log(
@@ -125,6 +129,8 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     selectedReceiverNumber,
     selectedStatus,
     dispatch,
+    selectedIntent,
+    selectedSentiment,
   ]);
 
   const handlePageChange = (newPage: number) => {
@@ -443,6 +449,44 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               ))}
             </Select>
           </FormControl>
+
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Intent</InputLabel>
+            <Select
+              value={selectedIntent}
+              onChange={(e) => setSelectedIntent(e.target.value)}
+              label="Intent"
+              className="bg-gray-100 rounded-full"
+            >
+              <MenuItem value="">All</MenuItem>
+              {Array.from(
+                new Set(messages.map((msg: { intent: string }) => msg.intent))
+              ).map((intent: string, index: number) => (
+                <MenuItem key={index} value={intent}>
+                  {intent}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Sentiment</InputLabel>
+            <Select
+              value={selectedSentiment}
+              onChange={(e) => setSelectedSentiment(e.target.value)}
+              label="Sentiment"
+              className="bg-gray-100 rounded-full"
+            >
+              <MenuItem value="">All</MenuItem>
+              {Array.from(
+                new Set(messages.map((msg: { sentiment: string }) => msg.sentiment))
+              ).map((sentiment: string, index: number) => (
+                <MenuItem key={index} value={sentiment}>
+                  {sentiment}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
         <table className="w-full">
           <thead>
@@ -466,12 +510,16 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                   campaignName: string;
                   receiverNumber: string;
                   status: string;
+                  intent : string;
+                  sentiment : string;
                 }) =>
                   (!selectedCampaignName ||
                     msg.campaignName === selectedCampaignName) &&
                   (!selectedReceiverNumber ||
                     msg.receiverNumber === selectedReceiverNumber) &&
-                  (!selectedStatus || msg.status === selectedStatus)
+                  (!selectedStatus || msg.status === selectedStatus) &&
+                  (!selectedIntent || msg.intent === selectedIntent) &&
+                  (!selectedSentiment || msg.sentiment === selectedSentiment)
               )
               .map(
                 (
