@@ -1,5 +1,5 @@
 import axios from "axios";
-import { notifySuccess } from "../components/Toast";
+import { notifyError, notifySuccess } from "../components/Toast";
 
 export const publicBaseUrl = "https://uatapi.botwot.io";
 
@@ -25,7 +25,12 @@ axiosInstance.interceptors.request.use(
 );
 
 const responseErrorInterceptor = (error: any) => {
-  console.log("Error:", error);
+  notifyError(
+    error?.response?.data?.error
+      ? error?.response?.data?.error
+      : "Something went wrong!"
+  );
+
   return Promise.reject(error);
 };
 

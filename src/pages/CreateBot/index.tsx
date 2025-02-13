@@ -219,6 +219,9 @@ const CreateBot: React.FC = () => {
     setFileName('')
     setIsModalOpen(false)
   };
+  const botSmartnessHandle = (val) => {
+    setFormValues({ ...formValues, botSmartness: val });
+  }
 
   return (
     <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center ' onClick={() => (showColorPicker ? setShowColorPicker(false) : '')}>
@@ -459,7 +462,7 @@ const CreateBot: React.FC = () => {
                       type="file"
                       onChange={handleFileChange}
                       ref={viewerRef}
-                      accept="application/pdf"
+                      accept=".pdf, .doc, .docx, .txt"
                       id="file-upload"
                       className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
                     />
@@ -561,7 +564,7 @@ const CreateBot: React.FC = () => {
                 </div> */}
               </div>
             </div>
-            <CreateBotRightContainer botSmartness={botSmartness} imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} setFormValues={setFormValues} formValues={formValues} handleSubmit={handleSubmit} font={botFont} />
+            <CreateBotRightContainer botSmartness={botSmartness} imageSrc={imageSrc} botName='Botwot Assistant' theme={theme} color={chatColor} botSmartnessHandle={botSmartnessHandle} handleSubmit={handleSubmit} font={botFont} />
 
           </Form>
         )}
