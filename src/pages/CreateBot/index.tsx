@@ -47,7 +47,7 @@ const CreateBot: React.FC = () => {
     botLimit: '',
     phoneNumber: '',
     email: '',
-    botSmartness: false,
+    botSmartness: true,
     appoimentLink: '',
     botIconOption: BOTICONS.list
   });
@@ -96,7 +96,7 @@ const CreateBot: React.FC = () => {
     botIdentity: '',
     phoneNumber: '',
     email: '',
-    botSmartness: false,
+    botSmartness: true,
     appoimentLink: '',
     botIconOption: BOTICONS.list
 
@@ -194,7 +194,7 @@ const CreateBot: React.FC = () => {
       botIdentity: '',
       phoneNumber: '',
       email: '',
-      botSmartness: false,
+      botSmartness: true,
       appoimentLink: '',
       botIconOption: BOTICONS.list
 
@@ -212,7 +212,7 @@ const CreateBot: React.FC = () => {
       botIdentity: '',
       phoneNumber: '',
       email: '',
-      botSmartness: false,
+      botSmartness: true,
       appoimentLink: ''
     })
     setImageName('')
