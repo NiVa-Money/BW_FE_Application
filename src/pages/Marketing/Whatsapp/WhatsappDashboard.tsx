@@ -89,7 +89,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   );
 
   const selectedCampaignId =
-    campaignData.find(
+    campaignData?.find(
       (msg: { campaignName: string }) =>
         msg.campaignName === selectedCampaignName
     )?.campaignId || "";
@@ -167,7 +167,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   // set it to the first campaign in the array.
   useEffect(() => {
     if (campaignWiseMessagesMetrics?.length) {
-      const exists = campaignWiseMessagesMetrics.find(
+      const exists = campaignWiseMessagesMetrics?.find(
         (item: { campaignName: string }) => item.campaignName === campaign
       );
       if (!exists) {
