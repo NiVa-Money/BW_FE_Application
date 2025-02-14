@@ -12,6 +12,7 @@ import {
 import { subDays, format } from "date-fns";
 import { COLORS } from "../constants";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import CustomDatePicker from "./CustomDatePicker";
 
 interface DateRangePickerProps {
   onDateRangeChange: (startDate: Date, endDate: Date) => void;
@@ -128,24 +129,19 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <Typography variant="h6" className="pb-2">
             Select Date Range
           </Typography>
+
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-            <DatePicker
-              selected={startDate}
-              onChange={(date: Date | null) => handleDateChange(date, true)}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-              maxDate={endDate}
-              className="w-full px-2 py-1 border rounded"
+            <CustomDatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={(newValue) => handleDateChange(newValue, true)}
+              maxDate={endDate || undefined}
             />
-            <DatePicker
-              selected={endDate}
-              onChange={(date: Date | null) => handleDateChange(date, false)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate}
-              className="w-full px-2 py-1 border rounded"
+            <CustomDatePicker
+              label="End Date"
+              value={endDate}
+              onChange={(newValue) => handleDateChange(newValue, false)}
+              minDate={startDate || undefined}
             />
           </div>
         </Paper>
