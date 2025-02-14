@@ -1,6 +1,4 @@
 import { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import {
   Button,
   Menu,
@@ -55,15 +53,25 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       return;
     }
 
-    const today = new Date();
+    const now = new Date();
     const days = DATE_RANGES[range as keyof typeof DATE_RANGES];
-    const start = subDays(today, days);
+
+    let startDate: Date;
+    let endDate: Date = now;
+
+    if (range === "Today") {
+      // Set start date to 12:00 AM today
+      startDate = new Date(now);
+      startDate.setHours(0, 0, 0, 0);
+    } else {
+      startDate = subDays(now, days);
+    }
 
     setIsCustomRange(false);
-    setStartDate(start);
-    setEndDate(today);
+    setStartDate(startDate);
+    setEndDate(endDate);
     setSelectedRange(range);
-    onDateRangeChange(start, today);
+    onDateRangeChange(startDate, endDate);
     setMenuOpen(false);
   };
 
