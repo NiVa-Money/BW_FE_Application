@@ -165,11 +165,15 @@ const DashboardPanel = () => {
       { name: "Neutral", value: stats.data.sentiments.Neutral || 1 },
     ];
 
+    const formatNumber = (value: number) => {
+      return value === 0 ? 0 : value.toFixed(1);
+    };
+
     const averageHandlingTime = [
       {
         name: botName,
-        whatsapp: stats.data.avarageHandlingTime.whatsapp,
-        website: stats.data.avarageHandlingTime.web,
+        whatsapp: formatNumber(stats.data.avarageHandlingTime.whatsapp),
+        website: formatNumber(stats.data.avarageHandlingTime.web),
       },
     ];
 
