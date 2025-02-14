@@ -60,9 +60,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
         },
         {
           title: "Live chat Vs ended the chat",
-          content: `Live: ${
-            headerData.liveVsEndedSessions.live * 10
-          }%, Ended: ${headerData.liveVsEndedSessions.ended * 10}%`,
+          content: `Live: ${headerData.liveVsEndedSessions.live}, Ended: ${headerData.liveVsEndedSessions.ended}`,
         },
         {
           title: "AI vs. Human Resolution Rate",
