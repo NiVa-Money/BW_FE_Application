@@ -16,6 +16,7 @@ import {
 import CommonTable from "../../components/TableComponent";
 import { COLORS } from "../../constants";
 import ChartContainer from "./ChartContainer";
+import { camelCaseToWords } from "../../hooks/functions";
 
 interface ChartItemsProps {
   constructedChartsData: {
@@ -34,20 +35,9 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
     ? Object.keys(constructedChartsData.chatTrafficOverview[0])
     : [];
 
-  const formatCamelCase = (camelCaseString) => {
-    if (!camelCaseString || typeof camelCaseString !== "string") {
-      return camelCaseString;
-    }
-    // Add a space before capital letters and capitalize the first letter
-    const formattedString = camelCaseString
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str) => str.toUpperCase());
-
-    return formattedString.trim(); // Remove any leading/trailing spaces
-  };
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
     ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map((header) =>
-        formatCamelCase(header)
+        camelCaseToWords(header)
       )
     : [];
 
