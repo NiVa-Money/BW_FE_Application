@@ -107,11 +107,14 @@ const DashboardPanel = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-
   // Fetch dashboard data
   const fetchData = async (
-    startDate: Date | null = null,
-    endDate: Date | null = null
+    startDate: Date | null = (() => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today;
+    })(),
+    endDate: Date | null = new Date()
   ) => {
     if (!botId) return;
     try {
