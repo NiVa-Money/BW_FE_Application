@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Menu,
@@ -13,6 +13,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import CustomDatePicker from "./CustomDatePicker";
 
 interface DateRangePickerProps {
+  onToday: (value: boolean) => void;
   onDateRangeChange: (startDate: Date, endDate: Date) => void;
 }
 
@@ -26,6 +27,7 @@ const DATE_RANGES = {
 } as const;
 
 const DateRangePicker: React.FC<DateRangePickerProps> = ({
+  onToday,
   onDateRangeChange,
 }) => {
   const [buttonRef, setButtonRef] = useState<HTMLElement | null>(null);
@@ -86,6 +88,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       onDateRangeChange(startDate, date);
     }
   };
+
+  useEffect(() => {
+    if (selectedRange === "Today") {
+      onToday(true);
+    } else onToday(false);
+  }, [selectedRange]);
 
   return (
     <div className="relative">

@@ -14,6 +14,7 @@ import {
   DashboardHeaderProps,
 } from "./types";
 import ChartItems from "./ChartItems";
+import useLatestFetchData from "../../hooks/useLatestFetchData";
 
 // StatsCard Component
 const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
@@ -97,6 +98,7 @@ const DashboardPanel = () => {
   const [botName, setBotName] = useState("");
   const [stats, setStats] = useState<DashboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isToday, setIsToday] = useState(false);
 
   const userIdLocal = localStorage.getItem("user_id");
   const dispatch = useDispatch();
@@ -176,7 +178,6 @@ const DashboardPanel = () => {
         website: formatNumber(stats.data.avarageHandlingTime.web),
       },
     ];
-
     return {
       totalConversation: stats.data.channelWiseConversation,
       sentiments,
@@ -188,10 +189,16 @@ const DashboardPanel = () => {
     };
   }, [stats]);
 
+  const onToday = (value: boolean) => {
+    setIsToday(value);
+  };
+
   // Handle date range change
   const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
     await fetchData(startDate, endDate);
   };
+
+  const latestFetchedTodaysData = useLatestFetchData(botId, isToday);
 
   // Set default bot ID
   useEffect(() => {
@@ -212,6 +219,13 @@ const DashboardPanel = () => {
   useEffect(() => {
     fetchData();
   }, [botId]);
+
+  // Update stats when newData is fetched by the hook
+  useEffect(() => {
+    if (isToday && latestFetchedTodaysData) {
+      setStats(latestFetchedTodaysData);
+    }
+  }, [isToday, latestFetchedTodaysData]);
 
   return (
     <div>
@@ -248,7 +262,10 @@ const DashboardPanel = () => {
             Create an Agent
           </Button>
         </Card>
-        <DateRangePicker onDateRangeChange={handleDateRangeChange} />
+        <DateRangePicker
+          onToday={onToday}
+          onDateRangeChange={handleDateRangeChange}
+        />
       </div>
 
       {/* Header */}
