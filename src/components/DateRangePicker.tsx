@@ -1,6 +1,4 @@
-import { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { useEffect, useState } from "react";
 import {
   Button,
   Menu,
@@ -12,8 +10,10 @@ import {
 import { subDays, format } from "date-fns";
 import { COLORS } from "../constants";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import CustomDatePicker from "./CustomDatePicker";
 
 interface DateRangePickerProps {
+  onToday: (value: boolean) => void;
   onDateRangeChange: (startDate: Date, endDate: Date) => void;
 }
 
@@ -27,6 +27,7 @@ const DATE_RANGES = {
 } as const;
 
 const DateRangePicker: React.FC<DateRangePickerProps> = ({
+  onToday,
   onDateRangeChange,
 }) => {
   const [buttonRef, setButtonRef] = useState<HTMLElement | null>(null);
@@ -54,15 +55,25 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       return;
     }
 
-    const today = new Date();
+    const now = new Date();
     const days = DATE_RANGES[range as keyof typeof DATE_RANGES];
-    const start = subDays(today, days);
+
+    let startDate: Date;
+    let endDate: Date = now;
+
+    if (range === "Today") {
+      // Set start date to 12:00 AM today
+      startDate = new Date(now);
+      startDate.setHours(0, 0, 0, 0);
+    } else {
+      startDate = subDays(now, days);
+    }
 
     setIsCustomRange(false);
-    setStartDate(start);
-    setEndDate(today);
+    setStartDate(startDate);
+    setEndDate(endDate);
     setSelectedRange(range);
-    onDateRangeChange(start, today);
+    onDateRangeChange(startDate, endDate);
     setMenuOpen(false);
   };
 
@@ -77,6 +88,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       onDateRangeChange(startDate, date);
     }
   };
+
+  useEffect(() => {
+    if (selectedRange === "Today") {
+      onToday(true);
+    } else onToday(false);
+  }, [selectedRange]);
 
   return (
     <div className="relative">
@@ -128,24 +145,19 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <Typography variant="h6" className="pb-2">
             Select Date Range
           </Typography>
+
           <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-            <DatePicker
-              selected={startDate}
-              onChange={(date: Date | null) => handleDateChange(date, true)}
-              selectsStart
-              startDate={startDate}
-              endDate={endDate}
-              maxDate={endDate}
-              className="w-full px-2 py-1 border rounded"
+            <CustomDatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={(newValue) => handleDateChange(newValue, true)}
+              maxDate={endDate || undefined}
             />
-            <DatePicker
-              selected={endDate}
-              onChange={(date: Date | null) => handleDateChange(date, false)}
-              selectsEnd
-              startDate={startDate}
-              endDate={endDate}
-              minDate={startDate}
-              className="w-full px-2 py-1 border rounded"
+            <CustomDatePicker
+              label="End Date"
+              value={endDate}
+              onChange={(newValue) => handleDateChange(newValue, false)}
+              minDate={startDate || undefined}
             />
           </div>
         </Paper>
