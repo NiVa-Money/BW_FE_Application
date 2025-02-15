@@ -41,7 +41,7 @@ const AllChats = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-  const [channelNameVal, setChannelNameVal] = useState("whatsapp");
+  const [channelNameVal, setChannelNameVal] = useState("website");
   const [botIdVal, setBotIdVal] = useState("");
 
   const botsDataLoader = useSelector(
@@ -80,10 +80,10 @@ const AllChats = () => {
     dispatch(getAllSession(data));
   };
   useEffect(() => {
-    if (advanceFeatureDataRedux !== null || undefined) {
+    if (advanceFeatureDataRedux !== null) {
       setAdvanceFeatureData(advanceFeatureDataRedux);
     }
-  }, [advanceFeatureDataRedux]);
+  }, [advanceFeatureDataRedux?.summary]);
 
   useEffect(() => {
     if (botsDataRedux?.botId?.length) {
@@ -129,15 +129,12 @@ const AllChats = () => {
         },
         {
           title: "Sentiment Analysis",
-          description: `Positive: ${
-            advanceFeatureData?.sentiments?.positive || 0
-          }%, 
-                      Neutral: ${
-                        advanceFeatureData?.sentiments?.neutral || 0
-                      }%, 
-                      Negative: ${
-                        advanceFeatureData?.sentiments?.negative || 0
-                      }%`,
+          description: `Positive: ${advanceFeatureData?.sentiments?.positive || 0
+            }%, 
+                      Neutral: ${advanceFeatureData?.sentiments?.neutral || 0
+            }%, 
+                      Negative: ${advanceFeatureData?.sentiments?.negative || 0
+            }%`,
           expanded: true,
         },
         {
@@ -272,9 +269,8 @@ const AllChats = () => {
               >
                 <h3 className="font-medium">{section.title}</h3>
                 <ExpandMoreIcon
-                  className={`w-4 h-4 transform ${
-                    section.expanded ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
+                    }`}
                 />
               </div>
               {section.expanded && (
