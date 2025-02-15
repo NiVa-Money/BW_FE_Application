@@ -34,11 +34,15 @@ interface Campaign {
 export default function CampaignManager() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const campaignData = useSelector(
     (state: RootState) =>
       state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp
   );
 
+
+
+  console.log("campaign list", campaignData);
   useEffect(() => {
     dispatch(fetchCampaignsAction({ payload: {} }));
   }, [dispatch]);

@@ -10,10 +10,8 @@ import {
 } from "../../../store/actions/conversationActions";
 import { RootState } from "../../../store";
 import { getBotsAction } from "../../../store/actions/botActions";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SessionsList from "./SessionsList";
-
-
 
 interface AnalysisSection {
   title: string;
@@ -23,9 +21,7 @@ interface AnalysisSection {
 
 const AllChats = () => {
   const [, setSelectedSessionId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<any>([
-
-  ]);
+  const [messages, setMessages] = useState<any>([]);
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
@@ -34,15 +30,20 @@ const AllChats = () => {
   const advanceFeatureDataRedux = useSelector(
     (state: RootState) => state?.userChat?.advanceFeature?.data?.data || {}
   );
-  const [advanceFeatureData, setAdvanceFeatureData] = useState<any>({})
-
-  console.log("advanceFeatureData", advanceFeatureDataRedux);
+  const [advanceFeatureData, setAdvanceFeatureData] = useState<any>({});
 
   const [botLists, setbotLists] = useState<any>([]);
-
+  const [channelName] = useState([
+    { name: "Whatsapp", value: "whatsapp" },
+    { name: "Website", value: "website" },
+    { name: "Instagram", value: "instagram" },
+  ]);
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
+  const [channelNameVal, setChannelNameVal] = useState("whatsapp");
+  const [botIdVal, setBotIdVal] = useState("");
+
   const botsDataLoader = useSelector(
     (state: RootState) => state.bot?.lists?.loader
   );
@@ -59,7 +60,6 @@ const AllChats = () => {
         value: bot._id,
         name: bot.botName,
       }));
-      console.log("Formatted Bots:", formattedBots); // Debugging
       setbotLists(formattedBots);
     }
   }, [botsDataRedux, botsDataLoader]);
@@ -81,12 +81,11 @@ const AllChats = () => {
   };
   useEffect(() => {
     if (advanceFeatureDataRedux !== null || undefined) {
-      setAdvanceFeatureData(advanceFeatureDataRedux)
+      setAdvanceFeatureData(advanceFeatureDataRedux);
     }
-  }, [advanceFeatureDataRedux])
+  }, [advanceFeatureDataRedux]);
 
   useEffect(() => {
-
     if (botsDataRedux?.botId?.length) {
       getChatHistory();
     }
@@ -105,17 +104,13 @@ const AllChats = () => {
     }
   }, [allSessions]);
 
-
-  console.log('advanceFeatureDataadvanceFeatureData', advanceFeatureData)
-  const [analysisSections, setAnalysisSections] = useState<AnalysisSection[]>([
-
-  ]);
-
+  const [analysisSections, setAnalysisSections] = useState<AnalysisSection[]>(
+    []
+  );
 
   useEffect(() => {
     if (advanceFeatureData !== null) {
       setAnalysisSections([
-
         {
           title: "Summary",
           description: advanceFeatureData?.summary,
@@ -128,16 +123,21 @@ const AllChats = () => {
         },
         {
           title: "Next Steps",
-          description: advanceFeatureData?.nextStep || "No next steps available.",
+          description:
+            advanceFeatureData?.nextStep || "No next steps available.",
           expanded: true,
         },
         {
           title: "Sentiment Analysis",
-          description: `Positive: ${advanceFeatureData?.sentiments?.positive || 0
-            }%, 
-                      Neutral: ${advanceFeatureData?.sentiments?.neutral || 0}%, 
-                      Negative: ${advanceFeatureData?.sentiments?.negative || 0
-            }%`,
+          description: `Positive: ${
+            advanceFeatureData?.sentiments?.positive || 0
+          }%, 
+                      Neutral: ${
+                        advanceFeatureData?.sentiments?.neutral || 0
+                      }%, 
+                      Negative: ${
+                        advanceFeatureData?.sentiments?.negative || 0
+                      }%`,
           expanded: true,
         },
         {
@@ -145,16 +145,15 @@ const AllChats = () => {
           description: advanceFeatureData?.emotion || "No emotion detected.",
           expanded: true,
         },
-      ])
+      ]);
     }
-  }, [advanceFeatureData])
-
-
+  }, [advanceFeatureData]);
 
   const handleSessionSelection = (sessionId: string) => {
-    const messagesData = sessionsDataRedux?.sessions.filter(obj => obj._id === sessionId)[0].sessions
-    console.log("Selected session ID:", sessionId, messagesData);
-    setMessages(messagesData)
+    const messagesData = sessionsDataRedux?.sessions.filter(
+      (obj) => obj._id === sessionId
+    )[0].sessions;
+    setMessages(messagesData);
     dispatch(getAdvanceFeature(sessionId));
 
     setSelectedSessionId(sessionId);
@@ -167,72 +166,125 @@ const AllChats = () => {
       )
     );
   };
+  const getBotSession = (e) => {
+    const botId = e.target.value;
+    setBotIdVal(botId);
+    dispatch(
+      getAllSession({
+        botId: botId,
+        userId: userId,
+        channelName: channelNameVal,
+      })
+    );
+  };
+  const getChannelNameHandler = (e) => {
+    const val = e.target.value;
+    setChannelNameVal(val);
+    dispatch(
+      getAllSession({ botId: botIdVal, userId: userId, channelName: val })
+    );
+  };
   return (
-    <div className="flex h-screen bg-gray-100">
-      <SessionsList botLists={botLists} onSessionSelect={handleSessionSelection} />
-
-      <div className="flex-1 flex flex-col">
-        <div className="bg-white p-4 flex justify-between items-center border-b">
-          <div className="flex items-center space-x-2">
-            <div>
-              <h3>All Chats</h3>
-            </div>
-          </div>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded flex items-center" onClick={() => setMessages(null)}>
+    <div className="flex flex-col p-6">
+      <div className="flex justify-between items-center h-[45px]">
+        <h1 className="text-xl font-semibold">All Chats</h1>
+        {messages?.length ? (
+          <button
+            className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px] mb-2 mt-4 mr-4"
+            onClick={() => setMessages(null)}
+          >
             Close Chat <CloseIcon className="ml-1 w-4 h-4" />
           </button>
+        ) : null}
+      </div>
+      <div className="flex gap-2">
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          onChange={(e) => getBotSession(e)}
+        >
+          <option value="">Select a bot</option>
+          {botLists.map((bot: { value: string | number; name: string }) => (
+            <option key={String(bot.value)} value={String(bot.value)}>
+              {bot.name}
+            </option>
+          ))}
+        </select>
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          onChange={(e) => getChannelNameHandler(e)}
+        >
+          <option value="">Select a Channel</option>
+          {channelName?.map((item: { value: string; name: string }) => (
+            <option key={String(item.value)} value={String(item.value)}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="flex h-screen bg-gray-100">
+        <SessionsList
+          botLists={botLists}
+          onSessionSelect={handleSessionSelection}
+        />
+
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages?.map((msg, index) => (
+              <div key={index} className="flex flex-col space-y-2">
+                {/* Answer on the left */}
+                <div className="self-end bg-purple-600 text-white px-2 py-2 rounded-lg max-w-xs">
+                  <span className="flex gap-[5px] justify-between">
+                    {msg.question}
+                    <AccountCircleIcon />
+                  </span>
+                </div>
+                {/* Question on the right */}
+                <div className="self-start bg-gray-800 text-white px-2 py-2 rounded-lg max-w-xs">
+                  <span className="flex gap-[5px] justify-between">
+                    {" "}
+                    <AccountCircleIcon />
+                    {msg.answer}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="p-4 border-t flex items-center space-x-2">
+            <input
+              type="text"
+              disabled
+              placeholder="Message"
+              className="flex-1 bg-gray-100 p-2 rounded-lg outline-none"
+            />
+            <button className="p-2 bg-gray-100 rounded-lg">
+              <SendIcon className="w-5 h-5 text-gray-400" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages?.map((msg, index) => (
-            <div key={index} className="flex flex-col space-y-2">
-              {/* Answer on the left */}
-              <div className="self-end bg-purple-600 text-white px-2 py-2 rounded-lg max-w-xs">
-                <span className='flex gap-[5px] justify-between'>{msg.question}<AccountCircleIcon /></span>
+        <div className="w-80 bg-gray-50 p-4">
+          {analysisSections.map((section, index) => (
+            <div key={index} className="mb-4">
+              <div
+                className="flex justify-between items-center p-2 bg-gray-100 rounded cursor-pointer"
+                onClick={() => handleToggleExpand(index)}
+              >
+                <h3 className="font-medium">{section.title}</h3>
+                <ExpandMoreIcon
+                  className={`w-4 h-4 transform ${
+                    section.expanded ? "rotate-180" : ""
+                  }`}
+                />
               </div>
-              {/* Question on the right */}
-              <div className="self-start bg-gray-800 text-white px-2 py-2 rounded-lg max-w-xs">
-                <span className='flex gap-[5px] justify-between'> <AccountCircleIcon />{msg.answer}</span>
-              </div>
+              {section.expanded && (
+                <p className="text-sm text-gray-600 mt-2 px-2">
+                  {section.description}
+                </p>
+              )}
             </div>
           ))}
         </div>
-
-        <div className="p-4 border-t flex items-center space-x-2">
-          <input
-            type="text"
-            disabled
-            placeholder="Message"
-            className="flex-1 bg-gray-100 p-2 rounded-lg outline-none"
-          />
-          <button
-            className="p-2 bg-gray-100 rounded-lg"
-          >
-            <SendIcon className="w-5 h-5 text-gray-400" />
-          </button>
-        </div>
-      </div>
-
-      <div className="w-80 bg-gray-50 p-4">
-        {analysisSections.map((section, index) => (
-          <div key={index} className="mb-4">
-            <div
-              className="flex justify-between items-center p-2 bg-gray-100 rounded cursor-pointer"
-              onClick={() => handleToggleExpand(index)}
-            >
-              <h3 className="font-medium">{section.title}</h3>
-              <ExpandMoreIcon
-                className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
-                  }`}
-              />
-            </div>
-            {section.expanded && (
-              <p className="text-sm text-gray-600 mt-2 px-2">
-                {section.description}
-              </p>
-            )}
-          </div>
-        ))}
       </div>
     </div>
   );

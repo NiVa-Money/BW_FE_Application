@@ -243,6 +243,9 @@ const EditBot: React.FC = () => {
     setFileName('')
     navigate('/integrations')
   }
+  const botSmartnessHandle = (val) => {
+    setFormValues({ ...formValues, botSmartness: val });
+  }
   useEffect(() => {
     if (editBotDataRedux !== null) {
       const success = editBotDataRedux?.success
@@ -764,11 +767,10 @@ const EditBot: React.FC = () => {
               botName="Botwot Assistant"
               theme={theme}
               color={chatColor}
-              setFormValues={setFormValues}
-              formValues={formValues}
               handleSubmit={handleSubmit}
               font={botFont}
               botSmartness={botSmartness}
+              botSmartnessHandle={botSmartnessHandle}
             />
           </Form>
         )}

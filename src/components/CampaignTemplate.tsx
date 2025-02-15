@@ -32,21 +32,16 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
     (state: RootState) =>
       state?.crudIntegration?.crudIntegration?.data?.secretToken
   );
-  console.log("Secret Token:", integrationId);
 
   const templates = useSelector(
     (state: any) => state.whatsappTemplates?.templates?.data || []
   );
-  console.log("Templates data:", templates);
 
   // const loading = useSelector((state: any) => state.whatsappTemplates?.loading);
 
   useEffect(() => {
     if (integrationId) {
-      console.log("Fetching templates for integrationId: ", integrationId);
       dispatch(fetchWhatsAppTemplatesAction(integrationId));
-    } else {
-      console.log("IntegrationId not found in Redux store");
     }
   }, [dispatch, integrationId]);
 
@@ -138,7 +133,6 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
       header: imageUrl || "", // Attach uploaded image if available
     };
 
-    console.log("Final Selected Template:", finalTemplate);
     onSelectTemplate(finalTemplate);
     onClose();
   };

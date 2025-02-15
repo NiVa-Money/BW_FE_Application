@@ -9,20 +9,19 @@ interface CreateBotRightContainerProps {
   imageSrc?: any;
   theme: string;
   color: string;
-  setFormValues: any;
-  formValues: any;
   handleSubmit: any;
   font: string;
   botSmartness: string;
+  botSmartnessHandle: any
 
 }
-
-const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botName, imageSrc, theme, setFormValues, formValues, handleSubmit, font, color, botSmartness }) => {
+const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botName, imageSrc, theme, handleSubmit, font, color, botSmartness, botSmartnessHandle }) => {
   const messages: any = [
     { id: 1, sender: 'bot', text: "Hi I’m BotWot, How can I assist you today?", time: '7:30 pm' },
     { id: 2, sender: 'user', text: 'I need to book an appointment', time: '7:31 pm' },
     { id: 3, sender: 'bot', text: 'Sure, when do you want to book this appointment?', time: '7:32 pm' },
   ];
+
   return (
     <div>
       <div className="flex flex-col h-[100%]">
@@ -33,8 +32,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botNa
             control={
               <Switch
                 checked={Boolean(botSmartness)}
-                value={botSmartness}
-                onClick={(e) => setFormValues({ ...formValues, botSmartness: e.target })}
+                onClick={(e: any) => botSmartnessHandle(e.target.checked)}
                 name='botSmartness' // Link switch to Formik field
                 color="primary" // Customize the color
               />

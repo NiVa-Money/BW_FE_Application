@@ -43,7 +43,7 @@ const MyBotCard: React.FC<CardProps> = ({
                         <h2 className="text-xl font-bold text-gray-800">{name}</h2>
                         <p className="text-gray-500 text-sm m-0">({description})</p>
                     </div>
-                    <div className='flex justify-between gap-[20px] m-0'>
+                    <div className='flex justify-between gap-[20px] ml-0'>
                         <button
                             onClick={onDelete}
                             className="text-red-500 hover:text-red-700 flex items-center flex flex-col justify-end"

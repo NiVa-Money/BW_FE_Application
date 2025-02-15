@@ -4,6 +4,7 @@ import {
   LinkedIn,
   Twitter,
   MoreVert,
+  WhatsApp,
   AttachFile,
   Send,
   Image,
@@ -29,7 +30,7 @@ const EngagementTab = () => {
     { icon: <Facebook />, sentiment: 60 },
     { icon: <LinkedIn />, sentiment: 60 },
     { icon: <Twitter />, sentiment: 60 },
-    { icon: <Twitter />, sentiment: 60 },
+    { icon: <WhatsApp />, sentiment: 60 },
   ];
 
   const userProfiles = [
@@ -38,7 +39,7 @@ const EngagementTab = () => {
     { icon: <Instagram />, sentiment: 80 },
     { icon: <LinkedIn />, sentiment: 80 },
     { icon: <Instagram />, sentiment: 10 },
-    { icon: <Twitter />, sentiment: 50 },
+    { icon: <WhatsApp />, sentiment: 50 },
     { icon: <Facebook />, sentiment: 80 },
   ];
 

@@ -2,12 +2,18 @@
 import {
   ADVANCE_FEATURE,
   USER_ALL_SESSION,
+  USER_ALL_SESSION_LIVE,
   USER_SESSION_HISTORY,
 } from "../actionTypes/conversationActionsTypes";
 
 export const getAllSession = (payload: any) => ({
   type: USER_ALL_SESSION,
   payload,
+});
+
+export const getAllSessionLive = (userId: any) => ({
+  type: USER_ALL_SESSION_LIVE,
+  payload: userId,
 });
 
 export const getAdvanceFeature = (payload: any) => ({
