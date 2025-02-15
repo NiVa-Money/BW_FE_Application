@@ -32,7 +32,6 @@ const AllChats = () => {
   );
   const [advanceFeatureData, setAdvanceFeatureData] = useState<any>({});
 
-  console.log("advanceFeatureData", advanceFeatureDataRedux);
 
   const [botLists, setbotLists] = useState<any>([]);
   const [channelName] = useState([

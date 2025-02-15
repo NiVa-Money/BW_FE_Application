@@ -143,12 +143,15 @@ const MyBots: React.FC = () => {
 
   return (
     <div className='flex flex-col w-[100%]'>
-      <button className='self-end bg-[#65558F] text-white p-1 w-[160px] rounded-[100px] mb-2 mt-4 mr-4' onClick={createBotHandler}>Create Bot</button>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className='flex justify-between items-center'>
+        <h1 className="text-xl font-semibold">My Bots</h1>
+
+        <button className='self-end bg-[#65558F] text-white p-1 w-[160px] rounded-[100px] mb-2 mt-4 mr-4' onClick={createBotHandler}>Create Bot</button></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-xl:gap-2 w-[95%]">
         {botLists?.map((item: any) => (
           <div
             key={item._id} // Always add a key prop when mapping arrays
-            className="m-[15px] max-w-[50%] min-w-[360px] w-[40%] mx-auto my-0 flex justify-center items-center"
+            className="m-[15px]   w-[100%] mx-auto my-0 flex justify-center items-center"
           >
             <MyBotCard
               name={item?.botName}
