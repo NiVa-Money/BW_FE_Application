@@ -45,6 +45,13 @@ const TestBot: React.FC<any> = ({
 
     }
     const senMessageHandler = () => {
+        setSessionMessages([...sessionMessages, {
+            userId: userIdLocal,
+            sessionId: botSessionId ? botSessionId : null,
+            question: message,
+            subscriptionPlanId: 'subscriptionPlanId1',
+            botId: botParamId,
+        }])
         setMessage('')
         message?.length &&
             dispatch(botTestAction({
@@ -67,7 +74,6 @@ const TestBot: React.FC<any> = ({
         }
     }, [botParamId])
 
-
     return (
         <div className='flex flex-col w-[100%] justify-center items-center '>
             <div className=' flex flex-col h-[75vh] w-[450px] bg-[#1e1b20] '>
@@ -86,7 +92,7 @@ const TestBot: React.FC<any> = ({
                             </div>
                             {/* Question on the right */}
                             <div className="self-start bg-gray-800 text-white px-2 py-2 rounded-lg max-w-xs">
-                                <span className='flex gap-[5px] justify-between'> <img height={20} width={20} src={botReduxImage} />{msg.answer}</span>
+                                <span className='flex gap-[5px] justify-between'> {msg?.answer?.length ? <img height={20} width={20} src={botReduxImage} /> : null}{msg.answer}</span>
                             </div>
                         </div>
                     ))}

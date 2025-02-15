@@ -198,9 +198,7 @@ const MarketingDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DashboardCard title="Market News">
           <div className="space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span>Hot News In Bitcoin</span>
-            </div>
+
 
             {loading ? (
               // Display loading spinner while fetching data
@@ -217,12 +215,13 @@ const MarketingDashboard = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="bg-gray-100 p-4 rounded-md shadow-md">
+                  <div className="bg-gray-100 p-4 rounded-md shadow-md max-h-[230px] flex flex-col overflow-y-scroll">
                     <h3 className="text-lg font-semibold">
                       {formattedNews[currentIndex].title}
                     </h3>
                     <ReactMarkdown className="text-sm text-gray-600">
-                      {formattedNews[currentIndex].content}
+                      {`${formattedNews[currentIndex].content}`}
+
                     </ReactMarkdown>
                   </div>
                 </motion.div>
