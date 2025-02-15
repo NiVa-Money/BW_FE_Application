@@ -55,7 +55,7 @@ export const initialState: any = {
   whatsappDashboard: {
     loading: false,
     error: null,
-    dashboardData: [], 
+    dashboardData: [],
     messages: [],
   },
 
@@ -65,6 +65,10 @@ export const initialState: any = {
       loader: false,
     },
     allSession: {
+      data: [],
+      loader: false,
+    },
+    allSessionLive: {
       data: [],
       loader: false,
     },
