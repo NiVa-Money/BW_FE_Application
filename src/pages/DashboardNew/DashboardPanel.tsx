@@ -137,8 +137,8 @@ const DashboardPanel = () => {
         setStats(response);
       }
     } catch (err) {
-      console.log("Error which fetching dashboard data", err);
-      throw new Error(err?.message);
+      console.error("Failed on fetchData: ", err);
+      throw new Error("Error while fetching dashboard data");
     } finally {
       setIsLoading(false);
     }
@@ -231,10 +231,6 @@ const DashboardPanel = () => {
     }
   }, [userIdLocal]);
 
-  // Fetch dashboard data on bot ID change
-  useEffect(() => {
-    fetchData();
-  }, [botId]);
 
   // Update stats when newData is fetched by the hook
   useEffect(() => {
