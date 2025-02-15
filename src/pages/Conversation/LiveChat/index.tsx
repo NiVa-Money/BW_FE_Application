@@ -16,7 +16,7 @@ import io from "socket.io-client";
 const LiveChat: React.FC = (): React.ReactElement => {
   const [isAIEnabled, setIsAIEnabled] = useState(false);
   const [isAgentAssistOpen, setIsAgentAssistOpen] = useState(true);
-  const [botIdVal, setBotIdVal] = useState("");
+  const [_botIdVal, setBotIdVal] = useState("");
   const [, setSelectedSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any>([]);
   const sessionsDataRedux = useSelector(
