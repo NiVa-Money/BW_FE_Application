@@ -14,6 +14,7 @@ export const dashBoardDataService = async (payload: any) => {
     const response = await axiosInstance.post(`/dashboard/static`, payload);
     return response.data;
   } catch (error: any) {
-    throw new Error("Error fetching user profile");
+    console.error("Error while fetching dashBoardDataService:", error);
+    throw new Error(error.response?.data?.message);
   }
 };
