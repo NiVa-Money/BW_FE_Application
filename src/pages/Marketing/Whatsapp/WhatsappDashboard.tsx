@@ -34,6 +34,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { COLORS } from "../../../constants";
+import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 
 interface DashboardProps {
   totalMessages: number;
@@ -54,8 +55,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [selectedCampaignName, setSelectedCampaignName] = useState("");
   const [selectedIntent, setSelectedIntent] = useState("");
   const [selectedSentiment, setSelectedSentiment] = useState("");
-  const [selectedReplied , setSelectedReplied] = useState("");
-
+  const [selectedReplied, setSelectedReplied] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -87,6 +87,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     (state: RootState) =>
       state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp
   );
+
+  useEffect(() => {
+    dispatch(fetchCampaignsAction({ payload: {} }));
+  }, [dispatch]);
 
   const selectedCampaignId =
     campaignData?.find(
@@ -483,7 +487,9 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
             >
               <MenuItem value="">All</MenuItem>
               {Array.from(
-                new Set(messages.map((msg: { sentiment: string }) => msg.sentiment))
+                new Set(
+                  messages.map((msg: { sentiment: string }) => msg.sentiment)
+                )
               ).map((sentiment: string, index: number) => (
                 <MenuItem key={index} value={sentiment}>
                   {sentiment}
@@ -533,16 +539,16 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                   campaignName: string;
                   receiverNumber: string;
                   status: string;
-                  intent : string;
-                  sentiment : string;
-                  replied : string;
+                  intent: string;
+                  sentiment: string;
+                  replied: string;
                 }) =>
                   (!selectedCampaignName ||
                     msg.campaignName === selectedCampaignName) &&
                   (!selectedReceiverNumber ||
                     msg.receiverNumber === selectedReceiverNumber) &&
                   (!selectedStatus || msg.status === selectedStatus) &&
-                  (!selectedIntent || msg.intent === selectedIntent) && 
+                  (!selectedIntent || msg.intent === selectedIntent) &&
                   (!selectedSentiment || msg.sentiment === selectedSentiment) &&
                   (!selectedReplied || msg.replied === selectedReplied)
               )
