@@ -32,7 +32,7 @@ export function* createWhatsAppCampaignSaga({
 
     // Extract campaignId from the response data
     const campaignId = campaignResponse?.data?.campaignId;
-   
+   console.log('campaignid' , campaignId)
 
     yield put({
       type: CREATE_WHATSAPP_CAMPAIGN_SUCCESS,
