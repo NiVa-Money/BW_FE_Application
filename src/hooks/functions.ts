@@ -12,3 +12,15 @@ export const formatDateString = (dateString: string): string => {
 
   return `${day}-${month}-${year} at ${hours}:${minutes}`;
 };
+
+export const camelCaseToWords = (camelCaseString) => {
+  if (!camelCaseString || typeof camelCaseString !== "string") {
+    return camelCaseString;
+  }
+  // Add a space before capital letters and capitalize the first letter
+  const formattedString = camelCaseString
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (str) => str.toUpperCase());
+
+  return formattedString.trim(); // Remove any leading/trailing spaces
+};
