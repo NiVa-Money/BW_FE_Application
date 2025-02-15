@@ -91,10 +91,7 @@ const CrudIntegration: React.FC = () => {
 
   useEffect(() => {
     if (botId) {
-      console.log("Dispatching getWhatsappRequest for botId:", botId);
       dispatch(getWhatsappRequest(botId));
-    } else {
-      console.log("No valid botId found");
     }
   }, [botId]);
 
@@ -118,9 +115,7 @@ const CrudIntegration: React.FC = () => {
   console.log("Secret Token:", secretToken); // Debugging
 
   useEffect(() => {
-    console.log("Current crudIntegrationData data state:", crudIntegrationData);
     if (crudIntegrationData !== null && crudIntegrationData !== undefined) {
-      console.log("Updating formData with API data:", crudIntegrationData);
       setFormData((prevFormData) => ({
         ...prevFormData,
         ...crudIntegrationData,
@@ -129,14 +124,12 @@ const CrudIntegration: React.FC = () => {
   }, [crudIntegrationData]);
 
   const handleUpdate = () => {
-    console.log("Updating with formData:", formData);
     dispatch(updateWhatsappRequest(formData));
-    navigate('/integrations');
+    navigate("/integrations");
   };
 
   const handleDelete = () => {
     if (secretToken) {
-      console.log("Deleting with whatsappId:", secretToken);
       dispatch(deleteWhatsappRequest(secretToken));
     } else {
       console.log("No valid ID found for deletion");

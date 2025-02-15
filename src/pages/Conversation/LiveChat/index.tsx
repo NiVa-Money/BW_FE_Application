@@ -24,13 +24,13 @@ const LiveChat: React.FC = (): React.ReactElement => {
   );
   const [botLists, setbotLists] = useState<any>([]);
   const [socket, setSocket] = useState(null);
-  const [sessionId, setSessionId] = React.useState<string>("");
-  const [botIdLive, setBotIdLive] = React.useState<string>("");
-  const [userIdLive, setBotUserIdLive] = React.useState<string>("");
+  const [sessionId, _setSessionId] = React.useState<string>("");
+  const [botIdLive, _setBotIdLive] = React.useState<string>("");
+  const [userIdLive, _setBotUserIdLive] = React.useState<string>("");
   const [newMessage, setNewMessage] = React.useState<any>("");
   const [isChatEnabled, setIsChatEnabled] = React.useState(false);
-  const [resolved, setResolved] = React.useState("");
-  const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
+  const [_resolved, setResolved] = React.useState("");
+  const [_showFeedbackModal, setShowFeedbackModal] = React.useState(false);
   const [showConfirmationModal, setShowConfirmationModal] =
     React.useState(false);
   const dispatch = useDispatch();
@@ -60,7 +60,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
         value: bot._id,
         name: bot.botName,
       }));
-      console.log("Formatted Bots:", formattedBots); // Debugging
       setbotLists(formattedBots);
     }
   }, [botsDataRedux, botsDataLoader]);

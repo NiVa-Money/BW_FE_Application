@@ -32,7 +32,6 @@ const AllChats = () => {
   );
   const [advanceFeatureData, setAdvanceFeatureData] = useState<any>({});
 
-
   const [botLists, setbotLists] = useState<any>([]);
   const [channelName] = useState([
     { name: "Whatsapp", value: "whatsapp" },
@@ -61,7 +60,6 @@ const AllChats = () => {
         value: bot._id,
         name: bot.botName,
       }));
-      console.log("Formatted Bots:", formattedBots); // Debugging
       setbotLists(formattedBots);
     }
   }, [botsDataRedux, botsDataLoader]);
@@ -106,7 +104,6 @@ const AllChats = () => {
     }
   }, [allSessions]);
 
-  console.log("advanceFeatureDataadvanceFeatureData", advanceFeatureData);
   const [analysisSections, setAnalysisSections] = useState<AnalysisSection[]>(
     []
   );
@@ -156,7 +153,6 @@ const AllChats = () => {
     const messagesData = sessionsDataRedux?.sessions.filter(
       (obj) => obj._id === sessionId
     )[0].sessions;
-    console.log("Selected session ID:", sessionId, messagesData);
     setMessages(messagesData);
     dispatch(getAdvanceFeature(sessionId));
 

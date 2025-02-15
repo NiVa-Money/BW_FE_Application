@@ -29,10 +29,10 @@ export function* createWhatsAppCampaignSaga({
   try {
     // Call the service to create the campaign
     const campaignResponse = yield call(createWhatsAppCampaignService, payload);
-    console.log("Campaign Response:", campaignResponse.data);
+
     // Extract campaignId from the response data
     const campaignId = campaignResponse?.data?.campaignId;
-    console.log("Campaign ID:", campaignId);
+   
 
     yield put({
       type: CREATE_WHATSAPP_CAMPAIGN_SUCCESS,

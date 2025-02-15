@@ -88,7 +88,6 @@ export function* getWhatsappSaga({
 }): Generator<any> {
   try {
     const getWhatsappSuc = yield call(getWhatsappData, payload);
-    console.log("getWhatsappSuccess Response: ", getWhatsappSuc);
 
     // Dispatch action to save the full response in Redux
     // yield put(getWhatsappSuccess(response.data));

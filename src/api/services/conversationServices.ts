@@ -21,7 +21,6 @@ export const getUserAllSessionLiveService = async (payload: any) => {
 
 export const getAdvanceFeatureService = async (payload: any) => {
   try {
-    console.log("Sending API request with payload:", payload);
     const response = await axiosInstance.post(`/user/chat-analysis`, payload);
     return response.data;
   } catch (error) {

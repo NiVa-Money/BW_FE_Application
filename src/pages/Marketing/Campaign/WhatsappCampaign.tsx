@@ -171,9 +171,6 @@ const WhatsappCampaign: React.FC = () => {
               },
             }
         : null;
-    console.log("selected template", selectedTemplate);
-    console.log("templatename:", selectedTemplate.templateName); // Debugging
-    console.log("templateContent:", templateContent); // Debugging
     const campaignPayload: CampaignPayload = {
       campaignName,
       channel: "whatsapp",
