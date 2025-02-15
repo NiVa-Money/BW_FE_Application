@@ -4,11 +4,14 @@
 import { SmartToy, Person, Image, AttachFile, Send } from "@mui/icons-material";
 import Switch from "@mui/material/Switch";
 import React, { useEffect, useState } from "react";
-import { getAllSession, getAllSessionLive } from "../../../store/actions/conversationActions";
+import {
+  getAllSession,
+  getAllSessionLive,
+} from "../../../store/actions/conversationActions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import SessionsList from "../AllChats/SessionsList";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import io from "socket.io-client";
 
 const LiveChat: React.FC = (): React.ReactElement => {
   const [isAIEnabled, setIsAIEnabled] = useState(false);
@@ -20,7 +23,16 @@ const LiveChat: React.FC = (): React.ReactElement => {
     (state: RootState) => state?.userChat?.allSession?.data
   );
   const [botLists, setbotLists] = useState<any>([]);
-
+  const [socket, setSocket] = useState(null);
+  const [sessionId, setSessionId] = React.useState<string>("");
+  const [botIdLive, setBotIdLive] = React.useState<string>("");
+  const [userIdLive, setBotUserIdLive] = React.useState<string>("");
+  const [newMessage, setNewMessage] = React.useState<any>("");
+  const [isChatEnabled, setIsChatEnabled] = React.useState(false);
+  const [resolved, setResolved] = React.useState("");
+  const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] =
+    React.useState(false);
   const dispatch = useDispatch();
 
   const handleToggle = (event: {
@@ -80,6 +92,72 @@ const LiveChat: React.FC = (): React.ReactElement => {
     }
   }, [botsDataRedux?.botId?.length]);
 
+  const sendMessage = (event: any) => {
+    event.preventDefault();
+    if (!newMessage.trim() || !socket) return;
+
+    const messageObj = {
+      text: newMessage,
+      sender: "user",
+    };
+
+    setMessages((prevMessages: any) => [...prevMessages, messageObj]);
+
+    socket.emit("joinAdmin", {
+      chatRoom: sessionId,
+      userId: userIdLive,
+      botId: botIdLive,
+      question: newMessage,
+    });
+
+    setNewMessage("");
+  };
+
+  React.useEffect(() => {
+    if (sessionId && botIdLive && userIdLive) {
+      const newSocket = io(process.env.NEXT_PUBLIC_BASE_URL, {
+        query: {
+          isWidget: "false",
+          chatRoom: sessionId,
+          botId: botIdLive,
+          userId: userIdLive,
+        },
+      });
+
+      newSocket.on("connect_error", (error: any) => {
+        console.error("Socket connection error:", error);
+      });
+
+      newSocket.on("message", (message) => {
+        console.log("Received message:", message);
+
+        // Check if the message is a system message
+        if (
+          typeof message === "string" &&
+          message.includes("has joined the chat")
+        ) {
+          // Handle system messages like "Admin has joined the chat"
+          setMessages((prevMessages: any) => [
+            ...prevMessages,
+            { text: message, sender: "system" },
+          ]);
+        } else if (message.question) {
+          // Handle normal user messages (like "kaise ho")
+          setMessages((prevMessages: any) => [
+            ...prevMessages,
+            { text: message.question, sender: "bot" },
+          ]);
+        }
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        newSocket.disconnect();
+      };
+    }
+  }, [sessionId, botIdLive, userIdLive]);
+
   const handleSessionSelection = (sessionId: string) => {
     const messagesData = sessionsDataRedux?.sessions.filter(
       (obj: { _id: string }) => obj._id === sessionId
@@ -88,6 +166,54 @@ const LiveChat: React.FC = (): React.ReactElement => {
     setMessages(messagesData);
 
     setSelectedSessionId(sessionId);
+  };
+
+  const handleResolution = (resolution: any) => {
+    setResolved(resolution);
+    setShowConfirmationModal(false);
+    setShowFeedbackModal(true);
+  };
+
+  const handleToggleChat = () => {
+    if (isChatEnabled) {
+      // If the chat is being ended, show the confirmation modal
+      setShowConfirmationModal(true);
+    } else {
+      // Enable the chat immediately if it's being turned on
+      setIsChatEnabled(true);
+    }
+  };
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    sendMessage(e);
+  };
+
+  const renderMessages = () => {
+    return messages.map((message: any, index: number) => (
+      <div
+        key={index}
+        className={`flex w-full mb-4 ${
+          message.sender === "user"
+            ? "justify-end"
+            : message.sender === "system"
+            ? "justify-center"
+            : "justify-start"
+        }`}
+      >
+        <div
+          className={`w-fit max-w-[75%] p-2 rounded-xl ${
+            message.sender === "user"
+              ? "bg-purple-500"
+              : message.sender === "system"
+              ? "bg-green-400"
+              : "bg-gray-500"
+          }`}
+        >
+          <span className="text-white">{message.text}</span>
+        </div>
+      </div>
+    ));
   };
 
   return (
@@ -229,6 +355,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </div>
                 )
               )}
+              {renderMessages()}
             </div>
 
             {/* Quick Replies */}
@@ -248,22 +375,69 @@ const LiveChat: React.FC = (): React.ReactElement => {
               </div>
             </div>
 
-            {/* Input Area */}
-            <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50">
-              <button className="p-1.5 hover:bg-gray-200 rounded-full">
-                <Image className="w-5 h-5 text-gray-600" />
-              </button>
-              <button className="p-1.5 hover:bg-gray-200 rounded-full">
-                <AttachFile className="w-5 h-5 text-gray-600" />
-              </button>
-              <input
-                type="text"
-                placeholder="Message"
-                className="flex-1 bg-transparent outline-none text-sm"
-              />
-              <button className="p-1.5 hover:bg-gray-200 rounded-full">
-                <Send className="w-5 h-5 text-gray-600" />
-              </button>
+            <div className="flex flex-col gap-2.5 z-10 px-8 py-5 mt-2.5 w-[98%] h-auto text-base whitespace-nowrap bg-[#65558F] rounded-xl text-gray-300 max-md:flex-wrap max-md:px-5 max-md:max-w-full justify-end items-center">
+              <div className="flex justify-end items-center w-full">
+                <button
+                  onClick={handleToggleChat}
+                  className={`mr-4 px-4 py-2 rounded-full ${
+                    isChatEnabled ? "bg-green-500" : "bg-gray-50"
+                  } text-black`}
+                >
+                  {isChatEnabled ? "End Chat?" : "Turn on to chat now"}
+                </button>
+              </div>
+
+              {showConfirmationModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-black text-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                    <h2 className="text-lg font-semibold mb-4 text-center">
+                      Are you sure you want to end this conversation ?
+                    </h2>
+                    <div className="flex justify-around">
+                      <button
+                        onClick={() => handleResolution("Yes")}
+                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300"
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => handleResolution("No")}
+                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition duration-300"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isChatEnabled && (
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex items-center w-full gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50"
+                >
+                  <button className="p-1.5 hover:bg-gray-200 rounded-full">
+                    <Image className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button className="p-1.5 hover:bg-gray-200 rounded-full">
+                    <AttachFile className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <input
+                    type="text"
+                    placeholder="Enter your message..."
+                    className="flex-1 bg-transparent outline-none text-sm text-gray-600"
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    value={newMessage}
+                  />
+                  <button
+                    className="p-1.5 hover:bg-gray-200 rounded-full"
+                    aria-label="Send message"
+                    type="submit"
+                  >
+                    <Send className="w-5 h-5 text-gray-600" />
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         </div>
