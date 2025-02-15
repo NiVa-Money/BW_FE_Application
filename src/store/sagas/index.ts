@@ -49,11 +49,13 @@ import {
 } from "./whatsappDashboardSaga";
 import {
   getAdvanceFeatureSaga,
+  getUserAllSessionLiveSaga,
   getUserAllSessionSaga,
 } from "./conversationSagas";
 import {
   ADVANCE_FEATURE,
   USER_ALL_SESSION,
+  USER_ALL_SESSION_LIVE,
 } from "../actionTypes/conversationActionsTypes";
 
 export default function* rootSaga() {
@@ -74,5 +76,6 @@ export default function* rootSaga() {
   yield takeEvery(FETCH_WHATSAPP_MESSAGES_REQUEST, fetchWhatsAppMessagesSaga);
   yield takeEvery(TEST_BOT, testBotSaga);
   yield takeEvery(USER_ALL_SESSION, getUserAllSessionSaga);
+  yield takeEvery(USER_ALL_SESSION_LIVE, getUserAllSessionLiveSaga);
   yield takeEvery(ADVANCE_FEATURE, getAdvanceFeatureSaga);
 }

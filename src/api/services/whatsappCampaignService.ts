@@ -3,7 +3,7 @@ import axiosInstance from "../axiosConfig";
 import axios from "axios";
 
 /* Service to call the WhatsApp Campaign API */
- 
+
 export const createWhatsAppCampaignService = async (campaignData: any) => {
   try {
     const response = await axiosInstance.post(
@@ -88,7 +88,7 @@ export const fetchCampaignService = async () => {
     } else {
       console.error("Unexpected error:", error);
     }
-    throw error; 
+    throw error;
   }
 };
 
@@ -97,7 +97,6 @@ export const fetchWhatsAppTemplatesService = async (integrationId: string) => {
     const response = await axiosInstance.get(`/whatsapp/template`, {
       params: { integrationId },
     });
-    console.log("Templates fetched:", response.data);
 
     return response.data;
   } catch (error) {

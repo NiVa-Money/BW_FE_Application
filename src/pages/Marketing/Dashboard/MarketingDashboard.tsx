@@ -371,7 +371,7 @@ const MarketingDashboard = () => {
                 <Instagram sx={{ color: "#E4405F" }} />
                 <span className="text-sm font-medium">2 Active campaigns</span>
               </div>
-              <button className="text-indigo-600 text-sm">
+              <button className="text-[#65558F]-600 text-sm">
                 View dashboard
               </button>
             </div>
@@ -381,7 +381,7 @@ const MarketingDashboard = () => {
                 <span className="text-sm font-medium">1 Active campaign</span>
               </div>
               <button
-                className="text-indigo-600 text-sm"
+                className="text-[#65558F]-600 text-sm"
                 onClick={handleViewDashboard}
               >
                 View dashboard

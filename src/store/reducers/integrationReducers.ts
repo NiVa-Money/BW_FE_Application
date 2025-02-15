@@ -39,7 +39,7 @@ export const integrationReducer = (
 
 // interface WhatsappState {
 //   loading: boolean;
-  
+
 //   data: any | null;
 // }
 
@@ -71,7 +71,6 @@ export const whatsappcrudReducer = (
       };
 
     case GET_WHATSAPP_SUCCESS:
-      console.log("action", action.payload);
       return {
         ...state,
         crudIntegration: {

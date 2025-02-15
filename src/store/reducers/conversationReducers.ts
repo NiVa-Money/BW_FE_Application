@@ -6,6 +6,9 @@ import {
   ADVANCE_FEATURE,
   ADVANCE_FEATURE_FAILURE,
   ADVANCE_FEATURE_SUCCESS,
+  GET_USER_All_SESSION_FAILURE_LIVE,
+  GET_USER_All_SESSION_SUCCESS_LIVE,
+  USER_ALL_SESSION_LIVE,
 } from "../actionTypes/conversationActionsTypes";
 import { initialState } from "../initialState";
 
@@ -30,6 +33,22 @@ export default function userChatReducers(
         allSession: { data: action.payload, loader: false },
       };
 
+    case USER_ALL_SESSION_LIVE:
+      return {
+        ...state,
+        allSessionLive: { data: action.payload, loader: false },
+      };
+    case GET_USER_All_SESSION_SUCCESS_LIVE:
+      return {
+        ...state,
+        allSessionLive: { data: action.payload, loader: true },
+      };
+    case GET_USER_All_SESSION_FAILURE_LIVE:
+      return {
+        ...state,
+        allSessionLive: { data: action.payload, loader: false },
+      };
+      
     case ADVANCE_FEATURE:
       return {
         ...state,

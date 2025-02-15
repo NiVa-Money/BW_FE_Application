@@ -41,7 +41,7 @@ const WhatsAppIntegration: React.FC = () => {
         _id: bot._id,
         botName: bot.botName,
       }));
-      console.log("Formatted Bots:", formattedBots); // Debugging
+
       setbotLists(formattedBots);
     }
   }, [botsDataRedux, botsDataLoader]);
@@ -63,7 +63,6 @@ const WhatsAppIntegration: React.FC = () => {
     }
 
     try {
-      console.log("Form Data:", formData);
       dispatch(saveWhatsapp(formData)); // Trigger API call
       if (secretToken && webhookUrl) {
         setIsModalOpen(true); // Only open the modal if the data is available

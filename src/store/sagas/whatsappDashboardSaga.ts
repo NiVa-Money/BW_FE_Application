@@ -19,7 +19,7 @@ export function* whatsappDashboardSaga({
 }): Generator<any> {
   try {
     const dashboardData = yield call(whatsAppDashboardService, payload);
-    console.log("whatsapp dashbord data", dashboardData);
+ 
     yield put({
       type: FETCH_WHATSAPP_DASHBOARD_SUCCESS,
       payload: dashboardData,
@@ -38,7 +38,7 @@ export function* fetchWhatsAppMessagesSaga(
 ): Generator<any, void, any> {
   try {
     const { page, limit, filter } = action.payload; // Extract values from payload
-    console.log("Fetching data for:", { page, limit, filter });
+  
 
     // Pass full payload object to the service function
     const data = yield call(whatsAppDashboardMessagesService, {
@@ -46,7 +46,7 @@ export function* fetchWhatsAppMessagesSaga(
       limit,
       filter,
     });
-    console.log("WhatsApp messages data:", data);
+ 
 
     yield put({
       type: FETCH_WHATSAPP_MESSAGES_SUCCESS,
