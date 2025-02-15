@@ -1,5 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Paper, Typography, Button, Card, CardContent } from "@mui/material";
+import {
+  Paper,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Select,
+  MenuItem,
+  FormControl,
+} from "@mui/material";
 import { COLORS } from "../../constants";
 import { RootState } from "../../store";
 import { getBotsAction } from "../../store/actions/botActions";
@@ -128,7 +137,8 @@ const DashboardPanel = () => {
         setStats(response);
       }
     } catch (err) {
-      console.error("Error Calling Dashboard API:", err);
+      console.log("Error which fetching dashboard data", err);
+      throw new Error(err?.message);
     } finally {
       setIsLoading(false);
     }
@@ -198,6 +208,12 @@ const DashboardPanel = () => {
     await fetchData(startDate, endDate);
   };
 
+  const handleBotSelection = (selectedBotId: string) => {
+    const selectedBot = botsDataRedux.find((bot) => bot._id === selectedBotId);
+    setBotId(selectedBotId);
+    setBotName(selectedBot?.botName || "");
+  };
+
   const latestFetchedTodaysData = useLatestFetchData(botId, isToday);
 
   // Set default bot ID
@@ -225,7 +241,7 @@ const DashboardPanel = () => {
     if (isToday && latestFetchedTodaysData) {
       setStats(latestFetchedTodaysData);
     }
-  }, [isToday, latestFetchedTodaysData]);
+  }, [latestFetchedTodaysData]);
 
   return (
     <div>
@@ -262,10 +278,27 @@ const DashboardPanel = () => {
             Create an Agent
           </Button>
         </Card>
-        <DateRangePicker
-          onToday={onToday}
-          onDateRangeChange={handleDateRangeChange}
-        />
+        <div className="flex gap-4">
+          <DateRangePicker
+            onToday={onToday}
+            onDateRangeChange={handleDateRangeChange}
+          />
+
+          {botsDataRedux?.length > 0 && (
+            <FormControl size="small" sx={{ minWidth: 85 }}>
+              <Select
+                value={botId}
+                onChange={(event) => handleBotSelection(event.target.value)}
+              >
+                {botsDataRedux?.map((bot: any) => (
+                  <MenuItem key={bot._id} value={bot._id}>
+                    {bot.botName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </div>
       </div>
 
       {/* Header */}
