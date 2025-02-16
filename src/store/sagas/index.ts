@@ -41,9 +41,11 @@ import {
 } from "./whatsappCampaignSaga";
 import {
   FETCH_WHATSAPP_DASHBOARD_REQUEST,
+  FETCH_WHATSAPP_INSIGHTS_REQUEST,
   FETCH_WHATSAPP_MESSAGES_REQUEST,
 } from "../actionTypes/whatsappDashboardActionTypes";
 import {
+  fetchWhatsAppCampaignSaga,
   fetchWhatsAppMessagesSaga,
   whatsappDashboardSaga,
 } from "./whatsappDashboardSaga";
@@ -74,6 +76,7 @@ export default function* rootSaga() {
   yield takeEvery(DELETE_WHATSAPP_REQUEST, deleteWhatsappSaga);
   yield takeEvery(FETCH_WHATSAPP_DASHBOARD_REQUEST, whatsappDashboardSaga);
   yield takeEvery(FETCH_WHATSAPP_MESSAGES_REQUEST, fetchWhatsAppMessagesSaga);
+  yield takeEvery(FETCH_WHATSAPP_INSIGHTS_REQUEST, fetchWhatsAppCampaignSaga);
   yield takeEvery(TEST_BOT, testBotSaga);
   yield takeEvery(USER_ALL_SESSION, getUserAllSessionSaga);
   yield takeEvery(USER_ALL_SESSION_LIVE, getUserAllSessionLiveSaga);

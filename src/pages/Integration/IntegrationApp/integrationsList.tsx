@@ -33,7 +33,7 @@ export default function IntegrationList() {
 
   useEffect(() => {
     dispatch(getWhatsappRequest(""));
-  }, [dispatch]);
+  }, []);
 
   const integrationArray = crudIntegrationData
     ? Array.isArray(crudIntegrationData)

@@ -6,6 +6,9 @@ import {
   FETCH_WHATSAPP_MESSAGES_REQUEST,
   FETCH_WHATSAPP_MESSAGES_FAILURE,
   FETCH_WHATSAPP_MESSAGES_SUCCESS,
+  FETCH_WHATSAPP_INSIGHTS_FAILURE,
+  FETCH_WHATSAPP_INSIGHTS_REQUEST,
+  FETCH_WHATSAPP_INSIGHTS_SUCCESS,
 } from "../actionTypes/whatsappDashboardActionTypes";
 import { initialState } from "../initialState";
 
@@ -25,6 +28,15 @@ export const whatsappDashboardReducer = (
     case FETCH_WHATSAPP_MESSAGES_SUCCESS:
       return { ...state, loading: false, messages: action.payload };
     case FETCH_WHATSAPP_MESSAGES_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+
+    case FETCH_WHATSAPP_INSIGHTS_REQUEST:
+      return { ...state, loading: true, error: null };
+
+    case FETCH_WHATSAPP_INSIGHTS_SUCCESS:
+      return { ...state, loading: false, campaignInsights: action.payload };
+
+    case FETCH_WHATSAPP_INSIGHTS_FAILURE:
       return { ...state, loading: false, error: action.payload };
     default:
       return state;

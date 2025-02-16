@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   FETCH_WHATSAPP_DASHBOARD_REQUEST,
+  FETCH_WHATSAPP_INSIGHTS_REQUEST,
   FETCH_WHATSAPP_MESSAGES_REQUEST,
 } from "../actionTypes/whatsappDashboardActionTypes";
 
@@ -8,12 +9,6 @@ export const fetchWhatsAppDashboardRequest = (campaignId: any) => ({
   type: FETCH_WHATSAPP_DASHBOARD_REQUEST,
   payload: campaignId,
 });
-
-// export const fetchWhatsAppMessagesRequest = (page: number) => ({
-//   type: FETCH_WHATSAPP_MESSAGES_REQUEST,
-//   payload: { page },
-// });
-
 
 export const fetchWhatsAppMessagesRequest = (params: {
   page: number;
@@ -27,4 +22,11 @@ export const fetchWhatsAppMessagesRequest = (params: {
   type: FETCH_WHATSAPP_MESSAGES_REQUEST,
   payload: params,
 });
+
+
+export const fetchWhatsAppInsightsRequest = (campaignId: string) => ({
+  type: FETCH_WHATSAPP_INSIGHTS_REQUEST,
+  payload: campaignId,
+});
+
 
