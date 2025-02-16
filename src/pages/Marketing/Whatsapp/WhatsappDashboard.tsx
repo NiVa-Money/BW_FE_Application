@@ -48,7 +48,7 @@ interface DashboardProps {
 const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [date, setDate] = useState<Date | null>(null);
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(1);
   const [limit, _setLimit] = useState(10);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
