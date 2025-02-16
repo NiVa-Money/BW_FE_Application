@@ -57,6 +57,7 @@ export const initialState: any = {
     error: null,
     dashboardData: [],
     messages: [],
+    campaignInsights : [],
   },
 
   userChat: {

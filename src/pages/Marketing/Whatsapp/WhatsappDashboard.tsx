@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -14,6 +15,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import AddIcon from "@mui/icons-material/Add";
+import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import {
   Message,
@@ -29,10 +32,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import {
   fetchWhatsAppDashboardRequest,
+  fetchWhatsAppInsightsRequest,
   fetchWhatsAppMessagesRequest,
 } from "../../../store/actions/whatsappDashboardActions";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { Card, CardContent, Typography } from "@mui/material";
+import { AnimatePresence, motion } from "framer-motion";
 import { COLORS } from "../../../constants";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 
@@ -68,6 +74,11 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   } = useSelector(
     (state: RootState) => state?.whatsappDashboard?.dashboardData?.data || {}
   );
+
+  const insights = useSelector(
+    (state: RootState) => state.whatsappDashboard?.campaignInsights || []
+  );
+  console.log("insights", insights);
 
   // Get messages and total pages for the table
   const messages = useSelector(
@@ -213,6 +224,25 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     </div>
   );
 
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
+
+  const handleNext = () => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % 3);
+  };
+
+  const handlePrev = () => {
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + 3) % 3);
+  };
+
+  useEffect(() => {
+    if (campaignId) {
+      dispatch(fetchWhatsAppInsightsRequest(campaignId));
+    }
+  }, [campaignId]);
+
   return (
     <div className="p-6">
       {/* Stats Section */}
@@ -328,17 +358,214 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               </p>
             </div>
           </div>
-          <div className="space-y-4">
-            {[
-              "AI-driven audience segmentation",
-              "Optimized ad performance metrics",
-              "Customer behavior trend analysis",
-            ].map((text, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span>{text}</span>
+          {insights?.campaignInsights ? (
+            <div className="relative">
+              <AnimatePresence initial={false} custom={direction}>
+                <motion.div
+                  key={currentIndex}
+                  custom={direction}
+                  variants={{
+                    enter: (direction) => ({
+                      x: direction > 0 ? 300 : -300,
+                      opacity: 0,
+                    }),
+                    center: {
+                      x: 0,
+                      opacity: 1,
+                    },
+                    exit: (direction) => ({
+                      x: direction > 0 ? -300 : 300,
+                      opacity: 0,
+                    }),
+                  }}
+                  className="min-w-[300px] p-2"
+                >
+                  <div className="mt-0 mb-2">
+                    <p className="text-2xl font-semibold mr-4 text-[#65558F] text-center">
+                      {insights?.campaignInsights?.campaignName}
+                    </p>
+                  </div>
+                  {currentIndex === 0 && (
+                    <Card className="mx-auto">
+                      <CardContent>
+                        <Typography variant="h5" gutterBottom>
+                          Engagement Analysis
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Most Engaged User:</strong>{" "}
+                          {
+                            insights.campaignInsights.engagementAnalysis
+                              .mostEngagedUser
+                          }
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          gutterBottom
+                        >
+                          <strong>High Intent Users:</strong>{" "}
+                          {insights.campaignInsights.engagementAnalysis.highIntentUsers.join(
+                            ", "
+                          )}
+                        </Typography>
+                        <div>
+                          <Typography variant="subtitle1">
+                            Common Queries:
+                          </Typography>
+                          {Object.entries(
+                            insights.campaignInsights.engagementAnalysis
+                              .commonQueries
+                          ).map(([queryType, queries]) => (
+                            <div key={queryType}>
+                              <Typography variant="body2" color="textSecondary">
+                                <strong>{queryType}:</strong>{" "}
+                                {Array.isArray(queries)
+                                  ? queries.join(", ")
+                                  : ""}
+                              </Typography>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {currentIndex === 1 && (
+                    <Card className="mx-auto">
+                      <CardContent>
+                        <Typography variant="h5" gutterBottom>
+                          Improvement Opportunities
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          gutterBottom
+                        >
+                          <strong>Reduce Failure Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.improvementOpportunities
+                              .reduceFailureRate
+                          }
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          gutterBottom
+                        >
+                          <strong>Increase Engagement:</strong>{" "}
+                          {
+                            insights.campaignInsights.improvementOpportunities
+                              .increaseEngagement
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Boost Response Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.improvementOpportunities
+                              .boostResponseRate
+                          }
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {currentIndex === 2 && (
+                    <Card className="mx-auto">
+                      <CardContent>
+                        <Typography variant="h5" gutterBottom>
+                          Performance Analytics
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Total Contacts:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .totalContacts
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Total Messages Sent:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .totalMessagesSent
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Delivered Messages:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .deliveredMessages
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Delivery Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .deliveryRate
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Read Messages:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .readMessages
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Read Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .readRate
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Replied Messages:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .repliedMessages
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Response Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .responseRate
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Failed Messages:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .failedMessages
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Failure Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .failureRate
+                          }
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+              <div className="flex justify-between mt-4">
+                <button
+                  onClick={handlePrev}
+                  className="px-4 py-2 bg-[#65558F] text-white rounded-full"
+                >
+                  <KeyboardArrowLeftRoundedIcon className="w-[18px]" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="px-4 py-2 bg-[#65558F] text-white rounded-full"
+                >
+                  <KeyboardArrowRightRoundedIcon className="w-[18px]" />
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div>No insights available.</div>
+          )}
         </div>
 
         {/* Campaign Section */}

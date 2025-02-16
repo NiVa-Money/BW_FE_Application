@@ -34,9 +34,31 @@ export const whatsAppDashboardMessagesService = async (params: {
       "/marketing/whatsapp/messages-overview",
       params // Send full request object
     );
-    
-    return response.data; // Assuming the response contains the required data
 
+    return response.data; // Assuming the response contains the required data
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error navigating to WhatsApp dashboard:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+export const whatsAppDashboardCampaignInsightsService = async (
+  campaignId: string
+) => {
+  try {
+    const response = await axiosInstance.post(
+      "/marketing/whatsapp/campaign-insights",
+      { campaignId } // Send as an object with a single string property
+    );
+
+    return response.data; // Assuming the response contains the required data
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(
