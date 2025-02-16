@@ -100,34 +100,25 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
 
   console.log("select campaign id ", selectedCampaignId);
 
+  // Always call API on mount (or when any filter changes)
   useEffect(() => {
-    if (selectedCampaignName) {
-      const filters: any = {
-        receiverNumber: selectedReceiverNumber,
-        status: selectedStatus,
-        intent: selectedIntent,
-        sentiment: selectedSentiment,
-        replied: selectedReplied,
-      };
-
-      console.log(
-        "Selected Campaign Name:",
-        selectedCampaignName,
-        selectedCampaignId
-      );
-
-      if (selectedCampaignId) {
-        filters.campaignIds = [selectedCampaignId]; // Only include campaignIds if it's valid
-      }
-
-      dispatch(
-        fetchWhatsAppMessagesRequest({
-          page,
-          limit,
-          filter: filters, // Pass dynamically built filters
-        })
-      );
+    const filters: any = {};
+    if (selectedReceiverNumber) filters.receiverNumber = selectedReceiverNumber;
+    if (selectedStatus) filters.status = selectedStatus;
+    if (selectedIntent) filters.intent = selectedIntent;
+    if (selectedSentiment) filters.sentiment = selectedSentiment;
+    if (selectedReplied) filters.replied = selectedReplied;
+    if (selectedCampaignName && selectedCampaignId) {
+      filters.campaignIds = [selectedCampaignId];
     }
+
+    // By default, when no filters are applied, only `page` and `limit` are sent.
+    const payload: any = { page, limit };
+    if (Object.keys(filters).length > 0) {
+      payload.filter = filters;
+    }
+
+    dispatch(fetchWhatsAppMessagesRequest(payload));
   }, [
     selectedCampaignName,
     selectedCampaignId,
@@ -135,10 +126,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     limit,
     selectedReceiverNumber,
     selectedStatus,
-    dispatch,
     selectedIntent,
     selectedSentiment,
     selectedReplied,
+    dispatch,
   ]);
 
   const handlePageChange = (newPage: number) => {
@@ -439,6 +430,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
             </Select>
           </FormControl>
 
+          {/* Hard-coded Status dropdown */}
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Status</InputLabel>
             <Select
@@ -448,9 +440,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {Array.from(
-                new Set(messages.map((msg: { status: string }) => msg.status))
-              ).map((status: string, index: number) => (
+              {["sent", "delivered", "read", "failed"].map((status, index) => (
                 <MenuItem key={index} value={status}>
                   {status}
                 </MenuItem>
@@ -458,6 +448,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
             </Select>
           </FormControl>
 
+          {/* Hard-coded Intent dropdown */}
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Intent</InputLabel>
             <Select
@@ -467,16 +458,17 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {Array.from(
-                new Set(messages.map((msg: { intent: string }) => msg.intent))
-              ).map((intent: string, index: number) => (
-                <MenuItem key={index} value={intent}>
-                  {intent}
-                </MenuItem>
-              ))}
+              {["Interested", "Not Interested", "Complaint", "Other"].map(
+                (intent, index) => (
+                  <MenuItem key={index} value={intent}>
+                    {intent}
+                  </MenuItem>
+                )
+              )}
             </Select>
           </FormControl>
 
+          {/* Hard-coded Sentiment dropdown */}
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Sentiment</InputLabel>
             <Select
@@ -486,11 +478,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {Array.from(
-                new Set(
-                  messages.map((msg: { sentiment: string }) => msg.sentiment)
-                )
-              ).map((sentiment: string, index: number) => (
+              {["Positive", "Negative", "Neutral"].map((sentiment, index) => (
                 <MenuItem key={index} value={sentiment}>
                   {sentiment}
                 </MenuItem>
