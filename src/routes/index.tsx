@@ -19,6 +19,7 @@ import CrudIntegration from "../pages/Integration/IntegrationApp/crudIntegration
 import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
 import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
+import Settings from "../pages/Settings";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -95,7 +96,12 @@ export const autRoutes: any[] = [
     component: <CrudIntegration />,
   },
   { id: 11, component: <AdminPanel />, path: "/help-center" },
+  {
+    id: 12,
+    component: <Settings />,
+    path: '/settings'
 
+  }
   // {
   //   path: "/integrations",
   //   component: <IntegrationsPage />

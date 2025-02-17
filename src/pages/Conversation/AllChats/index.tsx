@@ -164,6 +164,7 @@ const AllChats = () => {
     );
   };
   const getBotSession = (e) => {
+    console.log(e.target, 'e')
     const botId = e.target.value;
     setBotIdVal(botId);
     dispatch(
@@ -198,6 +199,7 @@ const AllChats = () => {
         <select
           className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
           onChange={(e) => getBotSession(e)}
+          name="gey"
         >
           <option value="">Select a bot</option>
           {botLists.map((bot: { value: string | number; name: string }) => (

@@ -2,6 +2,7 @@ export interface StatsCardProps {
   title: string;
   content: string;
   iconSrc?: string;
+  bgColor?: string;
 }
 export interface DashboardResponse {
   success: boolean;

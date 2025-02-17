@@ -163,7 +163,7 @@ const EngagementTab = () => {
       <div className="grid grid-cols-12 gap-4">
         {/* Left Column - User Profiles */}
         <div className="col-span-3">
-          <div className="bg-[#65558F] bg-opacity-[0.08]  rounded-lg">
+          <div className="bg-[#65558f] bg-opacity-[0.08]  rounded-lg">
             {userProfiles.map((profile, index) => (
               <div
                 key={index}
@@ -174,11 +174,10 @@ const EngagementTab = () => {
                   <p className="text-base">Jessica@maker</p>
                   <p className="text-base text-gray-500">hello , how are you</p>
                   <p
-                    className={`text-base ${
-                      profile.sentiment >= 50
+                    className={`text-base ${profile.sentiment >= 50
                         ? "text-green-500"
                         : "text-red-500"
-                    }`}
+                      }`}
                   >
                     {profile.sentiment}% Positive comment
                   </p>
