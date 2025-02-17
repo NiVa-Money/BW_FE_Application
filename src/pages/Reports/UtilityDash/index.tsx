@@ -10,7 +10,7 @@ import {
   InputLabel,
   Select,
 } from "@mui/material";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   XAxis,
   YAxis,
@@ -22,6 +22,10 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { RootState } from "../../../store";
+import { useDispatch, useSelector } from "react-redux";
+import { format } from "date-fns";
+import { fetchShopifyDashboardRequest } from "../../../store/actions/reportActions";
 
 const successData = [
   { day: "Sunday", value1: 50, value2: 60 },
@@ -41,69 +45,6 @@ const cancelData = [
   { id: 5, value: 80 },
   { id: 6, value: 45 },
   { id: 7, value: 55 },
-];
-
-const utilityMessageData = [
-  {
-    type: "Welcome Message",
-    totalSent: 1597,
-    failed: 96,
-    prepaid: 17,
-    cod: 1484,
-    confirmed: 492,
-    canceled: 138,
-    noAction: 854,
-  },
-  {
-    type: "Reminder 1",
-    totalSent: 854,
-    failed: "NA",
-    prepaid: "NA",
-    cod: 854,
-    confirmed: 447,
-    canceled: 56,
-    noAction: 351,
-  },
-  {
-    type: "Reminder 2",
-    totalSent: 351,
-    failed: "NA",
-    prepaid: "NA",
-    cod: 351,
-    confirmed: 202,
-    canceled: 12,
-    noAction: 137,
-  },
-  {
-    type: "Final Reminder",
-    totalSent: 137,
-    failed: "NA",
-    prepaid: "NA",
-    cod: 137,
-    confirmed: 85,
-    canceled: 4,
-    noAction: 48,
-  },
-  {
-    type: "Shipped Message Sent",
-    totalSent: 1028,
-    failed: "NA",
-    prepaid: "NA",
-    cod: "NA",
-    confirmed: "NA",
-    canceled: "NA",
-    noAction: "NA",
-  },
-  {
-    type: "Delivered Message Sent",
-    totalSent: "NA",
-    failed: "NA",
-    prepaid: "NA",
-    cod: "NA",
-    confirmed: "NA",
-    canceled: "NA",
-    noAction: "NA",
-  },
 ];
 
 // Data for Message Performance
@@ -135,27 +76,154 @@ const messagePerformanceData = [
 ];
 
 const UtilityDash = () => {
-  const [rangeType, setRangeType] = useState<"day" | "week" | "month">("day");
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [rangeType, setRangeType] = useState("day");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
-  const handleRangeTypeChange = (event: any) => {
-    setRangeType(event.target.value);
-    // Reset dates when range type is changed
-    setStartDate(null);
-    setEndDate(null);
-  };
+  const dispatch = useDispatch();
 
-  const handleStartDateChange = (date: Date | null) => {
-    setStartDate(date);
-    if (rangeType === "week" || rangeType === "month") {
-      setEndDate(date);
+  const shopifyData = useSelector(
+    (state: RootState) => state?.shopifyDashboard?.statistics
+  );
+  console.log("shopify ", shopifyData);
+
+  const utilityMessageData = [
+    {
+      type: "Welcome Message",
+      totalSent: shopifyData?.statistics?.totalWelcomeMessageSent ?? 0,
+      failed: "NA",
+      prepaid: "NA",
+      cod: "NA",
+      confirmed: shopifyData?.statistics?.stats?.welcome?.confirms ?? 0,
+      canceled: shopifyData?.statistics?.stats?.welcome?.cancels ?? 0,
+      noAction:
+        (shopifyData?.statistics?.totalWelcomeMessageSent ?? 0) -
+        ((shopifyData?.statistics?.stats?.welcome?.confirms ?? 0) +
+          (shopifyData?.statistics?.stats?.welcome?.cancels ?? 0)),
+    },
+    {
+      type: "Reminder 1",
+      totalSent: shopifyData?.statistics?.reminder_1 ?? 0,
+      failed: "NA",
+      prepaid: "NA",
+      cod: "NA",
+      confirmed: shopifyData?.statistics?.stats?.reminder1?.confirms ?? 0,
+      canceled: shopifyData?.statistics?.stats?.reminder1?.cancels ?? 0,
+      noAction:
+        (shopifyData?.statistics?.reminder_1 ?? 0) -
+        ((shopifyData?.statistics?.stats?.reminder1?.confirms ?? 0) +
+          (shopifyData?.statistics?.stats?.reminder1?.cancels ?? 0)),
+    },
+    {
+      type: "Reminder 2",
+      totalSent: shopifyData?.statistics?.reminder_2 ?? 0,
+      failed: "NA",
+      prepaid: "NA",
+      cod: "NA",
+      confirmed: shopifyData?.statistics?.stats?.reminder2?.confirms ?? 0,
+      canceled: shopifyData?.statistics?.stats?.reminder2?.cancels ?? 0,
+      noAction:
+        (shopifyData?.statistics?.reminder_2 ?? 0) -
+        ((shopifyData?.statistics?.stats?.reminder2?.confirms ?? 0) +
+          (shopifyData?.statistics?.stats?.reminder2?.cancels ?? 0)),
+    },
+    {
+      type: "Final Reminder",
+      totalSent: shopifyData?.statistics?.reminder_3 ?? 0,
+      failed: "NA",
+      prepaid: "NA",
+      cod: "NA",
+      confirmed: shopifyData?.statistics?.stats?.reminder3?.confirms ?? 0,
+      canceled: shopifyData?.statistics?.stats?.reminder3?.cancels ?? 0,
+      noAction:
+        (shopifyData?.statistics?.reminder_3 ?? 0) -
+        ((shopifyData?.statistics?.stats?.reminder3?.confirms ?? 0) +
+          (shopifyData?.statistics?.stats?.reminder3?.cancels ?? 0)),
+    },
+    {
+      type: "Shipped Message Sent",
+      totalSent: shopifyData?.statistics?.totalShipmentMessageSent ?? 0,
+      failed: "NA",
+      prepaid: "NA",
+      cod: "NA",
+      confirmed: "NA",
+      canceled: "NA",
+      noAction: "NA",
+    },
+    {
+      type: "Delivered Message Sent",
+      totalSent: "NA",
+      failed: "NA",
+      prepaid: "NA",
+      cod: "NA",
+      confirmed: "NA",
+      canceled: "NA",
+      noAction: "NA",
+    },
+  ];
+
+  const statCards = [
+    { label: "COD", value: shopifyData?.statistics?.codOrders ?? 0 },
+    {
+      label: "Welcome Message",
+      value: shopifyData?.statistics?.totalWelcomeMessageSent ?? 0,
+    },
+    {
+      label: "First Reminder Sent",
+      value: shopifyData?.statistics?.reminder_1 ?? 0,
+    },
+    {
+      label: "Second Reminder Sent",
+      value: shopifyData?.statistics?.reminder_2 ?? 0,
+    },
+    {
+      label: "Final Reminder Sent",
+      value: shopifyData?.statistics?.reminder_3 ?? 0,
+    },
+    { label: "Auto Cancel", value: shopifyData?.statistics?.autoCancel ?? 0 },
+  ];
+
+  const handleRangeTypeChange = (event) => {
+    const newRangeType = event.target.value;
+    setRangeType(newRangeType);
+
+    // Reset endDate when changing range type (if not selecting a range with 'day')
+    if (newRangeType === "day") {
+      setEndDate(null); // Reset the end date if selecting 'day'
     }
   };
 
-  const handleEndDateChange = (date: Date | null) => {
-    setEndDate(date);
+  const handleStartDateChange = (newStartDate) => {
+    setStartDate(newStartDate);
+
+    // If the range type is 'week' or 'month', set the end date based on the selected start date.
+    if (rangeType === "week" && newStartDate) {
+      const newEndDate = new Date(newStartDate);
+      newEndDate.setDate(newEndDate.getDate() + 6); // 7 days later for the week range
+      setEndDate(newEndDate);
+    } else if (rangeType === "month" && newStartDate) {
+      const newEndDate = new Date(newStartDate);
+      newEndDate.setMonth(newEndDate.getMonth() + 1); // 1 month later for the month range
+      setEndDate(newEndDate);
+    }
   };
+
+  const handleEndDateChange = (newEndDate) => {
+    setEndDate(newEndDate);
+  };
+  useEffect(() => {
+    if (!startDate || !endDate) {
+      console.error("Start or end date is missing");
+      return;
+    }
+
+    const formattedStartDate = format(startDate, "yyyy-MM-dd");
+    const formattedEndDate = format(endDate, "yyyy-MM-dd");
+
+    dispatch(
+      fetchShopifyDashboardRequest(formattedStartDate, formattedEndDate)
+    );
+  }, [startDate, endDate, dispatch]);
 
   return (
     <div className="p-6 bg-white min-h-screen">
@@ -164,7 +232,7 @@ const UtilityDash = () => {
           Utility Message Dashboard
         </h1>
 
-        <div className="grid grid-cols-6 gap-4 mb-6 ">
+        {/* <div className="grid grid-cols-6 gap-4 mb-6 ">
           {[
             { label: "COD", value: "3500" },
             { label: "Welcome Message", value: "1230" },
@@ -173,6 +241,27 @@ const UtilityDash = () => {
             { label: "Final Reminder Sent", value: "1000" },
             { label: "Auto Cancel", value: "1000" },
           ].map((stat, index) => (
+            <Card
+              key={index}
+              style={{ backgroundColor: "rgba(101,85,143,0.08)" }}
+            >
+              <CardContent>
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">{stat.label}</p>
+                    <p className="text-lg font-semibold">{stat.value}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div> */}
+
+        <div className="grid grid-cols-6 gap-4 mb-6">
+          {statCards.map((stat, index) => (
             <Card
               key={index}
               style={{ backgroundColor: "rgba(101,85,143,0.08)" }}
