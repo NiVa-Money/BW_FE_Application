@@ -17,7 +17,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
-import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
+import { MenuItem, Select, FormControl, InputLabel, SelectChangeEvent } from "@mui/material";
 import {
   Message,
   Visibility,
@@ -214,6 +214,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     }));
   }, [engagementRateMetrics, campaign]);
 
+  const handleCampaignChange = (e: SelectChangeEvent<string>) => {
+    setCampaign(e.target.value as string);
+  };
+
   const setScheduleDate = (newValue: Date | null): void => {
     setDate(newValue);
   };
@@ -237,11 +241,23 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     setCurrentIndex((prev) => (prev - 1 + 3) % 3);
   };
 
+  // useEffect(() => {
+  //   if (campaignId) {
+  //     dispatch(fetchWhatsAppInsightsRequest(campaignId));
+  //   }
+  // }, [campaignId]);
+
   useEffect(() => {
-    if (campaignId) {
-      dispatch(fetchWhatsAppInsightsRequest(campaignId));
+    if (campaign && campaignData?.length) {
+      const selectedCampaignObj = campaignData.find(
+        (c: { campaignName: string; campaignId: string }) =>
+          c.campaignName === campaign
+      );
+      if (selectedCampaignObj?.campaignId) {
+        dispatch(fetchWhatsAppInsightsRequest(selectedCampaignObj.campaignId));
+      }
     }
-  }, [campaignId]);
+  }, [campaign, campaignData, dispatch]);
 
   return (
     <div className="p-6">
@@ -279,7 +295,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
             <InputLabel className="text-[#65558F]">Campaign Name</InputLabel>
             <Select
               value={campaign}
-              onChange={(e) => setCampaign(e.target.value)}
+              onChange={handleCampaignChange}
               label="Campaign Name"
               className="bg-white border border-[#65558F] rounded-full text-sm"
             >
@@ -382,7 +398,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
                 >
                   <div className="mt-0 mb-2">
                     <p className="text-2xl font-semibold mr-4 text-[#65558F] text-center">
-                      {insights?.campaignInsights?.campaignName}
+                      {campaign}
                     </p>
                   </div>
                   {currentIndex === 0 && (
