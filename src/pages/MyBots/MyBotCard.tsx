@@ -3,6 +3,7 @@ import { FaTrashAlt } from 'react-icons/fa';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import EditIcon from '@mui/icons-material/Edit';
+import { COLORS } from '../../constants';
 interface CardProps {
     name: string;
     description: string;
@@ -30,8 +31,7 @@ const MyBotCard: React.FC<CardProps> = ({
 
 }) => {
     return (
-        <div className="border border-gray-300 rounded-lg p-4 flexs md:flex-row w-[100%] items-center md:items-start shadow-sm" >
-            {/* Left Section - Avatar */}
+        <div style={{ backgroundColor: `${COLORS.LIGHTGRAY}` }} className={`border border-gray-300 rounded-lg p-4 flexs md:flex-row w-[100%] items-center md:items-start shadow-sm`} >
             <div className="flex-shrink-0 flex items-center justify-between w-24 h-24 rounded-full bg-gray-100">
                 <img
                     src="/assets/bot1.svg"
