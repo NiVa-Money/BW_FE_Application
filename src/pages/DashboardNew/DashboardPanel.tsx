@@ -107,12 +107,12 @@ const DashboardPanel = () => {
   const [botName, setBotName] = useState("");
   const [stats, setStats] = useState<DashboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isToday, setIsToday] = useState(false);
   const [fetchUpdatedData, setFetchUpdatedData] = useState(true);
   const [dateRange, setDateRange] = useState({
     startDate: null,
     endDate: null,
   });
+  let isToday = true;
 
   const userIdLocal = localStorage.getItem("user_id");
   const dispatch = useDispatch();
@@ -205,13 +205,15 @@ const DashboardPanel = () => {
   }, [stats]);
 
   const onToday = (value: boolean) => {
-    setIsToday(value);
+    isToday = value;
   };
 
   // Handle date range change
   const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
     setDateRange({ startDate, endDate });
-    await fetchData(startDate, endDate);
+    if (!isToday) {
+      await fetchData(startDate, endDate);
+    }
   };
 
   const handleBotSelection = (selectedBotId: string) => {

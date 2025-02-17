@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Menu,
@@ -65,8 +65,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       // Set start date to 12:00 AM today
       startDate = new Date(now);
       startDate.setHours(0, 0, 0, 0);
+      onToday(true)
     } else {
       startDate = subDays(now, days);
+      onToday(false)
     }
 
     setIsCustomRange(false);
@@ -89,11 +91,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (selectedRange === "Today") {
-      onToday(true);
-    } else onToday(false);
-  }, [selectedRange]);
 
   return (
     <div className="relative">
