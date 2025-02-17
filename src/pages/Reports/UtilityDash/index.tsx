@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import TrendingUp from "@mui/icons-material/TrendingUp";
-import AddIcon from "@mui/icons-material/Add";
 import {
   Card,
   CardContent,
@@ -23,7 +22,6 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { useNavigate } from "react-router-dom";
 
 const successData = [
   { day: "Sunday", value1: 50, value2: 60 },
@@ -141,8 +139,6 @@ const UtilityDash = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
-  const navigate = useNavigate();
-
   const handleRangeTypeChange = (event: any) => {
     setRangeType(event.target.value);
     // Reset dates when range type is changed
@@ -226,13 +222,14 @@ const UtilityDash = () => {
           </div>
 
           {/* Text Insights */}
+
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h3 className="text-lg font-medium">Campaign Insights</h3>
+                <h3 className="text-lg font-medium">Customer Insights</h3>
                 <p className="text-sm text-[#65558F]">
-                  Leveraging AI analysis, alongside conversion data and research
-                  results
+                  A summary of customer interactions with AI, highlighting key
+                  discussions and the utility provided.
                 </p>
               </div>
             </div>
@@ -240,24 +237,32 @@ const UtilityDash = () => {
               <div className="min-w-[300px] p-2">
                 <div className="mt-0 mb-2">
                   <p className="text-2xl font-semibold mr-4 text-[#65558F] text-center">
-                    BotWot
+                    BotWot: AI-Driven Conversations
                   </p>
                 </div>
                 <Card className="mx-auto">
                   <CardContent>
                     <Typography variant="h5" gutterBottom>
-                      Engagement Analysis
+                      AI Engagement Summary
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       <strong>Most Engaged User:</strong> John Doe
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      <strong>High Intent Users:</strong> Alice, Bob, Charlie
+                      <strong>High-Interaction Customers:</strong> Alice, Bob,
+                      Charlie
                     </Typography>
-                    <Typography variant="subtitle1">Common Queries:</Typography>
+                    <Typography variant="subtitle1">
+                      Common AI-Driven Queries:
+                    </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      <strong>General:</strong> "What is the price?", "How does
-                      it work?"
+                      <strong>General Queries:</strong> "What is the price?",
+                      "How does it work?"
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      <strong>AI-Provided Utility:</strong> Offering
+                      personalized product recommendations, answering queries in
+                      real-time, and assisting with purchasing decisions.
                     </Typography>
                   </CardContent>
                 </Card>
@@ -267,19 +272,6 @@ const UtilityDash = () => {
 
           {/* Campaign Section */}
           <div className="space-y-4">
-            <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-lg font-medium">Create a New Campaign</h3>
-                <button
-                  onClick={() => navigate("/marketing/createcampaign")}
-                  className="flex items-center justify-center gap-2 px-6 py-2 bg-[#65558F] text-white rounded-full"
-                >
-                  <AddIcon className="w-[18px]" />
-                  Create Campaign
-                </button>
-              </div>
-            </div>
-
             {/* Engagement Rate Chart */}
             <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
               <ChartCard title="Cancel Rate">
