@@ -1,7 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { dashBoardDataService } from "../api/services/dashboardServices";
 
-const useLatestFetchData = (botId: string, shouldFetch: boolean) => {
+const useLatestFetchData = (
+  botId: string,
+  shouldFetch: boolean,
+  setFetchUpdatedData
+) => {
   const [data, setData] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
@@ -23,18 +27,22 @@ const useLatestFetchData = (botId: string, shouldFetch: boolean) => {
     } catch (err) {
       console.error("Error Calling Dashboard API:", err);
     }
-  }, [botId, shouldFetch]);
+  }, [botId]);
 
   useEffect(() => {
-    if (!shouldFetch) return; // Don't start the interval if shouldFetch is false
+    if (!shouldFetch) {
+      setFetchUpdatedData(false);
+      return; // Don't start the interval if shouldFetch is false
+    }
 
     fetchData();
+    setFetchUpdatedData(true);
 
     const intervalId = setInterval(fetchData, 10000);
 
     // Clear the interval when the component unmounts or shouldFetch becomes false
     return () => clearInterval(intervalId);
-  }, [fetchData, shouldFetch]);
+  }, [shouldFetch]);
 
   return data;
 };

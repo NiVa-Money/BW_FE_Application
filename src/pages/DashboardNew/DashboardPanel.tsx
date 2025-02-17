@@ -108,6 +108,11 @@ const DashboardPanel = () => {
   const [stats, setStats] = useState<DashboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isToday, setIsToday] = useState(false);
+  const [fetchUpdatedData, setFetchUpdatedData] = useState(true);
+  const [dateRange, setDateRange] = useState({
+    startDate: null,
+    endDate: null,
+  });
 
   const userIdLocal = localStorage.getItem("user_id");
   const dispatch = useDispatch();
@@ -205,6 +210,7 @@ const DashboardPanel = () => {
 
   // Handle date range change
   const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
+    setDateRange({ startDate, endDate });
     await fetchData(startDate, endDate);
   };
 
@@ -212,9 +218,17 @@ const DashboardPanel = () => {
     const selectedBot = botsDataRedux.find((bot) => bot._id === selectedBotId);
     setBotId(selectedBotId);
     setBotName(selectedBot?.botName || "");
+    if (!isToday) {
+      fetchData(dateRange.startDate, dateRange.endDate);
+    }
   };
 
-  const latestFetchedTodaysData = useLatestFetchData(botId, isToday);
+  //state, getter- true here, setter in child update
+  const latestFetchedTodaysData = useLatestFetchData(
+    botId,
+    isToday,
+    setFetchUpdatedData
+  );
 
   // Set default bot ID
   useEffect(() => {
@@ -231,13 +245,12 @@ const DashboardPanel = () => {
     }
   }, [userIdLocal]);
 
-
   // Update stats when newData is fetched by the hook
   useEffect(() => {
     if (isToday && latestFetchedTodaysData) {
       setStats(latestFetchedTodaysData);
     }
-  }, [latestFetchedTodaysData]);
+  }, [fetchUpdatedData]);
 
   return (
     <div>
