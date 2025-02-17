@@ -13,8 +13,6 @@ import {
 } from "@mui/material";
 import { FC, useState } from "react";
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -214,15 +212,15 @@ const UtilityDash = () => {
                 </div>
               </div>
             </div>
-            <ChartCard title="Response Rate">
+            <ChartCard title="Success Rate">
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={successData}>
+                <LineChart data={successData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="day" />
                   <YAxis />
-                  <Bar dataKey="value1" fill="#60A5FA" />
-                  <Bar dataKey="value2" fill="#CBD5E1" />
-                </BarChart>
+                  <Line type="monotone" dataKey="value1" stroke="#60A5FA" />
+                  <Line type="monotone" dataKey="value2" stroke="#CBD5E1" />
+                </LineChart>
               </ResponsiveContainer>
             </ChartCard>
           </div>
@@ -284,7 +282,7 @@ const UtilityDash = () => {
 
             {/* Engagement Rate Chart */}
             <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
-              <ChartCard title="Engagement Rate">
+              <ChartCard title="Cancel Rate">
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={cancelData}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -371,7 +369,6 @@ const UtilityDash = () => {
           </LocalizationProvider>
         </div>
 
-        
         <div className="mt-6">
           {/* Utility Message Dashboard Table */}
           <Card className="mt-2">
