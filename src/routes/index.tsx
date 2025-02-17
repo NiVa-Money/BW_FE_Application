@@ -19,6 +19,7 @@ import CrudIntegration from "../pages/Integration/IntegrationApp/crudIntegration
 import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
 import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
+import UtilityDash from "../pages/Reports/UtilityDash";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -67,7 +68,7 @@ export const autRoutes: any[] = [
   {
     id: 8,
     path: "/reports",
-    component: <AdminPanel />,
+    component: <UtilityDash />,
   },
   {
     id: 9,
