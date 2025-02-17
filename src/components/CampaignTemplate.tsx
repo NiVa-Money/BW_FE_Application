@@ -14,11 +14,13 @@ import { campaignImageService } from "../api/services/whatsappCampaignService";
 type CampaignTemplateProps = {
   onClose: () => void;
   onSelectTemplate: (template: any) => void;
+  selectedPhoneNumberId: string;
 };
 
 const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
   onClose,
   onSelectTemplate,
+  selectedPhoneNumberId,
 }) => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
   // const [text, setText] = useState("");
@@ -28,22 +30,38 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const dispatch = useDispatch();
 
-  const integrationId = useSelector(
-    (state: RootState) =>
-      state?.crudIntegration?.crudIntegration?.data?.secretToken
+  // Grab the array of integrations from Redux
+  const crudIntegrationData = useSelector(
+    (state: RootState) => state?.crudIntegration?.crudIntegration?.data
   );
+
+  // Make sure it's an array
+  const integrationsArray = Array.isArray(crudIntegrationData)
+    ? crudIntegrationData
+    : [crudIntegrationData];
+
+  // Find the record matching the user's selection
+  const chosenIntegration = integrationsArray.find(
+    (record: any) => record.phoneNumberId.toString() === selectedPhoneNumberId // or == if your data types vary
+  );
+
+  // Extract secretToken
+  const integrationId = chosenIntegration?.secretToken;
+  console.log("integrationId:", integrationId);
 
   const templates = useSelector(
     (state: any) => state.whatsappTemplates?.templates?.data || []
   );
 
+  console.log("templates", templates);
   // const loading = useSelector((state: any) => state.whatsappTemplates?.loading);
 
   useEffect(() => {
     if (integrationId) {
+      console.log("integration id ", integrationId);
       dispatch(fetchWhatsAppTemplatesAction(integrationId));
     }
-  }, [dispatch, integrationId]);
+  }, [integrationId, dispatch]);
 
   const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -180,7 +198,7 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
                     Upload
                   </button>
                   {fileName && (
-                    <span className="text-gray-700 text-sm ml-2">
+                    <span className="text-gray-70 0 text-sm ml-2">
                       {fileName}
                     </span>
                   )}

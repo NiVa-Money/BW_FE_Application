@@ -99,12 +99,11 @@ const CrudIntegration: React.FC = () => {
     (state: RootState) => state?.crudIntegration?.crudIntegration?.data
   );
 
-  const crudIntegrationData1 = useSelector(
-    (state: RootState) => state?.integration?.crudIntegration?.data
-  );
+  console.log("crud", crudIntegrationData);
+
   console.log(
     "Currentss data in Redux state:",
-    crudIntegrationData1,
+
     crudIntegrationData
   ); // Check data here
 

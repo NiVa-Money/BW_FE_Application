@@ -572,6 +572,7 @@ const WhatsappCampaign: React.FC = () => {
             <CampaignTemplate
               onClose={() => setShowTemplate(false)}
               onSelectTemplate={handleSelectTemplate}
+              selectedPhoneNumberId={selectedPhoneNumberId} 
             />
           )}
           {/* WhatsApp Preview */}
