@@ -48,6 +48,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     isCustomRange ? formatDateRange(startDate, endDate) : selectedRange;
 
   const handleRangeSelect = (range: string) => {
+    console.log('rr', range)
     if (range === "Specific Date Range") {
       setMenuOpen(false);
       setPopoverOpen(true);
@@ -65,8 +66,13 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       // Set start date to 12:00 AM today
       startDate = new Date(now);
       startDate.setHours(0, 0, 0, 0);
+      debugger
+      onToday(true)
     } else {
       startDate = subDays(now, days);
+      onToday(false)
+
+
     }
 
     setIsCustomRange(false);
@@ -78,6 +84,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   };
 
   const handleDateChange = (date: Date | null, isStart: boolean) => {
+    console.log(date)
     if (!date) return;
 
     if (isStart) {
@@ -89,11 +96,11 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (selectedRange === "Today") {
-      onToday(true);
-    } else onToday(false);
-  }, [selectedRange]);
+  // useEffect(() => {
+  //   if (selectedRange === "Today") {
+  //     onToday(true);
+  //   } else onToday(false);
+  // }, [selectedRange]);
 
   return (
     <div className="relative">
