@@ -15,9 +15,10 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  LineChart,
-  Line,
   ResponsiveContainer,
+  Bar,
+  BarChart,
+  Legend,
 } from "recharts";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -26,26 +27,6 @@ import { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { fetchShopifyDashboardRequest } from "../../../store/actions/reportActions";
-
-const successData = [
-  { day: "Sunday", value1: 50, value2: 60 },
-  { day: "Monday", value1: 100, value2: 90 },
-  { day: "Tuesday", value1: 30, value2: 40 },
-  { day: "Wednesday", value1: 20, value2: 80 },
-  { day: "Thursday", value1: 90, value2: 30 },
-  { day: "Friday", value1: 80, value2: 50 },
-  { day: "Saturday", value1: 10, value2: 20 },
-];
-
-const cancelData = [
-  { id: 1, value: 75 },
-  { id: 2, value: 25 },
-  { id: 3, value: 70 },
-  { id: 4, value: 35 },
-  { id: 5, value: 80 },
-  { id: 6, value: 45 },
-  { id: 7, value: 55 },
-];
 
 // Data for Message Performance
 const messagePerformanceData = [
@@ -75,113 +56,144 @@ const messagePerformanceData = [
   },
 ];
 
+interface UtilityData {
+  messages: {
+    type: string;
+    totalSent: number | string;
+    failed: string;
+    prepaid: number | string;
+    cod: number | string;
+    confirmed: number | string;
+    canceled: number | string;
+    noAction: number | string;
+  }[];
+  header: {
+    label: string;
+    value: number;
+  }[];
+  successRate: Array<Record<string, number>>;
+  cancelRate: Array<Record<string, number>>;
+  bars: {
+    key: string;
+    color: string;
+  }[];
+}
+
 const UtilityDash = () => {
   const [rangeType, setRangeType] = useState("day");
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [utilityData, setUtilityData] = useState<UtilityData | null>(null);
 
   const dispatch = useDispatch();
 
-  const shopifyData = useSelector(
-    (state: RootState) => state?.shopifyDashboard?.statistics
-  );
+  // const shopifyData = useSelector(
+  //   (state: RootState) => state?.shopifyDashboard?.shopifyDashboard
+  // );
+  const shopifyData = {
+    success: true,
+    messages: [
+      {
+        type: "Welcome Message",
+        totalSent: 783,
+        failed: "NA",
+        prepaid: 12,
+        cod: 759,
+        confirmed: 183,
+        canceled: 49,
+        noAction: 527,
+      },
+      {
+        type: "Reminder 1",
+        totalSent: 510,
+        failed: "NA",
+        prepaid: "NA",
+        cod: "NA",
+        confirmed: 70,
+        canceled: 22,
+        noAction: 418,
+      },
+      {
+        type: "Reminder 2",
+        totalSent: 354,
+        failed: "NA",
+        prepaid: "NA",
+        cod: "NA",
+        confirmed: 39,
+        canceled: 18,
+        noAction: 297,
+      },
+      {
+        type: "Reminder 3",
+        totalSent: 144,
+        failed: "NA",
+        prepaid: "NA",
+        cod: "NA",
+        confirmed: 9,
+        canceled: 4,
+        noAction: 131,
+      },
+      {
+        type: "Final Reminder",
+        totalSent: 144,
+        failed: "NA",
+        prepaid: "NA",
+        cod: "NA",
+        confirmed: 9,
+        canceled: 4,
+        noAction: 131,
+      },
+      {
+        type: "Shipped Message Sent",
+        totalSent: 612,
+        failed: "NA",
+        prepaid: "NA",
+        cod: "NA",
+        confirmed: "NA",
+        canceled: "NA",
+        noAction: "NA",
+      },
+      {
+        type: "Delivered Message Sent",
+        totalSent: "NA",
+        failed: "NA",
+        prepaid: "NA",
+        cod: "NA",
+        confirmed: "NA",
+        canceled: "NA",
+        noAction: "NA",
+      },
+    ],
+    header: [
+      { label: "Total Orders", value: 771 },
+      { label: "COD Orders", value: 759 },
+      { label: "Online Orders", value: 12 },
+      { label: "Total Confirmed", value: 301 },
+      { label: "Total Canceled", value: 93 },
+      { label: "Auto Canceled", value: 47 },
+    ],
+    successRate: [
+      {
+        response1: 3490,
+        response2: 4190,
+        response3: 990,
+      },
+    ],
+    bars: [
+      { key: "response1", color: "#60A5FA" },
+      { key: "response2", color: "#40Af92" },
+      { key: "response3", color: "#F87171" },
+    ],
+    cancelRate: [
+      {
+        response1: 3490,
+        response2: 4190,
+        response3: 990,
+      },
+    ],
+  };
+
   console.log("shopify ", shopifyData);
-
-  const utilityMessageData = [
-    {
-      type: "Welcome Message",
-      totalSent: shopifyData?.statistics?.totalWelcomeMessageSent ?? 0,
-      failed: "NA",
-      prepaid: "NA",
-      cod: "NA",
-      confirmed: shopifyData?.statistics?.stats?.welcome?.confirms ?? 0,
-      canceled: shopifyData?.statistics?.stats?.welcome?.cancels ?? 0,
-      noAction:
-        (shopifyData?.statistics?.totalWelcomeMessageSent ?? 0) -
-        ((shopifyData?.statistics?.stats?.welcome?.confirms ?? 0) +
-          (shopifyData?.statistics?.stats?.welcome?.cancels ?? 0)),
-    },
-    {
-      type: "Reminder 1",
-      totalSent: shopifyData?.statistics?.reminder_1 ?? 0,
-      failed: "NA",
-      prepaid: "NA",
-      cod: "NA",
-      confirmed: shopifyData?.statistics?.stats?.reminder1?.confirms ?? 0,
-      canceled: shopifyData?.statistics?.stats?.reminder1?.cancels ?? 0,
-      noAction:
-        (shopifyData?.statistics?.reminder_1 ?? 0) -
-        ((shopifyData?.statistics?.stats?.reminder1?.confirms ?? 0) +
-          (shopifyData?.statistics?.stats?.reminder1?.cancels ?? 0)),
-    },
-    {
-      type: "Reminder 2",
-      totalSent: shopifyData?.statistics?.reminder_2 ?? 0,
-      failed: "NA",
-      prepaid: "NA",
-      cod: "NA",
-      confirmed: shopifyData?.statistics?.stats?.reminder2?.confirms ?? 0,
-      canceled: shopifyData?.statistics?.stats?.reminder2?.cancels ?? 0,
-      noAction:
-        (shopifyData?.statistics?.reminder_2 ?? 0) -
-        ((shopifyData?.statistics?.stats?.reminder2?.confirms ?? 0) +
-          (shopifyData?.statistics?.stats?.reminder2?.cancels ?? 0)),
-    },
-    {
-      type: "Final Reminder",
-      totalSent: shopifyData?.statistics?.reminder_3 ?? 0,
-      failed: "NA",
-      prepaid: "NA",
-      cod: "NA",
-      confirmed: shopifyData?.statistics?.stats?.reminder3?.confirms ?? 0,
-      canceled: shopifyData?.statistics?.stats?.reminder3?.cancels ?? 0,
-      noAction:
-        (shopifyData?.statistics?.reminder_3 ?? 0) -
-        ((shopifyData?.statistics?.stats?.reminder3?.confirms ?? 0) +
-          (shopifyData?.statistics?.stats?.reminder3?.cancels ?? 0)),
-    },
-    {
-      type: "Shipped Message Sent",
-      totalSent: shopifyData?.statistics?.totalShipmentMessageSent ?? 0,
-      failed: "NA",
-      prepaid: "NA",
-      cod: "NA",
-      confirmed: "NA",
-      canceled: "NA",
-      noAction: "NA",
-    },
-    {
-      type: "Delivered Message Sent",
-      totalSent: "NA",
-      failed: "NA",
-      prepaid: "NA",
-      cod: "NA",
-      confirmed: "NA",
-      canceled: "NA",
-      noAction: "NA",
-    },
-  ];
-
-  const statCards = [
-    { label: "COD", value: shopifyData?.statistics?.codOrders ?? 0 },
-    {
-      label: "Welcome Message",
-      value: shopifyData?.statistics?.totalWelcomeMessageSent ?? 0,
-    },
-    {
-      label: "First Reminder Sent",
-      value: shopifyData?.statistics?.reminder_1 ?? 0,
-    },
-    {
-      label: "Second Reminder Sent",
-      value: shopifyData?.statistics?.reminder_2 ?? 0,
-    },
-    {
-      label: "Final Reminder Sent",
-      value: shopifyData?.statistics?.reminder_3 ?? 0,
-    },
-    { label: "Auto Cancel", value: shopifyData?.statistics?.autoCancel ?? 0 },
-  ];
 
   const handleRangeTypeChange = (event) => {
     const newRangeType = event.target.value;
@@ -211,6 +223,7 @@ const UtilityDash = () => {
   const handleEndDateChange = (newEndDate) => {
     setEndDate(newEndDate);
   };
+
   useEffect(() => {
     if (!startDate || !endDate) {
       console.error("Start or end date is missing");
@@ -225,6 +238,17 @@ const UtilityDash = () => {
     );
   }, [startDate, endDate, dispatch]);
 
+  useEffect(() => {
+    if (!shopifyData?.success) return;
+
+    const fetchUtilityData = async () => {
+      const data = shopifyData;
+      setUtilityData(data);
+    };
+
+    fetchUtilityData();
+  }, [shopifyData]);
+
   return (
     <div className="p-6 bg-white min-h-screen">
       <div className="mb-6">
@@ -232,36 +256,8 @@ const UtilityDash = () => {
           Utility Message Dashboard
         </h1>
 
-        {/* <div className="grid grid-cols-6 gap-4 mb-6 ">
-          {[
-            { label: "COD", value: "3500" },
-            { label: "Welcome Message", value: "1230" },
-            { label: "First Reminder Sent", value: "3000" },
-            { label: "Second Reminder Sent", value: "1000" },
-            { label: "Final Reminder Sent", value: "1000" },
-            { label: "Auto Cancel", value: "1000" },
-          ].map((stat, index) => (
-            <Card
-              key={index}
-              style={{ backgroundColor: "rgba(101,85,143,0.08)" }}
-            >
-              <CardContent>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">{stat.label}</p>
-                    <p className="text-lg font-semibold">{stat.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div> */}
-
         <div className="grid grid-cols-6 gap-4 mb-6">
-          {statCards.map((stat, index) => (
+          {utilityData?.header?.map((stat, index) => (
             <Card
               key={index}
               style={{ backgroundColor: "rgba(101,85,143,0.08)" }}
@@ -299,13 +295,20 @@ const UtilityDash = () => {
             </div>
             <ChartCard title="Success Rate">
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={successData}>
+                <BarChart data={utilityData?.successRate}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
+                  <XAxis dataKey="" />
+                  {/* DOUBT - This is wrong dataKey, should be something we need on x-axis */}
                   <YAxis />
-                  <Line type="monotone" dataKey="value1" stroke="#60A5FA" />
-                  <Line type="monotone" dataKey="value2" stroke="#CBD5E1" />
-                </LineChart>
+                  <Legend
+                    verticalAlign="top"
+                    wrapperStyle={{ paddingBottom: 10 }}
+                  />
+
+                  {utilityData?.bars.map(({ key, color }, index) => (
+                    <Bar key={index} dataKey={key} fill={color} />
+                  ))}
+                </BarChart>
               </ResponsiveContainer>
             </ChartCard>
           </div>
@@ -364,13 +367,21 @@ const UtilityDash = () => {
             {/* Engagement Rate Chart */}
             <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
               <ChartCard title="Cancel Rate">
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={cancelData}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={utilityData?.cancelRate}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="id" />
+                    <XAxis dataKey="" />
+                    {/* DOUBT - This is wrong dataKey, should be something we need on x-axis */}
                     <YAxis />
-                    <Line type="monotone" dataKey="value" stroke="#8B5CF6" />
-                  </LineChart>
+                    <Legend
+                      verticalAlign="top"
+                      wrapperStyle={{ paddingBottom: 10 }}
+                    />
+
+                    {utilityData?.bars.map(({ key, color }, index) => (
+                      <Bar key={index} dataKey={key} fill={color} />
+                    ))}
+                  </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
             </div>
@@ -482,7 +493,7 @@ const UtilityDash = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {utilityMessageData.map((row, index) => (
+                  {utilityData?.messages?.map((row, index) => (
                     <tr key={index} className="border-t">
                       <td className="p-2">{row.type}</td>
                       <td className="p-2">{row.totalSent}</td>
