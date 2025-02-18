@@ -16,9 +16,10 @@ import { editBotAction } from "../../store/actions/botActions";
 import CreateBotRightContainer from "../CreateBot/CreateBotRightContainer";
 import { RootState } from "../../store";
 import { useNavigate, useParams } from "react-router-dom";
-import ConfirmationModal from "../../components/ConformationModal";
+import ConfirmationModal from "../../components/confirmationModal";
 import { MenuItem, Select, ToggleButton } from "@mui/material";
 import { ToggleButtonGroup } from '@mui/material';
+import BotSuccessContent from "../../components/confirmationModal/BotSuccessContent";
 
 const EditBot: React.FC = () => {
   const { id } = useParams();
@@ -775,8 +776,11 @@ const EditBot: React.FC = () => {
           </Form>
         )}
       </Formik>
-      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`} />
-
+      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} contentComponent={<BotSuccessContent subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`} open={false} onClose={function (): void {
+        throw new Error('Function not implemented.');
+      }} onConfirm={function (): void {
+        throw new Error('Function not implemented.');
+      }} heading={''} />} />
     </div>
   );
 };
