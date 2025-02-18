@@ -71,7 +71,7 @@ const UtilityDash = () => {
   //   (state: RootState) => state?.shopifyDashboard?.shopifyDashboard
   // );
 
-  // FOR NOW USE these mock data - REMOVE LATER
+  // FOR NOW USE this mock data - REMOVE LATER when API changes is ready
   const shopifyData = {
     success: true,
     messages: [
