@@ -29,32 +29,6 @@ import { format } from "date-fns";
 import { fetchShopifyDashboardRequest } from "../../../store/actions/reportActions";
 
 // Data for Message Performance
-const messagePerformanceData = [
-  {
-    type: "Welcome Message",
-    confirmRate: "33%",
-    cancelRate: "9%",
-    noActionRate: "58%",
-  },
-  {
-    type: "Reminder 1",
-    confirmRate: "52%",
-    cancelRate: "7%",
-    noActionRate: "41%",
-  },
-  {
-    type: "Reminder 2",
-    confirmRate: "58%",
-    cancelRate: "3%",
-    noActionRate: "39%",
-  },
-  {
-    type: "Final Reminder",
-    confirmRate: "62%",
-    cancelRate: "3%",
-    noActionRate: "35%",
-  },
-];
 
 interface UtilityData {
   messages: {
@@ -77,6 +51,12 @@ interface UtilityData {
     key: string;
     color: string;
   }[];
+  messagePerformance: {
+    type: string;
+    confirmRate: string;
+    cancelRate: string;
+    noActions: string;
+  }[];
 }
 
 const UtilityDash = () => {
@@ -90,6 +70,8 @@ const UtilityDash = () => {
   // const shopifyData = useSelector(
   //   (state: RootState) => state?.shopifyDashboard?.shopifyDashboard
   // );
+
+  // FOR NOW USE these mock data - REMOVE LATER
   const shopifyData = {
     success: true,
     messages: [
@@ -189,6 +171,32 @@ const UtilityDash = () => {
         response1: 3490,
         response2: 4190,
         response3: 990,
+      },
+    ],
+    messagePerformance: [
+      {
+        type: "Welcome Message",
+        confirmRate: "33%",
+        cancelRate: "9%",
+        noActions: "58%",
+      },
+      {
+        type: "Reminder 1",
+        confirmRate: "52%",
+        cancelRate: "7%",
+        noActions: "41%",
+      },
+      {
+        type: "Reminder 2",
+        confirmRate: "58%",
+        cancelRate: "3%",
+        noActions: "39%",
+      },
+      {
+        type: "Final Reminder",
+        confirmRate: "62%",
+        cancelRate: "3%",
+        noActions: "35%",
       },
     ],
   };
@@ -538,12 +546,12 @@ const UtilityDash = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {messagePerformanceData.map((row, index) => (
+                  {utilityData?.messagePerformance.map((row, index) => (
                     <tr key={index} className="border-t">
                       <td className="p-2">{row.type}</td>
                       <td className="p-2">{row.confirmRate}</td>
                       <td className="p-2">{row.cancelRate}</td>
-                      <td className="p-2">{row.noActionRate}</td>
+                      <td className="p-2">{row.noActions}</td>
                     </tr>
                   ))}
                 </tbody>
