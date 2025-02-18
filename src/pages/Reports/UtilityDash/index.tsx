@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import { FC, useEffect, useState } from "react";
 import {
-  XAxis,
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
@@ -305,8 +304,6 @@ const UtilityDash = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={utilityData?.successRate}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="" />
-                  {/* DOUBT - This is wrong dataKey, should be something we need on x-axis */}
                   <YAxis />
                   <Legend
                     verticalAlign="top"
@@ -378,8 +375,6 @@ const UtilityDash = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={utilityData?.cancelRate}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="" />
-                    {/* DOUBT - This is wrong dataKey, should be something we need on x-axis */}
                     <YAxis />
                     <Legend
                       verticalAlign="top"
