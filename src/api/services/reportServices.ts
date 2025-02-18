@@ -6,7 +6,7 @@ export const fetchShopifyDashboardService = async (
   endDate: string
 ) => {
   try {
-    const response = await axiosInstance.post(`/shopify/dashboard`, {
+    const response = await axiosInstance.get(`/shopify/dashboard`, {
       params: { startDate, endDate },
     });
 
