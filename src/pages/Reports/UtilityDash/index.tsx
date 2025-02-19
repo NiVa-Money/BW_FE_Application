@@ -61,6 +61,7 @@ interface UtilityData {
     cod: number | string;
     confirmed: number | string;
     canceled: number | string;
+    shippedWithoutResponse: number | string;
     noAction: number | string;
   }[];
   header: {
@@ -457,6 +458,9 @@ const UtilityDash = () => {
                       <th className="text-left p-2">Confirmed</th>
                       <th className="text-left p-2">Canceled</th>
                       <th className="text-left p-2">No Action</th>
+                      <th className="text-left p-2">
+                        Shipped Without Response
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -470,6 +474,7 @@ const UtilityDash = () => {
                         <td className="p-2">{row.confirmed}</td>
                         <td className="p-2">{row.canceled}</td>
                         <td className="p-2">{row.noAction}</td>
+                        <td className="p-2">{row.shippedWithoutResponse} </td>
                       </tr>
                     ))}
                   </tbody>
