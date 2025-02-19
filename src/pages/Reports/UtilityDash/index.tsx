@@ -106,136 +106,6 @@ const UtilityDash = () => {
     (state: RootState) => state?.shopifyDashboard?.shopifyDashboard
   );
 
-  // FOR NOW USE this mock data - REMOVE LATER when API changes is ready
-  // const shopifyData = useMemo(() => ({
-  //   success: true,
-  //   messages: [
-  //     {
-  //       type: "Welcome Message",
-  //       totalSent: 783,
-  //       failed: "NA",
-  //       prepaid: 12,
-  //       cod: 759,
-  //       confirmed: 183,
-  //       canceled: 49,
-  //       noAction: 527,
-  //     },
-  //     {
-  //       type: "Reminder 1",
-  //       totalSent: 510,
-  //       failed: "NA",
-  //       prepaid: "NA",
-  //       cod: "NA",
-  //       confirmed: 70,
-  //       canceled: 22,
-  //       noAction: 418,
-  //     },
-  //     {
-  //       type: "Reminder 2",
-  //       totalSent: 354,
-  //       failed: "NA",
-  //       prepaid: "NA",
-  //       cod: "NA",
-  //       confirmed: 39,
-  //       canceled: 18,
-  //       noAction: 297,
-  //     },
-  //     {
-  //       type: "Reminder 3",
-  //       totalSent: 144,
-  //       failed: "NA",
-  //       prepaid: "NA",
-  //       cod: "NA",
-  //       confirmed: 9,
-  //       canceled: 4,
-  //       noAction: 131,
-  //     },
-  //     {
-  //       type: "Final Reminder",
-  //       totalSent: 144,
-  //       failed: "NA",
-  //       prepaid: "NA",
-  //       cod: "NA",
-  //       confirmed: 9,
-  //       canceled: 4,
-  //       noAction: 131,
-  //     },
-  //     {
-  //       type: "Shipped Message Sent",
-  //       totalSent: 612,
-  //       failed: "NA",
-  //       prepaid: "NA",
-  //       cod: "NA",
-  //       confirmed: "NA",
-  //       canceled: "NA",
-  //       noAction: "NA",
-  //     },
-  //     {
-  //       type: "Delivered Message Sent",
-  //       totalSent: "NA",
-  //       failed: "NA",
-  //       prepaid: "NA",
-  //       cod: "NA",
-  //       confirmed: "NA",
-  //       canceled: "NA",
-  //       noAction: "NA",
-  //     },
-  //   ],
-  //   header: [
-  //     { label: "Total Orders", value: 771 },
-  //     { label: "COD Orders", value: 759 },
-  //     { label: "Online Orders", value: 12 },
-  //     { label: "Total Confirmed", value: 301 },
-  //     { label: "Total Canceled", value: 93 },
-  //     { label: "Auto Canceled", value: 47 },
-  //   ],
-  //   successRate: [
-  //     {
-  //       response1: 3490,
-  //       response2: 4190,
-  //       response3: 990,
-  //     },
-  //   ],
-  //   bars: [
-  //     { key: "response1", color: "#60A5FA" },
-  //     { key: "response2", color: "#40Af92" },
-  //     { key: "response3", color: "#F87171" },
-  //   ],
-  //   cancelRate: [
-  //     {
-  //       response1: 3490,
-  //       response2: 4190,
-  //       response3: 990,
-  //     },
-  //   ],
-  //   messagePerformance: [
-  //     {
-  //       type: "Welcome Message",
-  //       confirmRate: "33%",
-  //       cancelRate: "9%",
-  //       noActions: "58%",
-  //     },
-  //     {
-  //       type: "Reminder 1",
-  //       confirmRate: "52%",
-  //       cancelRate: "7%",
-  //       noActions: "41%",
-  //     },
-  //     {
-  //       type: "Reminder 2",
-  //       confirmRate: "58%",
-  //       cancelRate: "3%",
-  //       noActions: "39%",
-  //     },
-  //     {
-  //       type: "Final Reminder",
-  //       confirmRate: "62%",
-  //       cancelRate: "3%",
-  //       noActions: "35%",
-  //     },
-  //   ],
-  // }), []);
-
   console.log("shopify ", shopifyData);
 
   const handleRangeTypeChange = (event: any) => {
@@ -248,21 +118,6 @@ const UtilityDash = () => {
       setEndDate(null);
     }
   };
-
-  // const handleStartDateChange = (newStartDate) => {
-  //   setStartDate(newStartDate);
-
-  //   // If the range type is 'week' or 'month', set the end date based on the selected start date.
-  //   if (rangeType === "week" && newStartDate) {
-  //     const newEndDate = new Date(newStartDate);
-  //     newEndDate.setDate(newEndDate.getDate() + 6); // 7 days later for the week range
-  //     setEndDate(newEndDate);
-  //   } else if (rangeType === "month" && newStartDate) {
-  //     const newEndDate = new Date(newStartDate);
-  //     newEndDate.setMonth(newEndDate.getMonth() + 1); // 1 month later for the month range
-  //     setEndDate(newEndDate);
-  //   }
-  // };
 
   const handleStartDateChange = (newStartDate: Date | null) => {
     setStartDate(newStartDate);
@@ -311,16 +166,25 @@ const UtilityDash = () => {
     );
   }, [startDate, endDate, dispatch]);
 
+  // useEffect(() => {
+  //   if (!shopifyData?.success) return;
+
+  //   const fetchUtilityData = async () => {
+  //     const data = shopifyData;
+  //     console.log("data", data);
+  //     setUtilityData(data);
+  //   };
+
+  //   fetchUtilityData();
+  // }, [shopifyData]);
+
   useEffect(() => {
     if (!shopifyData?.success) return;
 
-    const fetchUtilityData = async () => {
-      const data = shopifyData;
-      console.log("data", data);
-      setUtilityData(data);
-    };
-
-    fetchUtilityData();
+    setUtilityData((prev) => ({
+      ...shopifyData,
+      orders: prev?.orders, // keep existing orders if they exist
+    }));
   }, [shopifyData]);
 
   useEffect(() => {
@@ -672,7 +536,7 @@ const UtilityDash = () => {
           <Card className="mt-5">
             <CardHeader
               className="text-center"
-             title={
+              title={
                 <h6
                   style={{
                     fontSize: "1.2rem",
