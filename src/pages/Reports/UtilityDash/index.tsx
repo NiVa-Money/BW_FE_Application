@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import TrendingUp from "@mui/icons-material/TrendingUp";
 import {
   Card,
@@ -18,6 +17,8 @@ import {
   Bar,
   BarChart,
   Legend,
+  Cell,
+  XAxis,
 } from "recharts";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -44,11 +45,22 @@ interface UtilityData {
     label: string;
     value: number;
   }[];
-  successRate: Array<Record<string, number>>;
-  cancelRate: Array<Record<string, number>>;
-  bars: {
+  // successRate: Array<Record<string, number>>;
+  // cancelRate: Array<Record<string, number>>;
+  // bars: {
+  //   key: string;
+  //   color: string;
+  // }[];
+
+  successRate: {
     key: string;
     color: string;
+    count: number;
+  }[];
+  cancelRate: {
+    key: string;
+    color: string;
+    count: number;
   }[];
   messagePerformance: {
     type: string;
@@ -250,6 +262,7 @@ const UtilityDash = () => {
 
     const fetchUtilityData = async () => {
       const data = shopifyData;
+      console.log("data", data);
       setUtilityData(data);
     };
 
@@ -265,24 +278,25 @@ const UtilityDash = () => {
 
         <div className="grid grid-cols-6 gap-4 mb-6">
           {/* {utilityData?.header?.map((stat, index) => ( */}
-          {utilityData?.header && utilityData.header.map((stat, index) => (
-            <Card
-              key={index}
-              style={{ backgroundColor: "rgba(101,85,143,0.08)" }}
-            >
-              <CardContent>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-purple-600" />
+          {utilityData?.header &&
+            utilityData.header.map((stat, index) => (
+              <Card
+                key={index}
+                style={{ backgroundColor: "rgba(101,85,143,0.08)" }}
+              >
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">{stat.label}</p>
+                      <p className="text-lg font-semibold">{stat.value}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">{stat.label}</p>
-                    <p className="text-lg font-semibold">{stat.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
         </div>
 
         {/* Main Content */}
@@ -302,22 +316,25 @@ const UtilityDash = () => {
               </div>
             </div>
             <ChartCard title="Success Rate">
-            {utilityData?.successRate && utilityData?.bars && (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={utilityData?.successRate}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <YAxis />
-                  <Legend
-                    verticalAlign="top"
-                    wrapperStyle={{ paddingBottom: 10 }}
-                  />
-
-                  {utilityData?.bars.map(({ key, color }, index) => (
-                    <Bar key={index} dataKey={key} fill={color} />
-                  ))}
-                </BarChart>
-              </ResponsiveContainer>
-              )}
+              {utilityData?.successRate &&
+                utilityData.successRate.length > 0 && (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={utilityData.successRate}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="key" />
+                      <YAxis />
+                      <Legend
+                        verticalAlign="top"
+                        wrapperStyle={{ paddingBottom: 10 }}
+                      />
+                      <Bar dataKey="count">
+                        {utilityData.successRate.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
             </ChartCard>
           </div>
 
@@ -375,22 +392,25 @@ const UtilityDash = () => {
             {/* Engagement Rate Chart */}
             <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
               <ChartCard title="Cancel Rate">
-              {utilityData?.cancelRate && utilityData?.bars && (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={utilityData?.cancelRate}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <YAxis />
-                    <Legend
-                      verticalAlign="top"
-                      wrapperStyle={{ paddingBottom: 10 }}
-                    />
-
-                    {utilityData?.bars.map(({ key, color }, index) => (
-                      <Bar key={index} dataKey={key} fill={color} />
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
-                )}
+                {utilityData?.cancelRate &&
+                  utilityData.cancelRate.length > 0 && (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={utilityData.cancelRate}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="key" />
+                        <YAxis />
+                        <Legend
+                          verticalAlign="top"
+                          wrapperStyle={{ paddingBottom: 10 }}
+                        />
+                        <Bar dataKey="count">
+                          {utilityData.cancelRate.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
               </ChartCard>
             </div>
           </div>
@@ -487,35 +507,35 @@ const UtilityDash = () => {
               }
             />
             <CardContent>
-            {utilityData?.messages && (
-              <table className="min-w-full">
-                <thead>
-                  <tr>
-                    <th className="text-left p-2">Type of Message</th>
-                    <th className="text-left p-2">Total Message Sent</th>
-                    <th className="text-left p-2">Message Failed</th>
-                    <th className="text-left p-2">Prepaid Message</th>
-                    <th className="text-left p-2">COD Message</th>
-                    <th className="text-left p-2">Confirmed</th>
-                    <th className="text-left p-2">Canceled</th>
-                    <th className="text-left p-2">No Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {utilityData?.messages?.map((row, index) => (
-                    <tr key={index} className="border-t">
-                      <td className="p-2">{row.type}</td>
-                      <td className="p-2">{row.totalSent}</td>
-                      <td className="p-2">{row.failed}</td>
-                      <td className="p-2">{row.prepaid}</td>
-                      <td className="p-2">{row.cod}</td>
-                      <td className="p-2">{row.confirmed}</td>
-                      <td className="p-2">{row.canceled}</td>
-                      <td className="p-2">{row.noAction}</td>
+              {utilityData?.messages && (
+                <table className="min-w-full">
+                  <thead>
+                    <tr>
+                      <th className="text-left p-2">Type of Message</th>
+                      <th className="text-left p-2">Total Message Sent</th>
+                      <th className="text-left p-2">Message Failed</th>
+                      <th className="text-left p-2">Prepaid Message</th>
+                      <th className="text-left p-2">COD Message</th>
+                      <th className="text-left p-2">Confirmed</th>
+                      <th className="text-left p-2">Canceled</th>
+                      <th className="text-left p-2">No Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {utilityData?.messages?.map((row, index) => (
+                      <tr key={index} className="border-t">
+                        <td className="p-2">{row.type}</td>
+                        <td className="p-2">{row.totalSent}</td>
+                        <td className="p-2">{row.failed}</td>
+                        <td className="p-2">{row.prepaid}</td>
+                        <td className="p-2">{row.cod}</td>
+                        <td className="p-2">{row.confirmed}</td>
+                        <td className="p-2">{row.canceled}</td>
+                        <td className="p-2">{row.noAction}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </CardContent>
           </Card>
@@ -538,28 +558,28 @@ const UtilityDash = () => {
             />
 
             <CardContent>
-            {utilityData?.messagePerformance && (
-              <table className="min-w-full">
-                <thead>
-                  <tr>
-                    <th className="text-left p-2">Type of Message</th>
-                    <th className="text-left p-2">Confirm Rate</th>
-                    <th className="text-left p-2">Cancel Rate</th>
-                    <th className="text-left p-2">No Action Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {utilityData?.messagePerformance.map((row, index) => (
-                    <tr key={index} className="border-t">
-                      <td className="p-2">{row.type}</td>
-                      <td className="p-2">{row.confirmRate}</td>
-                      <td className="p-2">{row.cancelRate}</td>
-                      <td className="p-2">{row.noActions}</td>
+              {utilityData?.messagePerformance && (
+                <table className="min-w-full">
+                  <thead>
+                    <tr>
+                      <th className="text-left p-2">Type of Message</th>
+                      <th className="text-left p-2">Confirm Rate</th>
+                      <th className="text-left p-2">Cancel Rate</th>
+                      <th className="text-left p-2">No Action Rate</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                  </thead>
+                  <tbody>
+                    {utilityData?.messagePerformance.map((row, index) => (
+                      <tr key={index} className="border-t">
+                        <td className="p-2">{row.type}</td>
+                        <td className="p-2">{row.confirmRate}</td>
+                        <td className="p-2">{row.cancelRate}</td>
+                        <td className="p-2">{row.noActions}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </CardContent>
           </Card>
         </div>
