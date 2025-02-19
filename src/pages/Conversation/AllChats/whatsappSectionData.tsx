@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-
+import DoneIcon from '@mui/icons-material/Done';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import MessageComponent from "./MessageContent";
 interface WhatsappSectionProps {
   messages: any;
 }
@@ -13,21 +14,17 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
         messages.map((msg: any, index: number) => {
           const isUserQuery = msg?.messageCategory === "user_query";
           const isAnswerCategory = [
-            "follow_up", "marketing", "confirmation",
+            "follow-up", "marketing", "confirmation",
             "final_confirmation_reminder", "second_confirmation_reminder",
             "first_confirmation_reminder"
           ].includes(msg?.messageCategory);
+          console.log('isAnswerCategory', isAnswerCategory)
           const msgType = ["template", "text", "button_reply", "image"].includes(msg?.messageType)
 
           const content = isUserQuery
             ? msg?.messageContent?.text
             : isAnswerCategory
               ? msg?.messageContent?.template?.body?.text || msg?.messageContent?.text || msg?.answer
-              : "";
-          const imgUrl = isUserQuery
-            ? msg?.messageContent?.text
-            : isAnswerCategory
-              ? msg?.messageContent?.template?.header?.image || msg?.messageContent?.template?.header?.image || ''
               : "";
 
           return (
@@ -36,17 +33,9 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
               key={index}
               className={`flex ${isUserQuery ? "justify-end" : "justify-start"} mb-2`}
             >
-              <div
-                className={`px-3 py-2 rounded-lg max-w-xs text-white ${isUserQuery ? "bg-purple-600" : "bg-gray-800"
-                  }`}
-              >
-                {msg?.messageCategory !== "user_query" ? imgUrl ? < img src={imgUrl} width={100} height={100} /> : null : null}
-                <span className="flex gap-2 items-center">
-                  {!isUserQuery && <AccountCircleIcon />}
-                  {content}
-                  {isUserQuery && <AccountCircleIcon />}
-                </span>
-              </div>
+              <MessageComponent msgType={msg.messageType} msg={msg} isUserQuery={isUserQuery} content={content} index={index} />
+
+
             </div>
           );
         })
