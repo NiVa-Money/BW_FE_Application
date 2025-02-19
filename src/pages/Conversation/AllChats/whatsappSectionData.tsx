@@ -7,39 +7,46 @@ interface WhatsappSectionProps {
 }
 
 const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
-  console.log("mm", messages);
   return (
-    <>
-      {messages && messages.length > 0
-        ? messages.map((msg: any, index: number) => {
-            // If the message is a user query, show user text.
-            if (msg?.messageCategory === "user_query") {
-              return (
-                <div key={index} className="flex justify-end mb-2">
-                  <div className="bg-purple-600 text-white px-2 py-2 rounded-lg max-w-xs">
-                    <span className="flex gap-2 items-center">
-                      {msg?.userQuery}
-                      <AccountCircleIcon />
-                    </span>
-                  </div>
-                </div>
-              );
-            } else {
-              // For all other message categories, show answer text.
-              return (
-                <div key={index} className="flex justify-start mb-2">
-                  <div className="bg-gray-800 text-white px-2 py-2 rounded-lg max-w-xs">
-                    <span className="flex gap-2 items-center">
-                      <AccountCircleIcon />
-                      {msg?.answer}
-                    </span>
-                  </div>
-                </div>
-              );
-            }
-          })
-        : null}
-    </>
+    <div className="p-4">
+      {messages && messages.length > 0 ? (
+        messages.map((msg: any, index: number) => {
+          const isUserQuery = msg?.messageCategory === "user_query";
+          const isAnswerCategory = [
+            "follow_up", "marketing", "confirmation", 
+            "final_confirmation_reminder", "second_confirmation_reminder", 
+            "first_confirmation_reminder"
+          ].includes(msg?.messageCategory);
+          
+          const content = isUserQuery 
+            ? msg?.messageContent?.text 
+            : isAnswerCategory 
+            ? msg?.messageContent?.template?.body?.text || msg?.messageContent?.text || msg?.answer 
+            : "";
+          
+          return (
+            <div
+              key={index}
+              className={`flex ${isUserQuery ? "justify-end" : "justify-start"} mb-2`}
+            >
+              <div
+                className={`px-3 py-2 rounded-lg max-w-xs text-white ${
+                  isUserQuery ? "bg-purple-600" : "bg-gray-800"
+                }`}
+              >
+                <span className="flex gap-2 items-center">
+                  {!isUserQuery && <AccountCircleIcon />}
+                  {content}
+                  {isUserQuery && <AccountCircleIcon />}
+                </span>
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <p>No messages available</p>
+      )}
+    </div>
   );
 };
 

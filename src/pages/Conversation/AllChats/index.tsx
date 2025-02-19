@@ -12,6 +12,7 @@ import { RootState } from "../../../store";
 import { getBotsAction } from "../../../store/actions/botActions";
 import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
+import WhatsappSectionData from "./whatsappSectionData";
 
 interface AnalysisSection {
   title: string;
@@ -128,12 +129,15 @@ const AllChats = () => {
         },
         {
           title: "Sentiment Analysis",
-          description: `Positive: ${advanceFeatureData?.sentiments?.positive || 0
-            }%, 
-                      Neutral: ${advanceFeatureData?.sentiments?.neutral || 0
-            }%, 
-                      Negative: ${advanceFeatureData?.sentiments?.negative || 0
-            }%`,
+          description: `Positive: ${
+            advanceFeatureData?.sentiments?.positive || 0
+          }%, 
+                      Neutral: ${
+                        advanceFeatureData?.sentiments?.neutral || 0
+                      }%, 
+                      Negative: ${
+                        advanceFeatureData?.sentiments?.negative || 0
+                      }%`,
           expanded: true,
         },
         {
@@ -221,15 +225,17 @@ const AllChats = () => {
         <SessionsList
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
-
         />
 
         <div className="flex-1 flex flex-col overflow-y-scroll">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
-            <WebsiteSectionData messages={messages} />
-
+            {channelNameVal === "whatsapp" ? (
+              <WhatsappSectionData messages={messages} />
+            ) : (
+              <WebsiteSectionData messages={messages} />
+            )}
           </div>
+
           <div className="p-4 border-t flex items-center space-x-2">
             <input
               type="text"
@@ -241,7 +247,6 @@ const AllChats = () => {
               <SendIcon className="w-5 h-5 text-gray-400" />
             </button>
           </div>
-
         </div>
 
         <div className="w-80 bg-gray-50 p-4 overflow-y-scroll">
@@ -253,8 +258,9 @@ const AllChats = () => {
               >
                 <h3 className="font-medium">{section.title}</h3>
                 <ExpandMoreIcon
-                  className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
-                    }`}
+                  className={`w-4 h-4 transform ${
+                    section.expanded ? "rotate-180" : ""
+                  }`}
                 />
               </div>
               {section.expanded && (
