@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import SendIcon from "@mui/icons-material/Send";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
+import SendIcon from "@mui/icons-material/Send";
 import {
   getAdvanceFeature,
   getAllSession,
@@ -36,7 +36,6 @@ const AllChats = () => {
   const [channelName] = useState([
     { name: "Whatsapp", value: "whatsapp" },
     { name: "Website", value: "website" },
-    { name: "Instagram", value: "instagram" },
   ]);
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
@@ -218,18 +217,19 @@ const AllChats = () => {
           ))}
         </select>
       </div>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-gray-100 h-[calc(100vh -120px)]">
         <SessionsList
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
+
         />
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-y-scroll">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
             <WebsiteSectionData messages={messages} />
 
           </div>
-
           <div className="p-4 border-t flex items-center space-x-2">
             <input
               type="text"
@@ -241,9 +241,10 @@ const AllChats = () => {
               <SendIcon className="w-5 h-5 text-gray-400" />
             </button>
           </div>
+
         </div>
 
-        <div className="w-80 bg-gray-50 p-4">
+        <div className="w-80 bg-gray-50 p-4 overflow-y-scroll">
           {analysisSections.map((section, index) => (
             <div key={index} className="mb-4">
               <div

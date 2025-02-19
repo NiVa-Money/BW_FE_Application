@@ -26,7 +26,7 @@ const SessionsList: React.FC<any> = ({ onSessionSelect }) => {
   }, [sessionsDataRedux]);
 
   return (
-    <div className="w-96 pl-0 bg-white p-4 border-r">
+    <div className="w-64 pl-0 bg-white p-4 border-r overflow-y-scroll">
       <div className="flex flex-col gap-1">
         {sessionsData.map((item, index) => (
           <div
