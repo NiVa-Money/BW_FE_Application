@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { fetchShopifyDashboardRequest } from "../../../store/actions/reportActions";
 import { fetchShopifyOrdersService } from "../../../api/services/reportServices";
+import ReactMarkdown from "react-markdown";
 
 interface Order {
   orderName: string;
@@ -51,6 +52,7 @@ interface Order {
 // Data for Message Performance
 
 interface UtilityData {
+  aiInsights: string;
   messages: {
     type: string;
     totalSent: number | string;
@@ -367,25 +369,12 @@ const UtilityDash = () => {
                     <Typography variant="h5" gutterBottom>
                       AI Engagement Summary
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      <strong>Most Engaged User:</strong> John Doe
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      <strong>High-Interaction Customers:</strong> Alice, Bob,
-                      Charlie
-                    </Typography>
-                    <Typography variant="subtitle1">
-                      Common AI-Driven Queries:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      <strong>General Queries:</strong> "What is the price?",
-                      "How does it work?"
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      <strong>AI-Provided Utility:</strong> Offering
-                      personalized product recommendations, answering queries in
-                      real-time, and assisting with purchasing decisions.
-                    </Typography>
+                    <div className="max-h-64 overflow-y-auto">
+                      <ReactMarkdown>
+                        {utilityData?.aiInsights ||
+                          "No AI insights available at this time."}
+                      </ReactMarkdown>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
