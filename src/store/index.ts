@@ -9,6 +9,7 @@ import {
 } from "./reducers/integrationReducers";
 import userChatReducers from "./reducers/conversationReducers";
 import { whatsappDashboardReducer } from "./reducers/whatsappDashboardReducers";
+import { shopifyDashboardReducer } from "./reducers/reportReducers";
 const sagaMiddleware = createSagaMiddleware();
 
 const rootReducer = {
@@ -18,6 +19,7 @@ const rootReducer = {
   whatsappCampaign: whatsappCampaignReducer,
   whatsappTemplates: whatsappTemplateReducer,
   whatsappDashboard : whatsappDashboardReducer,
+  shopifyDashboard : shopifyDashboardReducer, 
   userChat: userChatReducers,
 };
 
