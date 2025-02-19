@@ -13,27 +13,34 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
         messages.map((msg: any, index: number) => {
           const isUserQuery = msg?.messageCategory === "user_query";
           const isAnswerCategory = [
-            "follow_up", "marketing", "confirmation", 
-            "final_confirmation_reminder", "second_confirmation_reminder", 
+            "follow_up", "marketing", "confirmation",
+            "final_confirmation_reminder", "second_confirmation_reminder",
             "first_confirmation_reminder"
           ].includes(msg?.messageCategory);
-          
-          const content = isUserQuery 
-            ? msg?.messageContent?.text 
-            : isAnswerCategory 
-            ? msg?.messageContent?.template?.body?.text || msg?.messageContent?.text || msg?.answer 
-            : "";
-          
+          const msgType = ["template", "text", "button_reply", "image"].includes(msg?.messageType)
+
+          const content = isUserQuery
+            ? msg?.messageContent?.text
+            : isAnswerCategory
+              ? msg?.messageContent?.template?.body?.text || msg?.messageContent?.text || msg?.answer
+              : "";
+          const imgUrl = isUserQuery
+            ? msg?.messageContent?.text
+            : isAnswerCategory
+              ? msg?.messageContent?.template?.header?.image || msg?.messageContent?.template?.header?.image || ''
+              : "";
+
           return (
+
             <div
               key={index}
               className={`flex ${isUserQuery ? "justify-end" : "justify-start"} mb-2`}
             >
               <div
-                className={`px-3 py-2 rounded-lg max-w-xs text-white ${
-                  isUserQuery ? "bg-purple-600" : "bg-gray-800"
-                }`}
+                className={`px-3 py-2 rounded-lg max-w-xs text-white ${isUserQuery ? "bg-purple-600" : "bg-gray-800"
+                  }`}
               >
+                {msg?.messageCategory !== "user_query" ? imgUrl ? < img src={imgUrl} width={100} height={100} /> : null : null}
                 <span className="flex gap-2 items-center">
                   {!isUserQuery && <AccountCircleIcon />}
                   {content}

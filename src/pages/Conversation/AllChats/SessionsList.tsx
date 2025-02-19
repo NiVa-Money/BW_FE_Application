@@ -59,7 +59,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { formatDateString } from "../../../hooks/functions";
 
-const SessionsList: React.FC<any> = ({ onSessionSelect }) => {
+const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal }) => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
@@ -77,7 +77,7 @@ const SessionsList: React.FC<any> = ({ onSessionSelect }) => {
     (state: RootState) => state?.userChat?.allSession?.data?.sessions?.userPhoneId
   );
 
-  console.log(userName , userPhoneId , channelName)
+  console.log(userName, userPhoneId, channelName)
 
 
   const channelNameImages = {
@@ -92,7 +92,7 @@ const SessionsList: React.FC<any> = ({ onSessionSelect }) => {
       setSessionsData(sessionsDataRedux.sessions);
     }
   }, [sessionsDataRedux]);
-
+  console.log(sessionsData)
   return (
     <div className="w-64 pl-0 bg-white p-4 border-r overflow-y-scroll">
       <div className="flex flex-col gap-1">
@@ -100,28 +100,28 @@ const SessionsList: React.FC<any> = ({ onSessionSelect }) => {
           <div
             key={item._id}
             className="flex justify-between items-center p-[8px] bg-[#EADDFF29] rounded-[10px]"
-            onClick={() => onSessionSelect(item._id)}
+            onClick={() => onSessionSelect(channelName === "whatsapp" ? item.userPhoneId : item._id)}
           >
             <div className="flex flex-col">
               {channelName === "whatsapp" ? (
                 <>
-                  <span>{userName || "Unknown User"}</span>
-                  <span>{userPhoneId || "No Phone ID"}</span>
+                  <span>{item.userName || "Unknown User"}</span>
+                  <span>{item.userPhoneId || "No Phone ID"}</span>
                 </>
               ) : (
                 <span>Session {Number(index + 1)}</span>
               )}
               <span>
-                {item.createdAt
+                {item?.createdAt
                   ? formatDateString(item.createdAt)
-                  : "No Date Available"}
+                  : ""}
               </span>
             </div>
             <div>
               <img
                 width={30}
                 height={30}
-                src={channelNameImages[item.channelName]}
+                src={channelNameImages[channelNameVal]}
                 alt={item.channelName}
               />
             </div>

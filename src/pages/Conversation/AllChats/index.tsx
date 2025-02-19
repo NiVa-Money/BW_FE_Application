@@ -129,15 +129,12 @@ const AllChats = () => {
         },
         {
           title: "Sentiment Analysis",
-          description: `Positive: ${
-            advanceFeatureData?.sentiments?.positive || 0
-          }%, 
-                      Neutral: ${
-                        advanceFeatureData?.sentiments?.neutral || 0
-                      }%, 
-                      Negative: ${
-                        advanceFeatureData?.sentiments?.negative || 0
-                      }%`,
+          description: `Positive: ${advanceFeatureData?.sentiments?.positive || 0
+            }%, 
+                      Neutral: ${advanceFeatureData?.sentiments?.neutral || 0
+            }%, 
+                      Negative: ${advanceFeatureData?.sentiments?.negative || 0
+            }%`,
           expanded: true,
         },
         {
@@ -150,11 +147,13 @@ const AllChats = () => {
   }, [advanceFeatureData]);
 
   const handleSessionSelection = (sessionId: string) => {
-    const messagesData = sessionsDataRedux?.sessions.filter(
+    const messagesData = channelNameVal !== 'whatsapp' ? sessionsDataRedux?.sessions.filter(
       (obj) => obj._id === sessionId
+    )[0].sessions : sessionsDataRedux?.sessions.filter(
+      (obj) => obj.userPhoneId === sessionId
     )[0].sessions;
     setMessages(messagesData);
-    dispatch(getAdvanceFeature(sessionId));
+    channelNameVal !== 'whatsapp' && dispatch(getAdvanceFeature(sessionId));
 
     setSelectedSessionId(sessionId);
   };
@@ -225,6 +224,7 @@ const AllChats = () => {
         <SessionsList
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
+          channelNameVal={channelNameVal}
         />
 
         <div className="flex-1 flex flex-col overflow-y-scroll">
@@ -258,9 +258,8 @@ const AllChats = () => {
               >
                 <h3 className="font-medium">{section.title}</h3>
                 <ExpandMoreIcon
-                  className={`w-4 h-4 transform ${
-                    section.expanded ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
+                    }`}
                 />
               </div>
               {section.expanded && (
