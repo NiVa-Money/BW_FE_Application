@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import TrendingUp from "@mui/icons-material/TrendingUp";
 import {
   Card,
@@ -27,6 +28,25 @@ import { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { fetchShopifyDashboardRequest } from "../../../store/actions/reportActions";
+import { fetchShopifyOrdersService } from "../../../api/services/reportServices";
+
+interface Order {
+  orderName: string;
+  codOrder: boolean;
+  onlineOrder: boolean;
+  welcomeMessageSent: boolean;
+  reminder1: boolean;
+  reminder2: boolean;
+  reminder3: boolean;
+  cancel: boolean;
+  confirm: boolean;
+  shipped: boolean;
+  autoCancel: boolean;
+  actionTakenAfter: string | null;
+  userName: string;
+  userNumber: string;
+  date: string;
+}
 
 // Data for Message Performance
 
@@ -68,6 +88,7 @@ interface UtilityData {
     cancelRate: string;
     noActions: string;
   }[];
+  orders?: Order[];
 }
 
 const UtilityDash = () => {
@@ -75,6 +96,9 @@ const UtilityDash = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [utilityData, setUtilityData] = useState<UtilityData | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [limit] = useState<number>(10);
+  const [fetchedOrders, setFetchedOrders] = useState<number>(0);
 
   const dispatch = useDispatch();
 
@@ -214,27 +238,51 @@ const UtilityDash = () => {
 
   console.log("shopify ", shopifyData);
 
-  const handleRangeTypeChange = (event) => {
+  const handleRangeTypeChange = (event: any) => {
     const newRangeType = event.target.value;
     setRangeType(newRangeType);
 
-    // Reset endDate when changing range type (if not selecting a range with 'day')
-    if (newRangeType === "day") {
-      setEndDate(null); // Reset the end date if selecting 'day'
+    if (newRangeType === "day" && startDate) {
+      setEndDate(startDate);
+    } else if (newRangeType === "day") {
+      setEndDate(null);
     }
   };
 
-  const handleStartDateChange = (newStartDate) => {
+  // const handleStartDateChange = (newStartDate) => {
+  //   setStartDate(newStartDate);
+
+  //   // If the range type is 'week' or 'month', set the end date based on the selected start date.
+  //   if (rangeType === "week" && newStartDate) {
+  //     const newEndDate = new Date(newStartDate);
+  //     newEndDate.setDate(newEndDate.getDate() + 6); // 7 days later for the week range
+  //     setEndDate(newEndDate);
+  //   } else if (rangeType === "month" && newStartDate) {
+  //     const newEndDate = new Date(newStartDate);
+  //     newEndDate.setMonth(newEndDate.getMonth() + 1); // 1 month later for the month range
+  //     setEndDate(newEndDate);
+  //   }
+  // };
+
+  const handleStartDateChange = (newStartDate: Date | null) => {
     setStartDate(newStartDate);
 
-    // If the range type is 'week' or 'month', set the end date based on the selected start date.
-    if (rangeType === "week" && newStartDate) {
+    if (!newStartDate) {
+      // If user clears start date, also clear end date
+      setEndDate(null);
+      return;
+    }
+
+    // If rangeType is 'day', endDate should always match startDate
+    if (rangeType === "day") {
+      setEndDate(newStartDate);
+    } else if (rangeType === "week") {
       const newEndDate = new Date(newStartDate);
-      newEndDate.setDate(newEndDate.getDate() + 6); // 7 days later for the week range
+      newEndDate.setDate(newEndDate.getDate() + 6);
       setEndDate(newEndDate);
-    } else if (rangeType === "month" && newStartDate) {
+    } else if (rangeType === "month") {
       const newEndDate = new Date(newStartDate);
-      newEndDate.setMonth(newEndDate.getMonth() + 1); // 1 month later for the month range
+      newEndDate.setMonth(newEndDate.getMonth() + 1);
       setEndDate(newEndDate);
     }
   };
@@ -242,6 +290,12 @@ const UtilityDash = () => {
   const handleEndDateChange = (newEndDate) => {
     setEndDate(newEndDate);
   };
+
+  useEffect(() => {
+    if (rangeType === "day" && startDate) {
+      setEndDate(startDate);
+    }
+  }, [rangeType, startDate]);
 
   useEffect(() => {
     if (!startDate || !endDate) {
@@ -269,12 +323,99 @@ const UtilityDash = () => {
     fetchUtilityData();
   }, [shopifyData]);
 
+  useEffect(() => {
+    if (!startDate || !endDate) return;
+
+    const formattedStartDate = format(startDate, "yyyy-MM-dd");
+    const formattedEndDate = format(endDate, "yyyy-MM-dd");
+
+    const fetchOrders = async () => {
+      try {
+        const response = await fetchShopifyOrdersService(
+          formattedStartDate,
+          formattedEndDate,
+          page
+        );
+
+        // Keep track of how many orders we got
+        setFetchedOrders(response.fetchedOrders || 0);
+
+        // Merge the orders into your existing utilityData
+        setUtilityData((prev) =>
+          prev
+            ? { ...prev, orders: response.orders }
+            : ({ orders: response.orders } as UtilityData)
+        );
+      } catch (error) {
+        console.error("Error fetching Shopify orders:", error);
+      }
+    };
+
+    fetchOrders();
+  }, [startDate, endDate, page]);
+
   return (
     <div className="p-6 bg-white min-h-screen">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">
           Utility Message Dashboard
         </h1>
+
+        <div className="mb-6">
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <div className="mb-4">
+              {/* Date Range Selection */}
+              <FormControl fullWidth>
+                <InputLabel>Choose Range</InputLabel>
+                <Select
+                  value={rangeType}
+                  onChange={handleRangeTypeChange}
+                  label="Choose Range"
+                >
+                  <MenuItem value="day">One Day</MenuItem>
+                  <MenuItem value="week">A Week</MenuItem>
+                  <MenuItem value="month">A Month</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+
+            {/* Date Picker Section */}
+            <div className="flex gap-4">
+              {/* Start Date Picker */}
+              <div className="w-1/2">
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={handleStartDateChange}
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </div>
+
+              {/* End Date Picker (only visible for 'week' and 'month' range types) */}
+              {rangeType !== "day" && (
+                <div className="w-1/2">
+                  <DatePicker
+                    label="End Date"
+                    value={endDate}
+                    onChange={handleEndDateChange}
+                    minDate={startDate || undefined}
+                    slotProps={{
+                      textField: {
+                        variant: "outlined",
+                        fullWidth: true,
+                      },
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </LocalizationProvider>
+        </div>
 
         <div className="grid grid-cols-6 gap-4 mb-6">
           {/* {utilityData?.header?.map((stat, index) => ( */}
@@ -433,62 +574,6 @@ const UtilityDash = () => {
 
         </div> */}
 
-        <div className="p-4">
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <div className="mb-4">
-              {/* Date Range Selection */}
-              <FormControl fullWidth>
-                <InputLabel>Choose Range</InputLabel>
-                <Select
-                  value={rangeType}
-                  onChange={handleRangeTypeChange}
-                  label="Choose Range"
-                >
-                  <MenuItem value="day">One Day</MenuItem>
-                  <MenuItem value="week">A Week</MenuItem>
-                  <MenuItem value="month">A Month</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-
-            {/* Date Picker Section */}
-            <div className="flex gap-4">
-              {/* Start Date Picker */}
-              <div className="w-1/2">
-                <DatePicker
-                  label="Start Date"
-                  value={startDate}
-                  onChange={handleStartDateChange}
-                  slotProps={{
-                    textField: {
-                      variant: "outlined",
-                      fullWidth: true,
-                    },
-                  }}
-                />
-              </div>
-
-              {/* End Date Picker (only visible for 'week' and 'month' range types) */}
-              {rangeType !== "day" && (
-                <div className="w-1/2">
-                  <DatePicker
-                    label="End Date"
-                    value={endDate}
-                    onChange={handleEndDateChange}
-                    minDate={startDate || undefined}
-                    slotProps={{
-                      textField: {
-                        variant: "outlined",
-                        fullWidth: true,
-                      },
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </LocalizationProvider>
-        </div>
-
         <div className="mt-6">
           {/* Utility Message Dashboard Table */}
           <Card className="mt-2">
@@ -582,6 +667,99 @@ const UtilityDash = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Orders list table  */}
+          <Card className="mt-5">
+            <CardHeader
+              className="text-center"
+             title={
+                <h6
+                  style={{
+                    fontSize: "1.2rem",
+                    color: "#2E2F5F",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Orders
+                </h6>
+              }
+            />
+            <CardContent>
+              {utilityData?.orders && (
+                <table className="min-w-full">
+                  <thead>
+                    <tr>
+                      <th className="text-left p-2">Order Name</th>
+                      <th className="text-left p-2">COD Order</th>
+                      <th className="text-left p-2">Online Order</th>
+                      <th className="text-left p-2">Welcome Msg Sent</th>
+                      <th className="text-left p-2">Reminder1</th>
+                      <th className="text-left p-2">Reminder2</th>
+                      <th className="text-left p-2">Reminder3</th>
+                      <th className="text-left p-2">Cancel</th>
+                      <th className="text-left p-2">Confirm</th>
+                      <th className="text-left p-2">Shipped</th>
+                      <th className="text-left p-2">Auto Cancel</th>
+                      <th className="text-left p-2">Action Taken After</th>
+                      <th className="text-left p-2">User Name</th>
+                      <th className="text-left p-2">User Number</th>
+                      <th className="text-left p-2">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {utilityData.orders.map((order, index) => (
+                      <tr key={index} className="border-t">
+                        <td className="p-2">{order.orderName}</td>
+                        <td className="p-2">{order.codOrder ? "Yes" : "No"}</td>
+                        <td className="p-2">
+                          {order.onlineOrder ? "Yes" : "No"}
+                        </td>
+                        <td className="p-2">
+                          {order.welcomeMessageSent ? "Yes" : "No"}
+                        </td>
+                        <td className="p-2">
+                          {order.reminder1 ? "Yes" : "No"}
+                        </td>
+                        <td className="p-2">
+                          {order.reminder2 ? "Yes" : "No"}
+                        </td>
+                        <td className="p-2">
+                          {order.reminder3 ? "Yes" : "No"}
+                        </td>
+                        <td className="p-2">{order.cancel ? "Yes" : "No"}</td>
+                        <td className="p-2">{order.confirm ? "Yes" : "No"}</td>
+                        <td className="p-2">{order.shipped ? "Yes" : "No"}</td>
+                        <td className="p-2">
+                          {order.autoCancel ? "Yes" : "No"}
+                        </td>
+                        <td className="p-2">{order.actionTakenAfter || "-"}</td>
+                        <td className="p-2">{order.userName}</td>
+                        <td className="p-2">{order.userNumber}</td>
+                        <td className="p-2">{order.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </CardContent>
+          </Card>
+          <div className="flex items-center justify-between mt-4">
+            <button
+              className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </button>
+            <span>Page: {page}</span>
+            <button
+              className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              onClick={() => setPage((prev) => prev + 1)}
+              disabled={fetchedOrders < limit}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>

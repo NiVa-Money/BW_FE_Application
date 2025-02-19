@@ -16,3 +16,21 @@ export const fetchShopifyDashboardService = async (
     throw error;
   }
 };
+
+
+export const fetchShopifyOrdersService = async (
+  startDate: string,
+  endDate: string,
+  page: number
+) => {
+  try {
+    const response = await axiosInstance.get(`/shopify/orders`, {
+      params: { startDate, endDate, page },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Shopify orders:", error);
+    throw error;
+  }
+};
