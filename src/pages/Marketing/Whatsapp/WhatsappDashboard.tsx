@@ -14,7 +14,15 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import AddIcon from "@mui/icons-material/Add";
-import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
+import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import {
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  SelectChangeEvent,
+} from "@mui/material";
 import {
   Message,
   Visibility,
@@ -29,10 +37,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import {
   fetchWhatsAppDashboardRequest,
+  fetchWhatsAppInsightsRequest,
   fetchWhatsAppMessagesRequest,
 } from "../../../store/actions/whatsappDashboardActions";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { Card, CardContent, Typography } from "@mui/material";
+import { AnimatePresence, motion } from "framer-motion";
 import { COLORS } from "../../../constants";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 
@@ -48,7 +59,7 @@ interface DashboardProps {
 const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [date, setDate] = useState<Date | null>(null);
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(1);
   const [limit, _setLimit] = useState(10);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
@@ -68,6 +79,11 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   } = useSelector(
     (state: RootState) => state?.whatsappDashboard?.dashboardData?.data || {}
   );
+
+  const insights = useSelector(
+    (state: RootState) => state.whatsappDashboard?.campaignInsights || []
+  );
+  console.log("insights", insights);
 
   // Get messages and total pages for the table
   const messages = useSelector(
@@ -100,34 +116,25 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
 
   console.log("select campaign id ", selectedCampaignId);
 
+  // Always call API on mount (or when any filter changes)
   useEffect(() => {
-    if (selectedCampaignName) {
-      const filters: any = {
-        receiverNumber: selectedReceiverNumber,
-        status: selectedStatus,
-        intent: selectedIntent,
-        sentiment: selectedSentiment,
-        replied: selectedReplied,
-      };
-
-      console.log(
-        "Selected Campaign Name:",
-        selectedCampaignName,
-        selectedCampaignId
-      );
-
-      if (selectedCampaignId) {
-        filters.campaignIds = [selectedCampaignId]; // Only include campaignIds if it's valid
-      }
-
-      dispatch(
-        fetchWhatsAppMessagesRequest({
-          page,
-          limit,
-          filter: filters, // Pass dynamically built filters
-        })
-      );
+    const filters: any = {};
+    if (selectedReceiverNumber) filters.receiverNumber = selectedReceiverNumber;
+    if (selectedStatus) filters.status = selectedStatus;
+    if (selectedIntent) filters.intent = selectedIntent;
+    if (selectedSentiment) filters.sentiment = selectedSentiment;
+    if (selectedReplied) filters.replied = selectedReplied;
+    if (selectedCampaignName && selectedCampaignId) {
+      filters.campaignIds = [selectedCampaignId];
     }
+
+    // By default, when no filters are applied, only `page` and `limit` are sent.
+    const payload: any = { page, limit };
+    if (Object.keys(filters).length > 0) {
+      payload.filter = filters;
+    }
+
+    dispatch(fetchWhatsAppMessagesRequest(payload));
   }, [
     selectedCampaignName,
     selectedCampaignId,
@@ -135,10 +142,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     limit,
     selectedReceiverNumber,
     selectedStatus,
-    dispatch,
     selectedIntent,
     selectedSentiment,
     selectedReplied,
+    dispatch,
   ]);
 
   const handlePageChange = (newPage: number) => {
@@ -212,6 +219,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
     }));
   }, [engagementRateMetrics, campaign]);
 
+  const handleCampaignChange = (e: SelectChangeEvent<string>) => {
+    setCampaign(e.target.value as string);
+  };
+
   const setScheduleDate = (newValue: Date | null): void => {
     setDate(newValue);
   };
@@ -221,6 +232,37 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
       No data available
     </div>
   );
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
+
+  const handleNext = () => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % 3);
+  };
+
+  const handlePrev = () => {
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + 3) % 3);
+  };
+
+  // useEffect(() => {
+  //   if (campaignId) {
+  //     dispatch(fetchWhatsAppInsightsRequest(campaignId));
+  //   }
+  // }, [campaignId]);
+
+  useEffect(() => {
+    if (campaign && campaignData?.length) {
+      const selectedCampaignObj = campaignData.find(
+        (c: { campaignName: string; campaignId: string }) =>
+          c.campaignName === campaign
+      );
+      if (selectedCampaignObj?.campaignId) {
+        dispatch(fetchWhatsAppInsightsRequest(selectedCampaignObj.campaignId));
+      }
+    }
+  }, [campaign, campaignData, dispatch]);
 
   return (
     <div className="p-6">
@@ -258,7 +300,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
             <InputLabel className="text-[#65558F]">Campaign Name</InputLabel>
             <Select
               value={campaign}
-              onChange={(e) => setCampaign(e.target.value)}
+              onChange={handleCampaignChange}
               label="Campaign Name"
               className="bg-white border border-[#65558F] rounded-full text-sm"
             >
@@ -337,17 +379,214 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               </p>
             </div>
           </div>
-          <div className="space-y-4">
-            {[
-              "AI-driven audience segmentation",
-              "Optimized ad performance metrics",
-              "Customer behavior trend analysis",
-            ].map((text, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span>{text}</span>
+          {insights?.campaignInsights ? (
+            <div className="relative">
+              <AnimatePresence initial={false} custom={direction}>
+                <motion.div
+                  key={currentIndex}
+                  custom={direction}
+                  variants={{
+                    enter: (direction) => ({
+                      x: direction > 0 ? 300 : -300,
+                      opacity: 0,
+                    }),
+                    center: {
+                      x: 0,
+                      opacity: 1,
+                    },
+                    exit: (direction) => ({
+                      x: direction > 0 ? -300 : 300,
+                      opacity: 0,
+                    }),
+                  }}
+                  className="min-w-[300px] p-2"
+                >
+                  <div className="mt-0 mb-2">
+                    <p className="text-2xl font-semibold mr-4 text-[#65558F] text-center">
+                      {campaign}
+                    </p>
+                  </div>
+                  {currentIndex === 0 && (
+                    <Card className="mx-auto">
+                      <CardContent>
+                        <Typography variant="h5" gutterBottom>
+                          Engagement Analysis
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Most Engaged User:</strong>{" "}
+                          {
+                            insights.campaignInsights.engagementAnalysis
+                              .mostEngagedUser
+                          }
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          gutterBottom
+                        >
+                          <strong>High Intent Users:</strong>{" "}
+                          {insights.campaignInsights.engagementAnalysis.highIntentUsers.join(
+                            ", "
+                          )}
+                        </Typography>
+                        <div>
+                          <Typography variant="subtitle1">
+                            Common Queries:
+                          </Typography>
+                          {Object.entries(
+                            insights.campaignInsights.engagementAnalysis
+                              .commonQueries
+                          ).map(([queryType, queries]) => (
+                            <div key={queryType}>
+                              <Typography variant="body2" color="textSecondary">
+                                <strong>{queryType}:</strong>{" "}
+                                {Array.isArray(queries)
+                                  ? queries.join(", ")
+                                  : ""}
+                              </Typography>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {currentIndex === 1 && (
+                    <Card className="mx-auto">
+                      <CardContent>
+                        <Typography variant="h5" gutterBottom>
+                          Improvement Opportunities
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          gutterBottom
+                        >
+                          <strong>Reduce Failure Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.improvementOpportunities
+                              .reduceFailureRate
+                          }
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          gutterBottom
+                        >
+                          <strong>Increase Engagement:</strong>{" "}
+                          {
+                            insights.campaignInsights.improvementOpportunities
+                              .increaseEngagement
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Boost Response Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.improvementOpportunities
+                              .boostResponseRate
+                          }
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {currentIndex === 2 && (
+                    <Card className="mx-auto">
+                      <CardContent>
+                        <Typography variant="h5" gutterBottom>
+                          Performance Analytics
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Total Contacts:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .totalContacts
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Total Messages Sent:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .totalMessagesSent
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Delivered Messages:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .deliveredMessages
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Delivery Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .deliveryRate
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Read Messages:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .readMessages
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Read Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .readRate
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Replied Messages:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .repliedMessages
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Response Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .responseRate
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Failed Messages:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .failedMessages
+                          }
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          <strong>Failure Rate:</strong>{" "}
+                          {
+                            insights.campaignInsights.performanceAnalytics
+                              .failureRate
+                          }
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+              <div className="flex justify-between mt-4">
+                <button
+                  onClick={handlePrev}
+                  className="px-4 py-2 bg-[#65558F] text-white rounded-full"
+                >
+                  <KeyboardArrowLeftRoundedIcon className="w-[18px]" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="px-4 py-2 bg-[#65558F] text-white rounded-full"
+                >
+                  <KeyboardArrowRightRoundedIcon className="w-[18px]" />
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div>No insights available.</div>
+          )}
         </div>
 
         {/* Campaign Section */}
@@ -439,6 +678,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
             </Select>
           </FormControl>
 
+          {/* Hard-coded Status dropdown */}
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Status</InputLabel>
             <Select
@@ -448,9 +688,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {Array.from(
-                new Set(messages.map((msg: { status: string }) => msg.status))
-              ).map((status: string, index: number) => (
+              {["sent", "delivered", "read", "failed"].map((status, index) => (
                 <MenuItem key={index} value={status}>
                   {status}
                 </MenuItem>
@@ -458,6 +696,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
             </Select>
           </FormControl>
 
+          {/* Hard-coded Intent dropdown */}
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Intent</InputLabel>
             <Select
@@ -467,16 +706,17 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {Array.from(
-                new Set(messages.map((msg: { intent: string }) => msg.intent))
-              ).map((intent: string, index: number) => (
-                <MenuItem key={index} value={intent}>
-                  {intent}
-                </MenuItem>
-              ))}
+              {["Interested", "Not Interested", "Complaint", "Other"].map(
+                (intent, index) => (
+                  <MenuItem key={index} value={intent}>
+                    {intent}
+                  </MenuItem>
+                )
+              )}
             </Select>
           </FormControl>
 
+          {/* Hard-coded Sentiment dropdown */}
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Sentiment</InputLabel>
             <Select
@@ -486,11 +726,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {Array.from(
-                new Set(
-                  messages.map((msg: { sentiment: string }) => msg.sentiment)
-                )
-              ).map((sentiment: string, index: number) => (
+              {["Positive", "Negative", "Neutral"].map((sentiment, index) => (
                 <MenuItem key={index} value={sentiment}>
                   {sentiment}
                 </MenuItem>

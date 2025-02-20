@@ -15,9 +15,7 @@ interface ConfirmationModalProps {
     onClose: () => void;
     onConfirm: () => void;
     heading: string;
-    bodyText: string;
-    subHeading1: string;
-    subHeading2: string;
+    contentComponent: any
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -25,9 +23,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     onClose,
     onConfirm,
     heading,
-    bodyText,
-    subHeading1,
-    subHeading2
+    contentComponent,
+
 
 }) => {
     const navigate = useNavigate()
@@ -48,17 +45,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     />
                 </DialogTitle>
                 <DialogContent className="mt-[20px]">
-                    <Box display="flex" flexDirection="column" alignItems="center">
-                        <Typography variant="body1" align="left" className="w-[100%]" color="textSecondary ">
-                            <div className="flex flex-col w-[100%]">
-                                <span>{subHeading1}</span>
-                                <span>{subHeading2}</span>
-                            </div>
-                        </Typography>
-                        <Typography variant="body1" align="left" color="textSecondary">
-                            {bodyText}
-                        </Typography>
-                    </Box>
+                    {contentComponent}
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: "end", gap: 1, mt: 2 }}>
                     <Button onClick={closeBotHandler} variant="outlined" color="primary" className="rounded-[100px]">

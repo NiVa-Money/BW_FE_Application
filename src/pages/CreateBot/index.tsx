@@ -17,7 +17,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createBotAction } from '../../store/actions/botActions';
 import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../store';
-import ConfirmationModal from '../../components/ConformationModal';
+import ConfirmationModal from '../../components/confirmationModal';
+import BotSuccessContent from '../../components/confirmationModal/BotSuccessContent';
 
 
 const CreateBot: React.FC = () => {
@@ -569,7 +570,11 @@ const CreateBot: React.FC = () => {
           </Form>
         )}
       </Formik>
-      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`} />
+      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} contentComponent={<BotSuccessContent subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`} open={false} onClose={function (): void {
+        throw new Error('Function not implemented.');
+      }} onConfirm={function (): void {
+        throw new Error('Function not implemented.');
+      }} heading={''} />} />
 
     </div>
 

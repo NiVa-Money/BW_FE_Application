@@ -41,9 +41,11 @@ import {
 } from "./whatsappCampaignSaga";
 import {
   FETCH_WHATSAPP_DASHBOARD_REQUEST,
+  FETCH_WHATSAPP_INSIGHTS_REQUEST,
   FETCH_WHATSAPP_MESSAGES_REQUEST,
 } from "../actionTypes/whatsappDashboardActionTypes";
 import {
+  fetchWhatsAppCampaignSaga,
   fetchWhatsAppMessagesSaga,
   whatsappDashboardSaga,
 } from "./whatsappDashboardSaga";
@@ -57,6 +59,8 @@ import {
   USER_ALL_SESSION,
   USER_ALL_SESSION_LIVE,
 } from "../actionTypes/conversationActionsTypes";
+import { FETCH_SHOPIFY_DASHBOARD_REQUEST } from "../actionTypes/reportActionTypes";
+import { fetchShopifyDashboardSaga } from "./reportSagas";
 
 export default function* rootSaga() {
   yield takeEvery(CREATE_BOT, createBotSaga);
@@ -74,8 +78,10 @@ export default function* rootSaga() {
   yield takeEvery(DELETE_WHATSAPP_REQUEST, deleteWhatsappSaga);
   yield takeEvery(FETCH_WHATSAPP_DASHBOARD_REQUEST, whatsappDashboardSaga);
   yield takeEvery(FETCH_WHATSAPP_MESSAGES_REQUEST, fetchWhatsAppMessagesSaga);
+  yield takeEvery(FETCH_WHATSAPP_INSIGHTS_REQUEST, fetchWhatsAppCampaignSaga);
   yield takeEvery(TEST_BOT, testBotSaga);
   yield takeEvery(USER_ALL_SESSION, getUserAllSessionSaga);
   yield takeEvery(USER_ALL_SESSION_LIVE, getUserAllSessionLiveSaga);
   yield takeEvery(ADVANCE_FEATURE, getAdvanceFeatureSaga);
+  yield takeEvery(FETCH_SHOPIFY_DASHBOARD_REQUEST, fetchShopifyDashboardSaga);
 }

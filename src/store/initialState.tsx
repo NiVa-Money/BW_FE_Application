@@ -57,6 +57,13 @@ export const initialState: any = {
     error: null,
     dashboardData: [],
     messages: [],
+    campaignInsights : [],
+  },
+
+  shopifyDashboard : {
+    loading: false,
+    error: null,
+    shopifyData: [],
   },
 
   userChat: {

@@ -1,17 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import SendIcon from "@mui/icons-material/Send";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
+import SendIcon from "@mui/icons-material/Send";
 import {
   getAdvanceFeature,
   getAllSession,
 } from "../../../store/actions/conversationActions";
 import { RootState } from "../../../store";
 import { getBotsAction } from "../../../store/actions/botActions";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SessionsList from "./SessionsList";
+import WebsiteSectionData from "./websiteSectionData";
+import WhatsappSectionData from "./whatsappSectionData";
 
 interface AnalysisSection {
   title: string;
@@ -22,6 +24,7 @@ interface AnalysisSection {
 const AllChats = () => {
   const [, setSelectedSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any>([]);
+  const [page, setPage] = useState(1); 
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
@@ -36,19 +39,18 @@ const AllChats = () => {
   const [channelName] = useState([
     { name: "Whatsapp", value: "whatsapp" },
     { name: "Website", value: "website" },
-    { name: "Instagram", value: "instagram" },
   ]);
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-  const [channelNameVal, setChannelNameVal] = useState("whatsapp");
+  const [channelNameVal, setChannelNameVal] = useState("website");
   const [botIdVal, setBotIdVal] = useState("");
 
   const botsDataLoader = useSelector(
     (state: RootState) => state.bot?.lists?.loader
   );
 
-  const botId = botsDataRedux?.[0]?._id;
+  // const botId = botsDataRedux?.[0]?._id;
 
   useEffect(() => {
     if (
@@ -72,24 +74,44 @@ const AllChats = () => {
     }
   }, [userId]);
 
+  // const getChatHistory = () => {
+  //   const data = {
+  //     userId: userId,
+  //     botId: botId,
+  //   };
+  //   dispatch(getAllSession(data));
+  // };
+
   const getChatHistory = () => {
+    // If no bot selected, or no user, do nothing
+    if (!botIdVal || !userId) return;
+
     const data = {
-      userId: userId,
-      botId: botId,
+      // userId,
+      botId: botIdVal,         // from state
+      page,                    // from state
+      channelName: channelNameVal, // from state
     };
+
+    console.log("getChatHistory called with data:", data);
     dispatch(getAllSession(data));
   };
-  useEffect(() => {
-    if (advanceFeatureDataRedux !== null || undefined) {
-      setAdvanceFeatureData(advanceFeatureDataRedux);
-    }
-  }, [advanceFeatureDataRedux]);
 
   useEffect(() => {
-    if (botsDataRedux?.botId?.length) {
-      getChatHistory();
+    if (advanceFeatureDataRedux !== null) {
+      setAdvanceFeatureData(advanceFeatureDataRedux);
     }
-  }, [botsDataRedux?.botId?.length]);
+  }, [advanceFeatureDataRedux?.summary]);
+
+  // useEffect(() => {
+  //   if (botsDataRedux?.botId?.length) {
+  //     getChatHistory();
+  //   }
+  // }, [botsDataRedux?.botId?.length ,    ]);
+
+  useEffect(() => {
+    getChatHistory();
+  }, [botIdVal, channelNameVal, page]);
 
   const [, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -129,15 +151,12 @@ const AllChats = () => {
         },
         {
           title: "Sentiment Analysis",
-          description: `Positive: ${
-            advanceFeatureData?.sentiments?.positive || 0
-          }%, 
-                      Neutral: ${
-                        advanceFeatureData?.sentiments?.neutral || 0
-                      }%, 
-                      Negative: ${
-                        advanceFeatureData?.sentiments?.negative || 0
-                      }%`,
+          description: `Positive: ${advanceFeatureData?.sentiments?.positive || 0
+            }%, 
+                      Neutral: ${advanceFeatureData?.sentiments?.neutral || 0
+            }%, 
+                      Negative: ${advanceFeatureData?.sentiments?.negative || 0
+            }%`,
           expanded: true,
         },
         {
@@ -150,11 +169,16 @@ const AllChats = () => {
   }, [advanceFeatureData]);
 
   const handleSessionSelection = (sessionId: string) => {
-    const messagesData = sessionsDataRedux?.sessions.filter(
+    const messagesData = channelNameVal !== 'whatsapp' ? sessionsDataRedux?.sessions.filter(
       (obj) => obj._id === sessionId
+    )[0].sessions : sessionsDataRedux?.sessions.filter(
+      (obj) => obj.userPhoneId === sessionId
     )[0].sessions;
     setMessages(messagesData);
-    dispatch(getAdvanceFeature(sessionId));
+    // channelNameVal !== 'whatsapp' && dispatch(getAdvanceFeature(sessionId));
+    if (channelNameVal !== 'whatsapp') {
+      dispatch(getAdvanceFeature(sessionId));
+    }
 
     setSelectedSessionId(sessionId);
   };
@@ -190,7 +214,7 @@ const AllChats = () => {
         <h1 className="text-xl font-semibold">All Chats</h1>
         {messages?.length ? (
           <button
-            className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px] mb-2 mt-4 mr-4"
+            className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
             onClick={() => setMessages(null)}
           >
             Close Chat <CloseIcon className="ml-1 w-4 h-4" />
@@ -221,33 +245,22 @@ const AllChats = () => {
           ))}
         </select>
       </div>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-gray-100 h-[calc(100vh -120px)]">
         <SessionsList
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
+          channelNameVal={channelNameVal}
+          setPage={setPage}
+          page = {page}
         />
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-y-scroll">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages?.map((msg, index) => (
-              <div key={index} className="flex flex-col space-y-2">
-                {/* Answer on the left */}
-                <div className="self-end bg-purple-600 text-white px-2 py-2 rounded-lg max-w-xs">
-                  <span className="flex gap-[5px] justify-between">
-                    {msg.question}
-                    <AccountCircleIcon />
-                  </span>
-                </div>
-                {/* Question on the right */}
-                <div className="self-start bg-gray-800 text-white px-2 py-2 rounded-lg max-w-xs">
-                  <span className="flex gap-[5px] justify-between">
-                    {" "}
-                    <AccountCircleIcon />
-                    {msg.answer}
-                  </span>
-                </div>
-              </div>
-            ))}
+            {channelNameVal === "whatsapp" ? (
+              <WhatsappSectionData messages={messages} />
+            ) : (
+              <WebsiteSectionData messages={messages} />
+            )}
           </div>
 
           <div className="p-4 border-t flex items-center space-x-2">
@@ -263,7 +276,7 @@ const AllChats = () => {
           </div>
         </div>
 
-        <div className="w-80 bg-gray-50 p-4">
+        <div className="w-80 bg-gray-50 p-4 overflow-y-scroll">
           {analysisSections.map((section, index) => (
             <div key={index} className="mb-4">
               <div
@@ -272,9 +285,8 @@ const AllChats = () => {
               >
                 <h3 className="font-medium">{section.title}</h3>
                 <ExpandMoreIcon
-                  className={`w-4 h-4 transform ${
-                    section.expanded ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
+                    }`}
                 />
               </div>
               {section.expanded && (
