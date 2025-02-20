@@ -21,7 +21,7 @@ import {
   Cell,
   XAxis,
 } from "recharts";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+// import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { RootState } from "../../../store";
@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import { fetchShopifyDashboardRequest } from "../../../store/actions/reportActions";
 import { fetchShopifyOrdersService } from "../../../api/services/reportServices";
 import ReactMarkdown from "react-markdown";
+import CustomDatePicker from "../../../components/CustomDatePicker";
 
 interface Order {
   orderName: string;
@@ -102,7 +103,6 @@ const UtilityDash = () => {
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
   const [fetchedOrders, setFetchedOrders] = useState<number>(0);
-
   const dispatch = useDispatch();
 
   const shopifyData = useSelector(
@@ -250,7 +250,7 @@ const UtilityDash = () => {
             <div className="flex gap-4">
               {/* Start Date Picker */}
               <div className="w-1/2">
-                <DatePicker
+                {/* <DatePicker
                   label="Start Date"
                   value={startDate}
                   onChange={handleStartDateChange}
@@ -260,13 +260,19 @@ const UtilityDash = () => {
                       fullWidth: true,
                     },
                   }}
+                /> */}
+                <CustomDatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={handleStartDateChange}
+                  placeholder="Select start date"
                 />
               </div>
 
               {/* End Date Picker (only visible for 'week' and 'month' range types) */}
               {rangeType !== "day" && (
                 <div className="w-1/2">
-                  <DatePicker
+                  {/* <DatePicker
                     label="End Date"
                     value={endDate}
                     onChange={handleEndDateChange}
@@ -277,6 +283,13 @@ const UtilityDash = () => {
                         fullWidth: true,
                       },
                     }}
+                  /> */}
+                  <CustomDatePicker
+                    label="End Date"
+                    value={endDate}
+                    onChange={handleEndDateChange}
+                    minDate={startDate || undefined}
+                    placeholder="Select end date"
                   />
                 </div>
               )}
