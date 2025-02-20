@@ -209,10 +209,10 @@ const DashboardPanel = () => {
   };
 
   // Handle date range change
-  const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
+  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
     setDateRange({ startDate, endDate });
     if (!isToday) {
-      await fetchData(startDate, endDate);
+      fetchData(startDate, endDate);
     }
   };
 
