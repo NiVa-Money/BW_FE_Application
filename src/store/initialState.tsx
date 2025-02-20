@@ -60,6 +60,12 @@ export const initialState: any = {
     campaignInsights : [],
   },
 
+  shopifyDashboard : {
+    loading: false,
+    error: null,
+    shopifyData: [],
+  },
+
   userChat: {
     session: {
       data: [],

@@ -210,6 +210,7 @@ const WhatsappCampaign: React.FC = () => {
       alert("Failed to create campaign");
     }
   };
+
   const handleCreateTemplate = () => {
     const templateData = {
       integrationId, // Ensure this variable is defined
@@ -307,6 +308,22 @@ const WhatsappCampaign: React.FC = () => {
                   </div>
                 ))}
               </div>
+              {selectedTemplate && (
+                <div className="mt-4 p-4 border border-gray-300 rounded-md">
+                  <p className="text-xl font-semibold">Selected Template : </p>
+                  <h3 className="text-xl font-semibold">
+                    {selectedTemplate.name}
+                  </h3>
+                  <p>{selectedTemplate.body}</p>
+                  {selectedTemplate.header && (
+                    <img
+                      src={selectedTemplate.header}
+                      alt="Template Header"
+                      className="w-full h-auto mt-2"
+                    />
+                  )}
+                </div>
+              )}
 
               <button
                 className="flex gap-2 w-full mt-4  whitespace-nowrap min-h-[45px] justify-center items-center text-base font-medium text-gray-100 bg-[#65558F] rounded-3xl"
@@ -572,7 +589,7 @@ const WhatsappCampaign: React.FC = () => {
             <CampaignTemplate
               onClose={() => setShowTemplate(false)}
               onSelectTemplate={handleSelectTemplate}
-              selectedPhoneNumberId={selectedPhoneNumberId} 
+              selectedPhoneNumberId={selectedPhoneNumberId}
             />
           )}
           {/* WhatsApp Preview */}
