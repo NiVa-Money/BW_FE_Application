@@ -1,11 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { dashBoardDataService } from "../api/services/dashboardServices";
 
-const useLatestFetchData = (
-  botId: string,
-  shouldFetch: boolean,
-  setFetchUpdatedData
-) => {
+const useLatestFetchData = (botId: string, isToday: boolean) => {
   const [data, setData] = useState<any>(null);
 
   const fetchData = useCallback(async () => {
@@ -13,7 +9,7 @@ const useLatestFetchData = (
     startDate.setHours(0, 0, 0, 0); // Today at 00:00:00
     const endDate = new Date(); // Current time
 
-    if (!botId || !shouldFetch) return;
+    if (!botId || !isToday) return;
 
     try {
       const response: any = await dashBoardDataService({
@@ -27,22 +23,20 @@ const useLatestFetchData = (
     } catch (err) {
       console.error("Error Calling Dashboard API:", err);
     }
-  }, [botId]);
+  }, [botId, isToday]);
 
   useEffect(() => {
-    if (!shouldFetch) {
-      setFetchUpdatedData(false);
-      return; // Don't start the interval if shouldFetch is false
+    if (!isToday) {
+      return; // Don't start the interval if isToday is false
     }
 
     fetchData();
-    setFetchUpdatedData(true);
 
     const intervalId = setInterval(fetchData, 10000);
 
-    // Clear the interval when the component unmounts or shouldFetch becomes false
+    // Clear the interval when the component unmounts or isToday becomes false
     return () => clearInterval(intervalId);
-  }, [shouldFetch]);
+  }, [fetchData, isToday]);
 
   return data;
 };
