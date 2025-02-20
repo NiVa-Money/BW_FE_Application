@@ -226,7 +226,6 @@ const DashboardPanel = () => {
     }
   };
 
-  //state, getter- true here, setter in child update
   const latestFetchedTodaysData = useLatestFetchData(
     botId,
     isToday,
