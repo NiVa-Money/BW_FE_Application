@@ -20,6 +20,8 @@ import {
   Legend,
   Cell,
   XAxis,
+  Tooltip,
+  LabelList,
 } from "recharts";
 // import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -339,11 +341,15 @@ const UtilityDash = () => {
             <ChartCard title="Success Rate">
               {utilityData?.successRate &&
                 utilityData.successRate.length > 0 && (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={utilityData.successRate}>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={utilityData.successRate} margin={{ bottom: 50 }}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="key" />
+                      <XAxis dataKey="key" angle={-20} textAnchor="end" />
+
                       <YAxis />
+                      <Tooltip
+                        formatter={(value) => [`${value}`, "Success Count"]}
+                      />
                       <Legend
                         verticalAlign="top"
                         wrapperStyle={{ paddingBottom: 10 }}
@@ -352,6 +358,7 @@ const UtilityDash = () => {
                         {utilityData.successRate.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
+                        <LabelList dataKey="count" position="top" />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -360,7 +367,6 @@ const UtilityDash = () => {
           </div>
 
           {/* Text Insights */}
-
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
             <div className="flex justify-between items-center mb-4">
               <div>
@@ -383,7 +389,7 @@ const UtilityDash = () => {
                     <Typography variant="h5" gutterBottom>
                       AI Engagement Summary
                     </Typography>
-                    <div className="max-h-64 overflow-y-auto">
+                    <div className="max-h-72 overflow-y-auto">
                       <ReactMarkdown>
                         {utilityData?.aiInsights ||
                           "No AI insights available at this time."}
@@ -402,11 +408,14 @@ const UtilityDash = () => {
               <ChartCard title="Cancel Rate">
                 {utilityData?.cancelRate &&
                   utilityData.cancelRate.length > 0 && (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={utilityData.cancelRate}>
+                    <ResponsiveContainer width="100%" height={450}>
+                      <BarChart data={utilityData.cancelRate}  margin={{ bottom: 50 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="key" />
+                        <XAxis dataKey="key" angle={-20} textAnchor="end" />
                         <YAxis />
+                        <Tooltip
+                          formatter={(value) => [`${value}`, "Cancel Count"]}
+                        />
                         <Legend
                           verticalAlign="top"
                           wrapperStyle={{ paddingBottom: 10 }}
@@ -415,6 +424,7 @@ const UtilityDash = () => {
                           {utilityData.cancelRate.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
+                          <LabelList dataKey="count" position="top" />
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
