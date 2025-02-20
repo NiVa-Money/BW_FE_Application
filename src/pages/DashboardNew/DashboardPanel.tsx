@@ -299,6 +299,9 @@ const DashboardPanel = () => {
           {botsDataRedux?.length > 0 && (
             <FormControl size="small" sx={{ minWidth: 85 }}>
               <Select
+                sx={{
+                  maxHeight: 36, // To match the height of the DateRangePicker
+                }}
                 value={botId}
                 onChange={(event) => handleBotSelection(event.target.value)}
               >
