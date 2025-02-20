@@ -65,10 +65,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       // Set start date to 12:00 AM today
       startDate = new Date(now);
       startDate.setHours(0, 0, 0, 0);
-      onToday(true)
+      onToday(true);
     } else {
       startDate = subDays(now, days);
-      onToday(false)
+      onToday(false);
     }
 
     setIsCustomRange(false);
@@ -80,7 +80,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   };
 
   const handleDateChange = (date: Date | null, isStart: boolean) => {
-    console.log(date)
     if (!date) return;
 
     if (isStart) {
@@ -91,7 +90,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       onDateRangeChange(startDate, date);
     }
   };
-
 
   return (
     <div className="relative">
