@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -23,6 +24,7 @@ interface AnalysisSection {
 const AllChats = () => {
   const [, setSelectedSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any>([]);
+  const [page, setPage] = useState(1); 
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
@@ -48,7 +50,7 @@ const AllChats = () => {
     (state: RootState) => state.bot?.lists?.loader
   );
 
-  const botId = botsDataRedux?.[0]?._id;
+  // const botId = botsDataRedux?.[0]?._id;
 
   useEffect(() => {
     if (
@@ -72,24 +74,44 @@ const AllChats = () => {
     }
   }, [userId]);
 
+  // const getChatHistory = () => {
+  //   const data = {
+  //     userId: userId,
+  //     botId: botId,
+  //   };
+  //   dispatch(getAllSession(data));
+  // };
+
   const getChatHistory = () => {
+    // If no bot selected, or no user, do nothing
+    if (!botIdVal || !userId) return;
+
     const data = {
-      userId: userId,
-      botId: botId,
+      // userId,
+      botId: botIdVal,         // from state
+      page,                    // from state
+      channelName: channelNameVal, // from state
     };
+
+    console.log("getChatHistory called with data:", data);
     dispatch(getAllSession(data));
   };
+
   useEffect(() => {
     if (advanceFeatureDataRedux !== null) {
       setAdvanceFeatureData(advanceFeatureDataRedux);
     }
   }, [advanceFeatureDataRedux?.summary]);
 
+  // useEffect(() => {
+  //   if (botsDataRedux?.botId?.length) {
+  //     getChatHistory();
+  //   }
+  // }, [botsDataRedux?.botId?.length ,    ]);
+
   useEffect(() => {
-    if (botsDataRedux?.botId?.length) {
-      getChatHistory();
-    }
-  }, [botsDataRedux?.botId?.length]);
+    getChatHistory();
+  }, [botIdVal, channelNameVal, page]);
 
   const [, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -153,7 +175,10 @@ const AllChats = () => {
       (obj) => obj.userPhoneId === sessionId
     )[0].sessions;
     setMessages(messagesData);
-    channelNameVal !== 'whatsapp' && dispatch(getAdvanceFeature(sessionId));
+    // channelNameVal !== 'whatsapp' && dispatch(getAdvanceFeature(sessionId));
+    if (channelNameVal !== 'whatsapp') {
+      dispatch(getAdvanceFeature(sessionId));
+    }
 
     setSelectedSessionId(sessionId);
   };
@@ -225,6 +250,8 @@ const AllChats = () => {
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
           channelNameVal={channelNameVal}
+          setPage={setPage}
+          page = {page}
         />
 
         <div className="flex-1 flex flex-col overflow-y-scroll">
