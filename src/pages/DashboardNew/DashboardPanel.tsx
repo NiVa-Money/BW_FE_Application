@@ -59,30 +59,32 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
   const processedStats = headerData
     ? [
-      {
-        title: "Resolution Rate",
-        content: `${(headerData.resolutionRate &&
-          headerData.resolutionRate?.toFixed(2)) ||
-          0
+        {
+          title: "Resolution Rate",
+          content: `${
+            (headerData.resolutionRate &&
+              headerData.resolutionRate?.toFixed(2)) ||
+            0
           }%`,
-        iconSrc: "/assets/icons/three-bars.svg",
-      },
-      {
-        title: "Live chat Vs ended the chat",
-        content: `Live: ${headerData.liveVsEndedSessions.live}, Ended: ${headerData.liveVsEndedSessions.ended}`,
-      },
-      {
-        title: "AI vs. Human Resolution Rate",
-        content: `AI: ${headerData.aiVsHumanResolutionRate.ai}%, Human: ${headerData.aiVsHumanResolutionRate.human}%`,
-      },
-      {
-        title: "Consumed messages / Total messages ",
-        content: `${headerData.messages.consumed ||
-          headerData.messages.total - headerData.messages.left
+          iconSrc: "/assets/icons/three-bars.svg",
+        },
+        {
+          title: "Live chat Vs ended the chat",
+          content: `Live: ${headerData.liveVsEndedSessions.live}, Ended: ${headerData.liveVsEndedSessions.ended}`,
+        },
+        {
+          title: "AI vs. Human Resolution Rate",
+          content: `AI: ${headerData.aiVsHumanResolutionRate.ai}%, Human: ${headerData.aiVsHumanResolutionRate.human}%`,
+        },
+        {
+          title: "Consumed messages / Total messages ",
+          content: `${
+            headerData.messages.consumed ||
+            headerData.messages.total - headerData.messages.left
           }/${headerData.messages.total}`,
-      },
-      { title: "Escalation Rate", content: `${headerData.escalationRate}%` },
-    ]
+        },
+        { title: "Escalation Rate", content: `${headerData.escalationRate}%` },
+      ]
     : [];
 
   return (
@@ -208,9 +210,8 @@ const DashboardPanel = () => {
 
   // Handle date range change
   const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
-    debugger
     // const onTodayVal = onTOday()
-    console.log('st', startDate, endDate, isToday)
+    console.log("st", startDate, endDate, isToday);
     setDateRange({ startDate, endDate });
     if (!isToday) {
       await fetchData(startDate, endDate);
