@@ -14,6 +14,7 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
+import { FormControlLabel, Switch } from "@mui/material";
 
 interface AnalysisSection {
   title: string;
@@ -28,6 +29,7 @@ const AllChats = () => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
+  const [aiLevel, setAiLevel] = useState(true)
 
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
@@ -89,7 +91,8 @@ const AllChats = () => {
     const data = {
       // userId,
       botId: botIdVal,         // from state
-      page,                    // from state
+      page,
+      aiLevel,                   // from state
       channelName: channelNameVal, // from state
     };
 
@@ -104,7 +107,7 @@ const AllChats = () => {
 
   useEffect(() => {
     getChatHistory();
-  }, [page]);
+  }, [page, aiLevel]);
 
   const [, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -191,6 +194,7 @@ const AllChats = () => {
         botId: botId,
         page,
         channelName: channelNameVal,
+        aiLevel
       })
     );
   };
@@ -198,7 +202,7 @@ const AllChats = () => {
     const val = e.target.value;
     setChannelNameVal(val);
     dispatch(
-      getAllSession({ botId: botIdVal, page, channelName: val })
+      getAllSession({ botId: botIdVal, page, channelName: val, aiLevel })
     );
   };
   return (
@@ -237,6 +241,23 @@ const AllChats = () => {
             </option>
           ))}
         </select>
+        <div className='flex justify-center items-center'>
+          <label htmlFor="AI Chats" className='text-black mr-2'
+          >AI Chats</label>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={Boolean(aiLevel)}
+                onClick={(e: any) => setAiLevel(e.target.checked)}
+                color="primary" // Customize the color
+              />
+            }
+            label=''
+          // Display the label next to the switch
+          />
+
+
+        </div>
       </div>
       <div className="flex  bg-gray-100 h-full h-[calc(100vh - 120px)]" >
         <SessionsList
