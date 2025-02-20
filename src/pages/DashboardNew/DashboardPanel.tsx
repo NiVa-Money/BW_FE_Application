@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   Paper,
   Typography,
@@ -108,6 +108,7 @@ const DashboardPanel = () => {
   const [stats, setStats] = useState<DashboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isToday, setIsToday] = useState(true);
+  const isTodayRef = useRef(isToday); // use latest value of isToday for logic only
   const [dateRange, setDateRange] = useState({
     startDate: null,
     endDate: null,
@@ -204,28 +205,33 @@ const DashboardPanel = () => {
     };
   }, [stats]);
 
-  const onToday = (value: boolean) => {
-    setIsToday(value);
-  };
-
   // Handle date range change
-  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
+  const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
     setDateRange({ startDate, endDate });
-    if (!isToday) {
-      fetchData(startDate, endDate);
+    if (!isTodayRef.current) {
+      await fetchData(startDate, endDate); // Use ref value to ensure the latest isToday value
     }
   };
 
+  // Handle bot selection
   const handleBotSelection = (selectedBotId: string) => {
     const selectedBot = botsDataRedux.find((bot) => bot._id === selectedBotId);
     setBotId(selectedBotId);
     setBotName(selectedBot?.botName || "");
-    if (!isToday) {
-      fetchData(dateRange.startDate, dateRange.endDate);
+    if (!isTodayRef.current) {
+      fetchData(dateRange.startDate, dateRange.endDate); // Use ref value to ensure the latest isToday value
     }
   };
 
+  // Use the useLatestFetchData hook
   const latestFetchedTodaysData = useLatestFetchData(botId, isToday);
+
+  // Update stats when newData is fetched by the hook
+  useEffect(() => {
+    if (isToday && latestFetchedTodaysData) {
+      setStats(latestFetchedTodaysData);
+    }
+  }, [latestFetchedTodaysData, isToday]);
 
   // Set default bot ID
   useEffect(() => {
@@ -242,12 +248,10 @@ const DashboardPanel = () => {
     }
   }, [userIdLocal]);
 
-  // Update stats when newData is fetched by the hook
+  // Update the ref whenever isToday changes
   useEffect(() => {
-    if (isToday && latestFetchedTodaysData) {
-      setStats(latestFetchedTodaysData);
-    }
-  }, [latestFetchedTodaysData]);
+    isTodayRef.current = isToday;
+  }, [isToday]);
 
   return (
     <div>
@@ -286,7 +290,10 @@ const DashboardPanel = () => {
         </Card>
         <div className="flex gap-4">
           <DateRangePicker
-            onToday={onToday}
+            onToday={(value) => {
+              setIsToday(value); // Update isToday state asynchronously
+              isTodayRef.current = value; // Update ref synchronously
+            }}
             onDateRangeChange={handleDateRangeChange}
           />
 
