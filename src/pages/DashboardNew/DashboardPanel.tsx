@@ -1,5 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Paper, Typography, Button, Card, CardContent } from "@mui/material";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import {
+  Paper,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Select,
+  MenuItem,
+  FormControl,
+} from "@mui/material";
 import { COLORS } from "../../constants";
 import { RootState } from "../../store";
 import { getBotsAction } from "../../store/actions/botActions";
@@ -98,7 +107,12 @@ const DashboardPanel = () => {
   const [botName, setBotName] = useState("");
   const [stats, setStats] = useState<DashboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isToday, setIsToday] = useState(false);
+  const [isToday, setIsToday] = useState(true); // use this to update the data
+  const isTodayRef = useRef(isToday); // use this to update the logic
+  const [dateRange, setDateRange] = useState({
+    startDate: null,
+    endDate: null,
+  });
 
   const userIdLocal = localStorage.getItem("user_id");
   const dispatch = useDispatch();
@@ -107,6 +121,7 @@ const DashboardPanel = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
+
   // Fetch dashboard data
   const fetchData = async (
     startDate: Date | null = (() => {
@@ -128,7 +143,8 @@ const DashboardPanel = () => {
         setStats(response);
       }
     } catch (err) {
-      console.error("Error Calling Dashboard API:", err);
+      console.error("Failed on fetchData: ", err);
+      throw new Error("Error while fetching dashboard data");
     } finally {
       setIsLoading(false);
     }
@@ -189,22 +205,38 @@ const DashboardPanel = () => {
     };
   }, [stats]);
 
-  const onToday = (value: boolean) => {
-    setIsToday(value);
+  // Handle date range change
+  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
+    setDateRange({ startDate, endDate });
+    if (!isTodayRef.current) {
+      fetchData(startDate, endDate);
+    }
   };
 
-  // Handle date range change
-  const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
-    await fetchData(startDate, endDate);
+  // Handle bot selection
+  const handleBotSelection = (selectedBotId: string) => {
+    const selectedBot = botsDataRedux.find((bot) => bot._id === selectedBotId);
+    setBotId(selectedBotId);
+    setBotName(selectedBot?.botName || "");
+    if (!isTodayRef.current) {
+      fetchData(dateRange.startDate, dateRange.endDate);
+    }
   };
 
   const latestFetchedTodaysData = useLatestFetchData(botId, isToday);
 
-  // Set default bot ID
+  // Update stats when newData is fetched by the hook
+  useEffect(() => {
+    if (isToday && latestFetchedTodaysData) {
+      setStats(latestFetchedTodaysData);
+    }
+  }, [latestFetchedTodaysData, isToday]);
+
+  // Set default bot ID and Name
   useEffect(() => {
     if (botsDataRedux?.length) {
-      setBotId(botsDataRedux[0]._id); // Default to the first bot
-      setBotName(botsDataRedux[0].botName); // Default to the first bot
+      setBotId(botsDataRedux[0]._id);
+      setBotName(botsDataRedux[0].botName);
     }
   }, [botsDataRedux]);
 
@@ -215,17 +247,10 @@ const DashboardPanel = () => {
     }
   }, [userIdLocal]);
 
-  // Fetch dashboard data on bot ID change
+  // Update the ref whenever isToday changes
   useEffect(() => {
-    fetchData();
-  }, [botId]);
-
-  // Update stats when newData is fetched by the hook
-  useEffect(() => {
-    if (isToday && latestFetchedTodaysData) {
-      setStats(latestFetchedTodaysData);
-    }
-  }, [isToday, latestFetchedTodaysData]);
+    isTodayRef.current = isToday;
+  }, [isToday]);
 
   return (
     <div>
@@ -262,10 +287,33 @@ const DashboardPanel = () => {
             Create an Agent
           </Button>
         </Card>
-        <DateRangePicker
-          onToday={onToday}
-          onDateRangeChange={handleDateRangeChange}
-        />
+        <div className="flex gap-4">
+          <DateRangePicker
+            onToday={(value) => {
+              setIsToday(value); // Update isToday state asynchronously
+              isTodayRef.current = value; // Update ref synchronously
+            }}
+            onDateRangeChange={handleDateRangeChange}
+          />
+
+          {botsDataRedux?.length > 0 && (
+            <FormControl size="small" sx={{ minWidth: 85 }}>
+              <Select
+                sx={{
+                  maxHeight: 36, // To match the height of the DateRangePicker
+                }}
+                value={botId}
+                onChange={(event) => handleBotSelection(event.target.value)}
+              >
+                {botsDataRedux?.map((bot: any) => (
+                  <MenuItem key={bot._id} value={bot._id}>
+                    {bot.botName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </div>
       </div>
 
       {/* Header */}

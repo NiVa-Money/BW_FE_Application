@@ -11,6 +11,7 @@ import {
   Stack,
 } from "@mui/material";
 import { COLORS } from "../constants/index";
+import { camelCaseToWords } from "../hooks/functions";
 
 interface TableProps {
   headers: string[];
@@ -50,7 +51,7 @@ const CommonTable: React.FC<TableProps> = ({
             <TableRow>
               {headers.map((header, index) => (
                 <TableCell key={index} sx={{ color: COLORS.GRAY }}>
-                  {header}
+                  {camelCaseToWords(header)}
                 </TableCell>
               ))}
             </TableRow>

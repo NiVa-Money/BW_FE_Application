@@ -16,7 +16,6 @@ import {
 import CommonTable from "../../components/TableComponent";
 import { COLORS } from "../../constants";
 import ChartContainer from "./ChartContainer";
-import { camelCaseToWords } from "../../hooks/functions";
 
 interface ChartItemsProps {
   constructedChartsData: {
@@ -36,8 +35,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
     : [];
 
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
-    ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map((header) =>
-        camelCaseToWords(header)
+    ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map(
+        (header) => header
       )
     : [];
 
