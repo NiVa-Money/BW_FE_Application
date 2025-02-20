@@ -107,8 +107,8 @@ const DashboardPanel = () => {
   const [botName, setBotName] = useState("");
   const [stats, setStats] = useState<DashboardResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isToday, setIsToday] = useState(true);
-  const isTodayRef = useRef(isToday); // use latest value of isToday for logic only
+  const [isToday, setIsToday] = useState(true); // use this to update the data
+  const isTodayRef = useRef(isToday); // use this to update the logic
   const [dateRange, setDateRange] = useState({
     startDate: null,
     endDate: null,
@@ -206,10 +206,10 @@ const DashboardPanel = () => {
   }, [stats]);
 
   // Handle date range change
-  const handleDateRangeChange = async (startDate: Date, endDate: Date) => {
+  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
     setDateRange({ startDate, endDate });
     if (!isTodayRef.current) {
-      await fetchData(startDate, endDate); // Use ref value to ensure the latest isToday value
+      fetchData(startDate, endDate);
     }
   };
 
@@ -219,11 +219,10 @@ const DashboardPanel = () => {
     setBotId(selectedBotId);
     setBotName(selectedBot?.botName || "");
     if (!isTodayRef.current) {
-      fetchData(dateRange.startDate, dateRange.endDate); // Use ref value to ensure the latest isToday value
+      fetchData(dateRange.startDate, dateRange.endDate);
     }
   };
 
-  // Use the useLatestFetchData hook
   const latestFetchedTodaysData = useLatestFetchData(botId, isToday);
 
   // Update stats when newData is fetched by the hook
@@ -233,11 +232,11 @@ const DashboardPanel = () => {
     }
   }, [latestFetchedTodaysData, isToday]);
 
-  // Set default bot ID
+  // Set default bot ID and Name
   useEffect(() => {
     if (botsDataRedux?.length) {
-      setBotId(botsDataRedux[0]._id); // Default to the first bot
-      setBotName(botsDataRedux[0].botName); // Default to the first bot
+      setBotId(botsDataRedux[0]._id);
+      setBotName(botsDataRedux[0].botName);
     }
   }, [botsDataRedux]);
 
