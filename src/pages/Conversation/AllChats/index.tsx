@@ -189,7 +189,7 @@ const AllChats = () => {
         <h1 className="text-xl font-semibold">All Chats</h1>
         {messages?.length ? (
           <button
-            className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px] mb-2 mt-4 mr-4"
+            className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
             onClick={() => setMessages(null)}
           >
             Close Chat <CloseIcon className="ml-1 w-4 h-4" />

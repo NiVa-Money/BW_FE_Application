@@ -36,8 +36,8 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       text: "Conversation",
       icon: <QuestionAnswerIcon />,
       subItems: [
-        { id: 2.1, text: "All Chats", path: "/live-chat/all-chats" },
-        { id: 2.2, text: "Live Chats", path: "/live-chat/customs" },
+        { id: 2.1, text: "All Chats", path: "/conversations/all-chats" },
+        { id: 2.2, text: "Live Chats", path: "/conversations/live-chats" },
       ],
     },
     { id: 3, text: "Bot Builder", path: "/mybots", icon: <SmartToyIcon /> },
