@@ -17,15 +17,18 @@ export const fetchShopifyDashboardService = async (
   }
 };
 
-
 export const fetchShopifyOrdersService = async (
   startDate: string,
   endDate: string,
-  page: number
+  page: number,
+  filters: { actionTaken?: string; orderType?: string; fulfilled?: string } = {}
 ) => {
   try {
-    const response = await axiosInstance.get(`/shopify/orders`, {
-      params: { startDate, endDate, page },
+    const response = await axiosInstance.post(`/shopify/orders`, {
+      startDate,
+      endDate,
+      page,
+      ...filters,
     });
 
     return response.data;
