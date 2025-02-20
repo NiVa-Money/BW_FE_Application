@@ -24,7 +24,7 @@ interface AnalysisSection {
 const AllChats = () => {
   const [, setSelectedSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any>([]);
-  const [page, setPage] = useState(1); 
+  const [page, setPage] = useState(1);
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
@@ -93,7 +93,6 @@ const AllChats = () => {
       channelName: channelNameVal, // from state
     };
 
-    console.log("getChatHistory called with data:", data);
     dispatch(getAllSession(data));
   };
 
@@ -103,15 +102,9 @@ const AllChats = () => {
     }
   }, [advanceFeatureDataRedux?.summary]);
 
-  // useEffect(() => {
-  //   if (botsDataRedux?.botId?.length) {
-  //     getChatHistory();
-  //   }
-  // }, [botsDataRedux?.botId?.length ,    ]);
-
   useEffect(() => {
     getChatHistory();
-  }, [botIdVal, channelNameVal, page]);
+  }, [page]);
 
   const [, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -120,9 +113,9 @@ const AllChats = () => {
 
   useEffect(() => {
     if (allSessions.length > 0) {
-      const latestSessionId = allSessions[0]._id; // Assuming the latest session is at index 0
+      const latestSessionId = allSessions[0]._id;
       setSessionId(latestSessionId);
-      localStorage.setItem("session_id", latestSessionId); // Store session ID in localStorage if needed
+      localStorage.setItem("session_id", latestSessionId);
     }
   }, [allSessions]);
 
@@ -196,7 +189,7 @@ const AllChats = () => {
     dispatch(
       getAllSession({
         botId: botId,
-        userId: userId,
+        page,
         channelName: channelNameVal,
       })
     );
@@ -205,11 +198,11 @@ const AllChats = () => {
     const val = e.target.value;
     setChannelNameVal(val);
     dispatch(
-      getAllSession({ botId: botIdVal, userId: userId, channelName: val })
+      getAllSession({ botId: botIdVal, page, channelName: val })
     );
   };
   return (
-    <div className="flex flex-col p-6">
+    <div className="flex flex-col pl-6 pr-6 pt-6 h-screen">
       <div className="flex justify-between items-center h-[45px]">
         <h1 className="text-xl font-semibold">All Chats</h1>
         {messages?.length ? (
@@ -245,13 +238,13 @@ const AllChats = () => {
           ))}
         </select>
       </div>
-      <div className="flex h-screen bg-gray-100 h-[calc(100vh -120px)]">
+      <div className="flex  bg-gray-100 h-full h-[calc(100vh - 120px)]" >
         <SessionsList
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
           channelNameVal={channelNameVal}
           setPage={setPage}
-          page = {page}
+          page={page}
         />
 
         <div className="flex-1 flex flex-col overflow-y-scroll">

@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { formatDateString } from "../../../hooks/functions";
 
-const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal , page, setPage}) => {
+const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, setPage }) => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
@@ -40,7 +40,7 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal , page, s
   }, [sessionsDataRedux]);
   console.log(sessionsData);
   return (
-    <div className="w-72 pl-0 bg-white p-4 border-r overflow-y-scroll">
+    <div className="w-64 pl-0 bg-white p-4 border-r overflow-y-scroll">
       <div className="flex flex-col gap-1">
         {sessionsData.map((item, index) => (
           <div
