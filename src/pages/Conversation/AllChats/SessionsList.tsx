@@ -9,19 +9,6 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, se
     (state: RootState) => state?.userChat?.allSession?.data
   );
   const [sessionsData, setSessionsData] = useState([]);
-  // const [page, setPage] = useState(1);
-
-
-  const userName = useSelector(
-    (state: RootState) => state?.userChat?.allSession?.data?.sessions?.userName
-  );
-
-  const userPhoneId = useSelector(
-    (state: RootState) =>
-      state?.userChat?.allSession?.data?.sessions?.userPhoneId
-  );
-
-  console.log(userName, userPhoneId, channelNameVal);
 
   const channelNameImages = {
     whatsapp: "/assets/whatsapp.png",
@@ -75,7 +62,7 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, se
           </div>
         ))}
       </div>
-      {sessionsData?.length && !Boolean(sessionsData?.length < 20) ?
+      {sessionsData?.length && !(sessionsData?.length < 20) ?
         <div className="flex justify-between mt-4">
           <button
             disabled={page === 1}

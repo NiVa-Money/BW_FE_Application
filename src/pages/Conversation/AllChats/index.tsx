@@ -102,10 +102,9 @@ const AllChats = () => {
   );
 
   useEffect(() => {
-    if (allSessions.length > 0) {
+    if (allSessions?.length > 0) {
       const latestSessionId = allSessions[0]._id;
       setSessionId(latestSessionId);
-      localStorage.setItem("session_id", latestSessionId);
     }
   }, [allSessions]);
 
@@ -115,7 +114,7 @@ const AllChats = () => {
 
 
   useEffect(() => {
-    if (advanceFeatureDataRedux !== null && advanceFeatureDataRedux?.success) {
+    if (advanceFeatureDataRedux?.success) {
       const { emotion, intent, reason, salesIntelligence, sentiments, smartSuggestion, vulnerability } = advanceFeatureDataRedux?.data;
 
       setAnalysisSections([
@@ -205,11 +204,7 @@ const AllChats = () => {
       (obj) => obj.userPhoneId === sessionId
     )[0].sessions;
     setMessages(messagesData);
-    // channelNameVal !== 'whatsapp' && dispatch(getAdvanceFeature(sessionId));
-    // if (channelNameVal !== 'whatsapp') {
     dispatch(getAdvanceFeature(sessionId, botIdVal, channelNameVal));
-    // }
-
     setSessionId(sessionId);
   };
 
@@ -253,7 +248,7 @@ const AllChats = () => {
         {messages?.length ? (
           <button
             className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
-            onClick={() => setMessages(null)}
+            onClick={() => setMessages([])}
           >
             Close Chat <CloseIcon className="ml-1 w-4 h-4" />
           </button>
