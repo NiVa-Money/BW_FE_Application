@@ -17,12 +17,16 @@ export const getAllSessionLive = (userId: any) => ({
 });
 
 // conversationActions.ts
-export const getAdvanceFeature = (sessionIdOrPhoneId: string, channelName: string, botId: string) => ({
+export const getAdvanceFeature = (
+  sessionIdOrPhoneId: string,
+  botId: string,
+  channelName: string
+) => ({
   type: ADVANCE_FEATURE,
   payload: {
     sessionIdOrPhoneId,
-    channelName,
     botId,
+    channelName,
   },
 });
 

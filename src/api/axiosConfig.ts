@@ -26,8 +26,8 @@ axiosInstance.interceptors.request.use(
 
 const responseErrorInterceptor = (error: any) => {
   notifyError(
-    error?.response?.data?.error
-      ? error?.response?.data?.error
+    error?.response?.data?.message
+      ? error?.response?.data?.message
       : "Something went wrong!"
   );
 
