@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import TrendingUp from "@mui/icons-material/TrendingUp";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   Card,
   CardContent,
@@ -30,7 +31,10 @@ import { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { fetchShopifyDashboardRequest } from "../../../store/actions/reportActions";
-import { fetchShopifyOrdersService } from "../../../api/services/reportServices";
+import {
+  downloadShopifyOrdersService,
+  fetchShopifyOrdersService,
+} from "../../../api/services/reportServices";
 import ReactMarkdown from "react-markdown";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 
@@ -226,6 +230,52 @@ const UtilityDash = () => {
     selectedOrderType,
     selectedFulfilled,
   ]);
+
+  const handleDownload = async () => {
+    if (!startDate || !endDate) {
+      alert("Please select a date range first!");
+      return;
+    }
+
+    try {
+      const formattedStartDate = format(startDate, "yyyy-MM-dd");
+      const formattedEndDate = format(endDate, "yyyy-MM-dd");
+
+      const filters = {
+        actionTaken: selectedActionTaken,
+        orderType: selectedOrderType,
+        fulfilled: selectedFulfilled,
+      };
+
+      // Call the service that fetches the file (as a Blob)
+      const fileBlob = await downloadShopifyOrdersService(
+        formattedStartDate,
+        formattedEndDate,
+        page,
+        filters
+      );
+
+      // Create a URL for the downloaded file
+      const downloadUrl = URL.createObjectURL(fileBlob);
+
+      // Create a hidden link and trigger the download
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute(
+        "download",
+        `shopify_orders_${formattedStartDate}_${formattedEndDate}.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Error downloading Shopify orders:", error);
+      alert("Failed to download orders. Please try again.");
+    }
+  };
 
   return (
     <div className="p-6 bg-white min-h-screen">
@@ -639,6 +689,13 @@ const UtilityDash = () => {
                   ))}
                 </Select>
               </FormControl>
+
+              <button
+                onClick={handleDownload}
+                className="flex items-center px-4 py-2 bg-[#65558F] text-white rounded-md transition-colors"
+              >
+                <DownloadIcon className="mr-2" />
+              </button>
             </div>
             <CardContent>
               {utilityData?.orders && (

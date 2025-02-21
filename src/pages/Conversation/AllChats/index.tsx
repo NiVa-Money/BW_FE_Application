@@ -29,13 +29,13 @@ const AllChats = () => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
-  const [aiLevel, setAiLevel] = useState(true)
+  const [aiLevel, setAiLevel] = useState(true);
 
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
     (state: RootState) => state?.userChat?.advanceFeature?.data?.data || {}
   );
-  const [advanceFeatureData, setAdvanceFeatureData] = useState<any>({});
+  const [, setAdvanceFeatureData] = useState<any>({});
 
   const [botLists, setbotLists] = useState<any>([]);
   const [channelName] = useState([
@@ -90,9 +90,9 @@ const AllChats = () => {
 
     const data = {
       // userId,
-      botId: botIdVal,         // from state
+      botId: botIdVal, // from state
       page,
-      aiLevel,                   // from state
+      aiLevel, // from state
       channelName: channelNameVal, // from state
     };
 
@@ -103,7 +103,7 @@ const AllChats = () => {
     if (advanceFeatureDataRedux !== null) {
       setAdvanceFeatureData(advanceFeatureDataRedux);
     }
-  }, [advanceFeatureDataRedux?.summary]);
+  }, [advanceFeatureDataRedux]);
 
   useEffect(() => {
     getChatHistory();
@@ -126,44 +126,91 @@ const AllChats = () => {
     []
   );
 
+  // useEffect(() => {
+  //   if (advanceFeatureData !== null) {
+  //     setAnalysisSections([
+  //       {
+  //         title: "Summary",
+  //         description: advanceFeatureData?.summary || "No summary detected.",
+  //         expanded: true,
+  //       },
+  //       {
+  //         title: "Cause",
+  //         description: advanceFeatureData?.cause || "No cause detected.",
+  //         expanded: true,
+  //       },
+  //       {
+  //         title: "Next Steps",
+  //         description:
+  //           advanceFeatureData?.nextStep || "No next steps available.",
+  //         expanded: true,
+  //       },
+  //       {
+  //         title: "Sentiment Analysis",
+  //         description: `Positive: ${
+  //           advanceFeatureData?.sentiments?.positive || 0
+  //         }%, 
+  //                     Neutral: ${
+  //                       advanceFeatureData?.sentiments?.neutral || 0
+  //                     }%, 
+  //                     Negative: ${
+  //                       advanceFeatureData?.sentiments?.negative || 0
+  //                     }%`,
+  //         expanded: true,
+  //       },
+  //       {
+  //         title: "Emotion Analysis",
+  //         description: advanceFeatureData?.emotion || "No emotion detected.",
+  //         expanded: true,
+  //       },
+  //     ]);
+  //   }
+  // }, [advanceFeatureData]);
+
   useEffect(() => {
-    if (advanceFeatureData !== null) {
+    if (advanceFeatureDataRedux !== null) {
+      const { emotion, intent, reason, salesIntelligence, sentiments, smartSuggestion, vulnerability } = advanceFeatureDataRedux;
+  
       setAnalysisSections([
         {
-          title: "Summary",
-          description: advanceFeatureData?.summary,
+          title: "Emotion Analysis",
+          description: emotion?.emotion || "No emotion detected.",
           expanded: true,
         },
         {
-          title: "Cause",
-          description: advanceFeatureData?.cause || "No cause detected.",
+          title: "Intent Analysis",
+          description: intent?.intent || "No intent detected.",
           expanded: true,
         },
         {
-          title: "Next Steps",
-          description:
-            advanceFeatureData?.nextStep || "No next steps available.",
+          title: "Reason",
+          description: reason?.reason || "No reason provided.",
+          expanded: true,
+        },
+        {
+          title: "Sales Intelligence",
+          description: salesIntelligence?.sales_insights || "No sales insights.",
           expanded: true,
         },
         {
           title: "Sentiment Analysis",
-          description: `Positive: ${advanceFeatureData?.sentiments?.positive || 0
-            }%, 
-                      Neutral: ${advanceFeatureData?.sentiments?.neutral || 0
-            }%, 
-                      Negative: ${advanceFeatureData?.sentiments?.negative || 0
-            }%`,
+          description: sentiments?.sentiment || "No sentiment data.",
           expanded: true,
         },
         {
-          title: "Emotion Analysis",
-          description: advanceFeatureData?.emotion || "No emotion detected.",
+          title: "Smart Suggestion",
+          description: smartSuggestion?.suggestions || "No suggestions available.",
+          expanded: true,
+        },
+        {
+          title: "Vulnerability",
+          description: vulnerability?.vulnerabilities || "No vulnerabilities found.",
           expanded: true,
         },
       ]);
     }
-  }, [advanceFeatureData]);
-
+  }, [advanceFeatureDataRedux]);
+  
   const handleSessionSelection = (sessionId: string) => {
     const messagesData = channelNameVal !== 'whatsapp' ? sessionsDataRedux?.sessions.filter(
       (obj) => obj._id === sessionId
@@ -172,12 +219,32 @@ const AllChats = () => {
     )[0].sessions;
     setMessages(messagesData);
     // channelNameVal !== 'whatsapp' && dispatch(getAdvanceFeature(sessionId));
-    if (channelNameVal !== 'whatsapp') {
-      dispatch(getAdvanceFeature(sessionId));
-    }
+    // if (channelNameVal !== 'whatsapp') {
+      dispatch(getAdvanceFeature(sessionId, channelNameVal, botIdVal));
+    // }
 
     setSelectedSessionId(sessionId);
   };
+
+
+  // const handleSessionSelection = (sessionId: string) => {
+  //   // 1. Find the session by its _id (for all channels)
+  //   const sessionObj = sessionsDataRedux?.sessions.find(
+  //     (obj) => obj._id === sessionId
+  //   );
+
+  //   // 2. Retrieve the messages from the found session object
+  //   const messagesData = sessionObj?.sessions || [];
+
+  //   // 3. Update local state with the messages
+  //   setMessages(messagesData);
+
+  //   // 4. Dispatch your action with sessionId and channelNameVal
+  //   dispatch(getAdvanceFeature(sessionId, channelNameVal));
+
+  //   // 5. Update selected session state
+  //   setSelectedSessionId(sessionId);
+  // };
 
   const handleToggleExpand = (index: number) => {
     setAnalysisSections((prevSections) =>
@@ -194,7 +261,7 @@ const AllChats = () => {
         botId: botId,
         page,
         channelName: channelNameVal,
-        aiLevel
+        aiLevel,
       })
     );
   };
@@ -241,9 +308,10 @@ const AllChats = () => {
             </option>
           ))}
         </select>
-        <div className='flex justify-center items-center'>
-          <label htmlFor="AI Chats" className='text-black mr-2'
-          >AI Chats</label>
+        <div className="flex justify-center items-center">
+          <label htmlFor="AI Chats" className="text-black mr-2">
+            AI Chats
+          </label>
           <FormControlLabel
             control={
               <Switch
@@ -252,14 +320,12 @@ const AllChats = () => {
                 color="primary" // Customize the color
               />
             }
-            label=''
-          // Display the label next to the switch
+            label=""
+            // Display the label next to the switch
           />
-
-
         </div>
       </div>
-      <div className="flex  bg-gray-100 h-full h-[calc(100vh - 120px)]" >
+      <div className="flex  bg-gray-100 h-full h-[calc(100vh - 120px)]">
         <SessionsList
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
@@ -299,8 +365,9 @@ const AllChats = () => {
               >
                 <h3 className="font-medium">{section.title}</h3>
                 <ExpandMoreIcon
-                  className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
-                    }`}
+                  className={`w-4 h-4 transform ${
+                    section.expanded ? "rotate-180" : ""
+                  }`}
                 />
               </div>
               {section.expanded && (
