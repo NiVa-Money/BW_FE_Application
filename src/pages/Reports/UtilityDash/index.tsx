@@ -263,7 +263,7 @@ const UtilityDash = () => {
       link.href = downloadUrl;
       link.setAttribute(
         "download",
-        `shopify_orders_${formattedStartDate}_${formattedEndDate}.xlsx`
+        `shopify_orders_${formattedStartDate}_${formattedEndDate}.csv`
       );
       document.body.appendChild(link);
       link.click();
