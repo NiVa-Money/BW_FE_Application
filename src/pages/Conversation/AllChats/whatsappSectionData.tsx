@@ -39,7 +39,7 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
                 } mb-2`}
             >
               <MessageComponent
-                msgType={msg.messageType}
+                msgType={msg?.messageType}
                 msg={msg}
                 isUserQuery={isUserQuery}
                 content={content}

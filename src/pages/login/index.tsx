@@ -8,11 +8,14 @@ import {
 } from "../../api/services/authServices";
 import { Link } from "react-router-dom";
 import { loginWithGoogle } from "../../components/firebase/firebaseConfig";
-
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -37,6 +40,8 @@ const Login = () => {
             "userData",
             JSON.stringify({ moduleMap: response.moduleMap })
           );
+          setEmail('')
+          setPassword('')
           navigate("/dashboard");
           navigate(0);
         } else {
@@ -50,7 +55,6 @@ const Login = () => {
         setIsLoading(false);
       }
     }
-    setIsLoading(true);
   };
 
   // Handle Google login
@@ -227,7 +231,8 @@ const Login = () => {
                         imgSrc: "/assets/key_icon.svg",
                         value: password,
                         onChange: setPassword,
-                        type: "password",
+                        type: showPassword ? "text" : "password",
+                        isPassword: true,
                       },
                     ].map((field, index) => (
                       <div
@@ -247,8 +252,17 @@ const Login = () => {
                           placeholder={field.placeholder}
                           value={field.value}
                           onChange={(e) => field.onChange(e.target.value)}
-                          className="w-full bg-transparent outline-none"
+                          className="w-full bg-transparent outline-none relative"
                         />
+                        {field.isPassword && (
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className=" text-gray-500 hover:text-gray-700 absolute flex justify-start right-[38px]"
+                          >
+                            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>

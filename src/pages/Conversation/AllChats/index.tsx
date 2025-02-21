@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-import SendIcon from "@mui/icons-material/Send";
 import {
   getAdvanceFeature,
   getAllSession,
@@ -15,6 +14,7 @@ import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
 import { FormControlLabel, Switch } from "@mui/material";
+import { notifyError } from "../../../components/Toast";
 
 interface AnalysisSection {
   title: string;
@@ -23,7 +23,6 @@ interface AnalysisSection {
 }
 
 const AllChats = () => {
-  const [, setSelectedSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any>([]);
   const [page, setPage] = useState(1);
   const sessionsDataRedux = useSelector(
@@ -33,9 +32,8 @@ const AllChats = () => {
 
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
-    (state: RootState) => state?.userChat?.advanceFeature?.data?.data || {}
+    (state: RootState) => state?.userChat?.advanceFeature?.data || {}
   );
-  const [, setAdvanceFeatureData] = useState<any>({});
 
   const [botLists, setbotLists] = useState<any>([]);
   const [channelName] = useState([
@@ -76,13 +74,7 @@ const AllChats = () => {
     }
   }, [userId]);
 
-  // const getChatHistory = () => {
-  //   const data = {
-  //     userId: userId,
-  //     botId: botId,
-  //   };
-  //   dispatch(getAllSession(data));
-  // };
+
 
   const getChatHistory = () => {
     // If no bot selected, or no user, do nothing
@@ -99,26 +91,20 @@ const AllChats = () => {
     dispatch(getAllSession(data));
   };
 
-  useEffect(() => {
-    if (advanceFeatureDataRedux !== null) {
-      setAdvanceFeatureData(advanceFeatureDataRedux);
-    }
-  }, [advanceFeatureDataRedux]);
 
   useEffect(() => {
     getChatHistory();
   }, [page, aiLevel]);
 
-  const [, setSessionId] = useState("");
+  const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
     (state: RootState) => state?.userChat?.sessionChat?.sessions || []
   );
 
   useEffect(() => {
-    if (allSessions.length > 0) {
+    if (allSessions?.length > 0) {
       const latestSessionId = allSessions[0]._id;
       setSessionId(latestSessionId);
-      localStorage.setItem("session_id", latestSessionId);
     }
   }, [allSessions]);
 
@@ -126,51 +112,11 @@ const AllChats = () => {
     []
   );
 
-  // useEffect(() => {
-  //   if (advanceFeatureData !== null) {
-  //     setAnalysisSections([
-  //       {
-  //         title: "Summary",
-  //         description: advanceFeatureData?.summary || "No summary detected.",
-  //         expanded: true,
-  //       },
-  //       {
-  //         title: "Cause",
-  //         description: advanceFeatureData?.cause || "No cause detected.",
-  //         expanded: true,
-  //       },
-  //       {
-  //         title: "Next Steps",
-  //         description:
-  //           advanceFeatureData?.nextStep || "No next steps available.",
-  //         expanded: true,
-  //       },
-  //       {
-  //         title: "Sentiment Analysis",
-  //         description: `Positive: ${
-  //           advanceFeatureData?.sentiments?.positive || 0
-  //         }%, 
-  //                     Neutral: ${
-  //                       advanceFeatureData?.sentiments?.neutral || 0
-  //                     }%, 
-  //                     Negative: ${
-  //                       advanceFeatureData?.sentiments?.negative || 0
-  //                     }%`,
-  //         expanded: true,
-  //       },
-  //       {
-  //         title: "Emotion Analysis",
-  //         description: advanceFeatureData?.emotion || "No emotion detected.",
-  //         expanded: true,
-  //       },
-  //     ]);
-  //   }
-  // }, [advanceFeatureData]);
 
   useEffect(() => {
-    if (advanceFeatureDataRedux !== null) {
-      const { emotion, intent, reason, salesIntelligence, sentiments, smartSuggestion, vulnerability } = advanceFeatureDataRedux;
-  
+    if (advanceFeatureDataRedux?.success) {
+      const { emotion, intent, reason, salesIntelligence, sentiments, smartSuggestion, vulnerability } = advanceFeatureDataRedux?.data;
+
       setAnalysisSections([
         {
           title: "Emotion Analysis",
@@ -210,7 +156,47 @@ const AllChats = () => {
       ]);
     }
   }, [advanceFeatureDataRedux]);
-  
+  useEffect(() => {
+
+    setAnalysisSections([
+      {
+        title: "Emotion Analysis",
+        description: "No emotion detected.",
+        expanded: true,
+      },
+      {
+        title: "Intent Analysis",
+        description: "No intent detected.",
+        expanded: true,
+      },
+      {
+        title: "Reason",
+        description: "No reason provided.",
+        expanded: true,
+      },
+      {
+        title: "Sales Intelligence",
+        description: "No sales insights.",
+        expanded: true,
+      },
+      {
+        title: "Sentiment Analysis",
+        description: "No sentiment data.",
+        expanded: true,
+      },
+      {
+        title: "Smart Suggestion",
+        description: "No suggestions available.",
+        expanded: true,
+      },
+      {
+        title: "Vulnerability",
+        description: "No vulnerabilities found.",
+        expanded: true,
+      },
+    ]);
+  }, []);
+
   const handleSessionSelection = (sessionId: string) => {
     const messagesData = channelNameVal !== 'whatsapp' ? sessionsDataRedux?.sessions.filter(
       (obj) => obj._id === sessionId
@@ -218,33 +204,9 @@ const AllChats = () => {
       (obj) => obj.userPhoneId === sessionId
     )[0].sessions;
     setMessages(messagesData);
-    // channelNameVal !== 'whatsapp' && dispatch(getAdvanceFeature(sessionId));
-    // if (channelNameVal !== 'whatsapp') {
-      dispatch(getAdvanceFeature(sessionId, channelNameVal, botIdVal));
-    // }
-
-    setSelectedSessionId(sessionId);
+    dispatch(getAdvanceFeature(sessionId, botIdVal, channelNameVal));
+    setSessionId(sessionId);
   };
-
-
-  // const handleSessionSelection = (sessionId: string) => {
-  //   // 1. Find the session by its _id (for all channels)
-  //   const sessionObj = sessionsDataRedux?.sessions.find(
-  //     (obj) => obj._id === sessionId
-  //   );
-
-  //   // 2. Retrieve the messages from the found session object
-  //   const messagesData = sessionObj?.sessions || [];
-
-  //   // 3. Update local state with the messages
-  //   setMessages(messagesData);
-
-  //   // 4. Dispatch your action with sessionId and channelNameVal
-  //   dispatch(getAdvanceFeature(sessionId, channelNameVal));
-
-  //   // 5. Update selected session state
-  //   setSelectedSessionId(sessionId);
-  // };
 
   const handleToggleExpand = (index: number) => {
     setAnalysisSections((prevSections) =>
@@ -256,6 +218,7 @@ const AllChats = () => {
   const getBotSession = (e) => {
     const botId = e.target.value;
     setBotIdVal(botId);
+    setSessionId('')
     dispatch(
       getAllSession({
         botId: botId,
@@ -268,9 +231,15 @@ const AllChats = () => {
   const getChannelNameHandler = (e) => {
     const val = e.target.value;
     setChannelNameVal(val);
-    dispatch(
-      getAllSession({ botId: botIdVal, page, channelName: val, aiLevel })
-    );
+    setSessionId('')
+    if (botIdVal?.length) {
+      dispatch(
+        getAllSession({ botId: botIdVal, page, channelName: val, aiLevel })
+      );
+    }
+    else {
+      notifyError('Please select Bot')
+    }
   };
   return (
     <div className="flex flex-col pl-6 pr-6 pt-6 h-screen">
@@ -279,7 +248,7 @@ const AllChats = () => {
         {messages?.length ? (
           <button
             className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
-            onClick={() => setMessages(null)}
+            onClick={() => setMessages([])}
           >
             Close Chat <CloseIcon className="ml-1 w-4 h-4" />
           </button>
@@ -300,6 +269,7 @@ const AllChats = () => {
         <select
           className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
           onChange={(e) => getChannelNameHandler(e)}
+          value={channelNameVal}
         >
           <option value="">Select a Channel</option>
           {channelName?.map((item: { value: string; name: string }) => (
@@ -321,7 +291,7 @@ const AllChats = () => {
               />
             }
             label=""
-            // Display the label next to the switch
+          // Display the label next to the switch
           />
         </div>
       </div>
@@ -336,24 +306,14 @@ const AllChats = () => {
 
         <div className="flex-1 flex flex-col overflow-y-scroll">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {channelNameVal === "whatsapp" ? (
+            {channelNameVal === "whatsapp" && sessionId?.length ?
               <WhatsappSectionData messages={messages} />
-            ) : (
-              <WebsiteSectionData messages={messages} />
-            )}
+              : sessionId?.length ?
+                <WebsiteSectionData messages={messages} />
+                : null}
           </div>
 
-          <div className="p-4 border-t flex items-center space-x-2">
-            <input
-              type="text"
-              disabled
-              placeholder="Message"
-              className="flex-1 bg-gray-100 p-2 rounded-lg outline-none"
-            />
-            <button className="p-2 bg-gray-100 rounded-lg">
-              <SendIcon className="w-5 h-5 text-gray-400" />
-            </button>
-          </div>
+
         </div>
 
         <div className="w-80 bg-gray-50 p-4 overflow-y-scroll">
@@ -365,9 +325,8 @@ const AllChats = () => {
               >
                 <h3 className="font-medium">{section.title}</h3>
                 <ExpandMoreIcon
-                  className={`w-4 h-4 transform ${
-                    section.expanded ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
+                    }`}
                 />
               </div>
               {section.expanded && (
