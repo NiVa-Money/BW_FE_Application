@@ -625,7 +625,8 @@ const UtilityDash = () => {
                 </h6>
               }
             />
-            <div className="flex font-bold gap-4 mb-2">
+          <div className="flex font-bold gap-4 mb-2 justify-between items-center">
+              <div>
               <FormControl
                 variant="outlined"
                 size="small"
@@ -689,12 +690,12 @@ const UtilityDash = () => {
                   ))}
                 </Select>
               </FormControl>
-
+</div>
               <button
                 onClick={handleDownload}
-                className="flex items-center px-4 py-2 bg-[#65558F] text-white rounded-md transition-colors"
+                className="flex items-end px-4 py-2 bg-[#65558F] text-white rounded-md"
               >
-                <DownloadIcon className="mr-2" />
+                <DownloadIcon />
               </button>
             </div>
             <CardContent>
