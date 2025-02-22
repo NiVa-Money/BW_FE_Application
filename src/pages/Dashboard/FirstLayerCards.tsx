@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { CSSProperties } from 'react';
 import { Resizable } from "re-resizable";
 import DatePicker from 'react-datepicker';
@@ -30,7 +31,7 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
       justifyContent: 'flex-start',
     },
     card: {
-      backgroundColor: '#FFFFFF',
+      backgroundColor: '#f32567',
       borderRadius: '16px',
       padding: '16px',
       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -39,6 +40,7 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
       display: 'flex',
       alignItems: 'center',
       gap: '16px',
+      width: 400
     },
     icon: {
       fontSize: '24px',
@@ -89,14 +91,19 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
 
   return (
     <div style={styles.cardContainer}>
+<<<<<<< HEAD
       {cards.map((card) => (
+=======
+      {cards.map((card, _index) => (
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
         <Resizable key={card.id}
 
-          style={{ ...styles.card, height: card.height, width: card.width }}>
+          style={{ ...styles.card, height: card.height }}>
           <div style={styles.icon}>{card.icon}</div>
           <div style={styles.cardContent}>
             <div style={styles.cardTitle}>{card.title}</div>
             <div style={styles.cardValue}>{card.value}</div>
+            <div>{card.width}</div>
             <div style={styles.cardTrend}>
 
               <span >
@@ -110,9 +117,10 @@ const FirstLayerCards: React.FC<FirstLayerCardsProps> = ({ cards }) => {
           {card.hasCalendar && (
             <div style={styles.calendar}>
               <DatePicker
-                selected={new Date()} 
-                onChange={(date) => console.log(date)} 
+                selected={new Date()}
+                onChange={(date) => console.log(date)}
                 dateFormat="yyyy-MM-dd"
+                selectsMultiple 
               />
             </div>
           )}

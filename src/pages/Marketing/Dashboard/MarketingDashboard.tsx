@@ -1,6 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+<<<<<<< HEAD
 import { useState, useEffect, ReactNode } from "react";
+=======
+import {
+  useState,
+  useEffect,
+  ReactNode,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 import { motion } from "framer-motion";
 import axios from "axios";
 import { Card, CardContent, CardHeader, IconButton } from "@mui/material";
@@ -28,6 +39,11 @@ import axiosInstance from "../../../api/axiosConfig";
 import ReactMarkdown from "react-markdown";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos"; // Left Arrow Icon
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"; // Right Arrow Icon
+<<<<<<< HEAD
+=======
+import WhatsappDash from "../Whatsapp/WhatsappDashboard";
+import { useNavigate } from "react-router-dom";
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 
 const followerData = [
   { day: 1, value: 25000 },
@@ -97,6 +113,13 @@ const MarketingDashboard = () => {
   const [newsData, setNewsData] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+<<<<<<< HEAD
+=======
+  // const [isFetched, setIsFetched] = useState(false);
+  const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
+
+  const navigate = useNavigate();
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 
   const fetchInsights = async () => {
     setLoading(true);
@@ -133,8 +156,25 @@ const MarketingDashboard = () => {
     }
   };
 
+<<<<<<< HEAD
   useEffect(() => {
     fetchInsights();
+=======
+  // useEffect(() => {
+  //   if (!isFetched) {
+  //     fetchInsights();
+  //     setIsFetched(true); // Mark as fetched
+  //   }
+  // }, [isFetched]);
+
+  const isFetchedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isFetchedRef.current) {
+      fetchInsights();
+      isFetchedRef.current = true; // Ensure it doesn't run again
+    }
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
   }, []);
 
   const handlePrev = () => {
@@ -145,7 +185,15 @@ const MarketingDashboard = () => {
     setCurrentIndex((prev) => (prev === newsData.length - 1 ? 0 : prev + 1));
   };
 
+<<<<<<< HEAD
   const formatNewsForCarousel = () => {
+=======
+  const handleViewDashboard = () => {
+    navigate(`/marketing/whatsappdashboard`);
+  };
+
+  const formatNewsForCarousel = useCallback(() => {
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
     return newsData.map((item) => {
       const match = item.match(/^(\d+\.\s\*\*(.*?)\*\*):(.*)$/s); // Matches title & content
       if (match) {
@@ -156,18 +204,32 @@ const MarketingDashboard = () => {
       const transformedItem = item.replace(/### (.*)/g, "**$1**");
       return { title: "", content: transformedItem.trim() };
     });
+<<<<<<< HEAD
   };
 
   const formattedNews = formatNewsForCarousel();
+=======
+  }, [newsData]);
+
+  // const formattedNews = formatNewsForCarousel();
+  const formattedNews = useMemo(
+    () => formatNewsForCarousel(),
+    [formatNewsForCarousel]
+  );
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DashboardCard title="Market News">
           <div className="space-y-4">
+<<<<<<< HEAD
             <div className="flex items-center justify-between text-sm">
               <span>Hot News In Bitcoin</span>
             </div>
+=======
+
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 
             {loading ? (
               // Display loading spinner while fetching data
@@ -184,12 +246,21 @@ const MarketingDashboard = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
                 >
+<<<<<<< HEAD
                   <div className="bg-gray-100 p-4 rounded-md shadow-md">
+=======
+                  <div className="bg-gray-100 p-4 rounded-md shadow-md max-h-[230px] flex flex-col overflow-y-scroll">
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
                     <h3 className="text-lg font-semibold">
                       {formattedNews[currentIndex].title}
                     </h3>
                     <ReactMarkdown className="text-sm text-gray-600">
+<<<<<<< HEAD
                       {formattedNews[currentIndex].content}
+=======
+                      {`${formattedNews[currentIndex].content}`}
+
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
                     </ReactMarkdown>
                   </div>
                 </motion.div>
@@ -211,6 +282,7 @@ const MarketingDashboard = () => {
 
         <DashboardCard title="Social Media Trends">
           <div className="space-y-4">
+<<<<<<< HEAD
             {Array(3)
               .fill(0)
               .map((_, i) => (
@@ -219,6 +291,18 @@ const MarketingDashboard = () => {
                   <span className="text-sm">Lorem Ipsum</span>
                 </div>
               ))}
+=======
+            {[
+              "Short-form videos are dominating engagement",
+              "Brands leveraging AI for personalized content",
+              "Influencer collaborations driving higher ROI",
+            ].map((trend, i) => (
+              <div key={i} className="flex items-center space-x-2">
+                <TrendingUp fontSize="small" color="primary" />
+                <span className="text-sm">{trend}</span>
+              </div>
+            ))}
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
           </div>
         </DashboardCard>
 
@@ -244,7 +328,14 @@ const MarketingDashboard = () => {
                 </p>
               </div>
             </div>
+<<<<<<< HEAD
             <button className="w-full bg-[#65558F] text-white py-2 rounded-lg">
+=======
+            <button
+              onClick={() => navigate("/marketing/createcampaign")}
+              className="w-full bg-[#65558F] text-white py-2 rounded-lg"
+            >
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
               Create a WhatsApp Campaign
             </button>
           </div>
@@ -288,7 +379,11 @@ const MarketingDashboard = () => {
                     outerRadius={80}
                     label
                   >
+<<<<<<< HEAD
                     {geographyData.map((entry, index) => (
+=======
+                    {geographyData.map((_entry, index) => (
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
@@ -313,7 +408,11 @@ const MarketingDashboard = () => {
                     outerRadius={80}
                     label
                   >
+<<<<<<< HEAD
                     {geographyData.map((entry, index) => (
+=======
+                    {geographyData.map((_entry, index) => (
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
@@ -333,7 +432,11 @@ const MarketingDashboard = () => {
                 <Instagram sx={{ color: "#E4405F" }} />
                 <span className="text-sm font-medium">2 Active campaigns</span>
               </div>
+<<<<<<< HEAD
               <button className="text-indigo-600 text-sm">
+=======
+              <button className="text-[#65558F]-600 text-sm">
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
                 View dashboard
               </button>
             </div>
@@ -342,9 +445,28 @@ const MarketingDashboard = () => {
                 <WhatsApp sx={{ color: "#25D366" }} />
                 <span className="text-sm font-medium">1 Active campaign</span>
               </div>
+<<<<<<< HEAD
               <button className="text-indigo-600 text-sm">
                 View dashboard
               </button>
+=======
+              <button
+                className="text-[#65558F]-600 text-sm"
+                onClick={handleViewDashboard}
+              >
+                View dashboard
+              </button>
+              {showWhatsappDash && (
+                <WhatsappDash
+                  totalMessages={0}
+                  seenMessages={0}
+                  deliveredMessages={0}
+                  unreadMessages={0}
+                  hotLeads={0}
+                  campaignName={""}
+                />
+              )}
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
             </div>
           </div>
         </DashboardCard>
@@ -405,7 +527,11 @@ const MarketingDashboard = () => {
                   outerRadius={80}
                   label
                 >
+<<<<<<< HEAD
                   {socialData.map((entry, index) => (
+=======
+                  {socialData.map((_entry, index) => (
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}

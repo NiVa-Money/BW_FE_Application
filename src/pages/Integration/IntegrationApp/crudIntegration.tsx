@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // /* eslint-disable @typescript-eslint/no-unused-vars */
 // import React, { useState } from "react";
@@ -207,6 +208,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+=======
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -215,6 +220,12 @@ import {
   deleteWhatsappRequest,
   updateWhatsappRequest,
 } from "../../../store/actions/integrationActions";
+<<<<<<< HEAD
+=======
+import { RootState } from "../../../store";
+import { getBotsAction } from "../../../store/actions/botActions";
+import { useNavigate } from "react-router-dom";
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 
 const ConfirmationModal: React.FC<{
   onCancel: () => void;
@@ -254,6 +265,7 @@ const CrudIntegration: React.FC = () => {
   });
 
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
+<<<<<<< HEAD
 
   const dispatch = useDispatch();
 
@@ -290,11 +302,94 @@ const CrudIntegration: React.FC = () => {
 
   const handleUpdate = () => {
     dispatch(updateWhatsappRequest(formData)); // Dispatch update action
+=======
+  const [, setbotLists] = useState<any>([]);
+
+  const botsDataRedux = useSelector(
+    (state: RootState) => state.bot?.lists?.data
+  );
+
+  const botId = botsDataRedux?.[0]?._id;
+  console.log("botId", botId); // Debugging
+
+  const botsDataLoader = useSelector(
+    (state: RootState) => state.bot?.lists?.loader
+  );
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (
+      Array.isArray(botsDataRedux) &&
+      botsDataRedux.length &&
+      !botsDataLoader
+    ) {
+      const formattedBots = botsDataRedux.map((bot: any) => ({
+        botId: bot._id,
+        botName: bot.botName,
+      }));
+      console.log("Formatted Bots:", formattedBots); // Debugging
+      setbotLists(formattedBots);
+    }
+  }, [botsDataRedux, botsDataLoader]);
+
+  const userIdLocal = localStorage.getItem("user_id");
+
+  useEffect(() => {
+    if (userIdLocal?.length) {
+      dispatch(getBotsAction(userIdLocal));
+    }
+  }, [dispatch, userIdLocal]);
+
+  useEffect(() => {
+    if (botId) {
+      dispatch(getWhatsappRequest(botId));
+    }
+  }, [botId]);
+
+  const crudIntegrationData = useSelector(
+    (state: RootState) => state?.crudIntegration?.crudIntegration?.data
+  );
+
+  console.log("crud", crudIntegrationData);
+
+  console.log(
+    "Currentss data in Redux state:",
+
+    crudIntegrationData
+  ); // Check data here
+
+  const secretToken = useSelector(
+    (state: RootState) =>
+      state?.crudIntegration?.crudIntegration?.data?.secretToken
+  );
+  console.log("Secret Token:", secretToken); // Debugging
+
+  useEffect(() => {
+    if (crudIntegrationData !== null && crudIntegrationData !== undefined) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        ...crudIntegrationData,
+      }));
+    }
+  }, [crudIntegrationData]);
+
+  const handleUpdate = () => {
+    dispatch(updateWhatsappRequest(formData));
+    navigate("/integrations");
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
   };
 
   const handleDelete = () => {
     if (secretToken) {
+<<<<<<< HEAD
       dispatch(deleteWhatsappRequest(secretToken)); // Use secretToken as the ID
+=======
+      dispatch(deleteWhatsappRequest(secretToken));
+    } else {
+      console.log("No valid ID found for deletion");
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
     }
   };
 
@@ -316,7 +411,11 @@ const CrudIntegration: React.FC = () => {
               onClick={handleUpdate}
               className="bg-[#65558F] w-[200px] ml-44 text-white px-6 py-3 rounded-3xl font-semibold hover:bg-[#65558F]/85"
             >
+<<<<<<< HEAD
               Edit
+=======
+              Save
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
             </button>
             <button
               onClick={() => setIsDeleteConfirm(true)}
@@ -326,9 +425,12 @@ const CrudIntegration: React.FC = () => {
             </button>
           </div>
 
+<<<<<<< HEAD
           {loading && <p>Loading...</p>}
           {error && <p className="text-red-500">Error: {error}</p>}
 
+=======
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
           {/* Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>

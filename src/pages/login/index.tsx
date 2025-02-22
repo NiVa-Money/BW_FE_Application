@@ -1,13 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoginUserService } from "../../api/services/authServices";
+import {
+  getUserProfileService,
+  LoginUserService,
+  LoginverifyGoogleLogin,
+  verifyGoogleUserService,
+} from "../../api/services/authServices";
 import { Link } from "react-router-dom";
 import { loginWithGoogle } from "../../components/firebase/firebaseConfig";
-
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -22,22 +30,30 @@ const Login = () => {
     if (!isValidForm()) {
       setError("Please provide a valid email and password.");
       return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await LoginUserService({ email, password });
-      if (response.success) {
-        navigate("/dashboard");
-      } else {
-        setError(response.message || "Login failed. Please try again.");
+    } else {
+      try {
+        const response = await LoginUserService({ email, password });
+        if (response.success) {
+          localStorage.setItem("user_id", response.user_id);
+          localStorage.setItem("token", response.token);
+          localStorage.setItem(
+            "userData",
+            JSON.stringify({ moduleMap: response.moduleMap })
+          );
+          setEmail('')
+          setPassword('')
+          navigate("/dashboard");
+          navigate(0);
+        } else {
+          setError(
+            response.message || "Google login failed. Please try again."
+          );
+        }
+      } catch (err) {
+        setError("An unexpected error occurred.");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error("Error logging in:", err);
-      setError("An unexpected error occurred. Please try again later.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -47,7 +63,89 @@ const Login = () => {
     try {
       const response = await loginWithGoogle();
       if (response.success) {
-        navigate("/dashboard");
+        try {
+          const emailverify = await verifyGoogleUserService({
+            emailId: response?.user?.email,
+          });
+          if (emailverify.success) {
+            localStorage.setItem("user_id", emailverify.user_id);
+            localStorage.setItem("token", emailverify.token);
+            try {
+              const email: string = response?.user?.email
+                ? encodeURIComponent(response.user.email)
+                : "";
+              const userProfile = await getUserProfileService(email);
+              if (userProfile) {
+                localStorage.setItem("userData", JSON.stringify(userProfile));
+              }
+              navigate("/dashboard");
+              navigate(0);
+            } catch {
+              console.error("Error fetching user detail");
+            }
+          } else {
+            setError(
+              response.message || "Google login failed. Please try again."
+            );
+          }
+        } catch (err) {
+          if (err) {
+            try {
+              const [firstName, ...rest] =
+                response?.user.displayName.split(" ");
+              const lastName = rest.join("");
+
+              const payload = {
+                firstName,
+                lastName,
+                emailId: response?.user?.email,
+                mobileNo: "",
+              };
+
+              const signUpGoogle = await LoginverifyGoogleLogin(payload);
+
+              if (signUpGoogle?.data?.success) {
+                try {
+                  const emailverify = await verifyGoogleUserService({
+                    emailId: payload?.emailId,
+                  });
+                  if (emailverify.success) {
+                    localStorage.setItem("user_id", emailverify.user_id);
+                    localStorage.setItem("token", emailverify.token);
+                    try {
+                      const email: string = response?.user?.email
+                        ? encodeURIComponent(response.user.email)
+                        : "";
+                      const userProfile = await getUserProfileService(email);
+                      if (userProfile) {
+                        localStorage.setItem(
+                          "userData",
+                          JSON.stringify(userProfile)
+                        );
+                      }
+                      navigate("/dashboard");
+                      navigate(0);
+                    } catch {
+                      console.error("Error fetching user detail");
+                    }
+                  } else {
+                    setError(
+                      response.message ||
+                      "Google login failed. Please try again."
+                    );
+                  }
+                } catch (error) {
+                  console.log("Error while Verify", error);
+                }
+              }
+            } catch (error) {
+              console.log("Error:", error);
+            }
+          }
+
+          console.error("Error logging in with Google:", err);
+          setError("An unexpected error occurred during Google login.");
+        }
       } else {
         setError(response.message || "Google login failed. Please try again.");
       }
@@ -133,7 +231,8 @@ const Login = () => {
                         imgSrc: "/assets/key_icon.svg",
                         value: password,
                         onChange: setPassword,
-                        type: "password",
+                        type: showPassword ? "text" : "password",
+                        isPassword: true,
                       },
                     ].map((field, index) => (
                       <div
@@ -153,8 +252,17 @@ const Login = () => {
                           placeholder={field.placeholder}
                           value={field.value}
                           onChange={(e) => field.onChange(e.target.value)}
-                          className="w-full bg-transparent outline-none"
+                          className="w-full bg-transparent outline-none relative"
                         />
+                        {field.isPassword && (
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className=" text-gray-500 hover:text-gray-700 absolute flex justify-start right-[38px]"
+                          >
+                            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>

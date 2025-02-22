@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 
 import React from 'react';
-import { Chip, TextField } from '@mui/material';
-import { FieldProps } from 'formik';
+import {  TextField } from '@mui/material';
 
-interface FormikChipsFieldProps extends FieldProps {
-  options: { label: string; value: string; }[];
-}
+// interface FormikChipsFieldProps extends FieldProps {
+//   options: { label: string; value: string; }[];
+// }
 
 const FormikFieldInputComponent: React.FC<any> = ({ field, form, ...props }) => {
 
@@ -28,6 +29,9 @@ const FormikFieldInputComponent: React.FC<any> = ({ field, form, ...props }) => 
             '& .MuiOutlinedInput-input': {
               height: '35px',
             },
+            '& .MuiInputBase-input': {
+              padding: '0 10px'
+            }
           },
         }}
         fullWidth

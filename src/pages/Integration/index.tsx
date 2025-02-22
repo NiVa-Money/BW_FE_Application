@@ -1,7 +1,13 @@
 import React, { useState } from "react";
+<<<<<<< HEAD
 import { integrations } from "./integrations";
 import WhatsAppIntegration from "./IntegrationApp";
 import CrudIntegration from "./IntegrationApp/crudIntegration";
+=======
+import { useNavigate } from "react-router-dom";
+import { integrations } from "./integrations";
+import WhatsAppIntegration from "./IntegrationApp";
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 
 interface Integration {
   icon: string;
@@ -13,12 +19,18 @@ interface Integration {
 
 const IntegrationTab: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>("all");
+<<<<<<< HEAD
   const [activeIntegration, setActiveIntegration] = useState<string | null>(
     null
   ); // State to track the active integration
   const [showCrudIntegration, setShowCrudIntegration] = useState<boolean>(false); // State to show CrudIntegration component
 
   // Categorize integrations based on their variant
+=======
+  const [activeIntegration, setActiveIntegration] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
   const categories = {
     all: "All Integrations",
     communications: "Communications",
@@ -26,7 +38,10 @@ const IntegrationTab: React.FC = () => {
     social: "Social Media",
   };
 
+<<<<<<< HEAD
   // Map each category to relevant variants
+=======
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
   const categoryMapping: { [key: string]: string[] } = {
     all: [],
     communications: ["slack", "whatsapp", "linkedin"],
@@ -34,7 +49,10 @@ const IntegrationTab: React.FC = () => {
     social: ["facebook", "instagram", "tiktok", "x"],
   };
 
+<<<<<<< HEAD
   // Filter integrations based on the active category
+=======
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
   const filteredIntegrations =
     activeCategory === "all"
       ? integrations
@@ -43,6 +61,7 @@ const IntegrationTab: React.FC = () => {
         );
 
   const handleConnectClick = (variant: string) => {
+<<<<<<< HEAD
     // Mark integration as connected and navigate to its component
     if (variant === "whatsapp") {
       setActiveIntegration("whatsapp"); // Set WhatsAppIntegration as active
@@ -55,6 +74,16 @@ const IntegrationTab: React.FC = () => {
   };
 
   // Render integration cards
+=======
+    setActiveIntegration(variant); // Set the active integration when Connect is clicked
+    navigate("/createintegration"); // Navigate to /createintegration
+  };
+
+  const handleIntegrationDetailsClick = () => {
+    navigate("/integrationList"); // Navigate to /integrationList
+  };
+
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
   const renderIntegrationCard = (integration: Integration) => (
     <div
       key={integration.name}
@@ -66,9 +95,13 @@ const IntegrationTab: React.FC = () => {
         className="object-contain w-16 h-16"
       />
       <div className="mt-4 text-center">
+<<<<<<< HEAD
         <h3 className="text-lg font-semibold text-gray-800">
           {integration.name}
         </h3>
+=======
+        <h3 className="text-lg font-semibold text-gray-800">{integration.name}</h3>
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
         <p className="mt-2 text-sm text-gray-500">{integration.description}</p>
       </div>
       <div className="flex items-center mt-4 gap-2 w-full">
@@ -82,9 +115,16 @@ const IntegrationTab: React.FC = () => {
         >
           {integration.connected ? "Connected" : "Connect"}
         </button>
+<<<<<<< HEAD
         <button 
         onClick={handleIntegrationDetailsClick}
         className="flex-1 whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200">
+=======
+        <button
+          onClick={handleIntegrationDetailsClick}
+          className="flex-1 whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200"
+        >
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
           Integration Details →
         </button>
       </div>
@@ -92,10 +132,14 @@ const IntegrationTab: React.FC = () => {
   );
 
   // Main render
+<<<<<<< HEAD
   return showCrudIntegration ? (
     // Show CrudIntegration component when state is set
     <CrudIntegration />
   ) : activeIntegration === "whatsapp" ? (
+=======
+  return activeIntegration === "whatsapp" ? (
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
     <WhatsAppIntegration />
   ) : (
     <div className="p-6 bg-white min-h-screen">

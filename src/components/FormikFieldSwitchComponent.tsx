@@ -12,7 +12,7 @@ const FormikFieldSwitchComponent: React.FC<FormikSwitchProps> = ({ field, form, 
     const { setFieldValue } = form;
 
     // Handle the switch toggle
-    const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    const handleSwitchChange = (_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
         setFieldValue(name, checked); // Update Formik state with the switch value
         if (onChange) {
             onChange(checked); // Optionally call the parent onChange handler

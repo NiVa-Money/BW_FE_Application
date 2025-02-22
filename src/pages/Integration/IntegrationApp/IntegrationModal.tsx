@@ -1,4 +1,8 @@
 import React from "react";
+<<<<<<< HEAD
+=======
+import { CopyAll } from "@mui/icons-material";
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
 
 interface ModalProps {
   isOpen: boolean;
@@ -12,6 +16,14 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
   if (!isOpen) return null;
 
+<<<<<<< HEAD
+=======
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Copied to clipboard!");
+  };
+
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50">
       <div className="bg-white p-8 rounded-lg w-96">
@@ -29,6 +41,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
             className="w-full p-3 border border-gray-300 rounded-lg"
             readOnly
           />
+<<<<<<< HEAD
+=======
+          <button
+            onClick={() => handleCopy(data.secretToken)}
+            className="ml-2 bg-black mt-2 text-white px-4 py-2 rounded-lg"
+          >
+            <CopyAll />
+          </button>
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
         </div>
 
         <div className="mb-4">
@@ -41,6 +62,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
             className="w-full p-3 border border-gray-300 rounded-lg"
             readOnly
           />
+<<<<<<< HEAD
+=======
+          <button
+            onClick={() => handleCopy(data.webhookUrl)}
+            className="ml-2 bg-black mt-2 text-white px-4 py-2 rounded-lg"
+          >
+            <CopyAll />
+          </button>
+>>>>>>> 726e8dc3e5e6d23c51f3b00ededb66a296452161
         </div>
 
         <div className="flex justify-end">
