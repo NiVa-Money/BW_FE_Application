@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from "axios";
 import { notifyError, notifySuccess } from "../components/Toast";
 
@@ -36,7 +38,7 @@ const responseErrorInterceptor = (error: any) => {
 
 const responseInterceptor = (response: any) => {
   if (response?.status === 200 || response?.status === 201) {
-    notifySuccess(response.data.message);
+    // notifySuccess(response.data.message);
   }
   return response;
 };

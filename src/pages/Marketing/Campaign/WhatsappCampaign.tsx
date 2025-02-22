@@ -213,8 +213,8 @@ const WhatsappCampaign: React.FC = () => {
 
   const handleCreateTemplate = () => {
     const templateData = {
-      integrationId, // Ensure this variable is defined
-      name, // Ensure this variable is defined
+      integrationId, 
+      name, 
       text,
       // image,
     };
