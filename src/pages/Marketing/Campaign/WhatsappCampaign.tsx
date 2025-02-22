@@ -17,22 +17,21 @@ import {
 } from "../../../store/actions/whatsappCampaignActions";
 import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
+import CreateTemplateModal from "./CreateTemplate";
 
 const WhatsappCampaign: React.FC = () => {
   const [mode, setMode] = useState<"Template">("Template");
 
   const [campaignName, setCampaignName] = useState<string>("");
   const [contactList, setContactList] = useState<File | null>(null);
-  // const [botConfigFile, setBotConfigFile] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
   const [_fileName, setFileName] = useState("");
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
-  const [text, setText] = useState("");
-  const [name, setName] = useState("");
+
   // const [image, setImage] = useState<string | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null); // New state
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null); 
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
 
   const navigate = useNavigate();
@@ -71,20 +70,6 @@ const WhatsappCampaign: React.FC = () => {
     }
   };
 
-  // const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-
-  //   if (file && file.type !== "application/pdf") {
-  //     alert("Only PDF files are allowed.");
-  //     event.target.value = ""; // Clear the file input
-  //     setFileName(""); // Clear the file name state
-  //   } else if (file) {
-  //     setBotConfigFile(file); // Set the bot configuration file
-  //     setFileName(file.name); // Update the file name to show in both inputs
-  //   }
-  // };
-
-  // const handleModeChange = (selectedMode: "Text" | "Image" | "Template") => {
   const handleModeChange = (selectedMode: "Template") => {
     setMode(selectedMode);
     setShowTemplate(selectedMode === "Template");
@@ -211,25 +196,59 @@ const WhatsappCampaign: React.FC = () => {
     }
   };
 
-  const handleCreateTemplate = () => {
-    const templateData = {
-      integrationId, 
-      name, 
-      text,
-      // image,
+  const handleTemplateDone = (templateData: {
+    name: string;
+    text: string;
+    footerText: string;
+    buttonText: string;
+    buttonUrl: string;
+    buttonPhoneNumber: string;
+  }) => {
+    // Find the integration that matches the selected phoneNumberId
+    const selectedIntegration = integrationList.find(
+      (integration) =>
+        integration.phoneNumberId.toString() === selectedPhoneNumberId
+    );
+
+    if (
+      !selectedIntegration ||
+      !selectedIntegration.secretToken ||
+      selectedIntegration.secretToken.length !== 24
+    ) {
+      alert(
+        "Invalid integration selected. Please check your integration configuration."
+      );
+      return;
+    }
+
+    const payload = {
+      integrationId: selectedIntegration.secretToken,
+      name: templateData.name,
+      language: "en_US",
+      category: "MARKETING",
+      header: {
+        type: "TEXT",
+        content: templateData.text,
+      },
+      body: {
+        text: templateData.text,
+      },
+      footer: {
+        text: templateData.footerText || "Default Footer",
+      },
+      buttons: [
+        {
+          type: "QUICK_REPLY",
+          text: templateData.buttonText || "Default Button",
+          url: templateData.buttonUrl || "",
+          phoneNumber: templateData.buttonPhoneNumber || "",
+        },
+      ],
     };
-    dispatch(createWhatsAppTemplateAction(templateData));
+
+    dispatch(createWhatsAppTemplateAction(payload));
     setCustomizeScreen(false);
   };
-
-  // const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-  //   const files = event.target.files;
-  //   if (files && files[0]) {
-  //     const file = files[0];
-  //     // setImage(URL.createObjectURL(file));
-  //     setFileName(file.name); // Store filename
-  //   }
-  // };
 
   React.useEffect(() => {
     if (success) navigate("/marketing/dashboard");
@@ -257,18 +276,6 @@ const WhatsappCampaign: React.FC = () => {
         <div className="flex flex-wrap gap-4 mt-10">
           {/* Left Section */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">
-            {/* <div className="flex flex-col w-full mb-4">
-              <label className="leading-snug text-slate-700 mb-2">
-                Choose WhatsApp Number ID *
-              </label>
-              <input
-                type="text"
-                value={phoneNumberId}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="PhoneNumberID"
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-              />
-            </div> */}
             <div className="flex flex-col w-full mb-4">
               <label className="leading-snug text-slate-700 mb-2">
                 Choose WhatsApp Number ID *
@@ -316,97 +323,12 @@ const WhatsappCampaign: React.FC = () => {
                 Create Template
               </button>
             </div>
-            {customizeScreen ? (
-              <div className="rounded-lg shadow-sm p-6">
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      Template Name
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your template name"
-                      className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-                    />
-
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Text
-                    </label>
-                    <textarea
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      className="w-full h-32 px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
-                  <div>
-                    {/* <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image
-                    </label>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          document.getElementById("file-upload")?.click()
-                        }
-                        className="flex items-center px-4 py-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100"
-                      >
-                        {fileName
-                          ? `Uploaded File: ${fileName}`
-                          : "Upload an image"}
-                      </button>
-
-                      <input
-                        id="file-upload"
-                        type="file"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                        accept="image/*"
-                      />
-                    </div> */}
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-3 mt-6">
-                  <button
-                    onClick={() => setCustomizeScreen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleCreateTemplate}
-                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            ) : null}
-
-            {/* Mode-Specific Input */}
-            {/* <div className="flex flex-col w-full mb-4">
-              {/* {mode === "Text" && (
-                <div className="flex flex-col w-full mb-4">
-                  <label className="text-slate-700 ml-2 mb-2">
-                    Message Content *
-                  </label>
-                  <textarea
-                    placeholder="Enter your message content"
-                    className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
-                  />
-                </div>
-              )} */}
-            {/* {mode === "Image" && (
-                <div>
-                  <label className="text-slate-700 ml-2">Upload Image *</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
-                  />
-                </div>
-              )} */}
-            {/* </div>  */}
+            {customizeScreen && (
+              <CreateTemplateModal
+                onClose={() => setCustomizeScreen(false)}
+                onDone={handleTemplateDone}
+              />
+            )}
 
             {/* Schedule Date */}
             <div className="flex flex-col w-full mb-4">
@@ -578,16 +500,11 @@ const WhatsappCampaign: React.FC = () => {
           )}
           {/* WhatsApp Preview */}
           <div className="flex flex-col flex-1 mt-5 shrink basis-0 min-w-[240px]">
-            {/* <img
-              src="/assets/WhatsappCampaign.svg"
-              alt="Whatsapp Campaign"
-              className="w-full h-[700px]"
-            /> */}
             <div className="relative w-[400px] h-[660px] border border-gray-300 rounded-md overflow-hidden">
               {/* Header (Contact name, info, date) */}
               <div className="bg-[#075E54] text-white flex items-center justify-between px-4 py-2">
                 <div className="flex flex-col">
-                  <span className="font-bold text-base"> Campign </span>
+                  <span className="font-bold text-base"> Campaign </span>
                 </div>
               </div>
 
