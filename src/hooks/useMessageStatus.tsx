@@ -28,14 +28,14 @@ export const useMessageStatus = ({ status, readTime, sentTime, deliveredTime, cr
     return (
         <span className="flex justify-end">
             <span className="text-[12px]" style={{ color: COLORS.DARKGRAY }}>
-                {getTime()}
+                {getTime()}{status}
             </span>
             {status === MessageStatusType.DELIVERED ? (
                 <DoneAllIcon className="w-[15px] h-[15px]" />
-            ) : MessageStatusType.READ ? (
+            ) : status === MessageStatusType.READ ? (
                 <DoneAllIcon className="w-[15px] h-[15px] text-blue-500" />
             ) : (
-                <DoneIcon className="w-[15px] h-[15px]" />
+                <DoneIcon className="w-[15px] h-[15px] text-red-100" />
             )}
         </span>
     );
