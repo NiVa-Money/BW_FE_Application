@@ -15,9 +15,20 @@ import {
   createWhatsAppCampaignAction,
   createWhatsAppTemplateAction,
 } from "../../../store/actions/whatsappCampaignActions";
-import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
+import {
+  convertCsvToJsonService,
+  uploadWhatsAppMediaService,
+} from "../../../api/services/whatsappCampaignService";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
 import CreateTemplateModal from "./CreateTemplate";
+
+interface TemplateButton {
+  type: "quick_reply" | "call_to_action";
+  text: string;
+  ctaType?: "url" | "phone";
+  url?: string;
+  phoneNumber?: string;
+}
 
 const WhatsappCampaign: React.FC = () => {
   const [mode, setMode] = useState<"Template">("Template");
@@ -31,7 +42,7 @@ const WhatsappCampaign: React.FC = () => {
 
   // const [image, setImage] = useState<string | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null); 
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
 
   const navigate = useNavigate();
@@ -196,20 +207,136 @@ const WhatsappCampaign: React.FC = () => {
     }
   };
 
-  const handleTemplateDone = (templateData: {
-    name: string;
-    text: string;
-    footerText: string;
-    buttonText: string;
-    buttonUrl: string;
-    buttonPhoneNumber: string;
-  }) => {
-    // Find the integration that matches the selected phoneNumberId
-    const selectedIntegration = integrationList.find(
-      (integration) =>
-        integration.phoneNumberId.toString() === selectedPhoneNumberId
-    );
+  // const handleTemplateDone = async (templateData: {
+  //   name: string;
+  //   language: string;
+  //   headerType: string;
+  //   headerText?: string;
+  //   headerFile?: File | null;
+  //   bodyText: string;
+  //   footerText?: string;
+  //   buttons: TemplateButton[];
+  // }) => {
+  //   // Find the integration that matches the selected phoneNumberId
+  //   const selectedIntegration = integrationList.find(
+  //     (integration) =>
+  //       integration.phoneNumberId.toString() === selectedPhoneNumberId
+  //   );
 
+  //   if (
+  //     !selectedIntegration ||
+  //     !selectedIntegration.secretToken ||
+  //     selectedIntegration.secretToken.length !== 24
+  //   ) {
+  //     alert(
+  //       "Invalid integration selected. Please check your integration configuration."
+  //     );
+  //     return;
+  //   }
+
+  //   // 1) Upload header media if user selected image/video/document
+  //   let headerUrl = "";
+  //   if (
+  //     templateData.headerFile &&
+  //     ["image", "video", "document"].includes(templateData.headerType)
+  //   ) {
+  //     try {
+  //       const formData = new FormData();
+  //       formData.append("file", templateData.headerFile);
+  //       const { url } = await uploadWhatsAppMediaService(
+  //         formData,
+  //         selectedIntegration.secretToken
+  //       );
+  //       headerUrl = url;
+  //     } catch (error) {
+  //       console.error("Header upload failed:", error);
+  //       alert("Failed to upload header media.");
+  //       return;
+  //     }
+  //   }
+
+  //   // 2) Build the final header object
+  //   let headerType = "NONE";
+  //   let headerContent = "";
+  //   if (templateData.headerType === "text") {
+  //     headerType = "TEXT";
+  //     headerContent = templateData.headerText || "";
+  //   } else if (
+  //     ["image", "video", "document"].includes(templateData.headerType)
+  //   ) {
+  //     headerType = templateData.headerType.toUpperCase(); // "IMAGE", "VIDEO", or "DOCUMENT"
+  //     headerContent = headerUrl;
+  //   }
+
+  //   // 3) Map the user’s buttons into your backend format
+  //   // (Adjust if your backend expects different key names)
+  //   const mappedButtons = templateData.buttons.map((btn) => {
+  //     if (btn.type === "quick_reply") {
+  //       return {
+  //         type: "QUICK_REPLY",
+  //         text: btn.text,
+  //       };
+  //     } else {
+  //       // call_to_action
+  //       if (btn.ctaType === "url") {
+  //         return {
+  //           type: "URL",
+  //           text: btn.text,
+  //           url: btn.url || "",
+  //         };
+  //       } else {
+  //         // phone
+  //         return {
+  //           type: "PHONE",
+  //           text: btn.text,
+  //           phoneNumber: btn.phoneNumber || "",
+  //         };
+  //       }
+  //     }
+  //   });
+
+  //   // 4) Create the template payload for your backend
+  //   const payload = {
+  //     integrationId: selectedIntegration.secretToken,
+  //     name: templateData.name,
+  //     language: templateData.language || "en_US",
+  //     category: "MARKETING",
+  //     header: {
+  //       type: headerType,
+  //       content: headerContent,
+  //     },
+  //     body: {
+  //       text: templateData.bodyText,
+  //     },
+  //     footer: {
+  //       text: templateData.footerText || "",
+  //     },
+  //     buttons: mappedButtons,
+  //   };
+
+  //   // 5) Dispatch the createWhatsAppTemplateAction with the payload
+  //   dispatch(createWhatsAppTemplateAction(payload));
+
+  //   // Hide the modal
+  //   setCustomizeScreen(false);
+  // };
+
+  // Find integration
+  const selectedIntegration = integrationList.find(
+    (integration) =>
+      integration.phoneNumberId.toString() === selectedPhoneNumberId
+  );
+
+  const handleTemplateDone = async (templateData: {
+    name: string;
+    language: string; // e.g. "en_US"
+    headerType: string; // "none" | "text" | "image" | "video" | "document"
+    headerText?: string;
+    headerFile?: File | null;
+    bodyText: string;
+    footerText?: string;
+    buttons: TemplateButton[]; // "quick_reply" or "call_to_action"
+  }) => {
     if (
       !selectedIntegration ||
       !selectedIntegration.secretToken ||
@@ -221,31 +348,105 @@ const WhatsappCampaign: React.FC = () => {
       return;
     }
 
+    // 1) Upload file if image/video/document
+    let fileHandle = "";
+    if (
+      templateData.headerFile &&
+      ["image", "video", "document"].includes(templateData.headerType)
+    ) {
+      try {
+        const formData = new FormData();
+        formData.append("file", templateData.headerFile);
+        const file = new File(
+          [templateData.headerFile],
+          templateData.headerFile.name
+        );
+        const response = await uploadWhatsAppMediaService(
+          file,
+          selectedIntegration.secretToken
+        );
+
+        if (response?.fileHandle) {
+          fileHandle = response.fileHandle;
+        } else {
+          throw new Error("File handle missing in response");
+        }
+      } catch (error) {
+        console.error("Header upload failed:", error);
+        alert("Failed to upload header media.");
+        return;
+      }
+    }
+
+    // 2) Build the final header
+    let headerType = "TEXT" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
+    let headerContent = "";
+
+    if (templateData.headerType === "text") {
+      headerType = "TEXT";
+      headerContent = templateData.headerText || "";
+    } else if (templateData.headerType === "image") {
+      headerType = "IMAGE";
+      headerContent = fileHandle;
+    } else if (templateData.headerType === "video") {
+      headerType = "VIDEO";
+      headerContent = fileHandle;
+    } else if (templateData.headerType === "document") {
+      headerType = "DOCUMENT";
+      headerContent = fileHandle;
+    } else {
+      headerType = "NONE";
+    }
+
+    // 3) Convert buttons to the doc's ButtonDto
+    // Doc says: ButtonDto.type can be "QUICK_REPLY", "URL", "PHONE_NUMBER"
+    const mappedButtons = templateData.buttons.map((btn) => {
+      if (btn.type === "quick_reply") {
+        // QUICK_REPLY
+        return {
+          type: "QUICK_REPLY" as const,
+          text: btn.text,
+        };
+      } else {
+        // call_to_action
+        if (btn.ctaType === "url") {
+          // "URL"
+          return {
+            type: "URL" as const,
+            text: btn.text,
+            url: btn.url || "",
+          };
+        } else {
+          // "PHONE_NUMBER"
+          return {
+            type: "PHONE_NUMBER" as const,
+            text: btn.text,
+            phoneNumber: btn.phoneNumber || "",
+          };
+        }
+      }
+    });
+
+    // 4) Build final payload
     const payload = {
       integrationId: selectedIntegration.secretToken,
       name: templateData.name,
-      language: "en_US",
+      language: templateData.language || "en_US",
       category: "MARKETING",
       header: {
-        type: "TEXT",
-        content: templateData.text,
+        type: headerType, // "TEXT", "IMAGE", "DOCUMENT", "VIDEO", or "NONE"
+        content: headerContent, // If text, user input; if file, fileHandle
       },
       body: {
-        text: templateData.text,
+        text: templateData.bodyText,
       },
       footer: {
-        text: templateData.footerText || "Default Footer",
+        text: templateData.footerText || "",
       },
-      buttons: [
-        {
-          type: "QUICK_REPLY",
-          text: templateData.buttonText || "Default Button",
-          url: templateData.buttonUrl || "",
-          phoneNumber: templateData.buttonPhoneNumber || "",
-        },
-      ],
+      buttons: mappedButtons,
     };
 
+    // 5) Dispatch
     dispatch(createWhatsAppTemplateAction(payload));
     setCustomizeScreen(false);
   };
@@ -327,6 +528,7 @@ const WhatsappCampaign: React.FC = () => {
               <CreateTemplateModal
                 onClose={() => setCustomizeScreen(false)}
                 onDone={handleTemplateDone}
+                secretToken={selectedIntegration?.secretToken || ""}
               />
             )}
 
