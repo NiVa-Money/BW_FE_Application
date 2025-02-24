@@ -18,6 +18,7 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { NavLink } from "react-router-dom";
 import { sidebarNavLinks } from "../hooks/routeNavLinks";
 import { authProtectedRoutes, publicRoutes } from ".";
+import { COLORS } from "../constants";
 
 interface AuthMiddlewareProps {
   children: React.ReactNode;
@@ -97,12 +98,30 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                     onClick={() => item.subItems && handleToggle(item.id)}
                     sx={{
                       minHeight: 48,
+                      "&.active": {
+                        "& .MuiListItemIcon-root": {
+                          color: COLORS.DARKBLUE, // active icon color
+                        },
+                        "& .MuiListItemText-primary": {
+                          color: COLORS.DARKBLUE, // color for active text
+                          fontWeight: "bold",
+                        },
+                      },
+                      "&:hover": {
+                        "& .MuiListItemIcon-root": {
+                          color: COLORS.DARKBLUE, // color for icon on hover
+                        },
+                        "& .MuiListItemText-primary": {
+                          color: COLORS.DARKBLUE, // color for text on hover
+                        },
+                      },
                     }}
                   >
                     <ListItemIcon
                       sx={{
                         minWidth: 0,
                         mr: open ? 1 : "auto",
+                        transition: "color 0.3s ease",
                       }}
                     >
                       {item?.icon ? item.icon : null}
@@ -135,13 +154,31 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                               minHeight: 48,
                               justifyContent: open ? "initial" : "center",
                               py: 0.25,
+                              "&.active": {
+                                "& .MuiListItemIcon-root": {
+                                  color: COLORS.DARKBLUE, // active icon color
+                                },
+                                "& .MuiListItemText-primary": {
+                                  color: COLORS.DARKBLUE, // color for active text
+                                  fontWeight: "bold",
+                                },
+                              },
+                              "&:hover": {
+                                "& .MuiListItemIcon-root": {
+                                  color: COLORS.DARKBLUE, // color for icon on hover
+                                },
+                                "& .MuiListItemText-primary": {
+                                  color: COLORS.DARKBLUE, // color for text on hover
+                                },
+                              },
                             }}
-                            dense // To make content more compact
+                            dense
                           >
                             <ListItemIcon
                               sx={{
                                 minWidth: 0,
                                 mr: open ? 1 : "auto",
+                                transition: "color 0.3s ease",
                               }}
                             >
                               {subItem?.icon ? subItem.icon : null}
@@ -151,7 +188,8 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                               primary={subItem.text}
                               sx={{
                                 opacity: open ? 1 : 0,
-                                margin: 0, 
+                                margin: 0,
+                                transition: "color 0.3s ease",
                               }}
                             />
                           </ListItem>

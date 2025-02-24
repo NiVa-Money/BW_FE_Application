@@ -6,4 +6,5 @@ export const COLORS = {
   LIGHTVIOLET: "#F3EDF7",
   VIOLET: "#65558F",
   BLUE: "#78C9F1",
+  DARKBLUE: "#1976d2",
 } as const;
