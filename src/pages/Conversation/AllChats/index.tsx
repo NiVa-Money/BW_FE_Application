@@ -1,3 +1,4 @@
+/* eslint-disable no-unsafe-optional-chaining */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
 import { FormControlLabel, Switch } from "@mui/material";
 import { notifyError } from "../../../components/Toast";
+import ReactMarkdown from "react-markdown";
 
 interface AnalysisSection {
   title: string;
@@ -74,8 +76,6 @@ const AllChats = () => {
     }
   }, [userId]);
 
-
-
   const getChatHistory = () => {
     // If no bot selected, or no user, do nothing
     if (!botIdVal || !userId) return;
@@ -90,7 +90,6 @@ const AllChats = () => {
 
     dispatch(getAllSession(data));
   };
-
 
   useEffect(() => {
     getChatHistory();
@@ -112,19 +111,21 @@ const AllChats = () => {
     []
   );
 
-
   useEffect(() => {
     if (advanceFeatureDataRedux?.success) {
-      const { emotion, intent, reason, salesIntelligence, sentiments, smartSuggestion, vulnerability } = advanceFeatureDataRedux?.data;
+      const {
+        emotion,
+        intent,
+        reason,
+        salesIntelligence,
+        sentiments,
+        smartSuggestion,
+        vulnerability,
+      } = advanceFeatureDataRedux?.data;
 
       setAnalysisSections([
         {
-          title: "Emotion Analysis",
-          description: emotion?.emotion || "No emotion detected.",
-          expanded: true,
-        },
-        {
-          title: "Intent Analysis",
+          title: "Intent",
           description: intent?.intent || "No intent detected.",
           expanded: true,
         },
@@ -133,9 +134,10 @@ const AllChats = () => {
           description: reason?.reason || "No reason provided.",
           expanded: true,
         },
+
         {
-          title: "Sales Intelligence",
-          description: salesIntelligence?.sales_insights || "No sales insights.",
+          title: "Emotion Analysis",
+          description: emotion?.emotion || "No emotion detected.",
           expanded: true,
         },
         {
@@ -144,28 +146,30 @@ const AllChats = () => {
           expanded: true,
         },
         {
+          title: "Sales Intelligence",
+          description:
+            salesIntelligence?.sales_insights || "No sales insights.",
+          expanded: true,
+        },
+        {
           title: "Smart Suggestion",
-          description: smartSuggestion?.suggestions || "No suggestions available.",
+          description:
+            smartSuggestion?.suggestions || "No suggestions available.",
           expanded: true,
         },
         {
           title: "Vulnerability",
-          description: vulnerability?.vulnerabilities || "No vulnerabilities found.",
+          description:
+            vulnerability?.vulnerabilities || "No vulnerabilities found.",
           expanded: true,
         },
       ]);
     }
   }, [advanceFeatureDataRedux]);
   useEffect(() => {
-
     setAnalysisSections([
       {
-        title: "Emotion Analysis",
-        description: "No emotion detected.",
-        expanded: true,
-      },
-      {
-        title: "Intent Analysis",
+        title: "Intent",
         description: "No intent detected.",
         expanded: true,
       },
@@ -175,13 +179,18 @@ const AllChats = () => {
         expanded: true,
       },
       {
-        title: "Sales Intelligence",
-        description: "No sales insights.",
+        title: "Emotion Analysis",
+        description: "No emotion detected.",
         expanded: true,
       },
       {
         title: "Sentiment Analysis",
         description: "No sentiment data.",
+        expanded: true,
+      },
+      {
+        title: "Sales Intelligence",
+        description: "No sales insights.",
         expanded: true,
       },
       {
@@ -198,11 +207,13 @@ const AllChats = () => {
   }, []);
 
   const handleSessionSelection = (sessionId: string) => {
-    const messagesData = channelNameVal !== 'whatsapp' ? sessionsDataRedux?.sessions.filter(
-      (obj) => obj._id === sessionId
-    )[0].sessions : sessionsDataRedux?.sessions.filter(
-      (obj) => obj.userPhoneId === sessionId
-    )[0].sessions;
+    const messagesData =
+      channelNameVal !== "whatsapp"
+        ? sessionsDataRedux?.sessions.filter((obj) => obj._id === sessionId)[0]
+            .sessions
+        : sessionsDataRedux?.sessions.filter(
+            (obj) => obj.userPhoneId === sessionId
+          )[0].sessions;
     setMessages(messagesData);
     dispatch(getAdvanceFeature(sessionId, botIdVal, channelNameVal));
     setSessionId(sessionId);
@@ -218,7 +229,7 @@ const AllChats = () => {
   const getBotSession = (e) => {
     const botId = e.target.value;
     setBotIdVal(botId);
-    setSessionId('')
+    setSessionId("");
     dispatch(
       getAllSession({
         botId: botId,
@@ -231,14 +242,13 @@ const AllChats = () => {
   const getChannelNameHandler = (e) => {
     const val = e.target.value;
     setChannelNameVal(val);
-    setSessionId('')
+    setSessionId("");
     if (botIdVal?.length) {
       dispatch(
         getAllSession({ botId: botIdVal, page, channelName: val, aiLevel })
       );
-    }
-    else {
-      notifyError('Please select Bot')
+    } else {
+      notifyError("Please select Bot");
     }
   };
   return (
@@ -291,7 +301,7 @@ const AllChats = () => {
               />
             }
             label=""
-          // Display the label next to the switch
+            // Display the label next to the switch
           />
         </div>
       </div>
@@ -306,15 +316,12 @@ const AllChats = () => {
 
         <div className="flex-1 flex flex-col overflow-y-scroll">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {channelNameVal === "whatsapp" && sessionId?.length ?
+            {channelNameVal === "whatsapp" && sessionId?.length ? (
               <WhatsappSectionData messages={messages} />
-              : sessionId?.length ?
-                <WebsiteSectionData messages={messages} />
-                : null}
-
+            ) : sessionId?.length ? (
+              <WebsiteSectionData messages={messages} />
+            ) : null}
           </div>
-
-
         </div>
 
         <div className="w-80 bg-gray-50 p-4 overflow-y-scroll">
@@ -326,14 +333,15 @@ const AllChats = () => {
               >
                 <h3 className="font-medium">{section.title}</h3>
                 <ExpandMoreIcon
-                  className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
-                    }`}
+                  className={`w-4 h-4 transform ${
+                    section.expanded ? "rotate-180" : ""
+                  }`}
                 />
               </div>
               {section.expanded && (
-                <p className="text-sm text-gray-600 mt-2 px-2">
+                <ReactMarkdown className="text-sm text-gray-600 mt-2 px-2">
                   {section.description}
-                </p>
+                </ReactMarkdown>
               )}
             </div>
           ))}

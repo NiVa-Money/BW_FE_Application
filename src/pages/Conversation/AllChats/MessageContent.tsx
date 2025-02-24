@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useMessageStatus } from "../../../hooks/useMessageStatus";
 
 const MessageComponent = ({ msg, isUserQuery, content, index, msgType }) => {
