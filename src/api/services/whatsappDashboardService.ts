@@ -1,12 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import axiosInstance from "../axiosConfig";
 
-export const whatsAppDashboardService = async (campaignId: string) => {
+export const whatsAppDashboardService = async (
+  campaignId: string,
+  startDate: Date,
+  endDate: Date
+): Promise<any> => {
+  // Replace `any` with your expected response type if available
   try {
     const response = await axiosInstance.post("/marketing/whatsapp/dashboard", {
       campaignId,
+      startDate,
+      endDate,
     });
-    return response.data; // Assuming the response contains the required data
+
+    return response.data; // Return the data from the API response
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(

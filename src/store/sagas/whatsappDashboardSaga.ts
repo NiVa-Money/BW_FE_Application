@@ -21,7 +21,12 @@ export function* whatsappDashboardSaga({
   payload: any;
 }): Generator<any> {
   try {
-    const dashboardData = yield call(whatsAppDashboardService, payload);
+    const dashboardData = yield call(
+      whatsAppDashboardService,
+      payload.campaignId,
+      payload.startDate,
+      payload.endDate
+    );
 
     yield put({
       type: FETCH_WHATSAPP_DASHBOARD_SUCCESS,
