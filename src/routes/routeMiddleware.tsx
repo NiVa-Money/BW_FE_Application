@@ -19,6 +19,7 @@ import { NavLink } from "react-router-dom";
 import { sidebarNavLinks } from "../hooks/routeNavLinks";
 import { authProtectedRoutes, publicRoutes } from ".";
 import { COLORS } from "../constants";
+import CustomTooltip from "../components/CustomTooltip";
 
 interface AuthMiddlewareProps {
   children: React.ReactNode;
@@ -80,9 +81,11 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
         >
           <div className="flex flex-col bg-white h-full">
             <div className="flex justify-between gap-1 p-2">
-              <IconButton onClick={toggleSidebar}>
-                {open ? <KeyboardBackspaceIcon /> : <MenuIcon />}
-              </IconButton>
+              <CustomTooltip title={open ? "Collapse" : "Expand"} show={true}>
+                <IconButton onClick={toggleSidebar}>
+                  {open ? <KeyboardBackspaceIcon /> : <MenuIcon />}
+                </IconButton>
+              </CustomTooltip>
               {open && (
                 <button onClick={logOutHandler}>
                   <span>Log Out</span>
@@ -117,14 +120,16 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                       },
                     }}
                   >
-                    <ListItemIcon
-                      sx={{
-                        minWidth: 0,
-                        mr: open ? 1 : "auto",
-                      }}
-                    >
-                      {item?.icon ? item.icon : null}
-                    </ListItemIcon>
+                    <CustomTooltip title={item.text} show={!open}>
+                      <ListItemIcon
+                        sx={{
+                          minWidth: 0,
+                          mr: open ? 1 : "auto",
+                        }}
+                      >
+                        {item?.icon ? item.icon : null}
+                      </ListItemIcon>
+                    </CustomTooltip>
                     {open && <ListItemText primary={item.text} />}
                     {open && item.subItems?.length && (
                       <>
@@ -173,14 +178,16 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                             }}
                             dense
                           >
-                            <ListItemIcon
-                              sx={{
-                                minWidth: 0,
-                                mr: open ? 1 : "auto",
-                              }}
-                            >
-                              {subItem?.icon ? subItem.icon : null}
-                            </ListItemIcon>
+                            <CustomTooltip title={subItem.text} show={!open}>
+                              <ListItemIcon
+                                sx={{
+                                  minWidth: 0,
+                                  mr: open ? 1 : "auto",
+                                }}
+                              >
+                                {subItem?.icon ? subItem.icon : null}
+                              </ListItemIcon>
+                            </CustomTooltip>
 
                             <ListItemText
                               primary={subItem.text}
