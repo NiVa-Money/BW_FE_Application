@@ -3,8 +3,6 @@
 
 import { FC, useState, useEffect, Key } from "react";
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   XAxis,
@@ -29,7 +27,6 @@ import {
   Send,
   MarkEmailUnread,
   TrendingUp,
-  Campaign,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
@@ -53,35 +50,6 @@ interface DashboardProps {
   unreadMessages: number;
   hotLeads: number;
   campaignName: string;
-  // response: ResponseData;
-}
-
-interface CampaignMetrics {
-  campaignName: string;
-  failed: number;
-  sent: number;
-  read: number;
-  delivered: number;
-  total: number;
-  replied: number;
-}
-
-interface DateMetrics {
-  date: string;
-  [campaignName: string]: number | string;
-}
-
-interface DashboardData {
-  startDate: string;
-  endDate: string;
-  campaignWiseMessagesMetrics: CampaignMetrics[];
-  dateWiseMetrics: DateMetrics[];
-  engagementRateMetrics: DateMetrics[];
-}
-
-interface ResponseData {
-  success: boolean;
-  data: DashboardData;
 }
 
 const WhatsappDash: FC<DashboardProps> = ({
