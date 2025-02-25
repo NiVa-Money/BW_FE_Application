@@ -78,7 +78,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
             },
           }}
         >
-          <div className="flex flex-col bg-white h-full align-center">
+          <div className="flex flex-col bg-white h-full">
             <div className="flex justify-between gap-1 p-2">
               <IconButton onClick={toggleSidebar}>
                 {open ? <KeyboardBackspaceIcon /> : <MenuIcon />}
@@ -121,7 +121,6 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                       sx={{
                         minWidth: 0,
                         mr: open ? 1 : "auto",
-                        transition: "color 0.3s ease",
                       }}
                     >
                       {item?.icon ? item.icon : null}
@@ -178,7 +177,6 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                               sx={{
                                 minWidth: 0,
                                 mr: open ? 1 : "auto",
-                                transition: "color 0.3s ease",
                               }}
                             >
                               {subItem?.icon ? subItem.icon : null}
