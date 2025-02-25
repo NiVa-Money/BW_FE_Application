@@ -15,6 +15,7 @@ interface CardProps {
     onTest: () => void;
     onClick: () => void;
     onExport: () => void;
+    image: string;
 }
 
 const MyBotCard: React.FC<CardProps> = ({
@@ -27,14 +28,15 @@ const MyBotCard: React.FC<CardProps> = ({
     onDelete,
     onTest,
     onClick,
-    onExport
+    onExport,
+    image
 
 }) => {
     return (
         <div style={{ backgroundColor: `${COLORS.LIGHTGRAY}` }} className={`border border-gray-300 rounded-lg p-4 flexs md:flex-row w-[100%] items-center md:items-start shadow-sm`} >
             <div className="flex-shrink-0 flex items-center justify-between w-24 h-24 rounded-full bg-gray-100">
                 <img
-                    src="/assets/bot1.svg"
+                    src={image?.length ? image : "/assets/bot1.svg"}
                     alt={`${name} Avatar`}
                     className="w-full h-full rounded-full"
                 />

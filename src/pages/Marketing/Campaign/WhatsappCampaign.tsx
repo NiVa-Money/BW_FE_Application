@@ -213,8 +213,8 @@ const WhatsappCampaign: React.FC = () => {
 
   const handleCreateTemplate = () => {
     const templateData = {
-      integrationId, // Ensure this variable is defined
-      name, // Ensure this variable is defined
+      integrationId, 
+      name, 
       text,
       // image,
     };
@@ -308,22 +308,6 @@ const WhatsappCampaign: React.FC = () => {
                   </div>
                 ))}
               </div>
-              {selectedTemplate && (
-                <div className="mt-4 p-4 border border-gray-300 rounded-md">
-                  <p className="text-xl font-semibold">Selected Template : </p>
-                  <h3 className="text-xl font-semibold">
-                    {selectedTemplate.name}
-                  </h3>
-                  <p>{selectedTemplate.body}</p>
-                  {selectedTemplate.header && (
-                    <img
-                      src={selectedTemplate.header}
-                      alt="Template Header"
-                      className="w-full h-auto mt-2"
-                    />
-                  )}
-                </div>
-              )}
 
               <button
                 className="flex gap-2 w-full mt-4  whitespace-nowrap min-h-[45px] justify-center items-center text-base font-medium text-gray-100 bg-[#65558F] rounded-3xl"
@@ -593,12 +577,42 @@ const WhatsappCampaign: React.FC = () => {
             />
           )}
           {/* WhatsApp Preview */}
-          <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">
-            <img
+          <div className="flex flex-col flex-1 mt-5 shrink basis-0 min-w-[240px]">
+            {/* <img
               src="/assets/WhatsappCampaign.svg"
               alt="Whatsapp Campaign"
               className="w-full h-[700px]"
-            />
+            /> */}
+            <div className="relative w-[400px] h-[660px] border border-gray-300 rounded-md overflow-hidden">
+              {/* Header (Contact name, info, date) */}
+              <div className="bg-[#075E54] text-white flex items-center justify-between px-4 py-2">
+                <div className="flex flex-col">
+                  <span className="font-bold text-base"> Campign </span>
+                </div>
+              </div>
+
+              {/* Chat Area */}
+              <div className="p-4 h-full bg-gray-100">
+                {/* Single Message Bubble */}
+                <div className=" w-fit max-w-[80%] mt-10 rounded-lg bg-white p-2 mb-3">
+                  {selectedTemplate && (
+                    <div className="mt-4 p-4 rounded-md">
+                      <h3 className="text-xl font-semibold">
+                        {selectedTemplate.name}
+                      </h3>
+                      <p>{selectedTemplate.body}</p>
+                      {selectedTemplate.header && (
+                        <img
+                          src={selectedTemplate.header}
+                          alt="Template Header"
+                          className="w-full h-auto mt-2"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

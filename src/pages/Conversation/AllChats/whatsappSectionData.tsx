@@ -19,26 +19,27 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
             "second_confirmation_reminder",
             "first_confirmation_reminder",
           ].includes(msg?.messageCategory);
-          console.log("isAnswerCategory", isAnswerCategory);
           // const msgType = ["template", "text", "button_reply", "image"].includes(msg?.messageType)
 
-          const content = isUserQuery
-            ? msg?.messageContent?.text
-            : isAnswerCategory
-            ? msg?.messageContent?.template?.body?.text ||
-              msg?.messageContent?.text ||
-              msg?.answer
-            : "";
+          const content = msg?.messageType === "audio"
+            ? msg?.messageContent?.audio?.url || ""
+            : isUserQuery
+              ? msg?.messageContent?.text || ""
+              : isAnswerCategory
+                ? msg?.messageContent?.template?.body?.text ||
+                msg?.messageContent?.text ||
+                msg?.answer ||
+                ""
+                : "";
 
           return (
             <div
               key={index}
-              className={`flex ${
-                isUserQuery ? "justify-end" : "justify-start"
-              } mb-2`}
+              className={`flex ${isUserQuery ? "justify-end" : "justify-start"
+                } mb-2`}
             >
               <MessageComponent
-                msgType={msg.messageType}
+                msgType={msg?.messageType}
                 msg={msg}
                 isUserQuery={isUserQuery}
                 content={content}

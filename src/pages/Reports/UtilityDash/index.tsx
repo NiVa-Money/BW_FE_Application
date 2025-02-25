@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import TrendingUp from "@mui/icons-material/TrendingUp";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   Card,
   CardContent,
@@ -30,14 +31,16 @@ import { RootState } from "../../../store";
 import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { fetchShopifyDashboardRequest } from "../../../store/actions/reportActions";
-import { fetchShopifyOrdersService } from "../../../api/services/reportServices";
+import {
+  downloadShopifyOrdersService,
+  fetchShopifyOrdersService,
+} from "../../../api/services/reportServices";
 import ReactMarkdown from "react-markdown";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 
 interface Order {
   orderName: string;
-  codOrder: boolean;
-  onlineOrder: boolean;
+  orderType: string;
   welcomeMessageSent: boolean;
   reminder1: boolean;
   reminder2: boolean;
@@ -106,6 +109,9 @@ const UtilityDash = () => {
   const [limit] = useState<number>(10);
   const [fetchedOrders, setFetchedOrders] = useState<number>(0);
   const dispatch = useDispatch();
+  const [selectedActionTaken, setSelectedActionTaken] = useState("");
+  const [selectedOrderType, setSelectedOrderType] = useState("");
+  const [selectedFulfilled, setSelectedFulfilled] = useState("");
 
   const shopifyData = useSelector(
     (state: RootState) => state?.shopifyDashboard?.shopifyDashboard
@@ -171,18 +177,6 @@ const UtilityDash = () => {
     );
   }, [startDate, endDate, dispatch]);
 
-  // useEffect(() => {
-  //   if (!shopifyData?.success) return;
-
-  //   const fetchUtilityData = async () => {
-  //     const data = shopifyData;
-  //     console.log("data", data);
-  //     setUtilityData(data);
-  //   };
-
-  //   fetchUtilityData();
-  // }, [shopifyData]);
-
   useEffect(() => {
     if (!shopifyData?.success) return;
 
@@ -200,10 +194,17 @@ const UtilityDash = () => {
 
     const fetchOrders = async () => {
       try {
+        const filters = {
+          actionTaken: selectedActionTaken,
+          orderType: selectedOrderType,
+          fulfilled: selectedFulfilled,
+        };
+
         const response = await fetchShopifyOrdersService(
           formattedStartDate,
           formattedEndDate,
-          page
+          page,
+          filters
         );
 
         // Keep track of how many orders we got
@@ -221,7 +222,60 @@ const UtilityDash = () => {
     };
 
     fetchOrders();
-  }, [startDate, endDate, page]);
+  }, [
+    startDate,
+    endDate,
+    page,
+    selectedActionTaken,
+    selectedOrderType,
+    selectedFulfilled,
+  ]);
+
+  const handleDownload = async () => {
+    if (!startDate || !endDate) {
+      alert("Please select a date range first!");
+      return;
+    }
+
+    try {
+      const formattedStartDate = format(startDate, "yyyy-MM-dd");
+      const formattedEndDate = format(endDate, "yyyy-MM-dd");
+
+      const filters = {
+        actionTaken: selectedActionTaken,
+        orderType: selectedOrderType,
+        fulfilled: selectedFulfilled,
+      };
+
+      // Call the service that fetches the file (as a Blob)
+      const fileBlob = await downloadShopifyOrdersService(
+        formattedStartDate,
+        formattedEndDate,
+        page,
+        filters
+      );
+
+      // Create a URL for the downloaded file
+      const downloadUrl = URL.createObjectURL(fileBlob);
+
+      // Create a hidden link and trigger the download
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.setAttribute(
+        "download",
+        `shopify_orders_${formattedStartDate}_${formattedEndDate}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Error downloading Shopify orders:", error);
+      alert("Failed to download orders. Please try again.");
+    }
+  };
 
   return (
     <div className="p-6 bg-white min-h-screen">
@@ -342,7 +396,10 @@ const UtilityDash = () => {
               {utilityData?.successRate &&
                 utilityData.successRate.length > 0 && (
                   <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={utilityData.successRate} margin={{ bottom: 50 }}>
+                    <BarChart
+                      data={utilityData.successRate}
+                      margin={{ bottom: 50 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="key" angle={-20} textAnchor="end" />
 
@@ -409,7 +466,10 @@ const UtilityDash = () => {
                 {utilityData?.cancelRate &&
                   utilityData.cancelRate.length > 0 && (
                     <ResponsiveContainer width="100%" height={450}>
-                      <BarChart data={utilityData.cancelRate}  margin={{ bottom: 50 }}>
+                      <BarChart
+                        data={utilityData.cancelRate}
+                        margin={{ bottom: 50 }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="key" angle={-20} textAnchor="end" />
                         <YAxis />
@@ -565,14 +625,86 @@ const UtilityDash = () => {
                 </h6>
               }
             />
+          <div className="flex font-bold gap-4 mb-2 justify-between items-center">
+              <div>
+              <FormControl
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: 150 }}
+              >
+                <InputLabel>Action Taken</InputLabel>
+                <Select
+                  value={selectedActionTaken}
+                  onChange={(e) => setSelectedActionTaken(e.target.value)}
+                  label="Action Taken"
+                  className="bg-gray-100 rounded-full"
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {["true", "false"].map((actionTaken, index) => (
+                    <MenuItem key={index} value={actionTaken}>
+                      {actionTaken}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: 150 }}
+              >
+                <InputLabel>Order Type</InputLabel>
+                <Select
+                  value={selectedOrderType}
+                  onChange={(e) => setSelectedOrderType(e.target.value)}
+                  label="Order Type"
+                  className="bg-gray-100 rounded-full"
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {["COD", "Prepaid"].map((orderType, index) => (
+                    <MenuItem key={index} value={orderType}>
+                      {orderType}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Hard-coded Fulfilled dropdown */}
+              <FormControl
+                variant="outlined"
+                size="small"
+                sx={{ minWidth: 150 }}
+              >
+                <InputLabel>Fulfilled</InputLabel>
+                <Select
+                  value={selectedFulfilled}
+                  onChange={(e) => setSelectedFulfilled(e.target.value)}
+                  label="Status"
+                  className="bg-gray-100 rounded-full"
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {["true", "false"].map((fulfilled, index) => (
+                    <MenuItem key={index} value={fulfilled}>
+                      {fulfilled}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+</div>
+              <button
+                onClick={handleDownload}
+                className="flex items-end px-4 py-2 bg-[#65558F] text-white rounded-md"
+              >
+                <DownloadIcon />
+              </button>
+            </div>
             <CardContent>
               {utilityData?.orders && (
                 <table className="min-w-full">
                   <thead>
                     <tr>
                       <th className="text-left p-2">Order Name</th>
-                      <th className="text-left p-2">COD Order</th>
-                      <th className="text-left p-2">Online Order</th>
+                      <th className="text-left p-2">Order Type</th>
                       <th className="text-left p-2">Welcome Msg Sent</th>
                       <th className="text-left p-2">Reminder1</th>
                       <th className="text-left p-2">Reminder2</th>
@@ -591,10 +723,8 @@ const UtilityDash = () => {
                     {utilityData.orders.map((order, index) => (
                       <tr key={index} className="border-t">
                         <td className="p-2">{order.orderName}</td>
-                        <td className="p-2">{order.codOrder ? "Yes" : "No"}</td>
-                        <td className="p-2">
-                          {order.onlineOrder ? "Yes" : "No"}
-                        </td>
+                        <td className="p-2">{order.orderType}</td>
+
                         <td className="p-2">
                           {order.welcomeMessageSent ? "Yes" : "No"}
                         </td>

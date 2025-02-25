@@ -24,7 +24,6 @@ export const getAdvanceFeatureService = async (payload: any) => {
     const response = await axiosInstance.post(`/user/chat-analysis`, payload);
     return response.data;
   } catch (error) {
-    console.error("Error calling getAdvanceFeatureService:", error);
-    throw new Error("Error: Getting Advance Feature");
+    console.log("error", error);
   }
 };

@@ -61,8 +61,12 @@ export function* getAdvanceFeatureSaga({
   payload: any;
 }): Generator<any> {
   try {
+    const { sessionIdOrPhoneId, channelName , botId } = payload;
+
     const data = {
-      sessionId: payload,
+      sessionIdOrPhoneId,
+      channelName,
+      botId, 
     };
     const userChat = yield call(getAdvanceFeatureService, data);
     yield put({

@@ -48,7 +48,7 @@ export default function userChatReducers(
         ...state,
         allSessionLive: { data: action.payload, loader: false },
       };
-      
+
     case ADVANCE_FEATURE:
       return {
         ...state,

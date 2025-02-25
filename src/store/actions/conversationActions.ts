@@ -16,9 +16,18 @@ export const getAllSessionLive = (userId: any) => ({
   payload: userId,
 });
 
-export const getAdvanceFeature = (payload: any) => ({
+// conversationActions.ts
+export const getAdvanceFeature = (
+  sessionIdOrPhoneId: string,
+  botId: string,
+  channelName: string
+) => ({
   type: ADVANCE_FEATURE,
-  payload,
+  payload: {
+    sessionIdOrPhoneId,
+    botId,
+    channelName,
+  },
 });
 
 export const filteredSession = (payload: any) => {

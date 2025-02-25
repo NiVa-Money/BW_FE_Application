@@ -1,13 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import {
   FETCH_WHATSAPP_DASHBOARD_REQUEST,
   FETCH_WHATSAPP_INSIGHTS_REQUEST,
   FETCH_WHATSAPP_MESSAGES_REQUEST,
 } from "../actionTypes/whatsappDashboardActionTypes";
 
-export const fetchWhatsAppDashboardRequest = (campaignId: any) => ({
+export const fetchWhatsAppDashboardRequest = (campaignId: string , startDate: string, endDate: string) => ({
   type: FETCH_WHATSAPP_DASHBOARD_REQUEST,
-  payload: campaignId,
+  payload: campaignId, startDate, endDate
 });
 
 export const fetchWhatsAppMessagesRequest = (params: {

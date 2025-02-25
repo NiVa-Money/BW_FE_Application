@@ -155,6 +155,7 @@ const MyBots: React.FC = () => {
           >
             <MyBotCard
               name={item?.botName}
+              image={item?.botURL}
               description={item?.botIdentity}
               tone={item?.botTone}
               fileName={item?.docName}

@@ -36,8 +36,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
 
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
     ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map(
-        (header) => header
-      )
+      (header) => header
+    )
     : [];
 
   const chartItems = [

@@ -59,7 +59,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     const days = DATE_RANGES[range as keyof typeof DATE_RANGES];
 
     let startDate: Date;
-    let endDate: Date = now;
+    const endDate: Date = now;
 
     if (range === "Today") {
       // Set start date to 12:00 AM today
