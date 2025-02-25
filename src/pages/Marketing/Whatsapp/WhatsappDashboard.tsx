@@ -189,6 +189,7 @@ const WhatsappDash: FC<DashboardProps> = ({
       const formattedStartDate = format(startDate, "yyyy-MM-dd");
       const formattedEndDate = format(endDate, "yyyy-MM-dd");
       const campaignId = selectedCampaignId;
+      console.log("Campaign", selectedCampaignId);
 
       console.log("FORMATTED", formattedStartDate, formattedEndDate);
       try {
@@ -223,43 +224,47 @@ const WhatsappDash: FC<DashboardProps> = ({
       setStartDate(new Date(startDate));
       setEndDate(new Date(endDate));
 
-      // If we have any campaign metrics, aggregate their stats
-      if (campaignWiseMessagesMetrics.length > 0) {
-        let totalSent = 0;
-        let totalRead = 0;
-        let totalDelivered = 0;
-        let totalFailed = 0;
-        let totalReplied = 0;
+      // Determine the selected campaign name.
+      // If none is selected, default to the first campaign from the metrics.
+      const selectedCampaign =
+        campaign || campaignWiseMessagesMetrics[0]?.campaignName;
 
-        // Single pass to sum all metrics
-        campaignWiseMessagesMetrics.forEach((metric) => {
-          totalSent += metric.sent;
-          totalRead += metric.read;
-          totalDelivered += metric.delivered;
-          totalFailed += metric.failed;
-          totalReplied += metric.replied;
-        });
-
-        setTotalMessagesValue(totalSent);
-        setSeenMessagesValue(totalRead);
-        setDeliveredMessagesValue(totalDelivered);
-        setUnreadMessagesValue(totalFailed);
-        setHotLeadsValue(totalReplied);
+      // If no campaign is selected yet, set the default.
+      if (!campaign && selectedCampaign) {
+        setCampaign(selectedCampaign);
       }
 
-      // If no campaign is selected yet, default to the first one.
-      if (!campaign && campaignWiseMessagesMetrics.length > 0) {
-        setCampaign(campaignWiseMessagesMetrics[0].campaignName);
-      }
-
-      // Map dateWiseMetrics for the chart based on the selected campaign
-      updateChartData(
-        dateWiseMetrics,
-        campaign || campaignWiseMessagesMetrics[0]?.campaignName,
-        engagementRateMetrics
+      // If you want to display metrics only for the selected campaign,
+      // filter the metrics array accordingly.
+      const filteredMetrics = campaignWiseMessagesMetrics.filter(
+        (metric) => metric.campaignName === selectedCampaign
       );
+
+      // Aggregate metrics only for the selected campaign.
+      let totalSent = 0;
+      let totalRead = 0;
+      let totalDelivered = 0;
+      let totalFailed = 0;
+      let totalReplied = 0;
+
+      filteredMetrics.forEach((metric) => {
+        totalSent += metric.sent;
+        totalRead += metric.read;
+        totalDelivered += metric.delivered;
+        totalFailed += metric.failed;
+        totalReplied += metric.replied;
+      });
+
+      setTotalMessagesValue(totalSent);
+      setSeenMessagesValue(totalRead);
+      setDeliveredMessagesValue(totalDelivered);
+      setUnreadMessagesValue(totalFailed);
+      setHotLeadsValue(totalReplied);
+
+      // Update chart data based on the selected campaign.
+      updateChartData(dateWiseMetrics, selectedCampaign, engagementRateMetrics);
     }
-  }, [campaign]); // runs once on mount (or whenever the component is re-mounted)
+  }, [campaign]);
 
   // Update chart data when campaign selection changes
   useEffect(() => {
