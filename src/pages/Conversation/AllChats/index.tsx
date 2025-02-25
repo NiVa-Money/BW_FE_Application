@@ -312,6 +312,7 @@ const AllChats = () => {
           channelNameVal={channelNameVal}
           setPage={setPage}
           page={page}
+          sessionId={sessionId}
         />
 
         <div className="flex-1 flex flex-col overflow-y-scroll">

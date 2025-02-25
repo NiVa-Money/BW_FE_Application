@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { formatDateString } from "../../../hooks/functions";
 
-const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, setPage }) => {
+const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, setPage, sessionId }) => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
@@ -32,6 +32,16 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, se
           <div
             key={item._id}
             className="flex justify-between items-center p-[8px] bg-[#EADDFF29] rounded-[10px]"
+            style={{
+              backgroundColor:
+                channelNameVal === "whatsapp"
+                  ? sessionId === item?.userPhoneId || sessionId === item?._id
+                    ? "#413d4852"
+                    : "#EADDFF29"
+                  : sessionId === item?._id
+                    ? "#413d4852"
+                    : "#EADDFF29",
+            }}
             onClick={() =>
               onSessionSelect(
                 channelNameVal === "whatsapp" ? item.userPhoneId : item._id
