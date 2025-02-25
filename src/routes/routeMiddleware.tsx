@@ -75,6 +75,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
           sx={{
             "& .MuiDrawer-paper": {
               width: open ? 220 : 56,
+              transition: "width 0.3s ease",
             },
           }}
         >
