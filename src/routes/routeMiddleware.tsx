@@ -79,6 +79,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
               whiteSpace: "nowrap",
             },
           }}
+          onBlur={() => setOpen(false)}
         >
           <div className="flex flex-col bg-white h-full">
             <div className="flex justify-between gap-1 p-2">
