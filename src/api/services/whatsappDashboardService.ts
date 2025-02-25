@@ -4,8 +4,8 @@ import axiosInstance from "../axiosConfig";
 
 export const whatsAppDashboardService = async (
   campaignId: string,
-  startDate: Date,
-  endDate: Date
+  startDate: string,
+  endDate: string
 ): Promise<any> => {
   // Replace `any` with your expected response type if available
   try {
