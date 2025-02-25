@@ -50,8 +50,6 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
   if (isProtected && !userId) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
-  console.log("pathname", pathname);
-
   const logOutHandler = () => {
     navigate("/");
     localStorage.clear();
