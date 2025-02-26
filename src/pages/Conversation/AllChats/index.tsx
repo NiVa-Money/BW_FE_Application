@@ -252,7 +252,7 @@ const AllChats = () => {
     }
   };
   return (
-    <div className="flex flex-col pl-6 pr-6 pt-6 h-screen">
+    <div className="flex flex-col min-h-screen p-6">
       <div className="flex justify-between items-center h-[45px]">
         <h1 className="text-xl font-semibold">All Chats</h1>
         {messages?.length ? (

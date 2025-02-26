@@ -142,7 +142,7 @@ const MyBots: React.FC = () => {
   }, [userIdLocal])
 
   return (
-    <div className='flex flex-col w-[100%]'>
+    <div className='flex flex-col p-6 min-h-screen w-[100%]'>
       <div className='flex justify-between items-center'>
         <h1 className="text-xl font-semibold">My Bots</h1>
 
