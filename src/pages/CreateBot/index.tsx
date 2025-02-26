@@ -421,60 +421,47 @@ const CreateBot: React.FC = () => {
               onChange={handleChange}
             />
           </div>
-          <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label htmlFor="openByDefault" className="font-medium">
-              Open by Default
-            </label>
-            <p className="text-md text-gray-600">
+          {/* Open by Default */}
+          <div className="flex flex-col w-full mb-3 text-black">
+            <label >Open by Default</label>
+            <p className="text-sm text-gray-600 mb-2">
               Choose when chatbot will appear
             </p>
-            <Field
-              name="openByDefault"
-              component={FormikFieldSelectComponent} // Or whichever component you use for dropdowns
-              onChange={(value: string) => {
-                setFormValues({ ...formValues, openByDefault: value });
-              }}
-              options={[
-                { label: "Do not open automatically", value: "none" },
-                { label: "Open automatically on load", value: "onLoad" },
-                {
-                  label: "Open automatically after 5 secs",
-                  value: "afterFive",
-                },
-                {
-                  label: "Open automatically after 15 sec",
-                  value: "afterFiften",
-                },
-              ]}
-            />
-          </div>
-          <div className="flex flex-col w-[85%] mb-3 text-black">
-            {/* Title */}
-            <label htmlFor="pulsing" className="font-medium">
-              Pulsing
-            </label>
-
-            {/* Description */}
-            <p className="text-base text-black mb-2 h-10 rounded-md bg-[#65558F] opacity-10 px-2 flex items-center">
-              Add a pulsing effect on the avatar
-            </p>
-
-            {/* Switch */}
-            <FormControlLabel
-              // We don’t need an explicit label if you just want the switch
-              label=""
-              control={
-                <Switch
-                  // Tie this to your form/state
-                  checked={Boolean(botSmartness)}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    botSmartnessHandle(e.target.checked)
-                  }
-                  name="botSmartness"
-                  color="primary"
-                />
+            <select
+              className="bg-[#F3F2F6] h-[50px] px-4 rounded-[12px] text-gray-500 w-full appearance-none"
+              value={formValues.openByDefault || "none"}
+              onChange={(e) =>
+                setFormValues({ ...formValues, openByDefault: e.target.value })
               }
-            />
+            >
+              <option value="none">Do not open automatically</option>
+              <option value="onLoad">Open automatically on load</option>
+              <option value="afterFive">Open automatically after 5 secs</option>
+              <option value="afterFifteen">
+                Open automatically after 15 sec
+              </option>
+            </select>
+          </div>
+
+          {/* Pulsing */}
+          <div className="flex flex-col w-full mb-3 text-black">
+            <label>Pulsing</label>
+            <div className="bg-[#F3F2F6] h-[50px] px-4 rounded-[12px] flex items-center justify-between">
+              <span className="text-gray-500">
+                Add a pulsing effect on the avatar
+              </span>
+              <label className="inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={formValues.pulsing || false}
+                  onChange={(e) =>
+                    setFormValues({ ...formValues, pulsing: e.target.checked })
+                  }
+                />
+                <div className="relative w-12 h-6 bg-gray-200 peer-checked:bg-[#65558F] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:right-[22px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              </label>
+            </div>
           </div>
 
           <div className=" flex flex-col w-[85%] mb-3 text-black">
