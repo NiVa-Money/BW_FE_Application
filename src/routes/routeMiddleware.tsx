@@ -78,6 +78,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
               width: open ? 220 : 56,
               transition: "width 0.15s ease",
               whiteSpace: "nowrap",
+              color: COLORS.NEUTRALVIOLET,
             },
           }}
         >
@@ -97,7 +98,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
             </CustomTooltip>
             {open && (
               <button onClick={logOutHandler}>
-                <span>Log Out</span>
+                <span className="border px-2 py-1 rounded-lg">Log Out</span>
               </button>
             )}
           </div>
@@ -107,7 +108,6 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
             style={{
               flex: 1,
               overflowY: "auto",
-              color: COLORS.DARKGRAY,
             }}
           >
             <List>
@@ -144,6 +144,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                         sx={{
                           minWidth: 0,
                           mr: open ? 1 : "auto",
+                          color: COLORS.NEUTRALVIOLET,
                         }}
                       >
                         {item?.icon ? item.icon : null}
@@ -203,6 +204,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                                 sx={{
                                   minWidth: 0,
                                   mr: open ? 1 : "auto",
+                                  color: COLORS.NEUTRALVIOLET,
                                 }}
                               >
                                 {subItem?.icon ? subItem.icon : null}
