@@ -423,7 +423,7 @@ const CreateBot: React.FC = () => {
           </div>
           {/* Open by Default */}
           <div className="flex flex-col w-full mb-3 text-black">
-            <label >Open by Default</label>
+            <label>Open by Default</label>
             <p className="text-sm text-gray-600 mb-2">
               Choose when chatbot will appear
             </p>
