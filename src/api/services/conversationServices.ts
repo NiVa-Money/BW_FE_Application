@@ -43,3 +43,21 @@ export const enableWhatsAppManualModeService = async (payload: {
     throw new Error("Error: Setting WhatsApp manual mode");
   }
 };
+
+export const sendWhatsAppManualReplyService = async (payload: {
+  botId: string;
+  adminPhoneNumberId: string;
+  userPhoneNumberId: string;
+  message: string;
+}) => {
+  try {
+    const response = await axiosInstance.post(
+      "/whatsapp/manual-reply",
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.log("error", error);
+    throw new Error("Error: Sending WhatsApp manual reply");
+  }
+};

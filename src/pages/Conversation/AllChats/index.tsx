@@ -373,8 +373,6 @@ import { FormControlLabel, Switch } from "@mui/material";
 import { notifyError, notifySuccess } from "../../../components/Toast";
 import ReactMarkdown from "react-markdown";
 import SendIcon from "@mui/icons-material/Send";
-
-// ----- Recharts Imports -----
 import {
   BarChart,
   Bar,
@@ -386,7 +384,10 @@ import {
   RadialBarChart,
   RadialBar,
 } from "recharts";
-import { enableWhatsAppManualModeService } from "../../../api/services/conversationServices";
+import {
+  enableWhatsAppManualModeService,
+  sendWhatsAppManualReplyService,
+} from "../../../api/services/conversationServices";
 
 interface AnalysisSection {
   title: string;
@@ -427,16 +428,7 @@ const AllChats = () => {
   const [talkWithHuman, setTalkWithHuman] = useState(false);
   const [userMessage, setUserMessage] = useState("");
 
-  const handleSendMessage = () => {
-    // Don’t send if userMessage is empty
-    if (!userMessage.trim()) return;
 
-    // Append the new message
-    setMessages((prev) => [...prev, { content: userMessage, sender: "user" }]);
-
-    // Clear the input field
-    setUserMessage("");
-  };
 
   useEffect(() => {
     if (
@@ -599,62 +591,6 @@ const AllChats = () => {
     setSessionId(selectedSessionId);
   };
 
-  // const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
-  //   const newTalkWithHumanState = !talkWithHuman;
-
-  //   if (newTalkWithHumanState && channelNameVal === "whatsapp") {
-  //     setIsEnablingManualMode(true);
-
-  //     try {
-  //       // Make sure a session is actually selected
-  //       if (!selectedSessionId) {
-  //         notifyError("No session is selected");
-  //         setIsEnablingManualMode(false);
-  //         return;
-  //       }
-
-  //       // Find the matching session in sessionsDataRedux
-  //       const selectedSession = sessionsDataRedux?.sessions.find(
-  //         (obj) =>
-  //           obj._id === selectedSessionId ||
-  //           obj.userPhoneId === selectedSessionId
-  //       );
-
-  //       // Extract the correct IDs
-  //       const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
-  //       const userPhoneNumberId = selectedSession?.userPhoneId;
-
-  //       // Log or verify
-  //       console.log("Admin Phone Number ID:", adminPhoneNumberId);
-  //       console.log("User Phone Number ID:", userPhoneNumberId);
-
-  //       // Now call your service
-  //       const response = await enableWhatsAppManualModeService({
-  //         botId: botIdVal,
-  //         adminPhoneNumberId,
-  //         userPhoneNumberId,
-  //       });
-
-  //       if (response.success) {
-  //         notifySuccess("Manual mode enabled successfully");
-  //         setTalkWithHuman(newTalkWithHumanState);
-  //       } else {
-  //         notifyError(response.message || "Failed to enable manual mode");
-  //       }
-  //     } catch (error) {
-  //       notifyError("Error enabling manual mode");
-  //       console.error("Manual mode error:", error);
-  //     } finally {
-  //       setIsEnablingManualMode(false);
-  //     }
-  //   } else {
-  //     // For toggling OFF or for non-WhatsApp channels
-  //     setTalkWithHuman(newTalkWithHumanState);
-  //   }
-  // };
-
-  // ...
-
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
     // Figure out the new state (on or off)
     const newTalkWithHumanState = !talkWithHuman;
@@ -717,6 +653,54 @@ const AllChats = () => {
       // For non-WhatsApp channels, just update state
       setTalkWithHuman(newTalkWithHumanState);
     }
+  };
+
+  const handleSendMessage = async (selectedSessionId : string) => {
+    // Don’t send if userMessage is empty
+    if (!userMessage.trim()) return;
+
+    // Append the user's message immediately to the UI
+    setMessages((prev) => [...prev, { content: userMessage, sender: "agent" }]);
+
+    const selectedSession = sessionsDataRedux?.sessions.find(
+      (obj) =>
+        obj._id === selectedSessionId ||
+        obj.userPhoneId === selectedSessionId
+    );
+
+    const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
+    const userPhoneNumberId = selectedSession?.userPhoneId;
+    // If Talk with Human is enabled, call the API
+    if (talkWithHuman) {
+      try {
+        const payload = {
+          message: userMessage,
+          botId: botIdVal,
+          adminPhoneNumberId,
+          userPhoneNumberId,
+        };
+
+        // Call the API to send the message
+        const response = await sendWhatsAppManualReplyService(payload);
+
+        if (response.success) {
+          // Append the API response message to the UI (assuming the API returns a message)
+          setMessages((prev) => [
+            ...prev,
+            { content: response.data.message, sender: "human" },
+          ]);
+          notifySuccess("Message sent successfully");
+        } else {
+          notifyError(response.message || "Failed to send message");
+        }
+      } catch (error) {
+        notifyError("Error sending message");
+        console.error("API Error:", error);
+      }
+    }
+
+    // Clear the input field
+    setUserMessage("");
   };
 
   const handleToggleExpand = (index: number) => {
@@ -888,12 +872,12 @@ const AllChats = () => {
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSendMessage();
+                  if (e.key === "Enter") handleSendMessage(sessionId);
                 }}
               />
               <button
                 className="p-2 bg-gray-100 rounded-lg"
-                onClick={handleSendMessage}
+                onClick={() => handleSendMessage(sessionId)}
               >
                 <SendIcon className="w-5 h-5 text-gray-400" />
               </button>
