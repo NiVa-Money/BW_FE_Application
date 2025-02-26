@@ -11,6 +11,7 @@ import {
   Collapse,
   Toolbar,
   Box,
+  Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
@@ -79,21 +80,36 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
               whiteSpace: "nowrap",
             },
           }}
-          onBlur={() => setOpen(false)}
         >
-          <div className="flex flex-col bg-white h-full">
-            <div className="flex justify-between gap-1 p-2">
-              <CustomTooltip title={open ? "Collapse" : "Expand"} show={true}>
+          {/* Fixed Header */}
+          <div className="flex justify-between gap-1 p-2 bg-white z-10">
+            <CustomTooltip title={!open && "Expand"} show={true}>
+              <Box sx={{ display: "flex", alignItems: "center" }}>
                 <IconButton onClick={toggleSidebar}>
                   {open ? <KeyboardBackspaceIcon /> : <MenuIcon />}
                 </IconButton>
-              </CustomTooltip>
-              {open && (
-                <button onClick={logOutHandler}>
-                  <span>Log Out</span>
-                </button>
-              )}
-            </div>
+                {open && (
+                  <button onClick={toggleSidebar}>
+                    <Typography variant="body1">Back</Typography>
+                  </button>
+                )}
+              </Box>
+            </CustomTooltip>
+            {open && (
+              <button onClick={logOutHandler}>
+                <span>Log Out</span>
+              </button>
+            )}
+          </div>
+
+          {/* Scrollable Content */}
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              color: COLORS.DARKGRAY,
+            }}
+          >
             <List>
               {menuItems?.map((item: any) => (
                 <React.Fragment key={item.id}>
@@ -104,20 +120,21 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                     sx={{
                       minHeight: 48,
                       "&.active": {
+                        backgroundColor: COLORS.LIGHTGRAY,
                         "& .MuiListItemIcon-root": {
-                          color: COLORS.DARKBLUE, // active icon color
+                          color: COLORS.DARKVIOLET, // active icon color
                         },
                         "& .MuiListItemText-primary": {
-                          color: COLORS.DARKBLUE, // color for active text
+                          color: COLORS.DARKVIOLET, // color for active text
                           fontWeight: "bold",
                         },
                       },
                       "&:hover": {
                         "& .MuiListItemIcon-root": {
-                          color: COLORS.DARKBLUE, // color for icon on hover
+                          color: COLORS.DARKVIOLET, // color for icon on hover
                         },
                         "& .MuiListItemText-primary": {
-                          color: COLORS.DARKBLUE, // color for text on hover
+                          color: COLORS.DARKVIOLET, // color for text on hover
                         },
                       },
                     }}
@@ -161,20 +178,21 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                               justifyContent: open ? "initial" : "center",
                               py: 0.25,
                               "&.active": {
+                                backgroundColor: COLORS.LIGHTGRAY,
                                 "& .MuiListItemIcon-root": {
-                                  color: COLORS.DARKBLUE, // active icon color
+                                  color: COLORS.DARKVIOLET, // active icon color
                                 },
                                 "& .MuiListItemText-primary": {
-                                  color: COLORS.DARKBLUE, // color for active text
+                                  color: COLORS.DARKVIOLET, // color for active text
                                   fontWeight: "bold",
                                 },
                               },
                               "&:hover": {
                                 "& .MuiListItemIcon-root": {
-                                  color: COLORS.DARKBLUE, // color for icon on hover
+                                  color: COLORS.DARKVIOLET, // color for icon on hover
                                 },
                                 "& .MuiListItemText-primary": {
-                                  color: COLORS.DARKBLUE, // color for text on hover
+                                  color: COLORS.DARKVIOLET, // color for text on hover
                                 },
                               },
                             }}
@@ -218,6 +236,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
         sx={{
           flexGrow: 1,
         }}
+        onClick={() => open && setOpen(false)}
       >
         {isAuthRoute ? <div className="w-[100%]">{children}</div> : children}
       </Box>
