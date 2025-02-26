@@ -40,7 +40,7 @@ export const sidebarNavLinks = (moduleMapping: []) => {
         { id: 2.2, text: "Live Chats", path: "/conversations/live-chats" },
       ],
     },
-    { id: 3, text: "Bot Builder", path: "/mybots", icon: <SmartToyIcon /> },
+    { id: 3, text: "Agents", path: "/myagents", icon: <SmartToyIcon /> },
     { id: 4, text: "Engagement Tab", path: "/engagementTab", icon: <GroupsIcon /> },
     {
       id: 5,

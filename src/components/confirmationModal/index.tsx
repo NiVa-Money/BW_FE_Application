@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import {
     Dialog,
@@ -29,7 +30,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 }) => {
     const navigate = useNavigate()
     const closeBotHandler = () => {
-        navigate('/mybots')
+        navigate('/myagents')
     }
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
