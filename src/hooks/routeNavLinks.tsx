@@ -8,7 +8,10 @@ import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import CategoryIcon from "@mui/icons-material/Category"; // Dummy ICON for subItem in sidebar
+import MarkChatReadIcon from "@mui/icons-material/MarkChatRead";
+import TuneIcon from "@mui/icons-material/Tune";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import CampaignIcon from "@mui/icons-material/Campaign";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import HelpIcon from "@mui/icons-material/Help";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -43,13 +46,13 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           id: 2.1,
           text: "All Chats",
           path: "/conversations/all-chats",
-          icon: <CategoryIcon />,
+          icon: <MarkChatReadIcon />,
         },
         {
           id: 2.2,
           text: "Live Chats",
           path: "/conversations/live-chats",
-          icon: <CategoryIcon />,
+          icon: <TuneIcon />,
         },
       ],
     },
@@ -69,13 +72,13 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           id: 5.1,
           text: "Dashboard",
           path: "/marketing/dashboard",
-          icon: <CategoryIcon />,
+          icon: <DashboardIcon />,
         },
         {
           id: 5.2,
           text: "Campaign",
           path: "/marketing/campaign",
-          icon: <CategoryIcon />,
+          icon: <CampaignIcon />,
         },
       ],
     },
