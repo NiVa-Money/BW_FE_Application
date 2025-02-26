@@ -12,7 +12,6 @@ import FormikFieldChipComponent from "../../components/FormikFieldChipComponent"
 import FormikFieldToggleComponent from "../../components/FormikFieldToggleComponent";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
 import { BOTICONS, THEME } from "../../enums";
-import FormikFieldSelectComponent from "../../components/FormikFieldSelectDropdownComponent";
 import { useDispatch, useSelector } from "react-redux";
 import { createBotAction } from "../../store/actions/botActions";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +21,6 @@ import BotSuccessContent from "../../components/confirmationModal/BotSuccessCont
 import Button from "@mui/material/Button";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { FormControlLabel, Switch } from "@mui/material";
 
 const CreateBot: React.FC = () => {
   const imgViewerRef = useRef(null);

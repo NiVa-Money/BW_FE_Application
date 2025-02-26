@@ -27,3 +27,19 @@ export const getAdvanceFeatureService = async (payload: any) => {
     console.log("error", error);
   }
 };
+
+export const enableWhatsAppManualModeService = async (payload: {
+  botId: string;
+  adminPhoneNumberId: string;
+  userPhoneNumberId: string;
+  action: "append" | "remove"; // now we allow both
+}) => {
+  try {
+    // We pass the entire payload, including action, directly
+    const response = await axiosInstance.post(`/whatsapp/manual-mode`, payload);
+    return response.data;
+  } catch (error) {
+    console.log("error", error);
+    throw new Error("Error: Setting WhatsApp manual mode");
+  }
+};
