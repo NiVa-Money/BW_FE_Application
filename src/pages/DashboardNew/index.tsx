@@ -1,5 +1,4 @@
 import DashboardPanel from "./DashboardPanel";
-import { Container, Typography } from "@mui/material";
 
 const Dashboard: React.FC = () => {
   return (
