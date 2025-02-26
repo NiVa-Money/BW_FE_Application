@@ -9,8 +9,8 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import MarkChatReadIcon from "@mui/icons-material/MarkChatRead";
-import TuneIcon from "@mui/icons-material/Tune";
-import DashboardIcon from "@mui/icons-material/Dashboard";
+import WifiTetheringIcon from "@mui/icons-material/WifiTethering";
+import DonutSmallIcon from "@mui/icons-material/DonutSmall";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import HelpIcon from "@mui/icons-material/Help";
@@ -52,7 +52,7 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           id: 2.2,
           text: "Live Chats",
           path: "/conversations/live-chats",
-          icon: <TuneIcon />,
+          icon: <WifiTetheringIcon />,
         },
       ],
     },
@@ -72,7 +72,7 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           id: 5.1,
           text: "Dashboard",
           path: "/marketing/dashboard",
-          icon: <DashboardIcon />,
+          icon: <DonutSmallIcon />,
         },
         {
           id: 5.2,
