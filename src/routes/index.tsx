@@ -20,6 +20,7 @@ import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
 import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
 import UtilityDash from "../pages/Reports/UtilityDash";
+import UserManagement from "../pages/UserManagement";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -63,7 +64,7 @@ export const autRoutes: any[] = [
   {
     id: 7,
     path: "/workflow",
-    component: <AdminPanel />,
+    component: <UserManagement />,
   },
   {
     id: 8,
