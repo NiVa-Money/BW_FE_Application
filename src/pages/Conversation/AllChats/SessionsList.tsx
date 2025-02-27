@@ -39,22 +39,15 @@ const SessionsList: React.FC<SessionsListProps> = ({
     if (sessionsDataRedux?.success) {
       let filteredSessions = sessionsDataRedux.sessions;
 
-      // 1) AI = true, Human = false => show only handledBy "AI"
       if (aiLevel && !humanLevel) {
         filteredSessions = filteredSessions.filter(
           (session: any) => session.handledBy === "AI"
         );
-      }
-      // 2) AI = false, Human = true => show only handledBy "Human"
-      else if (!aiLevel && humanLevel) {
+      } else if (!aiLevel && humanLevel) {
         filteredSessions = filteredSessions.filter(
           (session: any) => session.handledBy === "Human"
         );
       }
-      // 3) AI = true, Human = true => show all
-      // 4) AI = false, Human = false => show all
-      // (no change to `filteredSessions`)
-
       setSessionsData(filteredSessions);
     } else {
       setSessionsData([]);

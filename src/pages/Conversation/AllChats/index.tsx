@@ -451,41 +451,50 @@ const AllChats = () => {
     }
   }, [userId]);
 
-  const getChatHistory = () => {
-    // If no bot selected, or no user, do nothing
+  // const getChatHistory = () => {
+  //   // If no bot selected, or no user, do nothing
+  //   if (!botIdVal || !userId) return;
+
+  //   const data = {
+  //     botId: botIdVal,
+  //     page,
+  //     aiLevel,
+  //     channelName: channelNameVal,
+  //   };
+
+  //   dispatch(getAllSession(data));
+  // };
+
+  const getChatHistory = ({ userPhoneId }: { userPhoneId?: string }) => {
     if (!botIdVal || !userId) return;
 
-    const data = {
+    // Build the request payload
+    const data: any = {
       botId: botIdVal,
       page,
       aiLevel,
+      humanLevel,
       channelName: channelNameVal,
     };
 
+    if (userPhoneId) {
+      data.userPhoneId = userPhoneId;
+    }
+
+    console.log("userPhoneId", userPhoneId);
+
+    // Dispatch the existing action
     dispatch(getAllSession(data));
   };
 
   useEffect(() => {
-    getChatHistory();
+    getChatHistory({});
   }, [page, aiLevel, humanLevel]);
 
   const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
     (state: RootState) => state?.userChat?.sessionChat?.sessions || []
   );
-
-  // useEffect(() => {
-  //   // Only start polling if:
-  //   // 1) We have a valid botId/user
-  //   // 2) A session is selected (sessionId != "")
-  //   if (botIdVal && userId && sessionId) {
-  //     const intervalId = setInterval(() => {
-  //       getChatHistory();
-  //     }, 5000);
-
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, [botIdVal, userId, sessionId, page, aiLevel, humanLevel, channelNameVal]);
 
   useEffect(() => {
     if (allSessions?.length > 0) {
@@ -603,11 +612,26 @@ const AllChats = () => {
     setSessionId(selectedSessionId);
   };
 
+  useEffect(() => {
+    // Only start polling if a session is actually selected
+    if (sessionId) {
+      const intervalId = setInterval(() => {
+        // If it's WhatsApp, we treat sessionId as userPhoneId
+        // Otherwise, treat it as the session's _id
+        if (channelNameVal === "whatsapp") {
+          getChatHistory({ userPhoneId: sessionId });
+        }
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [sessionId, channelNameVal, aiLevel, humanLevel]);
+
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
-    // Figure out the new state (on or off)
+    // Flip the state
     const newTalkWithHumanState = !talkWithHuman;
 
-    // If we are toggling ON and channel is WhatsApp, or toggling OFF for WhatsApp, call the same service
+    // For WhatsApp, call the API to append/remove
     if (channelNameVal === "whatsapp") {
       setIsEnablingManualMode(true);
 
@@ -618,7 +642,7 @@ const AllChats = () => {
           return;
         }
 
-        // 1) Find the matching session
+        // Find the matching session
         const selectedSession = sessionsDataRedux?.sessions.find(
           (obj) =>
             obj._id === selectedSessionId ||
@@ -628,10 +652,9 @@ const AllChats = () => {
         const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
         const userPhoneNumberId = selectedSession?.userPhoneId;
 
-        // 2) Decide action based on whether we’re enabling or disabling
+        // If newTalkWithHumanState is true => "append", else => "remove"
         const action = newTalkWithHumanState ? "append" : "remove";
 
-        // 3) Call the service
         const response = await enableWhatsAppManualModeService({
           botId: botIdVal,
           adminPhoneNumberId,
@@ -639,7 +662,6 @@ const AllChats = () => {
           action,
         });
 
-        // 4) Handle success/failure
         if (response.success) {
           notifySuccess(
             newTalkWithHumanState
@@ -662,7 +684,7 @@ const AllChats = () => {
         setIsEnablingManualMode(false);
       }
     } else {
-      // For non-WhatsApp channels, just update state
+      // For non-WhatsApp channels, just toggle locally
       setTalkWithHuman(newTalkWithHumanState);
     }
   };
