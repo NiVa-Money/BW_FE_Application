@@ -331,7 +331,7 @@ const AllChats = () => {
 
     try {
       // Make the API call
-     await enableWhatsAppManualModeService({
+      await enableWhatsAppManualModeService({
         botId: botIdVal,
         adminPhoneNumberId,
         userPhoneNumberId,
@@ -360,12 +360,7 @@ const AllChats = () => {
         // If trying to enable and user already exists, treat as success
         if (action === "append") {
           setTalkWithHuman(true);
-          notifySuccess("Manual mode is already enabled for this user");
-        } else {
-          notifyError("Error disabling manual mode");
         }
-      } else {
-        notifyError("Error toggling manual mode");
       }
     } finally {
       setIsEnablingManualMode(false);
