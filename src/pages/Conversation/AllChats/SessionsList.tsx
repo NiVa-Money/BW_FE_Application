@@ -4,13 +4,32 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { formatDateString } from "../../../hooks/functions";
 
-const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, setPage, sessionId }) => {
+interface SessionsListProps {
+  onSessionSelect: (sessionId: string) => void;
+  botLists: any;
+  channelNameVal: string;
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  sessionId: string;
+  aiLevel: boolean;
+  humanLevel: boolean;
+}
+
+const SessionsList: React.FC<SessionsListProps> = ({
+  onSessionSelect,
+  channelNameVal,
+  page,
+  setPage,
+  sessionId,
+  aiLevel,
+  humanLevel,
+}) => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
-  const [sessionsData, setSessionsData] = useState([]);
+  const [sessionsData, setSessionsData] = useState<any[]>([]);
 
-  const channelNameImages = {
+  const channelNameImages: Record<string, string> = {
     whatsapp: "/assets/whatsapp.png",
     instagram: "/assets/instagramLogo.svg",
     website: "/assets/website.png",
@@ -18,13 +37,30 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, se
 
   useEffect(() => {
     if (sessionsDataRedux?.success) {
-      setSessionsData(sessionsDataRedux.sessions);
-    }
-    else {
-      setSessionsData([]);
+      let filteredSessions = sessionsDataRedux.sessions;
 
+      // 1) AI = true, Human = false => show only handledBy "AI"
+      if (aiLevel && !humanLevel) {
+        filteredSessions = filteredSessions.filter(
+          (session: any) => session.handledBy === "AI"
+        );
+      }
+      // 2) AI = false, Human = true => show only handledBy "Human"
+      else if (!aiLevel && humanLevel) {
+        filteredSessions = filteredSessions.filter(
+          (session: any) => session.handledBy === "Human"
+        );
+      }
+      // 3) AI = true, Human = true => show all
+      // 4) AI = false, Human = false => show all
+      // (no change to `filteredSessions`)
+
+      setSessionsData(filteredSessions);
+    } else {
+      setSessionsData([]);
     }
-  }, [sessionsDataRedux]);
+  }, [sessionsDataRedux, aiLevel, humanLevel]);
+
   return (
     <div className="w-64 pl-0 bg-white p-4 border-r overflow-y-scroll">
       <div className="flex flex-col gap-1">
@@ -39,8 +75,8 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, se
                     ? "#413d4852"
                     : "#EADDFF29"
                   : sessionId === item?._id
-                    ? "#413d4852"
-                    : "#EADDFF29",
+                  ? "#413d4852"
+                  : "#EADDFF29",
             }}
             onClick={() =>
               onSessionSelect(
@@ -55,7 +91,7 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, se
                   <span>{item.userPhoneId || "No Phone ID"}</span>
                 </>
               ) : (
-                <span>Session {Number(index + 1)}</span>
+                <span>Session {index + 1}</span>
               )}
               <span>
                 {item?.createdAt ? formatDateString(item.createdAt) : ""}
@@ -72,7 +108,8 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, se
           </div>
         ))}
       </div>
-      {sessionsData?.length && !(sessionsData?.length < 20) ?
+
+      {sessionsData?.length && !(sessionsData?.length < 20) ? (
         <div className="flex justify-between mt-4">
           <button
             disabled={page === 1}
@@ -88,7 +125,8 @@ const SessionsList: React.FC<any> = ({ onSessionSelect, channelNameVal, page, se
           >
             Next
           </button>
-        </div> : null}
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -402,7 +402,9 @@ const AllChats = () => {
     (state: RootState) => state?.userChat?.allSession?.data
   );
 
+  console.log("sessionDataREDUX", sessionsDataRedux);
   const [aiLevel, setAiLevel] = useState(true);
+  const [humanLevel, setHumanLevel] = useState(true);
 
   const [isEnablingManualMode, setIsEnablingManualMode] = useState(false);
   const dispatch = useDispatch();
@@ -427,8 +429,6 @@ const AllChats = () => {
 
   const [talkWithHuman, setTalkWithHuman] = useState(false);
   const [userMessage, setUserMessage] = useState("");
-
-
 
   useEffect(() => {
     if (
@@ -655,7 +655,7 @@ const AllChats = () => {
     }
   };
 
-  const handleSendMessage = async (selectedSessionId : string) => {
+  const handleSendMessage = async (selectedSessionId: string) => {
     // Don’t send if userMessage is empty
     if (!userMessage.trim()) return;
 
@@ -664,8 +664,7 @@ const AllChats = () => {
 
     const selectedSession = sessionsDataRedux?.sessions.find(
       (obj) =>
-        obj._id === selectedSessionId ||
-        obj.userPhoneId === selectedSessionId
+        obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
     );
 
     const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
@@ -683,15 +682,15 @@ const AllChats = () => {
         // Call the API to send the message
         const response = await sendWhatsAppManualReplyService(payload);
 
-        if (response.success) {
+        if (response?.success) {
           // Append the API response message to the UI (assuming the API returns a message)
           setMessages((prev) => [
             ...prev,
-            { content: response.data.message, sender: "human" },
+            { content: response?.data?.message, sender: "human" },
           ]);
           notifySuccess("Message sent successfully");
         } else {
-          notifyError(response.message || "Failed to send message");
+          notifyError(response?.message || "Failed to send message");
         }
       } catch (error) {
         notifyError("Error sending message");
@@ -821,6 +820,19 @@ const AllChats = () => {
             label=""
           />
         </div>
+
+        <div className="flex justify-center items-center">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={Boolean(humanLevel)}
+                onClick={(e: any) => setHumanLevel(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Human Chats"
+          />
+        </div>
       </div>
 
       {/* Main Container */}
@@ -833,6 +845,8 @@ const AllChats = () => {
           setPage={setPage}
           page={page}
           sessionId={sessionId}
+          aiLevel={aiLevel}
+          humanLevel={humanLevel}
         />
 
         {/* Chat Section */}
