@@ -296,7 +296,7 @@ const DashboardPanel = () => {
             onDateRangeChange={handleDateRangeChange}
           />
 
-          {botsDataRedux?.length > 0 && (
+          {botsDataRedux?.length > 0 && Array.isArray(botsDataRedux) && (
             <FormControl size="small" sx={{ minWidth: 85 }}>
               <Select
                 sx={{

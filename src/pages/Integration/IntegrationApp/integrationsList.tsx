@@ -42,7 +42,7 @@ export default function IntegrationList() {
     : [];
 
   return (
-    <div className="p-8 mt-10 min-h-screen">
+    <div className="p-6 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900">
