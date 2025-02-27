@@ -1,13 +1,12 @@
 import DashboardPanel from "./DashboardPanel";
-import { Container, Typography } from "@mui/material";
 
 const Dashboard: React.FC = () => {
   return (
     <>
-      <Container maxWidth="xl" sx={{ p: 3 }}>
-        <Typography variant="h5" className="pb-2">Dashboard</Typography>
+      <div className="min-h-screen p-6">
+        <h1 className="text-xl font-semibold mb-2">Dashboard</h1>
         <DashboardPanel />
-      </Container>
+      </div>
     </>
   );
 };

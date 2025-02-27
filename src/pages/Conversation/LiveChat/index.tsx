@@ -216,7 +216,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen p-4">
+    <div className="flex flex-col min-h-screen p-6">
       {/* Live Chat Heading */}
       <div className="mb-4">
         <h1 className="text-xl font-semibold">Live Chat</h1>
