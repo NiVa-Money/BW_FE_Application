@@ -381,8 +381,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  RadialBarChart,
-  RadialBar,
+  ResponsiveContainer,
 } from "recharts";
 import {
   enableWhatsAppManualModeService,
@@ -468,12 +467,25 @@ const AllChats = () => {
 
   useEffect(() => {
     getChatHistory();
-  }, [page, aiLevel]);
+  }, [page, aiLevel, humanLevel]);
 
   const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
     (state: RootState) => state?.userChat?.sessionChat?.sessions || []
   );
+
+  // useEffect(() => {
+  //   // Only start polling if:
+  //   // 1) We have a valid botId/user
+  //   // 2) A session is selected (sessionId != "")
+  //   if (botIdVal && userId && sessionId) {
+  //     const intervalId = setInterval(() => {
+  //       getChatHistory();
+  //     }, 5000);
+
+  //     return () => clearInterval(intervalId);
+  //   }
+  // }, [botIdVal, userId, sessionId, page, aiLevel, humanLevel, channelNameVal]);
 
   useEffect(() => {
     if (allSessions?.length > 0) {
@@ -761,7 +773,6 @@ const AllChats = () => {
     { name: "Lack of personalization", value: 1 },
     { name: "Repeated requests/tracking", value: 1 },
     { name: "Security concerns", value: 1 },
-    // You could transform or count how often each issue appears
   ];
 
   return (
@@ -929,50 +940,75 @@ const AllChats = () => {
                         <p className="text-sm text-gray-600 mb-2">
                           {section.description}
                         </p>
-                        <BarChart
-                          width={250}
-                          height={200}
-                          data={sentimentData}
-                          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="value" fill="#8884d8" />
-                        </BarChart>
+
+                        <ResponsiveContainer width="105%" height={300}>
+                          <BarChart data={sentimentData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="value" fill="#8884d8" />
+                          </BarChart>
+                        </ResponsiveContainer>
                       </div>
                     )}
 
                     {/* 2. Sales Intelligence Radial Chart */}
                     {isSales && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          {section.description}
-                        </p>
-                        <RadialBarChart
-                          width={250}
-                          height={250}
-                          cx={125}
-                          cy={125}
-                          innerRadius={40}
-                          outerRadius={100}
-                          barSize={15}
-                          data={salesData}
-                          startAngle={90}
-                          endAngle={-270}
-                        >
-                          <RadialBar
-                            startAngle={90}
-                            endAngle={-270}
-                            dataKey="value"
-                            cornerRadius={10}
-                          />
-                          <Tooltip />
-                        </RadialBarChart>
-                        <div className="text-center mt-2">
-                          {salesData[0].value}% Probability
+                      <div className="bg-white shadow p-4 rounded-lg border border-gray-200">
+                        {/* Lead Conversion Probability */}
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-600">
+                            Lead Conversion Probability:
+                          </span>
+                          <span className="text-sm font-semibold text-gray-800 flex items-center gap-1">
+                            {salesData[0].value}%
+                            <span className="text-green-600">✓</span>
+                          </span>
+                        </div>
+
+                        {/* Customer Sentiment */}
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-600">
+                            Customer Sentiment:
+                          </span>
+                          <span className="text-sm font-semibold text-gray-800 flex items-center gap-1">
+                            Positive
+                            <span>😁</span>
+                          </span>
+                        </div>
+
+                        {/* Urgency Score */}
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-600">
+                            Urgency Score:
+                          </span>
+                          <span className="text-sm font-semibold text-red-500 flex items-center gap-1">
+                            🔥 High Priority
+                          </span>
+                        </div>
+
+                        {/* Buying Intent */}
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-gray-600">
+                            Buying Intent:
+                          </span>
+                          <span className="text-sm font-semibold text-yellow-600 flex items-center gap-1">
+                            Needs a nudge
+                            <span>⚠️</span>
+                          </span>
+                        </div>
+
+                        {/* Progress bar */}
+                        <div className="relative w-full bg-gray-200 rounded-full h-3 mb-1">
+                          <div
+                            className="bg-green-500 h-3 rounded-full"
+                            style={{ width: `${salesData[0].value}%` }}
+                          ></div>
+                        </div>
+                        <div className="text-xs text-gray-500 text-right">
+                          {salesData[0].value}% Sales Conversion Probability
                         </div>
                       </div>
                     )}
@@ -980,9 +1016,9 @@ const AllChats = () => {
                     {/* 3. Vulnerability Bar Chart */}
                     {isVulnerability && (
                       <div>
-                        <p className="text-sm text-gray-600 mb-2">
+                        {/* <p className="text-sm text-gray-600 mb-2">
                           {section.description}
-                        </p>
+                        </p> */}
                         <BarChart
                           width={250}
                           height={200}
