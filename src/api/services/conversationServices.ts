@@ -28,19 +28,43 @@ export const getAdvanceFeatureService = async (payload: any) => {
   }
 };
 
+// export const enableWhatsAppManualModeService = async (payload: {
+//   botId: string;
+//   adminPhoneNumberId: string;
+//   userPhoneNumberId: string;
+//   action: "append" | "remove"; // now we allow both
+// }) => {
+//   try {
+//     // We pass the entire payload, including action, directly
+//     const response = await axiosInstance.post(`/whatsapp/manual-mode`, payload);
+//     return response.data;
+//   } catch (error) {
+//     console.log("error", error);
+//     throw new Error("Error: Setting WhatsApp manual mode");
+//   }
+// };
+
 export const enableWhatsAppManualModeService = async (payload: {
   botId: string;
   adminPhoneNumberId: string;
   userPhoneNumberId: string;
-  action: "append" | "remove"; // now we allow both
+  action: "append" | "remove";
 }) => {
   try {
-    // We pass the entire payload, including action, directly
     const response = await axiosInstance.post(`/whatsapp/manual-mode`, payload);
-    return response.data;
-  } catch (error) {
-    console.log("error", error);
-    throw new Error("Error: Setting WhatsApp manual mode");
+    return response.data; // If 2xx, return data as-is
+  } catch (error: any) {
+    // If the server returns 4xx/5xx, axios throws. Let's return the server data (if present)
+    if (error.response?.data) {
+      // This likely contains { status: "error", message: "User number already exists" }
+      return error.response.data;
+    } else {
+      // Fallback if there's no error response from server
+      return {
+        status: "error",
+        message: error.message || "Unknown error setting WhatsApp manual mode",
+      };
+    }
   }
 };
 
