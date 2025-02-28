@@ -28,22 +28,6 @@ export const getAdvanceFeatureService = async (payload: any) => {
   }
 };
 
-// export const enableWhatsAppManualModeService = async (payload: {
-//   botId: string;
-//   adminPhoneNumberId: string;
-//   userPhoneNumberId: string;
-//   action: "append" | "remove"; // now we allow both
-// }) => {
-//   try {
-//     // We pass the entire payload, including action, directly
-//     const response = await axiosInstance.post(`/whatsapp/manual-mode`, payload);
-//     return response.data;
-//   } catch (error) {
-//     console.log("error", error);
-//     throw new Error("Error: Setting WhatsApp manual mode");
-//   }
-// };
-
 export const enableWhatsAppManualModeService = async (payload: {
   botId: string;
   adminPhoneNumberId: string;
@@ -83,5 +67,30 @@ export const sendWhatsAppManualReplyService = async (payload: {
   } catch (error) {
     console.log("error", error);
     throw new Error("Error: Sending WhatsApp manual reply");
+  }
+};
+
+export const getWhatsAppChatsService = async (payload: {
+  botId: string;
+  adminPhoneNumberId: string;
+  userPhoneNumberId: string;
+}) => {
+  try {
+    const response = await axiosInstance.get(`/whatsapp/chats`, {
+      params: payload
+    });
+
+    console.log( "response data", response.data.data);
+    return response.data;
+  
+  } catch (error: any) {
+    if (error.response?.data) {
+      return error.response.data;
+    } else {
+      return {
+        status: "error",
+        message: error.message || "Error retrieving WhatsApp chats"
+      };
+    }
   }
 };

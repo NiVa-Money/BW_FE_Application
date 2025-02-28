@@ -29,6 +29,7 @@ import {
 } from "recharts";
 import {
   enableWhatsAppManualModeService,
+  getWhatsAppChatsService,
   sendWhatsAppManualReplyService,
 } from "../../../api/services/conversationServices";
 
@@ -270,20 +271,51 @@ const AllChats = () => {
     setSessionId(selectedSessionId);
   };
 
-  // useEffect(() => {
-  //   // Only start polling if a session is actually selected
-  //   if (sessionId) {
-  //     const intervalId = setInterval(() => {
-  //       // If it's WhatsApp, we treat sessionId as userPhoneId
-  //       // Otherwise, treat it as the session's _id
-  //       if (channelNameVal === "whatsapp") {
-  //         getChatHistory({ userPhoneId: sessionId });
-  //       }
-  //     }, 5000);
+  useEffect(() => {
+    if (
+      sessionId &&
+      channelNameVal === "whatsapp" &&
+      sessionsDataRedux?.sessions
+    ) {
+      let intervalId: NodeJS.Timeout | null = null;
+      let isMounted = true;
 
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, [sessionId, channelNameVal, aiLevel, humanLevel]);
+      const selectedSession = sessionsDataRedux?.sessions.find(
+        (obj) => obj.userPhoneId === sessionId
+      );
+
+      if (selectedSession) {
+        const fetchWhatsAppChats = async () => {
+          try {
+            const chatsResponse = await getWhatsAppChatsService({
+              botId: botIdVal,
+              adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+              userPhoneNumberId: selectedSession.userPhoneId,
+            });
+
+            if (chatsResponse?.success && isMounted) {
+              console.log(".,,,,,", chatsResponse);
+              console.log("chat response", chatsResponse?.data[0].sessions);
+              setMessages(chatsResponse?.data[0].sessions || []);
+            }
+          } catch (error) {
+            console.error("Error in chat polling:", error);
+          }
+        };
+
+        // Fetch once immediately
+        fetchWhatsAppChats();
+
+        // Then poll every 5 seconds
+        intervalId = setInterval(fetchWhatsAppChats, 5000);
+      }
+
+      return () => {
+        isMounted = false;
+        if (intervalId) clearInterval(intervalId);
+      };
+    }
+  }, [sessionId, channelNameVal, botIdVal, sessionsDataRedux?.sessions]);
 
   useEffect(() => {
     // Only attempt if we have a session selected and channel is WhatsApp
@@ -338,30 +370,13 @@ const AllChats = () => {
         action,
       });
 
-      // Set the toggle based on the intended action, not the response
-      if (action === "append") {
+      if (selectedSession?.handledBy === "Human") {
         setTalkWithHuman(true);
-        notifySuccess("Manual mode enabled successfully");
       } else {
         setTalkWithHuman(false);
-        notifySuccess("Manual mode disabled successfully");
       }
 
-      // Refresh chat history regardless of success/failure
       await getChatHistory({ userPhoneId: selectedSessionId });
-    } catch (error) {
-      console.error("Manual mode error:", error);
-
-      // Check for specific error about user number already existing
-      if (
-        error.message?.includes("User number already exists") ||
-        error.response?.data?.message === "User number already exists"
-      ) {
-        // If trying to enable and user already exists, treat as success
-        if (action === "append") {
-          setTalkWithHuman(true);
-        }
-      }
     } finally {
       setIsEnablingManualMode(false);
     }
@@ -583,9 +598,17 @@ const AllChats = () => {
               <span className="select-none text-lg ml-2">
                 {isEnablingManualMode ? "Enabling..." : "Talk with Human"}
               </span>
+
               <div className="relative w-12 h-6 ml-2 text-end bg-gray-200 peer-checked:bg-[#65558F] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:right-[22px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
             </label>
           </div>
+
+          {talkWithHuman && (
+            <div className="mt-2 text-base ml-2 font-medium text-red-700">
+              This chat is getting handled by a human. If you want AI to handle
+              the conversation , please disable the toggle.
+            </div>
+          )}
 
           {/* Chat Input */}
           {talkWithHuman && (
