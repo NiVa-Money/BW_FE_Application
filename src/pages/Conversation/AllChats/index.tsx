@@ -14,7 +14,7 @@ import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
 import { FormControlLabel, Switch } from "@mui/material";
-import { notifyError, notifySuccess } from "../../../components/Toast";
+import { notifyError } from "../../../components/Toast";
 // import ReactMarkdown from "react-markdown";
 import SendIcon from "@mui/icons-material/Send";
 import {
@@ -74,7 +74,6 @@ const AllChats = () => {
   const [talkWithHuman, setTalkWithHuman] = useState(false);
   const [userMessage, setUserMessage] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
 
   // New search handler function
   const handleSearch = async () => {
@@ -88,8 +87,7 @@ const AllChats = () => {
       await getChatHistory({});
       return;
     }
-    setIsSearching(true);
-    // Validate input based on search type...
+
     const data: any = {
       botId: botIdVal,
       page: 1,
@@ -115,11 +113,11 @@ const AllChats = () => {
               ? filteredSessions[0].userPhoneId
               : filteredSessions[0]._id;
           setSessionId(firstSessionId);
-          handleSessionSelection(firstSessionId, filteredSessions);
+          handleSessionSelection(firstSessionId);
         }
       }
-    } finally {
-      setIsSearching(false);
+    } catch (error) {
+      console.log(error.message);
     }
   };
 
@@ -180,11 +178,12 @@ const AllChats = () => {
     return { success };
   };
 
-  useEffect(() => {
-    if (!isSearchActive) {
-      getChatHistory({});
-    }
-  }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
+  // useEffect(() => {
+  //   if (!isSearchActive) {
+  //     console.log("Search is not active" );
+  //     getChatHistory({});
+  //   }
+  // }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
 
   const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -237,92 +236,95 @@ const AllChats = () => {
   ]);
 
   useEffect(() => {
-    if (advanceFeatureDataRedux?.success) {
+    if (advanceFeatureDataRedux?.data?.success) {
+      // Pull out the nested data object
+      const analysis = advanceFeatureDataRedux?.data?.data?.currentAnalysis;
+      console.log(analysis);
+
       const {
         emotion,
         intent,
         reason,
-        salesIntelligence,
         sentiments,
+        salesIntelligence,
         smartSuggestion,
         vulnerability,
-      } = advanceFeatureDataRedux?.data ?? {};
+      } = analysis;
 
       setAnalysisSections([
         {
           title: "Intent",
-          description: intent?.intent || "No intent detected.",
+          description: intent || "No intent detected.",
           expanded: true,
         },
         {
           title: "Reason",
-          description: reason?.reason || "No reason provided.",
+          description: reason || "No reason provided.",
           expanded: true,
         },
         {
           title: "Emotion Analysis",
-          description: emotion?.emotion || "No emotion detected.",
+          description: emotion || "No emotion detected.",
           expanded: true,
         },
         {
           title: "Sentiment Analysis",
-          description: sentiments?.sentiment || "No sentiment data.",
+          description: sentiments
+            ? `Negative: ${sentiments.Negative}, Neutral: ${sentiments.Neutral}, Positive: ${sentiments.Positive}`
+            : "No sentiment data.",
           expanded: true,
         },
         {
           title: "Sales Intelligence",
-          description:
-            salesIntelligence?.sales_insights || "No sales insights.",
+          description: salesIntelligence
+            ? JSON.stringify(salesIntelligence)
+            : "No sales insights.",
           expanded: true,
         },
         {
           title: "Smart Suggestion",
-          description:
-            smartSuggestion?.suggestions || "No suggestions available.",
+          description: smartSuggestion || "No suggestions available.",
           expanded: true,
         },
         {
           title: "Vulnerability",
-          description:
-            vulnerability?.vulnerabilities || "No vulnerabilities found.",
+          description: vulnerability
+            ? JSON.stringify(vulnerability)
+            : "No vulnerabilities found.",
           expanded: true,
         },
       ]);
     }
   }, [advanceFeatureDataRedux]);
 
-  // const handleSessionSelection = (selectedSessionId: string) => {
-  //   const messagesData =
-  //     channelNameVal !== "whatsapp"
-  //       ? sessionsDataRedux?.sessions.filter(
-  //           (obj) => obj._id === selectedSessionId
-  //         )[0]?.sessions
-  //       : sessionsDataRedux?.sessions.filter(
-  //           (obj) => obj.userPhoneId === selectedSessionId
-  //         )[0]?.sessions;
-
-  //   setMessages(messagesData || []);
-  //   dispatch(getAdvanceFeature(selectedSessionId, botIdVal, channelNameVal));
-  //   setSessionId(selectedSessionId);
-  // };
-
-  const handleSessionSelection = (
-    selectedSessionId: string,
-    sessionsList?: any[]
-  ) => {
-    const currentSessions = isSearchActive
-      ? sessionsList || searchResults
-      : sessionsDataRedux?.sessions;
+  const handleSessionSelection = (selectedSessionId: string) => {
     const messagesData =
       channelNameVal !== "whatsapp"
-        ? currentSessions?.filter(
-            (obj: any) => obj._id === selectedSessionId
+        ? sessionsDataRedux?.sessions.filter(
+            (obj) => obj._id === selectedSessionId
           )[0]?.sessions
-        : currentSessions?.filter(
-            (obj: any) => obj.userPhoneId === selectedSessionId
+        : sessionsDataRedux?.sessions.filter(
+            (obj) => obj.userPhoneId === selectedSessionId
           )[0]?.sessions;
+
+    const selectedSession = sessionsDataRedux?.sessions.find(
+      (obj) =>
+        obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
+    );
+
+    const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
+    const userPhoneNumberId = selectedSession?.userPhoneId;
+
     setMessages(messagesData || []);
-    dispatch(getAdvanceFeature(selectedSessionId, botIdVal, channelNameVal));
+    dispatch(
+      getAdvanceFeature(
+        selectedSessionId,
+        botIdVal,
+        adminPhoneNumberId,
+        userPhoneNumberId,
+        channelNameVal
+      )
+    );
     setSessionId(selectedSessionId);
   };
 
@@ -358,8 +360,6 @@ const AllChats = () => {
                 searchType === "phone" && { phoneNumber: searchValue }),
             });
 
-            console.log("Chats Response:", chatsResponse);
-
             if (chatsResponse?.success && isMounted) {
               setMessages(chatsResponse?.data[0].sessions || []);
             }
@@ -392,67 +392,71 @@ const AllChats = () => {
     humanLevel,
   ]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!botIdVal) return; // Don't poll if botId is missing
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     if (!botIdVal) return; // Don't poll if botId is missing
 
-      const data: any = {
-        botId: botIdVal,
-        page: 1,
-        channelName: channelNameVal,
-      };
+  //     const data: any = {
+  //       botId: botIdVal,
+  //       page: 1,
+  //       channelName: channelNameVal,
+  //     };
 
-      // Apply search filter if active
-      if (isSearchActive && searchValue.trim()) {
-        if (searchType === "order") {
-          data.orderName = searchValue.trim();
-        } else {
-          data.phoneNumber = searchValue.trim();
-        }
-      }
+  //     // Apply search filter if active
+  //     console.log("?>>>>>>>>>", isSearchActive);
+  //     if (isSearchActive && searchValue.trim()) {
+  //       if (searchType === "order") {
+  //         data.orderName = searchValue.trim();
+  //       } else {
+  //         data.phoneNumber = searchValue.trim();
+  //       }
+  //     }
+  //     console.log("Polling with data:", data);
+  //     try {
+  //       const response = await dispatch(getAllSession(data));
+  //       console.log("Polling response received:", response);
 
-      try {
-        const response = await dispatch(getAllSession(data));
+  //       if (response?.payload?.success) {
+  //         const newSessions = response.payload.data.sessions;
+  //         console.log("New sessions received:", newSessions.length);
 
-        if (response?.payload?.success) {
-          const newSessions = response.payload.data.sessions;
+  //         if (isSearchActive) {
+  //           console.log("if search is active", isSearchActive);
+  //           if (newSessions.length > 0) {
+  //             // If search results exist, keep them
+  //             setSearchResults(newSessions);
+  //           } else {
+  //             // If no data found, reset search state
+  //             setIsSearchActive(true);
+  //             setSearchValue(""); // Clear the search box
+  //             setSearchResults(newSessions); // Show latest sessions
+  //           }
+  //         } else {
+  //           // Normal polling update when no search is active
+  //           setSearchResults(newSessions);
+  //         }
 
-          if (isSearchActive) {
-            if (newSessions.length > 0) {
-              // If search results exist, keep them
-              setSearchResults(newSessions);
-            } else {
-              // If no data found, reset search state
-              setIsSearchActive(false);
-              setSearchValue(""); // Clear the search box
-              setSearchResults(newSessions); // Show latest sessions
-            }
-          } else {
-            // Normal polling update when no search is active
-            setSearchResults(newSessions);
-          }
+  //         // Preserve the selected session if still valid
+  //         if (sessionId && newSessions.some((s: any) => s._id === sessionId)) {
+  //           return; // Keep current session if still available
+  //         } else if (newSessions.length > 0) {
+  //           // Auto-select first available session
+  //           const firstSessionId =
+  //             channelNameVal === "whatsapp"
+  //               ? newSessions[0].userPhoneId
+  //               : newSessions[0]._id;
+  //           setSessionId(firstSessionId);
+  //           handleSessionSelection(firstSessionId, newSessions);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Polling error:", error);
+  //     }
+  //   };
 
-          // Preserve the selected session if still valid
-          if (sessionId && newSessions.some((s: any) => s._id === sessionId)) {
-            return; // Keep current session if still available
-          } else if (newSessions.length > 0) {
-            // Auto-select first available session
-            const firstSessionId =
-              channelNameVal === "whatsapp"
-                ? newSessions[0].userPhoneId
-                : newSessions[0]._id;
-            setSessionId(firstSessionId);
-            handleSessionSelection(firstSessionId, newSessions);
-          }
-        }
-      } catch (error) {
-        console.error("Polling error:", error);
-      }
-    };
-
-    const interval = setInterval(fetchData, 5000); // Adjust polling interval as needed
-    return () => clearInterval(interval);
-  }, [botIdVal, channelNameVal, isSearchActive, searchValue, sessionId]);
+  //   const interval = setInterval(fetchData, 5000); // Adjust polling interval as needed
+  //   return () => clearInterval(interval);
+  // }, [botIdVal, channelNameVal, isSearchActive, searchValue, sessionId]);
 
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
     if (!selectedSessionId) {
@@ -518,12 +522,8 @@ const AllChats = () => {
             ...prev,
             { content: response?.data?.message, sender: "human" },
           ]);
-          notifySuccess("Message sent successfully");
-        } else {
-          notifyError(response?.message || "Failed to send message");
         }
       } catch (error) {
-        notifyError("Error sending message");
         console.error("API Error:", error);
       }
     }
@@ -543,8 +543,8 @@ const AllChats = () => {
     setBotIdVal(botId);
     setSessionId("");
     setMessages([]);
-    setIsSearchActive(false);
-    setSearchValue("");
+    // setIsSearchActive(false);
+    // setSearchValue("");
 
     if (botId) {
       dispatch(
@@ -564,8 +564,8 @@ const AllChats = () => {
     setChannelNameVal(val);
     setSessionId("");
     setMessages([]);
-    setIsSearchActive(false);
-    setSearchValue("");
+    // setIsSearchActive(false);
+    // setSearchValue("");
 
     if (botIdVal?.length) {
       dispatch(
@@ -582,43 +582,23 @@ const AllChats = () => {
     }
   };
 
-  // // SAMPLE DATA FOR CHARTS
-  // const sentimentData = [
-  //   { name: "Positive", value: 50 },
-  //   { name: "Negative", value: 30 },
-  //   { name: "Neutral", value: 20 },
-  // ];
-
-  // const salesData = [
-  //   {
-  //     name: "Lead Conversion Probability",
-  //     value: 85,
-  //     fill: "#8884d8",
-  //   },
-  // ];
-
-  // const vulnerabilityData = [
-  //   { name: "Lack of personalization", value: 1 },
-  //   { name: "Repeated requests/tracking", value: 1 },
-  //   { name: "Security concerns", value: 1 },
-  // ];
-
   // Transform sentiments data for chart
   const transformSentimentsData = (sentiments) => {
-    if (!sentiments || !sentiments.sentiment) return [];
-
-    return Object.entries(sentiments.sentiment).map(([name, valueStr]) => ({
+    if (!sentiments) return [];
+    // Since sentiments is an object with keys and percentage string values,
+    // convert each to a numeric value.
+    return Object.entries(sentiments).map(([name, valueStr]) => ({
       name,
-      value: parseInt(valueStr as string, 10), // Convert percentage strings like "40%" to numbers
+      value: parseInt(valueStr as string, 10),
     }));
   };
 
   // Transform sales intelligence data for chart
   const transformSalesData = (salesIntelligence) => {
-    if (!salesIntelligence || !salesIntelligence.sales_insights) return [];
-
+    if (!salesIntelligence) return [];
+    // Extract Lead Conversion Probability as a data point.
     const conversionProbability =
-      salesIntelligence.sales_insights["Lead Conversion Probability"] || "0%";
+      salesIntelligence["Lead Conversion Probability"] || "0%";
     return [
       {
         name: "Lead Conversion Probability",
@@ -630,25 +610,17 @@ const AllChats = () => {
 
   // Transform vulnerability data for chart
   const transformVulnerabilityData = (vulnerability) => {
-    if (!vulnerability || !vulnerability.vulnerabilities) return [];
-
-    return Object.entries(vulnerability.vulnerabilities).map(
-      ([name, valueStr]) => ({
-        name,
-        value: parseInt(valueStr as string, 10),
-      })
-    );
+    if (!vulnerability) return [];
+    return Object.entries(vulnerability).map(([name, valueStr]) => ({
+      name,
+      value: parseInt(valueStr as string, 10),
+    }));
   };
 
-  const sentimentData = transformSentimentsData(
-    advanceFeatureDataRedux?.data?.sentiments
-  );
-  const salesData = transformSalesData(
-    advanceFeatureDataRedux?.data?.salesIntelligence
-  );
-  const vulnerabilityData = transformVulnerabilityData(
-    advanceFeatureDataRedux?.data?.vulnerability
-  );
+  const analysis = advanceFeatureDataRedux?.data?.currentAnalysis;
+  const sentimentData = transformSentimentsData(analysis?.sentiments);
+  const salesData = transformSalesData(analysis?.salesIntelligence);
+  const vulnerabilityData = transformVulnerabilityData(analysis?.vulnerability);
 
   return (
     <div className="flex flex-col min-h-screen p-6">
@@ -700,30 +672,10 @@ const AllChats = () => {
         <button
           onClick={handleSearch}
           className="bg-blue-500 text-white p-2 rounded"
-          disabled={isSearching}
         >
-          {isSearching ? "Searching..." : "Search"}
+          Search
         </button>
       </div>
-
-      {/* Single Search active indicator */}
-      {isSearchActive && (
-        <div className="mb-2 px-4 py-2 bg-blue-100 text-blue-800 rounded flex justify-between items-center">
-          <span>
-            Searching for: {searchType === "order" ? "Order ID" : "Phone"}{" "}
-            <strong>
-              {searchType === "phone" ? "+91" : ""}
-              {searchValue}
-            </strong>
-          </span>
-          <span className="text-sm">
-            {isSearchActive
-              ? searchResults.length
-              : sessionsDataRedux?.sessions?.length || 0}{" "}
-            results found
-          </span>
-        </div>
-      )}
 
       {/* Bot and Channel Selection */}
       <div className="flex gap-2">
@@ -898,6 +850,7 @@ const AllChats = () => {
                         </ResponsiveContainer>
                       </div>
                     )}
+
                     {isSales && (
                       <div className="bg-white shadow p-4 rounded-lg border border-gray-200">
                         <div className="flex items-center justify-between mb-1">
@@ -905,8 +858,7 @@ const AllChats = () => {
                             Lead Conversion Probability:
                           </span>
                           <span className="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                            {advanceFeatureDataRedux?.data?.salesIntelligence
-                              ?.sales_insights?.[
+                            {analysis?.salesIntelligence?.[
                               "Lead Conversion Probability"
                             ] || "0%"}{" "}
                             <span className="text-green-600">✓</span>
@@ -917,9 +869,9 @@ const AllChats = () => {
                             Customer Sentiment:
                           </span>
                           <span className="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                            {advanceFeatureDataRedux?.data?.salesIntelligence
-                              ?.sales_insights?.["Customer Sentiment"] ||
-                              "Unknown"}{" "}
+                            {analysis?.salesIntelligence?.[
+                              "Customer Sentiment"
+                            ] || "Unknown"}{" "}
                             <span>😁</span>
                           </span>
                         </div>
@@ -929,8 +881,7 @@ const AllChats = () => {
                           </span>
                           <span className="text-sm font-semibold text-red-500 flex items-center gap-1">
                             🔥{" "}
-                            {advanceFeatureDataRedux?.data?.salesIntelligence
-                              ?.sales_insights?.["Urgency Score"] ||
+                            {analysis?.salesIntelligence?.["Urgency Score"] ||
                               "Low Priority"}
                           </span>
                         </div>
@@ -939,8 +890,7 @@ const AllChats = () => {
                             Buying Intent:
                           </span>
                           <span className="text-sm font-semibold text-yellow-600 flex items-center gap-1">
-                            {advanceFeatureDataRedux?.data?.salesIntelligence
-                              ?.sales_insights?.["Buying Intent"] ||
+                            {analysis?.salesIntelligence?.["Buying Intent"] ||
                               "Unknown"}{" "}
                             <span>⚠️</span>
                           </span>
@@ -956,13 +906,14 @@ const AllChats = () => {
                           ></div>
                         </div>
                         <div className="text-xs text-gray-500 text-right">
-                          {advanceFeatureDataRedux?.data?.salesIntelligence
-                            ?.sales_insights?.["Lead Conversion Probability"] ||
-                            "0%"}{" "}
+                          {analysis?.salesIntelligence?.[
+                            "Lead Conversion Probability"
+                          ] || "0%"}{" "}
                           Sales Conversion Probability
                         </div>
                       </div>
                     )}
+
                     {isVulnerability && (
                       <div>
                         <BarChart
