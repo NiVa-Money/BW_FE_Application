@@ -387,20 +387,20 @@ const AllChats = () => {
   ]);
 
   useEffect(() => {
-    // Only start polling if:
-    // 1) We have a valid sessionId
-    // 2) The channel is WhatsApp
+    // Skip polling if search filters are active.
+    if (isSearchActive) return;
+
     if (sessionId && channelNameVal === "whatsapp") {
       let intervalId: NodeJS.Timeout | null = null;
       let isMounted = true;
 
       const fetchData = async () => {
-        // Pass the filters to getChatHistory:
+        // Check again if search has become active.
+        if (isSearchActive) return;
         const result = await getChatHistory({ userPhoneId: sessionId });
         if (result?.success && isMounted) {
-          // If successful, set up the interval to re-fetch every 5s
+          // Start polling only if the initial call succeeded.
           intervalId = setInterval(() => {
-            // Poll again with the same filters
             getChatHistory({ userPhoneId: sessionId });
           }, 5000);
         }
@@ -413,13 +413,12 @@ const AllChats = () => {
         if (intervalId) clearInterval(intervalId);
       };
     }
-    // Include ALL relevant filter states in your dependencies
   }, [
     sessionId,
     channelNameVal,
     aiLevel,
     humanLevel,
-    isSearchActive,
+    isSearchActive, // ensures cleanup when search is active
     searchValue,
     searchType,
   ]);
