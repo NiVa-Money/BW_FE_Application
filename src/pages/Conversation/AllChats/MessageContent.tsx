@@ -62,7 +62,6 @@
 //                     )}
 //                     {useMessageStatus({ status: msg?.status, readTime: msg?.readTime, sentTime: msg?.sentTime, deliveredTime: msg?.deliveredTime, createdAt: msg?.createdAt })}
 
-
 //                 </div>
 //             );
 //             break;
@@ -99,20 +98,21 @@
 
 // export default MessageComponent;
 
-
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useMessageStatus } from "../../../hooks/useMessageStatus";
 
 const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
   let messageContent;
   switch (msgType) {
-    case "text":
-      // For text messages, use a light background with dark text if user, otherwise dark background with white text.
-      { const textClasses = isUserQuery
+    case "text": // For text messages, use a light background with dark text if user, otherwise dark background with white text.
+    {
+      const textClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
       messageContent = (
-        <div className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${textClasses}`}>
+        <div
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${textClasses}`}
+        >
           <span className="flex gap-2 items-center">
             {content !== undefined ? content : ""}
           </span>
@@ -125,15 +125,18 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           })}
         </div>
       );
-      break; }
+      break;
+    }
 
-    case "template":
-      // For template messages, change the bg if it's a user message.
-      { const templateClasses = isUserQuery
+    case "template": // For template messages, change the bg if it's a user message.
+    {
+      const templateClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-white text-black";
       messageContent = (
-        <div className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${templateClasses}`}>
+        <div
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${templateClasses}`}
+        >
           {msg.messageContent?.template?.header?.image && (
             <img
               src={msg.messageContent.template?.header?.image}
@@ -168,15 +171,18 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           ))}
         </div>
       );
-      break; }
+      break;
+    }
 
-    case "button_reply":
-      // Similar handling for button reply messages.
-      { const buttonReplyClasses = isUserQuery
+    case "button_reply": // Similar handling for button reply messages.
+    {
+      const buttonReplyClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
       messageContent = (
-        <div className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${buttonReplyClasses}`}>
+        <div
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${buttonReplyClasses}`}
+        >
           <span className="flex gap-2 items-center">
             {content !== undefined ? content : ""}
           </span>
@@ -189,15 +195,18 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           })}
         </div>
       );
-      break; }
+      break;
+    }
 
-    case "image":
-      // For images, apply the same bg conditional styles.
-      { const imageClasses = isUserQuery
+    case "image": // For images, apply the same bg conditional styles.
+    {
+      const imageClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
       messageContent = (
-        <div className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${imageClasses}`}>
+        <div
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${imageClasses}`}
+        >
           <img
             src={msg?.messageContent?.image?.url}
             alt="Shared Image"
@@ -219,15 +228,18 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           })}
         </div>
       );
-      break; }
+      break;
+    }
 
-    case "audio":
-      // For audio messages, use bg changes accordingly.
-      { const audioClasses = isUserQuery
+    case "audio": // For audio messages, use bg changes accordingly.
+    {
+      const audioClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-white text-black";
       messageContent = (
-        <div className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${audioClasses}`}>
+        <div
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${audioClasses}`}
+        >
           <audio controls>
             <source src={content} type="audio/ogg" />
           </audio>
@@ -240,10 +252,11 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           })}
         </div>
       );
-      break; }
+      break;
+    }
 
-    default:
-      { const defaultClasses = isUserQuery
+    default: {
+      const defaultClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
       messageContent = (
@@ -251,11 +264,14 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           {content}
         </div>
       );
-      break; }
+      break;
+    }
   }
 
   return (
-    <div className={`flex ${isUserQuery ? "justify-end" : "justify-start"} mb-2`}>
+    <div
+      className={`flex ${isUserQuery ? "justify-end" : "justify-start"} mb-2`}
+    >
       {messageContent}
     </div>
   );
