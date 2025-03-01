@@ -225,7 +225,18 @@ const CreateBot: React.FC = () => {
   }
 
   return (
-    <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center ' onClick={() => (showColorPicker ? setShowColorPicker(false) : '')}>
+    <div className='m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center '
+      onClick={(e) => {
+        const target = e.target as HTMLElement; // Cast target to HTMLElement
+
+        // Close the color picker only if the click is outside the input or color picker
+        if (showColorPicker) {
+          if (!target.closest('.color-picker-container')) {
+            setShowColorPicker(false);
+          }
+        }
+      }}
+    >
       <Formik
 
         initialValues={initialValues}
@@ -274,13 +285,28 @@ const CreateBot: React.FC = () => {
                         }}
                       />
                     ))}
-
-                    {showColorPicker && (
-                      <div className="absolute z-10 mt-2">
-                        <HexColorPicker color={chatColor} onChange={setChatColor} />
-                      </div>
-                    )}
-
+                    <div className="color-picker-container absolute z-10 mt-2">
+                      {showColorPicker && (
+                        <div>
+                          <HexColorPicker color={chatColor} onChange={setChatColor} />
+                          <input type='text' className='h-[25px] bg-[#65558F] relative -top-[4px] text-[white] text-center w-[200px] rounded-bl-[8px] rounded-br-[8px]'
+                            onChange={(e) => {
+                              setShowColorPicker(true)
+                              setChatColor(e.target.value || chatColor)
+                            }}
+                            value={chatColor}
+                            defaultValue={chatColor}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                // Prevents adding a new line
+                                setChatColor(chatColor)
+                                setShowColorPicker(false)
+                                console.log(e.target)
+                              }
+                            }} />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black" >
