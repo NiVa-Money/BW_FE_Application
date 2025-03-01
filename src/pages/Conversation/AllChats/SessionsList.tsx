@@ -8,8 +8,8 @@ interface SessionsListProps {
   onSessionSelect: (sessionId: string) => void;
   botLists: any;
   channelNameVal: string;
-  page: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
+  page?: number;
+  setPage?: React.Dispatch<React.SetStateAction<number>>;
   sessionId: string;
   aiLevel: boolean;
   humanLevel: boolean;

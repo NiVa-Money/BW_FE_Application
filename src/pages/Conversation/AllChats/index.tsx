@@ -766,7 +766,9 @@ const AllChats = () => {
                     {/* Fallback for sections without a chart */}
                     {!isSentiment && !isSales && !isVulnerability && (
                       <ReactMarkdown className="text-sm text-gray-600">
-                        {section.description}
+                        {typeof section.description === "object"
+                          ? JSON.stringify(section.description, null, 2)
+                          : section.description}
                       </ReactMarkdown>
                     )}
                   </div>
