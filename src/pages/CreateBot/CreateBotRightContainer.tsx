@@ -109,7 +109,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({ botNa
             </div>
             <div className='flex p-2 bg-[#F3F2F6] justify-between items-center h-[44px] rounded-[12px] mt-14 '>
               <div className='flex justify-start items-center ml-[12px]'>
-                <AddPhotoAlternateIcon className='text-[#2E2F5F]' /><span className='text-[#2E2F5F]' style={{ fontFamily: `${font}` }}> Message</span></div>
+                <AddPhotoAlternateIcon className='text-[#2E2F5F]' /><span className='text-[#2E2F5F]' style={{ fontFamily: `${font}` }}> Mesage</span></div>
               <SendIcon className='mr-[12px] text-[#2E2F5F]' />
 
             </div>
