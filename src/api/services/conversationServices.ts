@@ -74,6 +74,8 @@ export const getWhatsAppChatsService = async (payload: {
   botId: string;
   adminPhoneNumberId: string;
   userPhoneNumberId: string;
+  aiLevel,
+  humanLevel,
 }) => {
   try {
     const response = await axiosInstance.get(`/whatsapp/chats`, {

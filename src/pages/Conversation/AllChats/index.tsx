@@ -327,6 +327,9 @@ const AllChats = () => {
   };
 
   useEffect(() => {
+    // Stop polling if search is active.
+    if (isSearchActive) return;
+
     if (
       sessionId &&
       channelNameVal === "whatsapp" &&
@@ -365,7 +368,10 @@ const AllChats = () => {
           }
         };
 
+        // Initial fetch.
         fetchWhatsAppChats();
+
+        // Start polling.
         intervalId = setInterval(fetchWhatsAppChats, 5000);
       }
 
@@ -379,7 +385,7 @@ const AllChats = () => {
     channelNameVal,
     botIdVal,
     sessionsDataRedux?.sessions,
-    isSearchActive,
+    isSearchActive, // now used to disable polling during search
     searchType,
     searchValue,
     aiLevel,
@@ -387,41 +393,66 @@ const AllChats = () => {
   ]);
 
   useEffect(() => {
-    // Skip polling if search filters are active.
-    if (isSearchActive) return;
+    const fetchData = async () => {
+      if (!botIdVal) return; // Don't poll if botId is missing
 
-    if (sessionId && channelNameVal === "whatsapp") {
-      let intervalId: NodeJS.Timeout | null = null;
-      let isMounted = true;
+      const data: any = {
+        botId: botIdVal,
+        page: 1,
+        channelName: channelNameVal,
+      };
 
-      const fetchData = async () => {
-        // Check again if search has become active.
-        if (isSearchActive) return;
-        const result = await getChatHistory({ userPhoneId: sessionId });
-        if (result?.success && isMounted) {
-          // Start polling only if the initial call succeeded.
-          intervalId = setInterval(() => {
-            getChatHistory({ userPhoneId: sessionId });
-          }, 5000);
+      // Apply search filter if active
+      if (isSearchActive && searchValue.trim()) {
+        if (searchType === "order") {
+          data.orderName = searchValue.trim();
+        } else {
+          data.phoneNumber = searchValue.trim();
         }
-      };
+      }
 
-      fetchData();
+      try {
+        const response = await dispatch(getAllSession(data));
 
-      return () => {
-        isMounted = false;
-        if (intervalId) clearInterval(intervalId);
-      };
-    }
-  }, [
-    sessionId,
-    channelNameVal,
-    aiLevel,
-    humanLevel,
-    isSearchActive, // ensures cleanup when search is active
-    searchValue,
-    searchType,
-  ]);
+        if (response?.payload?.success) {
+          const newSessions = response.payload.data.sessions;
+
+          if (isSearchActive) {
+            if (newSessions.length > 0) {
+              // If search results exist, keep them
+              setSearchResults(newSessions);
+            } else {
+              // If no data found, reset search state
+              setIsSearchActive(false);
+              setSearchValue(""); // Clear the search box
+              setSearchResults(newSessions); // Show latest sessions
+            }
+          } else {
+            // Normal polling update when no search is active
+            setSearchResults(newSessions);
+          }
+
+          // Preserve the selected session if still valid
+          if (sessionId && newSessions.some((s: any) => s._id === sessionId)) {
+            return; // Keep current session if still available
+          } else if (newSessions.length > 0) {
+            // Auto-select first available session
+            const firstSessionId =
+              channelNameVal === "whatsapp"
+                ? newSessions[0].userPhoneId
+                : newSessions[0]._id;
+            setSessionId(firstSessionId);
+            handleSessionSelection(firstSessionId, newSessions);
+          }
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    };
+
+    const interval = setInterval(fetchData, 5000); // Adjust polling interval as needed
+    return () => clearInterval(interval);
+  }, [botIdVal, channelNameVal, isSearchActive, searchValue, sessionId]);
 
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
     if (!selectedSessionId) {
@@ -551,26 +582,73 @@ const AllChats = () => {
     }
   };
 
-  // SAMPLE DATA FOR CHARTS
-  const sentimentData = [
-    { name: "Positive", value: 50 },
-    { name: "Negative", value: 30 },
-    { name: "Neutral", value: 20 },
-  ];
+  // // SAMPLE DATA FOR CHARTS
+  // const sentimentData = [
+  //   { name: "Positive", value: 50 },
+  //   { name: "Negative", value: 30 },
+  //   { name: "Neutral", value: 20 },
+  // ];
 
-  const salesData = [
-    {
-      name: "Lead Conversion Probability",
-      value: 85,
-      fill: "#8884d8",
-    },
-  ];
+  // const salesData = [
+  //   {
+  //     name: "Lead Conversion Probability",
+  //     value: 85,
+  //     fill: "#8884d8",
+  //   },
+  // ];
 
-  const vulnerabilityData = [
-    { name: "Lack of personalization", value: 1 },
-    { name: "Repeated requests/tracking", value: 1 },
-    { name: "Security concerns", value: 1 },
-  ];
+  // const vulnerabilityData = [
+  //   { name: "Lack of personalization", value: 1 },
+  //   { name: "Repeated requests/tracking", value: 1 },
+  //   { name: "Security concerns", value: 1 },
+  // ];
+
+  // Transform sentiments data for chart
+  const transformSentimentsData = (sentiments) => {
+    if (!sentiments || !sentiments.sentiment) return [];
+
+    return Object.entries(sentiments.sentiment).map(([name, valueStr]) => ({
+      name,
+      value: parseInt(valueStr as string, 10), // Convert percentage strings like "40%" to numbers
+    }));
+  };
+
+  // Transform sales intelligence data for chart
+  const transformSalesData = (salesIntelligence) => {
+    if (!salesIntelligence || !salesIntelligence.sales_insights) return [];
+
+    const conversionProbability =
+      salesIntelligence.sales_insights["Lead Conversion Probability"] || "0%";
+    return [
+      {
+        name: "Lead Conversion Probability",
+        value: parseInt(conversionProbability, 10),
+        fill: "#8884d8",
+      },
+    ];
+  };
+
+  // Transform vulnerability data for chart
+  const transformVulnerabilityData = (vulnerability) => {
+    if (!vulnerability || !vulnerability.vulnerabilities) return [];
+
+    return Object.entries(vulnerability.vulnerabilities).map(
+      ([name, valueStr]) => ({
+        name,
+        value: parseInt(valueStr as string, 10),
+      })
+    );
+  };
+
+  const sentimentData = transformSentimentsData(
+    advanceFeatureDataRedux?.data?.sentiments
+  );
+  const salesData = transformSalesData(
+    advanceFeatureDataRedux?.data?.salesIntelligence
+  );
+  const vulnerabilityData = transformVulnerabilityData(
+    advanceFeatureDataRedux?.data?.vulnerability
+  );
 
   return (
     <div className="flex flex-col min-h-screen p-6">
@@ -827,7 +905,10 @@ const AllChats = () => {
                             Lead Conversion Probability:
                           </span>
                           <span className="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                            {salesData[0].value}%{" "}
+                            {advanceFeatureDataRedux?.data?.salesIntelligence
+                              ?.sales_insights?.[
+                              "Lead Conversion Probability"
+                            ] || "0%"}{" "}
                             <span className="text-green-600">✓</span>
                           </span>
                         </div>
@@ -836,7 +917,10 @@ const AllChats = () => {
                             Customer Sentiment:
                           </span>
                           <span className="text-sm font-semibold text-gray-800 flex items-center gap-1">
-                            Positive <span>😁</span>
+                            {advanceFeatureDataRedux?.data?.salesIntelligence
+                              ?.sales_insights?.["Customer Sentiment"] ||
+                              "Unknown"}{" "}
+                            <span>😁</span>
                           </span>
                         </div>
                         <div className="flex items-center justify-between mb-1">
@@ -844,7 +928,10 @@ const AllChats = () => {
                             Urgency Score:
                           </span>
                           <span className="text-sm font-semibold text-red-500 flex items-center gap-1">
-                            🔥 High Priority
+                            🔥{" "}
+                            {advanceFeatureDataRedux?.data?.salesIntelligence
+                              ?.sales_insights?.["Urgency Score"] ||
+                              "Low Priority"}
                           </span>
                         </div>
                         <div className="flex items-center justify-between mb-3">
@@ -852,17 +939,27 @@ const AllChats = () => {
                             Buying Intent:
                           </span>
                           <span className="text-sm font-semibold text-yellow-600 flex items-center gap-1">
-                            Needs a nudge <span>⚠️</span>
+                            {advanceFeatureDataRedux?.data?.salesIntelligence
+                              ?.sales_insights?.["Buying Intent"] ||
+                              "Unknown"}{" "}
+                            <span>⚠️</span>
                           </span>
                         </div>
                         <div className="relative w-full bg-gray-200 rounded-full h-3 mb-1">
                           <div
                             className="bg-green-500 h-3 rounded-full"
-                            style={{ width: `${salesData[0].value}%` }}
+                            style={{
+                              width: salesData[0]?.value
+                                ? `${salesData[0].value}%`
+                                : "0%",
+                            }}
                           ></div>
                         </div>
                         <div className="text-xs text-gray-500 text-right">
-                          {salesData[0].value}% Sales Conversion Probability
+                          {advanceFeatureDataRedux?.data?.salesIntelligence
+                            ?.sales_insights?.["Lead Conversion Probability"] ||
+                            "0%"}{" "}
+                          Sales Conversion Probability
                         </div>
                       </div>
                     )}
