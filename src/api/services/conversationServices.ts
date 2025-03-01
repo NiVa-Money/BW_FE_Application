@@ -79,8 +79,6 @@ export const getWhatsAppChatsService = async (payload: {
     const response = await axiosInstance.get(`/whatsapp/chats`, {
       params: payload
     });
-
-    console.log( "response data", response.data.data);
     return response.data;
   
   } catch (error: any) {
