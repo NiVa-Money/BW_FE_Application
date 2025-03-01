@@ -263,6 +263,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
             sessionId={sessionId}
             aiLevel={true}
             humanLevel={true}
+            sessionList={sessionsDataRedux?.sessions || []}
           />
         </div>
 

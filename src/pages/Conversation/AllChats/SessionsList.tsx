@@ -13,6 +13,10 @@ interface SessionsListProps {
   sessionId: string;
   aiLevel: boolean;
   humanLevel: boolean;
+  // New props for searching
+  searchType?: "order" | "phone";
+  searchValue?: string;
+  isSearchActive: boolean;
 }
 
 const SessionsList: React.FC<SessionsListProps> = ({
@@ -23,6 +27,8 @@ const SessionsList: React.FC<SessionsListProps> = ({
   sessionId,
   aiLevel,
   humanLevel,
+  searchType,
+  searchValue,
 }) => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
@@ -37,8 +43,10 @@ const SessionsList: React.FC<SessionsListProps> = ({
 
   useEffect(() => {
     if (sessionsDataRedux?.success) {
-      let filteredSessions = sessionsDataRedux.sessions;
+      // Start with all sessions from Redux
+      let filteredSessions = sessionsDataRedux.sessions || [];
 
+      // 1) AI/Human Filter
       if (aiLevel && !humanLevel) {
         filteredSessions = filteredSessions.filter(
           (session: any) => session.handledBy === "AI"
@@ -48,11 +56,28 @@ const SessionsList: React.FC<SessionsListProps> = ({
           (session: any) => session.handledBy === "Human"
         );
       }
+
+      // 2) Search Filter (example)
+      if (searchType === "order") {
+        // If your session object has an `orderId` property
+        filteredSessions = filteredSessions.filter(
+          (session: any) => session.orderId === searchValue
+        );
+      } else if (searchType === "phone") {
+        // If your session object has a `userPhoneId` property
+        // and your phone search uses +91 prefix
+        const fullPhone = `+91${searchValue}`;
+        filteredSessions = filteredSessions.filter(
+          (session: any) => session.userPhoneId === fullPhone
+        );
+      }
+
       setSessionsData(filteredSessions);
     } else {
       setSessionsData([]);
     }
-  }, [sessionsDataRedux, aiLevel, humanLevel]);
+    // Include searchType & searchValue in dependency array
+  }, [sessionsDataRedux, aiLevel, humanLevel, searchType, searchValue]);
 
   return (
     <div className="w-64 pl-0 bg-white p-4 border-r overflow-y-scroll">
@@ -125,3 +150,5 @@ const SessionsList: React.FC<SessionsListProps> = ({
 };
 
 export default SessionsList;
+
+
