@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
@@ -83,86 +82,44 @@ const AllChats = () => {
       notifyError("Please select a bot before searching");
       return;
     }
-
     if (!searchValue.trim()) {
       setIsSearchActive(false);
       setSearchResults([]);
       await getChatHistory({});
       return;
     }
-
     setIsSearching(true);
-
-    // Validate search input
-    if (searchType === "order") {
-      const orderRegex = /^NK\/\d+$/;
-      if (!orderRegex.test(searchValue.trim())) {
-        notifyError("Order ID must be in the format 'NK/12345'");
-        setIsSearching(false);
-        return;
-      }
-    } else if (
-      searchValue.trim().length !== 10 ||
-      !/^\d+$/.test(searchValue.trim())
-    ) {
-      notifyError("Please enter a valid 10-digit phone number");
-      setIsSearching(false);
-      return;
-    }
-
-    // Prepare payload
+    // Validate input based on search type...
     const data: any = {
       botId: botIdVal,
       page: 1,
       channelName: channelNameVal,
     };
-
     if (searchType === "order") {
       data.orderName = searchValue.trim();
     } else {
       data.phoneNumber = searchValue.trim();
     }
-
     try {
-      const response = dispatch(getAllSession(data));
-      console.log("Search API Response:", response);
-
+      const response = await dispatch(getAllSession(data));
       if (response?.payload?.success) {
+        const filteredSessions = response.payload.data.sessions;
+        setSearchResults(filteredSessions);
         setIsSearchActive(true);
         setSessionId("");
         setMessages([]);
         setPage(1);
-
-        // Auto-select the first session
-        const filteredSessions = response.payload.data.sessions;
         if (filteredSessions.length > 0) {
           const firstSessionId =
             channelNameVal === "whatsapp"
               ? filteredSessions[0].userPhoneId
               : filteredSessions[0]._id;
           setSessionId(firstSessionId);
-          handleSessionSelection(firstSessionId);
+          handleSessionSelection(firstSessionId, filteredSessions);
         }
       }
-    } catch (error) {
-      console.error("Search error:", error);
-      notifyError("Error during search");
     } finally {
       setIsSearching(false);
-    }
-  };
-
-  // Function to clear search
-  const clearSearch = async () => {
-    setSearchValue("");
-    setIsSearchActive(false);
-    setSearchResults([]);
-    setSessionId("");
-    setMessages([]);
-
-    // Reset to initial data
-    if (botIdVal) {
-      await getChatHistory({});
     }
   };
 
@@ -218,7 +175,7 @@ const AllChats = () => {
       }
     }
 
-    const response: any = dispatch(getAllSession(data));
+    const response: any = await dispatch(getAllSession(data));
     const success = response?.payload?.success || false;
     return { success };
   };
@@ -227,7 +184,7 @@ const AllChats = () => {
     if (!isSearchActive) {
       getChatHistory({});
     }
-  }, [page, aiLevel, humanLevel, isSearchActive]);
+  }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
 
   const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -334,16 +291,36 @@ const AllChats = () => {
     }
   }, [advanceFeatureDataRedux]);
 
-  const handleSessionSelection = (selectedSessionId: string) => {
+  // const handleSessionSelection = (selectedSessionId: string) => {
+  //   const messagesData =
+  //     channelNameVal !== "whatsapp"
+  //       ? sessionsDataRedux?.sessions.filter(
+  //           (obj) => obj._id === selectedSessionId
+  //         )[0]?.sessions
+  //       : sessionsDataRedux?.sessions.filter(
+  //           (obj) => obj.userPhoneId === selectedSessionId
+  //         )[0]?.sessions;
+
+  //   setMessages(messagesData || []);
+  //   dispatch(getAdvanceFeature(selectedSessionId, botIdVal, channelNameVal));
+  //   setSessionId(selectedSessionId);
+  // };
+
+  const handleSessionSelection = (
+    selectedSessionId: string,
+    sessionsList?: any[]
+  ) => {
+    const currentSessions = isSearchActive
+      ? sessionsList || searchResults
+      : sessionsDataRedux?.sessions;
     const messagesData =
       channelNameVal !== "whatsapp"
-        ? sessionsDataRedux?.sessions.filter(
-            (obj) => obj._id === selectedSessionId
+        ? currentSessions?.filter(
+            (obj: any) => obj._id === selectedSessionId
           )[0]?.sessions
-        : sessionsDataRedux?.sessions.filter(
-            (obj) => obj.userPhoneId === selectedSessionId
+        : currentSessions?.filter(
+            (obj: any) => obj.userPhoneId === selectedSessionId
           )[0]?.sessions;
-
     setMessages(messagesData || []);
     dispatch(getAdvanceFeature(selectedSessionId, botIdVal, channelNameVal));
     setSessionId(selectedSessionId);
@@ -369,13 +346,13 @@ const AllChats = () => {
               botId: botIdVal,
               adminPhoneNumberId: selectedSession.adminPhoneNumberId,
               userPhoneNumberId: selectedSession.userPhoneId,
-              // Include search and filter parameters
+              aiLevel,
+              humanLevel,
+
               ...(isSearchActive &&
                 searchType === "order" && { orderName: searchValue }),
               ...(isSearchActive &&
                 searchType === "phone" && { phoneNumber: searchValue }),
-              aiLevel,
-              humanLevel,
             });
 
             console.log("Chats Response:", chatsResponse);
@@ -410,25 +387,42 @@ const AllChats = () => {
   ]);
 
   useEffect(() => {
+    // Only start polling if:
+    // 1) We have a valid sessionId
+    // 2) The channel is WhatsApp
     if (sessionId && channelNameVal === "whatsapp") {
       let intervalId: NodeJS.Timeout | null = null;
       let isMounted = true;
 
-      (async () => {
+      const fetchData = async () => {
+        // Pass the filters to getChatHistory:
         const result = await getChatHistory({ userPhoneId: sessionId });
         if (result?.success && isMounted) {
+          // If successful, set up the interval to re-fetch every 5s
           intervalId = setInterval(() => {
-            getChatHistory({ userPhoneId: sessionId , });
+            // Poll again with the same filters
+            getChatHistory({ userPhoneId: sessionId });
           }, 5000);
         }
-      })();
+      };
+
+      fetchData();
 
       return () => {
         isMounted = false;
         if (intervalId) clearInterval(intervalId);
       };
     }
-  }, [sessionId, channelNameVal, aiLevel, humanLevel]);
+    // Include ALL relevant filter states in your dependencies
+  }, [
+    sessionId,
+    channelNameVal,
+    aiLevel,
+    humanLevel,
+    isSearchActive,
+    searchValue,
+    searchType,
+  ]);
 
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
     if (!selectedSessionId) {
@@ -633,17 +627,9 @@ const AllChats = () => {
         >
           {isSearching ? "Searching..." : "Search"}
         </button>
-        {isSearchActive && (
-          <button
-            onClick={clearSearch}
-            className="bg-gray-500 text-white p-2 rounded"
-          >
-            Clear Search
-          </button>
-        )}
       </div>
 
-      {/* Search active indicator */}
+      {/* Single Search active indicator */}
       {isSearchActive && (
         <div className="mb-2 px-4 py-2 bg-blue-100 text-blue-800 rounded flex justify-between items-center">
           <span>
@@ -654,7 +640,10 @@ const AllChats = () => {
             </strong>
           </span>
           <span className="text-sm">
-            {sessionsDataRedux?.sessions?.length || 0} results found
+            {isSearchActive
+              ? searchResults.length
+              : sessionsDataRedux?.sessions?.length || 0}{" "}
+            results found
           </span>
         </div>
       )}
@@ -717,22 +706,6 @@ const AllChats = () => {
         </div>
       </div>
 
-      {/* Search active indicator */}
-      {isSearchActive && (
-        <div className="mb-2 px-4 py-2 bg-blue-100 text-blue-800 rounded flex justify-between items-center">
-          <span>
-            Searching for: {searchType === "order" ? "Order ID" : "Phone"}{" "}
-            <strong>
-              {searchType === "phone" ? "+91" : ""}
-              {searchValue}
-            </strong>
-          </span>
-          <span className="text-sm">
-            {sessionsDataRedux?.sessions?.length || 0} results found
-          </span>
-        </div>
-      )}
-
       {/* Main Container */}
       <div className="flex bg-gray-100 h-full h-[calc(100vh - 120px)]">
         <SessionsList
@@ -747,6 +720,9 @@ const AllChats = () => {
           searchType={searchType}
           searchValue={isSearchActive ? searchValue : ""}
           isSearchActive={isSearchActive}
+          sessionsData={
+            isSearchActive ? searchResults : sessionsDataRedux?.sessions || []
+          }
         />
 
         <div className="flex-1 flex flex-col overflow-y-scroll">
