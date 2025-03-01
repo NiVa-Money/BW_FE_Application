@@ -289,7 +289,7 @@ const CreateBot: React.FC = () => {
                       {showColorPicker && (
                         <div>
                           <HexColorPicker color={chatColor} onChange={setChatColor} />
-                          <input type='text' className='h-[25px] bg-[#65558F] relative -top-[4px] text-[white] text-center w-[200px] rounded-bl-[8px] rounded-br-[8px]'
+                          <input type='text' className='h-[25px] bg-[#65558f] relative -top-[4px] text-[white] text-center w-[200px] rounded-bl-[8px] rounded-br-[8px]'
                             onChange={(e) => {
                               setShowColorPicker(true)
                               setChatColor(e.target.value || chatColor)
