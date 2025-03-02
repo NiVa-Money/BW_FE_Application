@@ -42,14 +42,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
   };
 
   const handleToggle = () => {
-    if (!open) {
-      setOpen(true);
-      setTimeout(() => {
-        setOpen(false);
-      }, 800);
-    } else {
-      setOpen(false);
-    }
+    // To handle anything on click of sidaebar sub items
   };
   const navigate = useNavigate();
   const toggleSidebar = () => setOpen(!open);
@@ -93,6 +86,8 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
               color: COLORS.NEUTRALVIOLET,
             },
           }}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
         >
           {/* Fixed Header */}
           <div className="flex justify-between gap-1 p-2 bg-white z-10">
