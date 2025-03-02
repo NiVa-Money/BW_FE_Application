@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import SessionsList from "../AllChats/SessionsList";
 import io from "socket.io-client";
+import CloseIcon from "@mui/icons-material/Close";
 
 const LiveChat: React.FC = (): React.ReactElement => {
   const [isAIEnabled, setIsAIEnabled] = useState(false);
@@ -24,13 +25,12 @@ const LiveChat: React.FC = (): React.ReactElement => {
   );
   const [botLists, setbotLists] = useState<any>([]);
   const [socket, setSocket] = useState(null);
-  const [sessionId, _setSessionId] = React.useState<string>("");
-  const [botIdLive, _setBotIdLive] = React.useState<string>("");
-  const [userIdLive, _setBotUserIdLive] = React.useState<string>("");
+  const [sessionId, setSessionId] = useState<string>("");
+  const [botIdLive, setBotIdLive] = useState<string>("");
+  const [userIdLive, setUserIdLive] = useState<string>("");
+
   const [newMessage, setNewMessage] = React.useState<any>("");
   const [isChatEnabled, setIsChatEnabled] = React.useState(false);
-  const [_resolved, setResolved] = React.useState("");
-  const [_showFeedbackModal, setShowFeedbackModal] = React.useState(false);
   const [showConfirmationModal, setShowConfirmationModal] =
     React.useState(false);
   const dispatch = useDispatch();
@@ -81,6 +81,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
     const data = {
       userId: userId,
       botId: botId,
+      sessionI : sessionId,
     };
     dispatch(getAllSessionLive(data));
   };
@@ -90,72 +91,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
       getChatHistory();
     }
   }, [botsDataRedux?.botId?.length]);
-
-  const sendMessage = (event: any) => {
-    event.preventDefault();
-    if (!newMessage.trim() || !socket) return;
-
-    const messageObj = {
-      text: newMessage,
-      sender: "user",
-    };
-
-    setMessages((prevMessages: any) => [...prevMessages, messageObj]);
-
-    socket.emit("joinAdmin", {
-      chatRoom: sessionId,
-      userId: userIdLive,
-      botId: botIdLive,
-      question: newMessage,
-    });
-
-    setNewMessage("");
-  };
-
-  React.useEffect(() => {
-    if (sessionId && botIdLive && userIdLive) {
-      const newSocket = io(process.env.NEXT_PUBLIC_BASE_URL, {
-        query: {
-          isWidget: "false",
-          chatRoom: sessionId,
-          botId: botIdLive,
-          userId: userIdLive,
-        },
-      });
-
-      newSocket.on("connect_error", (error: any) => {
-        console.error("Socket connection error:", error);
-      });
-
-      newSocket.on("message", (message) => {
-        console.log("Received message:", message);
-
-        // Check if the message is a system message
-        if (
-          typeof message === "string" &&
-          message.includes("has joined the chat")
-        ) {
-          // Handle system messages like "Admin has joined the chat"
-          setMessages((prevMessages: any) => [
-            ...prevMessages,
-            { text: message, sender: "system" },
-          ]);
-        } else if (message.question) {
-          // Handle normal user messages (like "kaise ho")
-          setMessages((prevMessages: any) => [
-            ...prevMessages,
-            { text: message.question, sender: "bot" },
-          ]);
-        }
-      });
-
-      setSocket(newSocket);
-
-      return () => {
-        newSocket.disconnect();
-      };
-    }
-  }, [sessionId, botIdLive, userIdLive]);
 
   const handleSessionSelection = (sessionId: string) => {
     const messagesData = sessionsDataRedux?.sessions.filter(
@@ -167,52 +102,93 @@ const LiveChat: React.FC = (): React.ReactElement => {
     setSelectedSessionId(sessionId);
   };
 
-  const handleResolution = (resolution: any) => {
-    setResolved(resolution);
-    setShowConfirmationModal(false);
-    setShowFeedbackModal(true);
+  const sendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    // Update local messages
+    setMessages((prev) => [...prev, { text: newMessage, sender: "user" }]);
+
+    
+    // Emit to server if socket is available
+    if (socket) {
+      socket.emit("agentConnected")
+      socket.emit("joinSession", {
+        chatRoom: sessionId,
+        userId: userIdLive,
+        botId: botIdLive,
+        question: newMessage,
+        userType: "AGENT",
+      });
+    }
+
+    setNewMessage("");
   };
 
-  const handleToggleChat = () => {
+  useEffect(() => {
+    if (sessionId && botIdLive && userIdLive) {
+      const newSocket = io(process.env.NEXT_PUBLIC_BASE_URL as string, {
+        query: {
+          userType: "AGENT",  
+          chatRoom: sessionId,
+          botId: botIdLive,
+          userId: userIdLive,
+        },
+      });
+
+      newSocket.on("connect_error", (error: any) => {
+        console.error("Socket connection error:", error);
+      });
+
+      // Listen for messages
+      newSocket.on("message", (message: any) => {
+        console.log("Received message:", message);
+        // Could be a system message
+        if (typeof message === "string" && message.includes("has joined the chat")) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { text: message, sender: "system" },
+          ]);
+        } else if (message?.question) {
+          // Normal user or bot message
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            { text: message.question, sender: "bot" },
+          ]);
+        }
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        newSocket.disconnect();
+        setSocket(null);
+      };
+    }
+  }, [sessionId, botIdLive, userIdLive]);
+
+  const handleResolution = (resolution: any) => {
+    setShowConfirmationModal(false);
+    // If user clicked "Yes", you can setIsChatEnabled(false) or do other logic
+    if (resolution === "Yes") {
+      setIsChatEnabled(false);
+    }
+  };
+
+  const handleToggleChat = (e:any) => {
     if (isChatEnabled) {
       // If the chat is being ended, show the confirmation modal
       setShowConfirmationModal(true);
     } else {
       // Enable the chat immediately if it's being turned on
       setIsChatEnabled(true);
+      sendMessage(e);
     }
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     sendMessage(e);
-  };
-
-  const renderMessages = () => {
-    return messages.map((message: any, index: number) => (
-      <div
-        key={index}
-        className={`flex w-full mb-4 ${
-          message.sender === "user"
-            ? "justify-end"
-            : message.sender === "system"
-            ? "justify-center"
-            : "justify-start"
-        }`}
-      >
-        <div
-          className={`w-fit max-w-[75%] p-2 rounded-xl ${
-            message.sender === "user"
-              ? "bg-purple-500"
-              : message.sender === "system"
-              ? "bg-green-400"
-              : "bg-gray-500"
-          }`}
-        >
-          <span className="text-white">{message.text}</span>
-        </div>
-      </div>
-    ));
   };
 
   return (
@@ -283,6 +259,12 @@ const LiveChat: React.FC = (): React.ReactElement => {
           <SessionsList
             botLists={botLists}
             onSessionSelect={handleSessionSelection}
+            channelNameVal={""}
+            sessionId={sessionId}
+            aiLevel={true}
+            humanLevel={true}
+            isSearchActive={false}
+            sessionsData={sessionsDataRedux?.sessions || []}
           />
         </div>
 
@@ -290,13 +272,18 @@ const LiveChat: React.FC = (): React.ReactElement => {
         <div className="col-span-1">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4">
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-md font-semibold">Nitya Prakhar</h2>
-                <p className="text-md text-gray-500">nitya@gmail.com</p>
-              </div>
-              <button className="px-4 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1">
+              {/* <button className="px-4 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1">
                 Close Chat
-              </button>
+              </button> */}
+
+              {messages?.length ? (
+                <button
+                  className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
+                  onClick={() => setMessages([])}
+                >
+                  Close Chat <CloseIcon className="ml-1 w-4 h-4" />
+                </button>
+              ) : null}
             </div>
 
             {/* Chat Messages */}
@@ -332,7 +319,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     <div className="flex justify-end mb-4">
                       <div className="bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]">
                         <span className="flex gap-[5px] justify-between">
-                          {msg.question}
+                          {msg?.question}
                         </span>
                       </div>
                       <div className="w-8 h-8 rounded-full bg-[#2E2F5F] ml-4 flex items-center justify-center">
@@ -346,15 +333,14 @@ const LiveChat: React.FC = (): React.ReactElement => {
                         <SmartToy className="text-white w-6 h-6" />
                       </div>
                       <div className="bg-white p-3 rounded-lg max-w-[70%]">
-                        <span className="flex gap-[5px] justify-between">
-                          {msg.answer}
+                        <span className="flex gap-[5px] justify-between overflow-auto">
+                          {msg?.answer}
                         </span>
                       </div>
                     </div>
                   </div>
                 )
               )}
-              {renderMessages()}
             </div>
 
             {/* Quick Replies */}
