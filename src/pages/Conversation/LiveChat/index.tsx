@@ -25,9 +25,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
   );
   const [botLists, setbotLists] = useState<any>([]);
   const [socket, setSocket] = useState(null);
-  const [sessionId, setSessionId] = useState<string>("");
-  const [botIdLive, setBotIdLive] = useState<string>("");
-  const [userIdLive, setUserIdLive] = useState<string>("");
+  const [sessionId] = useState<string>("");
+  const [botIdLive] = useState<string>("");
+  const [userIdLive] = useState<string>("");
 
   const [newMessage, setNewMessage] = React.useState<any>("");
   const [isChatEnabled, setIsChatEnabled] = React.useState(false);
