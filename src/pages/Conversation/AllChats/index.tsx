@@ -649,7 +649,7 @@ const AllChats = () => {
         {searchType === "order" ? (
           <input
             type="text"
-            placeholder="Enter Order ID (NK/12345)"
+            placeholder="Enter Order ID"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             className="p-2 border border-gray-300 rounded flex-1 max-w-xs"
