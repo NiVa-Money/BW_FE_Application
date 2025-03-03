@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import axios from "axios";
-import { notifyError, notifySuccess } from "../components/Toast";
+import { notifyError } from "../components/Toast";
 
 export const publicBaseUrl = "https://uatapi.botwot.io";
 

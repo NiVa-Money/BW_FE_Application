@@ -33,7 +33,7 @@ export const autRoutes: any[] = [
   },
   { id: 2.1, path: "/conversations/all-chats", component: <AllChats /> },
   { id: 2.2, path: "/conversations/live-chats", component: <LiveChat /> },
-  { id: 3, path: "/mybots", component: <MyBots /> },
+  { id: 3, path: "/myagents", component: <MyBots /> },
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
 
@@ -109,7 +109,7 @@ export const autRoutes: any[] = [
   // { path: '/createbot', component: <CreateBot /> },
   // { path: '/editbot/:id', component: <EditBot /> },
 
-  // { path: '/mybots', component: <MyBots /> },
+  // { path: '/myagents', component: <MyBots /> },
 
   // { path: "/marketing/whatsappDashboard", component: <WhatsApp /> },
 

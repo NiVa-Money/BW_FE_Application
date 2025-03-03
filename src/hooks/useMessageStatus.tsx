@@ -26,17 +26,40 @@ export const useMessageStatus = ({ status, readTime, sentTime, deliveredTime, cr
     };
 
     return (
-        <span className="flex justify-end">
+        // <span className="flex justify-end">
+        //     <span className="text-[12px]" style={{ color: COLORS.DARKGRAY }}>
+        //         {getTime()}
+        //     </span>
+        //     {status === MessageStatusType.DELIVERED ? (
+        //         <DoneAllIcon className="w-[15px] h-[15px]" />
+        //     ) : status === MessageStatusType.READ ? (
+        //         <DoneAllIcon className="w-[15px] h-[15px] text-blue-500" />
+        //     ) : (
+        //         <DoneIcon className="w-[15px] h-[15px] text-red-100" />
+        //     )}
+        // </span>
+        <span className="flex flex-col items-end">
+        {status === MessageStatusType.READ ? (
+            <>
+                <span className="text-[12px]" style={{ color: COLORS.DARKGRAY }}>
+                    Sent: {formatDateString(sentTime)}
+                </span>
+                <span className="text-[12px]" style={{ color: COLORS.DARKGRAY }}>
+                    Read: {formatDateString(readTime)}
+                </span>
+            </>
+        ) : (
             <span className="text-[12px]" style={{ color: COLORS.DARKGRAY }}>
                 {getTime()}
             </span>
-            {status === MessageStatusType.DELIVERED ? (
-                <DoneAllIcon className="w-[15px] h-[15px]" />
-            ) : MessageStatusType.READ ? (
-                <DoneAllIcon className="w-[15px] h-[15px] text-blue-500" />
-            ) : (
-                <DoneIcon className="w-[15px] h-[15px]" />
-            )}
-        </span>
+        )}
+        {status === MessageStatusType.DELIVERED ? (
+            <DoneAllIcon className="w-[15px] h-[15px]" />
+        ) : status === MessageStatusType.READ ? (
+            <DoneAllIcon className="w-[15px] h-[15px] text-blue-500" />
+        ) : (
+            <DoneIcon className="w-[15px] h-[15px] text-red-100" />
+        )}
+    </span>
     );
 };

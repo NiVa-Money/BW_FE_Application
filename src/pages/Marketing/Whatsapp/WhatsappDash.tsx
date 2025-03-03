@@ -1,9 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { FC, useState, useEffect, Key } from "react";
+import { FC, useState, useEffect, useMemo, Key } from "react";
 import {
+  LineChart,
+  Line,
   BarChart,
   Bar,
   XAxis,
@@ -32,6 +33,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import {
+  fetchWhatsAppDashboardRequest,
   fetchWhatsAppInsightsRequest,
   fetchWhatsAppMessagesRequest,
 } from "../../../store/actions/whatsappDashboardActions";
@@ -42,7 +44,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { COLORS } from "../../../constants";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 import CustomDatePicker from "../../../components/CustomDatePicker";
-import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
 
 interface DashboardProps {
   totalMessages: number;
@@ -53,10 +54,7 @@ interface DashboardProps {
   campaignName: string;
 }
 
-const WhatsappDash: FC<DashboardProps> = ({
-  campaignName = "Campaign 1",
-  // response,
-}) => {
+const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign #1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [page, setPage] = useState(1);
   const [limit, _setLimit] = useState(10);
@@ -70,17 +68,14 @@ const WhatsappDash: FC<DashboardProps> = ({
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [totalMessagesValue, setTotalMessagesValue] = useState(0);
-  const [seenMessagesValue, setSeenMessagesValue] = useState(0);
-  const [deliveredMessagesValue, setDeliveredMessagesValue] = useState(0);
-  const [unreadMessagesValue, setUnreadMessagesValue] = useState(0);
-  const [hotLeadsValue, setHotLeadsValue] = useState(0);
-  const [responseChartData, setResponseChartData] = useState([]);
-  const [engagementAnalysisData, setEngagementAnalysis] = useState([]);
-  const [response, setResponse] = useState<any>(null);
-
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  // Get the dashboard data from Redux
+  const {
+    campaignWiseMessagesMetrics,
+    dateWiseMetrics,
+    engagementRateMetrics,
+  } = useSelector(
+    (state: RootState) => state?.whatsappDashboard?.dashboardData?.data || {}
+  );
 
   const insights = useSelector(
     (state: RootState) => state.whatsappDashboard?.campaignInsights || []
@@ -167,8 +162,12 @@ const WhatsappDash: FC<DashboardProps> = ({
 
   const campaignId = useSelector(
     (state: RootState) =>
-      state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp?.campaignId
+      state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp?.[0]
+        ?.campaignId
   );
+
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
 
   // Handlers for updating the state on date change
   const handleStartDateChange = (newValue) => {
@@ -184,125 +183,63 @@ const WhatsappDash: FC<DashboardProps> = ({
   };
 
   useEffect(() => {
-    const fetchDashData = async () => {
-      // Format the dates inside the effect
+    if (campaignId) {
       const formattedStartDate = format(startDate, "yyyy-MM-dd");
       const formattedEndDate = format(endDate, "yyyy-MM-dd");
-      const campaignId = selectedCampaignId;
-      console.log("Campaign", selectedCampaignId);
-
-      console.log("FORMATTED", formattedStartDate, formattedEndDate);
-      try {
-        const data = await whatsAppDashboardService(
+      dispatch(
+        fetchWhatsAppDashboardRequest(
           campaignId,
           formattedStartDate,
           formattedEndDate
-        );
-
-        setResponse(data);
-      } catch (error) {
-        console.error("Error fetching WhatsApp data:", error);
-      }
-    };
-
-    fetchDashData();
-  }, [startDate, endDate, campaignId, selectedCampaignId]);
-
-  useEffect(() => {
-    if (response && response.success && response.data) {
-      const {
-        startDate,
-        endDate,
-        campaignWiseMessagesMetrics = [],
-        dateWiseMetrics,
-        engagementRateMetrics,
-      } = response.data;
-
-      console.log("campaignWiseMessagesMetrics:", campaignWiseMessagesMetrics);
-
-      // Set the date pickers
-      setStartDate(new Date(startDate));
-      setEndDate(new Date(endDate));
-
-      // Determine the selected campaign name.
-      // If none is selected, default to the first campaign from the metrics.
-      const selectedCampaign =
-        campaign || campaignWiseMessagesMetrics[0]?.campaignName;
-
-      // If no campaign is selected yet, set the default.
-      if (!campaign && selectedCampaign) {
-        setCampaign(selectedCampaign);
-      }
-
-      // If you want to display metrics only for the selected campaign,
-      // filter the metrics array accordingly.
-      const filteredMetrics = campaignWiseMessagesMetrics.filter(
-        (metric) => metric.campaignName === selectedCampaign
-      );
-
-      // Aggregate metrics only for the selected campaign.
-      let totalSent = 0;
-      let totalRead = 0;
-      let totalDelivered = 0;
-      let totalFailed = 0;
-      let totalReplied = 0;
-
-      filteredMetrics.forEach((metric) => {
-        totalSent += metric.sent;
-        totalRead += metric.read;
-        totalDelivered += metric.delivered;
-        totalFailed += metric.failed;
-        totalReplied += metric.replied;
-      });
-
-      setTotalMessagesValue(totalSent);
-      setSeenMessagesValue(totalRead);
-      setDeliveredMessagesValue(totalDelivered);
-      setUnreadMessagesValue(totalFailed);
-      setHotLeadsValue(totalReplied);
-
-      // Update chart data based on the selected campaign.
-      updateChartData(dateWiseMetrics, selectedCampaign, engagementRateMetrics);
-    }
-  }, [campaign]);
-
-  // Update chart data when campaign selection changes
-  useEffect(() => {
-    if (
-      response &&
-      response.success &&
-      response.data &&
-      response.data.dateWiseMetrics &&
-      response.data.engagementRateMetrics
-    ) {
-      updateChartData(
-        response.data.dateWiseMetrics,
-        campaign,
-        response.data.engagementRateMetrics
+        )
       );
     }
-  }, [campaign, response]);
+  }, [campaignId, dispatch, endDate, startDate]);
 
-  const updateChartData = (
-    dateWiseMetrics,
-    selectedCampaign,
-    engagementRateMetrics
-  ) => {
-    const barData = dateWiseMetrics.map((item) => ({
+  // When the API returns campaign metrics, if our selected campaign is not yet valid,
+  // set it to the first campaign in the array.
+  useEffect(() => {
+    if (campaignWiseMessagesMetrics?.length) {
+      const exists = campaignWiseMessagesMetrics?.find(
+        (item: { campaignName: string }) => item.campaignName === campaign
+      );
+      if (!exists) {
+        setCampaign(campaignWiseMessagesMetrics[0].campaignName);
+      }
+    }
+  }, [campaignWiseMessagesMetrics, campaign]);
+
+  // Compute the current campaign’s metrics (stats) from the API data.
+  const currentCampaignMetrics = useMemo(() => {
+    return campaignWiseMessagesMetrics?.find(
+      (item: any) => item.campaignName === campaign
+    );
+  }, [campaignWiseMessagesMetrics, campaign]);
+
+  // Derived stats (defaulting to zero if data is missing)
+  const totalMessagesValue = currentCampaignMetrics?.total || 0;
+  const seenMessagesValue = currentCampaignMetrics?.read || 0;
+  const deliveredMessagesValue = currentCampaignMetrics?.delivered || 0;
+  const unreadMessagesValue =
+    (currentCampaignMetrics?.failed || 0) + (currentCampaignMetrics?.sent || 0);
+
+  const hotLeadsValue = currentCampaignMetrics?.replied || 0;
+
+  // Transform dateWiseMetrics for the Response Rate Chart using the selected campaign name as key
+  const responseChartData = useMemo(() => {
+    return dateWiseMetrics?.map((item: any) => ({
       date: item.date,
-      // Use the campaign name as key; if the key doesn't exist, default to 0.
-      value: item[selectedCampaign] || 0,
+      value: item[campaign] ?? 0,
     }));
+  }, [dateWiseMetrics, campaign]);
 
-    const lineData = engagementRateMetrics.map((item) => ({
+  // Transform engagementRateMetrics for the Engagement Rate Chart
+  const engagementChartData = useMemo(() => {
+    return engagementRateMetrics?.map((item: any) => ({
       date: item.date,
-      // Use the campaign name as key; if the key doesn't exist, default to 0.
-      value: item[selectedCampaign] || 0,
+      value: item[campaign] ?? 0,
     }));
-
-    setResponseChartData(barData);
-    setEngagementAnalysis(lineData);
-  };
+  }, [engagementRateMetrics, campaign]);
 
   const handleCampaignChange = (e: SelectChangeEvent<string>) => {
     setCampaign(e.target.value as string);
@@ -327,6 +264,12 @@ const WhatsappDash: FC<DashboardProps> = ({
     setCurrentIndex((prev) => (prev - 1 + 3) % 3);
   };
 
+  // useEffect(() => {
+  //   if (campaignId) {
+  //     dispatch(fetchWhatsAppInsightsRequest(campaignId));
+  //   }
+  // }, [campaignId]);
+
   useEffect(() => {
     if (campaign && campaignData?.length) {
       const selectedCampaignObj = campaignData.find(
@@ -339,7 +282,6 @@ const WhatsappDash: FC<DashboardProps> = ({
     }
   }, [campaign, campaignData, dispatch]);
 
-  //  {response.data.campaignWiseMessagesMetrics.map((metric, idx) => (
   return (
     <div className="p-6">
       {/* Stats Section */}
@@ -380,8 +322,8 @@ const WhatsappDash: FC<DashboardProps> = ({
               label="Campaign Name"
               className="bg-white border border-[#65558F] rounded-full text-sm"
             >
-              {response?.data?.campaignWiseMessagesMetrics?.map(
-                (campaignItem, index) => (
+              {campaignWiseMessagesMetrics?.map(
+                (campaignItem: { campaignName: string }, index: number) => (
                   <MenuItem key={index} value={campaignItem.campaignName}>
                     {campaignItem.campaignName}
                   </MenuItem>
@@ -682,19 +624,20 @@ const WhatsappDash: FC<DashboardProps> = ({
           {/* Engagement Rate Chart */}
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
             <ChartCard title="Engagement Rate">
-              {engagementAnalysisData && engagementAnalysisData.length ? (
+              {engagementChartData && engagementChartData.length ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={engagementAnalysisData}>
+                  <LineChart data={engagementChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Bar
+                    <Line
+                      type="monotone"
                       dataKey="value"
-                      fill={COLORS.BLUE}
+                      stroke={COLORS.LIGHTVIOLET}
                       name="Engagement Rate"
                     />
-                  </BarChart>
+                  </LineChart>
                 </ResponsiveContainer>
               ) : (
                 <NoDataMessage />
@@ -718,10 +661,11 @@ const WhatsappDash: FC<DashboardProps> = ({
               label="Campaign Name"
               className="bg-gray-100 rounded-full"
             >
-              {response?.data?.campaignWiseMessagesMetrics.map(
-                (item, index) => (
-                  <MenuItem key={index} value={item.campaignName}>
-                    {item.campaignName}
+              <MenuItem value="">All</MenuItem>
+              {campaignWiseMessagesMetrics?.map(
+                (campaignItem: { campaignName: string }, index: number) => (
+                  <MenuItem key={index} value={campaignItem.campaignName}>
+                    {campaignItem.campaignName}
                   </MenuItem>
                 )
               )}

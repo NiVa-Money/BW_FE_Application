@@ -14,7 +14,6 @@ import {
   GET_USER_All_SESSION_FAILURE_LIVE,
   GET_USER_All_SESSION_SUCCESS_LIVE,
 } from "../actionTypes/conversationActionsTypes";
-import { notifyError } from "../../components/Toast";
 
 export function* getUserAllSessionSaga({
   payload,
@@ -61,12 +60,20 @@ export function* getAdvanceFeatureSaga({
   payload: any;
 }): Generator<any> {
   try {
-    const { sessionIdOrPhoneId, channelName , botId } = payload;
+    const {
+      sessionId,
+      userPhoneNumberId,
+      adminPhoneNumberId,
+      channelName,
+      botId,
+    } = payload;
 
     const data = {
-      sessionIdOrPhoneId,
+      sessionId,
+      userPhoneNumberId,
+      adminPhoneNumberId,
       channelName,
-      botId, 
+      botId,
     };
     const userChat = yield call(getAdvanceFeatureService, data);
     yield put({
@@ -74,7 +81,7 @@ export function* getAdvanceFeatureSaga({
       payload: userChat,
     });
   } catch (error: any) {
-    notifyError(`${error}`);
+    console.log(error);
     yield put({
       type: ADVANCE_FEATURE_FAILURE,
     });

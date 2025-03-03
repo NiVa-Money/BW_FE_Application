@@ -92,7 +92,7 @@ const TestBot: React.FC<any> = ({
                             </div>
                             {/* Question on the right */}
                             <div className="self-start bg-gray-800 text-white px-2 py-2 rounded-lg max-w-xs">
-                                <span className='flex gap-[5px] justify-between'> {msg?.answer?.length ? <img height={20} width={20} src={botReduxImage} /> : null}{msg.answer}</span>
+                                <span className='flex gap-[5px] justify-between'> {msg?.answer?.length ? <img style={{ height: '24px', width: '24px' }} src={botReduxImage} /> : null}{msg.answer}</span>
                             </div>
                         </div>
                     ))}
