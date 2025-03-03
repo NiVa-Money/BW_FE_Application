@@ -81,7 +81,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
     const data = {
       userId: userId,
       botId: botId,
-      sessionI : sessionId,
+      sessionId: sessionId,
     };
     dispatch(getAllSessionLive(data));
   };
@@ -109,10 +109,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
     // Update local messages
     setMessages((prev) => [...prev, { text: newMessage, sender: "user" }]);
 
-    
     // Emit to server if socket is available
     if (socket) {
-      socket.emit("agentConnected")
+      socket.emit("agentConnected");
       socket.emit("joinSession", {
         chatRoom: sessionId,
         userId: userIdLive,
@@ -129,7 +128,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
     if (sessionId && botIdLive && userIdLive) {
       const newSocket = io(process.env.NEXT_PUBLIC_BASE_URL as string, {
         query: {
-          userType: "AGENT",  
+          userType: "AGENT",
           chatRoom: sessionId,
           botId: botIdLive,
           userId: userIdLive,
@@ -144,7 +143,10 @@ const LiveChat: React.FC = (): React.ReactElement => {
       newSocket.on("message", (message: any) => {
         console.log("Received message:", message);
         // Could be a system message
-        if (typeof message === "string" && message.includes("has joined the chat")) {
+        if (
+          typeof message === "string" &&
+          message.includes("has joined the chat")
+        ) {
           setMessages((prevMessages) => [
             ...prevMessages,
             { text: message, sender: "system" },
@@ -175,7 +177,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
     }
   };
 
-  const handleToggleChat = (e:any) => {
+  const handleToggleChat = (e: any) => {
     if (isChatEnabled) {
       // If the chat is being ended, show the confirmation modal
       setShowConfirmationModal(true);
@@ -269,7 +271,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
         </div>
 
         {/* Middle Column - Chat */}
-        <div className="col-span-1">
+        {/* max-h-[850px] overflow-y-auto */}
+        <div className="col-span-1 ">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4">
             <div className="flex justify-between items-start mb-4">
               {/* <button className="px-4 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1">
@@ -287,7 +290,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
 
             {/* Chat Messages */}
-            <div className="min-h-[450px]">
+            <div className=" overflow-y-auto">
               {messages?.map(
                 (
                   msg: {
@@ -314,7 +317,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   },
                   index: React.Key
                 ) => (
-                  <div key={index} className="flex flex-col space-y-2">
+                  <div key={index} className="flex flex-col  space-y-2">
                     {/* Question on the right */}
                     <div className="flex justify-end mb-4">
                       <div className="bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]">

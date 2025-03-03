@@ -53,7 +53,7 @@ const AllChats = () => {
   );
   const [aiLevel, setAiLevel] = useState(true);
   const [humanLevel, setHumanLevel] = useState(true);
-  const [isEnablingManualMode, setIsEnablingManualMode] = useState(false);
+ 
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
     (state: RootState) => state?.userChat?.advanceFeature?.data || {}
@@ -72,6 +72,7 @@ const AllChats = () => {
     (state: RootState) => state.bot?.lists?.loader
   );
   const [talkWithHuman, setTalkWithHuman] = useState(false);
+  const [isEnablingManualMode, setIsEnablingManualMode] = useState(false);
   const [userMessage, setUserMessage] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [intentVal, setIntentVal] = useState("");
@@ -420,33 +421,35 @@ const AllChats = () => {
       notifyError("No session is selected");
       return;
     }
-
+  
     const selectedSession = sessionsDataRedux?.sessions.find(
       (obj) =>
         obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
     );
-
+  
     const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
     const userPhoneNumberId = selectedSession?.userPhoneId;
     const action = talkWithHuman ? "remove" : "append";
-
+  
+    // Set loading state immediately
     setIsEnablingManualMode(true);
-
+    
     try {
+      // Make the API call first before changing the UI state
       await enableWhatsAppManualModeService({
         botId: botIdVal,
         adminPhoneNumberId,
         userPhoneNumberId,
         action,
       });
-
-      if (selectedSession?.handledBy === "Human") {
-        setTalkWithHuman(true);
-      } else {
-        setTalkWithHuman(false);
-      }
-
+  
+      // Update UI state after successful API call
+      setTalkWithHuman(!talkWithHuman);
+      
       await getChatHistory({ userPhoneId: selectedSessionId });
+    } catch (error) {
+      console.error("API Error:", error);
+      notifyError("Failed to toggle manual mode");
     } finally {
       setIsEnablingManualMode(false);
     }
@@ -740,8 +743,8 @@ const AllChats = () => {
           }
         />
 
-        <div className="flex-1 flex flex-col overflow-y-scroll">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 p-4 space-y-4">
             {channelNameVal === "whatsapp" && sessionId?.length ? (
               <WhatsappSectionData messages={messages} />
             ) : sessionId?.length ? (
@@ -750,7 +753,7 @@ const AllChats = () => {
           </div>
 
           <div className="flex items-end justify-end space-x-2 mb-4">
-            <label className="inline-flex items-center cursor-pointer">
+            <label className="inline-flex items-center mr-4 cursor-pointer">
               <input
                 type="checkbox"
                 className="sr-only peer"
@@ -759,7 +762,7 @@ const AllChats = () => {
                 onChange={() => handleTalkWithHumanToggle(sessionId)}
                 disabled={isEnablingManualMode || !sessionId}
               />
-              <span className="select-none text-lg ml-2">
+              <span className="select-none text-lg">
                 {isEnablingManualMode ? "Enabling..." : "Talk with Human"}
               </span>
               <div className="relative w-12 h-6 ml-2 bg-gray-200 peer-checked:bg-[#65558F] rounded-full after:content-[''] after:absolute after:top-[2px] after:right-[22px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
