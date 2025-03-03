@@ -13,7 +13,6 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
-import { FormControlLabel, Switch } from "@mui/material";
 import { notifyError } from "../../../components/Toast";
 // import ReactMarkdown from "react-markdown";
 import SendIcon from "@mui/icons-material/Send";
@@ -32,6 +31,7 @@ import {
   getWhatsAppChatsService,
   sendWhatsAppManualReplyService,
 } from "../../../api/services/conversationServices";
+import { Switch } from "@mui/material";
 
 interface AnalysisSection {
   title: string;
@@ -74,6 +74,7 @@ const AllChats = () => {
   const [talkWithHuman, setTalkWithHuman] = useState(false);
   const [userMessage, setUserMessage] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [intentVal, setIntentVal] = useState("");
 
   // New search handler function
   const handleSearch = async () => {
@@ -92,6 +93,7 @@ const AllChats = () => {
       botId: botIdVal,
       page: 1,
       channelName: channelNameVal,
+      intent: intentVal,
     };
     if (searchType === "order") {
       data.orderName = searchValue.trim();
@@ -118,6 +120,22 @@ const AllChats = () => {
       }
     } catch (error) {
       console.log(error.message);
+    }
+  };
+
+  const handleIntentChange = (selectedIntent: string) => {
+    setIntentVal(selectedIntent);
+    if (botIdVal) {
+      dispatch(
+        getAllSession({
+          botId: botIdVal,
+          page: 1,
+          channelName: channelNameVal,
+          aiLevel,
+          humanLevel,
+          intent: selectedIntent,
+        })
+      );
     }
   };
 
@@ -158,6 +176,7 @@ const AllChats = () => {
       aiLevel,
       humanLevel,
       channelName: channelNameVal,
+      intentVal,
     };
 
     if (userPhoneId) {
@@ -234,68 +253,6 @@ const AllChats = () => {
       expanded: true,
     },
   ]);
-
-  useEffect(() => {
-    if (advanceFeatureDataRedux?.data?.success) {
-      // Pull out the nested data object
-      const analysis = advanceFeatureDataRedux?.data?.data?.currentAnalysis;
-      console.log(analysis);
-
-      const {
-        emotion,
-        intent,
-        reason,
-        sentiments,
-        salesIntelligence,
-        smartSuggestion,
-        vulnerability,
-      } = analysis;
-
-      setAnalysisSections([
-        {
-          title: "Intent",
-          description: intent || "No intent detected.",
-          expanded: true,
-        },
-        {
-          title: "Reason",
-          description: reason || "No reason provided.",
-          expanded: true,
-        },
-        {
-          title: "Emotion Analysis",
-          description: emotion || "No emotion detected.",
-          expanded: true,
-        },
-        {
-          title: "Sentiment Analysis",
-          description: sentiments
-            ? `Negative: ${sentiments.Negative}, Neutral: ${sentiments.Neutral}, Positive: ${sentiments.Positive}`
-            : "No sentiment data.",
-          expanded: true,
-        },
-        {
-          title: "Sales Intelligence",
-          description: salesIntelligence
-            ? JSON.stringify(salesIntelligence)
-            : "No sales insights.",
-          expanded: true,
-        },
-        {
-          title: "Smart Suggestion",
-          description: smartSuggestion || "No suggestions available.",
-          expanded: true,
-        },
-        {
-          title: "Vulnerability",
-          description: vulnerability
-            ? JSON.stringify(vulnerability)
-            : "No vulnerabilities found.",
-          expanded: true,
-        },
-      ]);
-    }
-  }, [advanceFeatureDataRedux]);
 
   const handleSessionSelection = (selectedSessionId: string) => {
     const messagesData =
@@ -621,6 +578,31 @@ const AllChats = () => {
   const sentimentData = transformSentimentsData(analysis?.sentiments);
   const salesData = transformSalesData(analysis?.salesIntelligence);
   const vulnerabilityData = transformVulnerabilityData(analysis?.vulnerability);
+  const intentData = analysis?.intent || "No intent detected.";
+  const reasonData = analysis?.reason || "No reason provided.";
+  const emotionData = analysis?.emotion || "No emotion detected.";
+  const smartSuggestionData = analysis?.smartSuggestion || "No suggestions.";
+
+  useEffect(() => {
+    if (analysis) {
+      setAnalysisSections((prevSections) =>
+        prevSections.map((section) => {
+          switch (section.title) {
+            case "Intent":
+              return { ...section, description: intentData };
+            case "Reason":
+              return { ...section, description: reasonData };
+            case "Emotion Analysis":
+              return { ...section, description: emotionData };
+            case "Smart Suggestion":
+              return { ...section, description: smartSuggestionData };
+            default:
+              return section;
+          }
+        })
+      );
+    }
+  }, [analysis, intentData, reasonData, emotionData, smartSuggestionData]);
 
   return (
     <div className="flex flex-col min-h-screen p-6">
@@ -705,32 +687,36 @@ const AllChats = () => {
           ))}
         </select>
 
-        <div className="flex justify-center items-center">
-          <label htmlFor="AI Chats" className="text-black mr-2">
-            AI Chats
-          </label>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={Boolean(aiLevel)}
-                onClick={(e: any) => setAiLevel(e.target.checked)}
-                color="primary"
-              />
-            }
-            label=""
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          value={intentVal}
+          onChange={(e) => handleIntentChange(e.target.value)}
+        >
+          <option value="">Filter by intent</option>
+          <option value="Buying">Buying</option>
+          <option value="Sales">Sales</option>
+          <option value="Query">Query</option>
+          <option value="Complaint">Complaint</option>
+          <option value="Support Request">Support Request</option>
+          <option value="Feedback">Feedback</option>
+          <option value="Interest">Interest</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+          <span className="text-gray-800 font-medium">AI Chats</span>
+          <Switch
+            checked={Boolean(aiLevel)}
+            onChange={(e) => setAiLevel(e.target.checked)}
+            color="primary"
           />
         </div>
-
-        <div className="flex justify-center items-center">
-          <FormControlLabel
-            control={
-              <Switch
-                checked={Boolean(humanLevel)}
-                onClick={(e: any) => setHumanLevel(e.target.checked)}
-                color="primary"
-              />
-            }
-            label="Human Chats"
+        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+          <span className="text-gray-800 font-medium">Human Chats</span>
+          <Switch
+            checked={Boolean(humanLevel)}
+            onChange={(e) => setHumanLevel(e.target.checked)}
+            color="primary"
           />
         </div>
       </div>
