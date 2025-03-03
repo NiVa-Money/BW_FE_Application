@@ -15,24 +15,34 @@ import {
   createWhatsAppCampaignAction,
   createWhatsAppTemplateAction,
 } from "../../../store/actions/whatsappCampaignActions";
-import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
+import {
+  convertCsvToJsonService,
+  uploadWhatsAppMediaService,
+} from "../../../api/services/whatsappCampaignService";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
+import CreateTemplateModal from "./CreateTemplate";
+
+interface TemplateButton {
+  type: "quick_reply" | "call_to_action";
+  text: string;
+  ctaType?: "url" | "phone";
+  url?: string;
+  phoneNumber?: string;
+}
 
 const WhatsappCampaign: React.FC = () => {
   const [mode, setMode] = useState<"Template">("Template");
 
   const [campaignName, setCampaignName] = useState<string>("");
   const [contactList, setContactList] = useState<File | null>(null);
-  // const [botConfigFile, setBotConfigFile] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
   const [_fileName, setFileName] = useState("");
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
-  const [text, setText] = useState("");
-  const [name, setName] = useState("");
+
   // const [image, setImage] = useState<string | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<any>(null); // New state
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
 
   const navigate = useNavigate();
@@ -71,20 +81,6 @@ const WhatsappCampaign: React.FC = () => {
     }
   };
 
-  // const handlePdfUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-
-  //   if (file && file.type !== "application/pdf") {
-  //     alert("Only PDF files are allowed.");
-  //     event.target.value = ""; // Clear the file input
-  //     setFileName(""); // Clear the file name state
-  //   } else if (file) {
-  //     setBotConfigFile(file); // Set the bot configuration file
-  //     setFileName(file.name); // Update the file name to show in both inputs
-  //   }
-  // };
-
-  // const handleModeChange = (selectedMode: "Text" | "Image" | "Template") => {
   const handleModeChange = (selectedMode: "Template") => {
     setMode(selectedMode);
     setShowTemplate(selectedMode === "Template");
@@ -211,25 +207,249 @@ const WhatsappCampaign: React.FC = () => {
     }
   };
 
-  const handleCreateTemplate = () => {
-    const templateData = {
-      integrationId, 
-      name, 
-      text,
-      // image,
+  // const handleTemplateDone = async (templateData: {
+  //   name: string;
+  //   language: string;
+  //   headerType: string;
+  //   headerText?: string;
+  //   headerFile?: File | null;
+  //   bodyText: string;
+  //   footerText?: string;
+  //   buttons: TemplateButton[];
+  // }) => {
+  //   // Find the integration that matches the selected phoneNumberId
+  //   const selectedIntegration = integrationList.find(
+  //     (integration) =>
+  //       integration.phoneNumberId.toString() === selectedPhoneNumberId
+  //   );
+
+  //   if (
+  //     !selectedIntegration ||
+  //     !selectedIntegration.secretToken ||
+  //     selectedIntegration.secretToken.length !== 24
+  //   ) {
+  //     alert(
+  //       "Invalid integration selected. Please check your integration configuration."
+  //     );
+  //     return;
+  //   }
+
+  //   // 1) Upload header media if user selected image/video/document
+  //   let headerUrl = "";
+  //   if (
+  //     templateData.headerFile &&
+  //     ["image", "video", "document"].includes(templateData.headerType)
+  //   ) {
+  //     try {
+  //       const formData = new FormData();
+  //       formData.append("file", templateData.headerFile);
+  //       const { url } = await uploadWhatsAppMediaService(
+  //         formData,
+  //         selectedIntegration.secretToken
+  //       );
+  //       headerUrl = url;
+  //     } catch (error) {
+  //       console.error("Header upload failed:", error);
+  //       alert("Failed to upload header media.");
+  //       return;
+  //     }
+  //   }
+
+  //   // 2) Build the final header object
+  //   let headerType = "NONE";
+  //   let headerContent = "";
+  //   if (templateData.headerType === "text") {
+  //     headerType = "TEXT";
+  //     headerContent = templateData.headerText || "";
+  //   } else if (
+  //     ["image", "video", "document"].includes(templateData.headerType)
+  //   ) {
+  //     headerType = templateData.headerType.toUpperCase(); // "IMAGE", "VIDEO", or "DOCUMENT"
+  //     headerContent = headerUrl;
+  //   }
+
+  //   // 3) Map the user’s buttons into your backend format
+  //   // (Adjust if your backend expects different key names)
+  //   const mappedButtons = templateData.buttons.map((btn) => {
+  //     if (btn.type === "quick_reply") {
+  //       return {
+  //         type: "QUICK_REPLY",
+  //         text: btn.text,
+  //       };
+  //     } else {
+  //       // call_to_action
+  //       if (btn.ctaType === "url") {
+  //         return {
+  //           type: "URL",
+  //           text: btn.text,
+  //           url: btn.url || "",
+  //         };
+  //       } else {
+  //         // phone
+  //         return {
+  //           type: "PHONE",
+  //           text: btn.text,
+  //           phoneNumber: btn.phoneNumber || "",
+  //         };
+  //       }
+  //     }
+  //   });
+
+  //   // 4) Create the template payload for your backend
+  //   const payload = {
+  //     integrationId: selectedIntegration.secretToken,
+  //     name: templateData.name,
+  //     language: templateData.language || "en_US",
+  //     category: "MARKETING",
+  //     header: {
+  //       type: headerType,
+  //       content: headerContent,
+  //     },
+  //     body: {
+  //       text: templateData.bodyText,
+  //     },
+  //     footer: {
+  //       text: templateData.footerText || "",
+  //     },
+  //     buttons: mappedButtons,
+  //   };
+
+  //   // 5) Dispatch the createWhatsAppTemplateAction with the payload
+  //   dispatch(createWhatsAppTemplateAction(payload));
+
+  //   // Hide the modal
+  //   setCustomizeScreen(false);
+  // };
+
+  // Find integration
+  const selectedIntegration = integrationList.find(
+    (integration) =>
+      integration.phoneNumberId.toString() === selectedPhoneNumberId
+  );
+
+  const handleTemplateDone = async (templateData: {
+    name: string;
+    language: string; // e.g. "en_US"
+    headerType: string; // "none" | "text" | "image" | "video" | "document"
+    headerText?: string;
+    headerFile?: File | null;
+    bodyText: string;
+    footerText?: string;
+    buttons: TemplateButton[]; // "quick_reply" or "call_to_action"
+  }) => {
+    if (
+      !selectedIntegration ||
+      !selectedIntegration.secretToken ||
+      selectedIntegration.secretToken.length !== 24
+    ) {
+      alert(
+        "Invalid integration selected. Please check your integration configuration."
+      );
+      return;
+    }
+
+    // 1) Upload file if image/video/document
+    let fileHandle = "";
+    if (
+      templateData.headerFile &&
+      ["image", "video", "document"].includes(templateData.headerType)
+    ) {
+      try {
+        const formData = new FormData();
+        formData.append("file", templateData.headerFile);
+        const file = new File(
+          [templateData.headerFile],
+          templateData.headerFile.name
+        );
+        const response = await uploadWhatsAppMediaService(
+          file,
+          selectedIntegration.secretToken
+        );
+
+        if (response?.fileHandle) {
+          fileHandle = response.fileHandle;
+        } else {
+          throw new Error("File handle missing in response");
+        }
+      } catch (error) {
+        console.error("Header upload failed:", error);
+        alert("Failed to upload header media.");
+        return;
+      }
+    }
+
+    // 2) Build the final header
+    let headerType = "TEXT" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
+    let headerContent = "";
+
+    if (templateData.headerType === "text") {
+      headerType = "TEXT";
+      headerContent = templateData.headerText || "";
+    } else if (templateData.headerType === "image") {
+      headerType = "IMAGE";
+      headerContent = fileHandle;
+    } else if (templateData.headerType === "video") {
+      headerType = "VIDEO";
+      headerContent = fileHandle;
+    } else if (templateData.headerType === "document") {
+      headerType = "DOCUMENT";
+      headerContent = fileHandle;
+    } else {
+      headerType = "NONE";
+    }
+
+    // 3) Convert buttons to the doc's ButtonDto
+    // Doc says: ButtonDto.type can be "QUICK_REPLY", "URL", "PHONE_NUMBER"
+    const mappedButtons = templateData.buttons.map((btn) => {
+      if (btn.type === "quick_reply") {
+        // QUICK_REPLY
+        return {
+          type: "QUICK_REPLY" as const,
+          text: btn.text,
+        };
+      } else {
+        // call_to_action
+        if (btn.ctaType === "url") {
+          // "URL"
+          return {
+            type: "URL" as const,
+            text: btn.text,
+            url: btn.url || "",
+          };
+        } else {
+          // "PHONE_NUMBER"
+          return {
+            type: "PHONE_NUMBER" as const,
+            text: btn.text,
+            phoneNumber: btn.phoneNumber || "",
+          };
+        }
+      }
+    });
+
+    // 4) Build final payload
+    const payload = {
+      integrationId: selectedIntegration.secretToken,
+      name: templateData.name,
+      language: templateData.language || "en_US",
+      category: "MARKETING",
+      header: {
+        type: headerType, // "TEXT", "IMAGE", "DOCUMENT", "VIDEO", or "NONE"
+        content: headerContent, // If text, user input; if file, fileHandle
+      },
+      body: {
+        text: templateData.bodyText,
+      },
+      footer: {
+        text: templateData.footerText || "",
+      },
+      buttons: mappedButtons,
     };
-    dispatch(createWhatsAppTemplateAction(templateData));
+
+    // 5) Dispatch
+    dispatch(createWhatsAppTemplateAction(payload));
     setCustomizeScreen(false);
   };
-
-  // const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-  //   const files = event.target.files;
-  //   if (files && files[0]) {
-  //     const file = files[0];
-  //     // setImage(URL.createObjectURL(file));
-  //     setFileName(file.name); // Store filename
-  //   }
-  // };
 
   React.useEffect(() => {
     if (success) navigate("/marketing/dashboard");
@@ -257,18 +477,6 @@ const WhatsappCampaign: React.FC = () => {
         <div className="flex flex-wrap gap-4 mt-10">
           {/* Left Section */}
           <div className="flex flex-col flex-1 shrink basis-0 min-w-[240px]">
-            {/* <div className="flex flex-col w-full mb-4">
-              <label className="leading-snug text-slate-700 mb-2">
-                Choose WhatsApp Number ID *
-              </label>
-              <input
-                type="text"
-                value={phoneNumberId}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="PhoneNumberID"
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-              />
-            </div> */}
             <div className="flex flex-col w-full mb-4">
               <label className="leading-snug text-slate-700 mb-2">
                 Choose WhatsApp Number ID *
@@ -316,97 +524,13 @@ const WhatsappCampaign: React.FC = () => {
                 Create Template
               </button>
             </div>
-            {customizeScreen ? (
-              <div className="rounded-lg shadow-sm p-6">
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      Template Name
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your template name"
-                      className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-                    />
-
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Text
-                    </label>
-                    <textarea
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      className="w-full h-32 px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
-                  <div>
-                    {/* <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image
-                    </label>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          document.getElementById("file-upload")?.click()
-                        }
-                        className="flex items-center px-4 py-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-md hover:bg-gray-100"
-                      >
-                        {fileName
-                          ? `Uploaded File: ${fileName}`
-                          : "Upload an image"}
-                      </button>
-
-                      <input
-                        id="file-upload"
-                        type="file"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                        accept="image/*"
-                      />
-                    </div> */}
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-3 mt-6">
-                  <button
-                    onClick={() => setCustomizeScreen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleCreateTemplate}
-                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            ) : null}
-
-            {/* Mode-Specific Input */}
-            {/* <div className="flex flex-col w-full mb-4">
-              {/* {mode === "Text" && (
-                <div className="flex flex-col w-full mb-4">
-                  <label className="text-slate-700 ml-2 mb-2">
-                    Message Content *
-                  </label>
-                  <textarea
-                    placeholder="Enter your message content"
-                    className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
-                  />
-                </div>
-              )} */}
-            {/* {mode === "Image" && (
-                <div>
-                  <label className="text-slate-700 ml-2">Upload Image *</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
-                  />
-                </div>
-              )} */}
-            {/* </div>  */}
+            {customizeScreen && (
+              <CreateTemplateModal
+                onClose={() => setCustomizeScreen(false)}
+                onDone={handleTemplateDone}
+                secretToken={selectedIntegration?.secretToken || ""}
+              />
+            )}
 
             {/* Schedule Date */}
             <div className="flex flex-col w-full mb-4">
@@ -578,16 +702,11 @@ const WhatsappCampaign: React.FC = () => {
           )}
           {/* WhatsApp Preview */}
           <div className="flex flex-col flex-1 mt-5 shrink basis-0 min-w-[240px]">
-            {/* <img
-              src="/assets/WhatsappCampaign.svg"
-              alt="Whatsapp Campaign"
-              className="w-full h-[700px]"
-            /> */}
             <div className="relative w-[400px] h-[660px] border border-gray-300 rounded-md overflow-hidden">
               {/* Header (Contact name, info, date) */}
               <div className="bg-[#075E54] text-white flex items-center justify-between px-4 py-2">
                 <div className="flex flex-col">
-                  <span className="font-bold text-base"> Campign </span>
+                  <span className="font-bold text-base"> Campaign </span>
                 </div>
               </div>
 
