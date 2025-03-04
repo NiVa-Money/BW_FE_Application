@@ -1,166 +1,4 @@
-// import { useState } from "react";
-// import {
-//   Box,
-//   Card,
-//   Typography,
-//   TextField,
-//   Button,
-//   styled,
-// } from "@mui/material";
-// import MarketingDashboard from "./MarketingDashboard";
-
-// const StyledCard = styled(Card)({
-//   maxWidth: "800px",
-//   margin: "auto",
-//   borderRadius: "16px",
-//   boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
-//   overflow: "hidden",
-// });
-
-// const HeaderBox = styled(Box)({
-//   backgroundSize: "cover",
-//   position: "relative",
-//   padding: "24px",
-// });
-
-// const StyledTextField = styled(TextField)({
-//   "& .MuiInputBase-root": {
-//     backgroundColor: "#F3F4F6",
-//     borderRadius: "8px",
-//   },
-//   "& .MuiOutlinedInput-notchedOutline": {
-//     border: "none",
-//   },
-// });
-
-// const MarketingDashboardForm = () => {
-//   const [showDashboard, setShowDashboard] = useState(false); // State to toggle between form and dashboard
-
-//   if (showDashboard) {
-//     return <MarketingDashboard />; // Show the MarketingDashboard if state is true
-//   }
-
-//   return (
-//     <Box
-//       sx={{
-//         minHeight: "100vh",
-//         p: 5,
-//         display: "flex",
-//         justifyContent: "center", // Centers content horizontally
-//         alignItems: "center", // Centers content vertically
-//       }}
-//     >
-//       <StyledCard>
-//         <HeaderBox
-//           sx={{
-//             backgroundImage: "url(/assets/marketing1.svg)",
-//             backgroundSize: "cover",
-//             backgroundPosition: "center",
-//             height: "20vh",
-//           }}
-//         ></HeaderBox>
-
-//         <Box sx={{ p: 4 }}>
-//           {/* Header Text */}
-//           <Typography
-//             variant="h6"
-//             sx={{
-//               color: "#2E2F5F", // Custom color
-//               fontWeight: "bold", // Make the font bold
-//               mb: 1,
-//             }}
-//           >
-//             Hi, User Name
-//           </Typography>
-
-//           <Typography
-//             sx={{
-//               color: "#2E2F5F", // Custom color
-//               fontWeight: "bold", // Make the font bold
-//               mb: 4,
-//             }}
-//           >
-//             To create effective marketing dashboards and campaigns, we need your
-//             expertise. Please help us understand your industry better.
-//           </Typography>
-
-//           {/* Form */}
-//           <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
-//             <Box>
-//               <Typography sx={{ mb: 1, color: "#2E2F5F" }}>
-//                 Your Brand
-//               </Typography>
-//               <StyledTextField fullWidth placeholder="Name of the company" />
-//             </Box>
-//             <Box>
-//               <Typography sx={{ mb: 1, color: "#2E2F5F" }}>
-//                 Your Location
-//               </Typography>
-//               <StyledTextField
-//                 fullWidth
-//                 placeholder="Enter the geographics where you work"
-//               />
-//             </Box>
-//             <Box>
-//               <Typography sx={{ mb: 1, color: "#2E2F5F" }}>
-//                 Your Competitors
-//               </Typography>
-//               <StyledTextField
-//                 fullWidth
-//                 placeholder="Enter your campaign name"
-//               />
-//             </Box>
-//             <Box>
-//               <Typography sx={{ mb: 1, color: "#2E2F5F" }}>
-//                 Keywords Of Your Industry
-//               </Typography>
-//               <StyledTextField
-//                 fullWidth
-//                 placeholder="Enter your campaign name"
-//               />
-//             </Box>
-//           </Box>
-
-//           {/* Buttons */}
-//           <Box
-//             sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}
-//           >
-//             <Button
-//               variant="outlined"
-//               sx={{
-//                 color: "#65558F", // Text color for both buttons
-//                 borderColor: "#65558F", // Border color for the outlined button
-//                 "&:hover": {
-//                   borderColor: "#9CA3AF",
-//                   backgroundColor: "transparent",
-//                 },
-//                 borderRadius: "8px", // Matching border radius
-//                 textTransform: "none", // Ensures text doesn't get transformed to uppercase
-//               }}
-//             >
-//               Cancel
-//             </Button>
-//             <Button
-//               variant="contained"
-//               sx={{
-//                 bgcolor: "#65558F", // Background color for the contained button
-//                 color: "white", // Text color for the contained button
-//                 borderRadius: "8px", // Matching border radius
-//                 textTransform: "none", // Ensures text doesn't get transformed to uppercase
-//               }}
-//               onClick={() => setShowDashboard(true)} // Set state to true when clicked
-//             >
-//               Done
-//             </Button>
-//           </Box>
-//         </Box>
-//       </StyledCard>
-//     </Box>
-//   );
-// };
-
-// export default MarketingDashboardForm;
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import {
   Box,
@@ -168,44 +6,157 @@ import {
   Typography,
   TextField,
   Button,
-  // styled,
+  Select,
+  MenuItem,
+  styled,
 } from "@mui/material";
 import MarketingDashboard from "./MarketingDashboard";
 import { fetchMarketingInsightsService } from "../../../api/services/marketingDashboardService";
+import { CountryEnum } from "../../../enums";
+
+const StyledCard = styled(Card)({
+  maxWidth: "1200px",
+  margin: "auto",
+  borderRadius: "16px",
+  boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
+  overflow: "hidden",
+});
+
+const HeaderBox = styled(Box)({
+  backgroundSize: "cover",
+  position: "relative",
+  padding: "24px",
+});
 
 const MarketingDashboardForm = () => {
   const [formData, setFormData] = useState({
-    brandName: "",
+    company: {
+      name: "",
+      socialLinks: {
+        instagram: "",
+        twitter: "",
+        linkedin: "",
+      },
+    },
     country: "",
-    competitors: "",
+    competitors: [
+      {
+        name: "",
+        socialLinks: {
+          instagram: "",
+          twitter: "",
+          linkedin: "",
+        },
+      },
+    ],
     nextUpdateInHours: 24,
-    nextKeywords: "",
-    trendKeywords: "",
+    newsKeywords: "",
+    trendsKeywords: [],
   });
-  const [showDashboard, setShowDashboard] = useState(false);
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData((prev) => {
+      const newFormData = { ...prev };
+
+      if (field.startsWith("company.socialLinks.")) {
+        const subField = field.split(".")[2];
+        newFormData.company = {
+          ...newFormData.company,
+          socialLinks: {
+            ...newFormData.company.socialLinks,
+            [subField]: value,
+          },
+        };
+      } else if (field.startsWith("company.")) {
+        const subField = field.split(".")[1];
+        newFormData.company = {
+          ...newFormData.company,
+          [subField]: value,
+        };
+      } else if (
+        field.startsWith("competitors[") &&
+        field.includes(".socialLinks.")
+      ) {
+        const matches = field.match(/competitors\[(\d+)\]\.socialLinks\.(\w+)/);
+        if (matches) {
+          const competitorIndex = Number(matches[1]);
+          const subField = matches[2];
+          const newCompetitors = [...newFormData.competitors];
+          newCompetitors[competitorIndex] = {
+            ...newCompetitors[competitorIndex],
+            socialLinks: {
+              ...newCompetitors[competitorIndex].socialLinks,
+              [subField]: value,
+            },
+          };
+          newFormData.competitors = newCompetitors;
+        }
+      } else if (field.startsWith("competitors[")) {
+        const matches = field.match(/competitors\[(\d+)\]\.(\w+)/);
+        if (matches) {
+          const competitorIndex = Number(matches[1]);
+          const subField = matches[2];
+          const newCompetitors = [...newFormData.competitors];
+          newCompetitors[competitorIndex] = {
+            ...newCompetitors[competitorIndex],
+            [subField]: value,
+          };
+          newFormData.competitors = newCompetitors;
+        }
+      } else {
+        (newFormData as any)[field] = value;
+      }
+
+      return newFormData;
+    });
   };
 
+  const newsKeywordsArray = formData.newsKeywords
+    .split(",")
+    .map((keyword) => keyword.trim())
+    .filter((keyword) => keyword !== "");
+
   const handleSubmit = async () => {
+    setError(null);
+
+    if (!formData.country) {
+      setError("Please select a country.");
+      return;
+    }
+
+    if (!formData.company.name) {
+      setError("Please enter a company name.");
+      return;
+    }
+
+    if (formData.competitors.length === 0 || !formData.competitors[0].name) {
+      setError("Please enter at least one competitor.");
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
       const insights = await fetchMarketingInsightsService(
-        formData.brandName,
+        formData.company.name,
         formData.country,
-        formData.competitors.split(",").map((c) => c.trim()),
+        formData.competitors.map((c) => c.name),
         formData.nextUpdateInHours,
-        formData.nextKeywords.split(",").map((k) => k.trim()),
-        formData.trendKeywords.split(",").map((k) => k.trim())
+        newsKeywordsArray,
+        formData.trendsKeywords
       );
 
       console.log("insights api response", insights);
       setShowDashboard(true);
     } catch (error) {
       console.error("Failed to fetch marketing insights", error);
+      setError("Failed to fetch marketing insights. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -217,67 +168,210 @@ const MarketingDashboardForm = () => {
     <Box
       sx={{
         minHeight: "100vh",
+        p: 5,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
       }}
     >
-      <Card sx={{ maxWidth: 600, width: "100%", p: 4 }}>
-        <Typography variant="h6" sx={{ mb: 3 }}>
-          Marketing Insights Setup
-        </Typography>
+      <StyledCard>
+        {/* Header section */}
+        <HeaderBox
+          sx={{
+            backgroundImage: "url(/assets/marketing1.svg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            height: "20vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+          }}
+        >
+          <Typography variant="h4" sx={{ textAlign: "center" }}>
+            Create Marketing Insights
+          </Typography>
+        </HeaderBox>
 
-        <Box sx={{ display: "grid", gap: 3 }}>
+        {/* Main form */}
+        <Box sx={{ p: 4 }}>
           <TextField
             fullWidth
-            label="Brand Name"
-            value={formData.brandName}
-            onChange={(e) => handleInputChange("brandName", e.target.value)}
+            label="Company Name"
+            value={formData.company.name}
+            onChange={(e) => handleInputChange("company.name", e.target.value)}
+            sx={{ mb: 2 }}
           />
-          <TextField
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: 2,
+              mb: 2,
+            }}
+          >
+            <TextField
+              fullWidth
+              label="Instagram"
+              value={formData.company.socialLinks.instagram}
+              onChange={(e) =>
+                handleInputChange(
+                  "company.socialLinks.instagram",
+                  e.target.value
+                )
+              }
+            />
+            <TextField
+              fullWidth
+              label="Twitter"
+              value={formData.company.socialLinks.twitter}
+              onChange={(e) =>
+                handleInputChange("company.socialLinks.twitter", e.target.value)
+              }
+            />
+            <TextField
+              fullWidth
+              label="LinkedIn"
+              value={formData.company.socialLinks.linkedin}
+              onChange={(e) =>
+                handleInputChange(
+                  "company.socialLinks.linkedin",
+                  e.target.value
+                )
+              }
+            />
+          </Box>
+
+          <Select
             fullWidth
-            label="Country"
             value={formData.country}
             onChange={(e) => handleInputChange("country", e.target.value)}
-          />
+            displayEmpty
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value="" disabled>
+              Select Country
+            </MenuItem>
+            {Object.entries(CountryEnum).map(([name, code]) => (
+              <MenuItem key={code} value={code}>
+                {name} ({code})
+              </MenuItem>
+            ))}
+          </Select>
+
           <TextField
             fullWidth
-            label="Competitor Companies (comma-separated)"
-            value={formData.competitors}
-            onChange={(e) => handleInputChange("companies", e.target.value)}
+            label="Competitor Name"
+            value={formData.competitors[0].name}
+            onChange={(e) =>
+              handleInputChange("competitors[0].name", e.target.value)
+            }
+            sx={{ mb: 2 }}
           />
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: 2,
+              mb: 2,
+            }}
+          >
+            <TextField
+              fullWidth
+              label="Competitor Instagram"
+              value={formData.competitors[0].socialLinks.instagram}
+              onChange={(e) =>
+                handleInputChange(
+                  "competitors[0].socialLinks.instagram",
+                  e.target.value
+                )
+              }
+            />
+            <TextField
+              fullWidth
+              label="Competitor Twitter"
+              value={formData.competitors[0].socialLinks.twitter}
+              onChange={(e) =>
+                handleInputChange(
+                  "competitors[0].socialLinks.twitter",
+                  e.target.value
+                )
+              }
+            />
+            <TextField
+              fullWidth
+              label="Competitor LinkedIn"
+              value={formData.competitors[0].socialLinks.linkedin}
+              onChange={(e) =>
+                handleInputChange(
+                  "competitors[0].socialLinks.linkedin",
+                  e.target.value
+                )
+              }
+            />
+          </Box>
+
           <TextField
             fullWidth
-            label="Next Update Hours"
+            label="Next Update Hours (1-168)"
             type="number"
+            inputProps={{ min: 1, max: 168 }}
             value={formData.nextUpdateInHours}
             onChange={(e) =>
-              handleInputChange("nextUpdateInHours", e.target.value)
+              handleInputChange("nextUpdateInHours", Number(e.target.value))
             }
+            sx={{ mb: 2 }}
           />
-          <TextField
-            fullWidth
-            label="Next Keywords (comma-separated)"
-            value={formData.nextKeywords}
-            onChange={(e) => handleInputChange("nextKeywords", e.target.value)}
-          />
-          <TextField
-            fullWidth
-            label="Trend Keywords (comma-separated)"
-            value={formData.trendKeywords}
-            onChange={(e) => handleInputChange("trendKeywords", e.target.value)}
-          />
-        </Box>
 
-        <Box
-          sx={{ display: "flex", justifyContent: "flex-end", mt: 3, gap: 2 }}
-        >
-          <Button variant="outlined">Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            Submit
-          </Button>
+          <TextField
+            fullWidth
+            label="News Keywords"
+            value={formData.newsKeywords}
+            onChange={(e) => handleInputChange("newsKeywords", e.target.value)}
+            sx={{ mb: 2 }}
+          />
+
+          <TextField
+            fullWidth
+            label="Trends Keywords (comma-separated)"
+            value={formData.trendsKeywords.join(", ")}
+            onChange={(e) =>
+              handleInputChange(
+                "trendsKeywords",
+                e.target.value
+                  .split(",")
+                  .map((k) => k.trim())
+                  .filter((k) => k)
+              )
+            }
+            sx={{ mb: 2 }}
+          />
+
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: "#65558F",
+                color: "white",
+                borderRadius: "8px",
+                textTransform: "none",
+              }}
+              onClick={handleSubmit}
+              disabled={isLoading}
+            >
+              {isLoading ? "Submitting..." : "Done"}
+            </Button>
+          </Box>
+
+          {error && (
+            <Typography color="error" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
         </Box>
-      </Card>
+      </StyledCard>
     </Box>
   );
 };
