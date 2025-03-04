@@ -146,13 +146,6 @@ const MarketingDashboard = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (!isFetched) {
-  //     fetchInsights();
-  //     setIsFetched(true); // Mark as fetched
-  //   }
-  // }, [isFetched]);
-
   const isFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -198,8 +191,6 @@ const MarketingDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DashboardCard title="Market News">
           <div className="space-y-4">
-
-
             {loading ? (
               // Display loading spinner while fetching data
               <div className="flex justify-center items-center h-40">
@@ -221,7 +212,6 @@ const MarketingDashboard = () => {
                     </h3>
                     <ReactMarkdown className="text-sm text-gray-600">
                       {`${formattedNews[currentIndex].content}`}
-
                     </ReactMarkdown>
                   </div>
                 </motion.div>
@@ -240,6 +230,7 @@ const MarketingDashboard = () => {
             </IconButton>
           </div>
         </DashboardCard>
+        
 
         <DashboardCard title="Social Media Trends">
           <div className="space-y-4">
