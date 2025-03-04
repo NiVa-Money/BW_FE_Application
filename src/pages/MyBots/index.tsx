@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
 import MyBotCard from './MyBotCard';
 import { useDispatch, useSelector } from 'react-redux';
@@ -144,9 +145,9 @@ const MyBots: React.FC = () => {
   return (
     <div className='flex flex-col p-6 min-h-screen w-[100%]'>
       <div className='flex justify-between items-center'>
-        <h1 className="text-xl font-semibold">My Bots</h1>
+        <h1 className="text-xl font-semibold">My Agents</h1>
 
-        <button className='self-end bg-[#65558F] text-white p-1 w-[160px] rounded-[100px] mb-2 mt-4 mr-4' onClick={createBotHandler}>Create Bot</button></div>
+        <button className='self-end bg-[#65558F] text-white p-1 w-[160px] rounded-[100px] mb-2 mt-4 mr-4' onClick={createBotHandler}>Create Agent</button></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-xl:gap-2 w-[95%]">
         {botLists?.map((item: any) => (
           <div

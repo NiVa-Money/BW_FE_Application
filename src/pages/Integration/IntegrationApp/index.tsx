@@ -177,7 +177,7 @@ const WhatsAppIntegration: React.FC = () => {
                   onClick={() => navigate("/createbot")}
                   className="bg-[#65558F] text-white p-3 w-full rounded-lg font-semibold hover:bg-[#65558F]/85 transition-colors"
                 >
-                  Create Bot
+                  Create Agent
                 </button>
               ) : (
                 <select
