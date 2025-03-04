@@ -94,7 +94,6 @@ const AllChats = () => {
       botId: botIdVal,
       page: 1,
       channelName: channelNameVal,
-      intent: intentVal,
     };
     if (searchType === "order") {
       data.orderName = searchValue.trim();
@@ -102,7 +101,7 @@ const AllChats = () => {
       data.phoneNumber = searchValue.trim();
     }
     try {
-      const response = await dispatch(getAllSession(data));
+      const response =  dispatch(getAllSession(data));
       if (response?.payload?.success) {
         const filteredSessions = response.payload.data.sessions;
         setSearchResults(filteredSessions);
