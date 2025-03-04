@@ -53,7 +53,7 @@ const AllChats = () => {
   );
   const [aiLevel, setAiLevel] = useState(true);
   const [humanLevel, setHumanLevel] = useState(true);
- 
+
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
     (state: RootState) => state?.userChat?.advanceFeature?.data || {}
@@ -198,12 +198,9 @@ const AllChats = () => {
     return { success };
   };
 
-  // useEffect(() => {
-  //   if (!isSearchActive) {
-  //     console.log("Search is not active" );
-  //     getChatHistory({});
-  //   }
-  // }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
+  useEffect(() => {
+    getChatHistory({});
+  }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
 
   const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -421,19 +418,19 @@ const AllChats = () => {
       notifyError("No session is selected");
       return;
     }
-  
+
     const selectedSession = sessionsDataRedux?.sessions.find(
       (obj) =>
         obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
     );
-  
+
     const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
     const userPhoneNumberId = selectedSession?.userPhoneId;
     const action = talkWithHuman ? "remove" : "append";
-  
+
     // Set loading state immediately
     setIsEnablingManualMode(true);
-    
+
     try {
       // Make the API call first before changing the UI state
       await enableWhatsAppManualModeService({
@@ -442,10 +439,10 @@ const AllChats = () => {
         userPhoneNumberId,
         action,
       });
-  
+
       // Update UI state after successful API call
       setTalkWithHuman(!talkWithHuman);
-      
+
       await getChatHistory({ userPhoneId: selectedSessionId });
     } catch (error) {
       console.error("API Error:", error);
