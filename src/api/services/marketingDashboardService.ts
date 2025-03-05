@@ -1,13 +1,8 @@
 import axiosInstance from "../axiosConfig";
 
-
-export const getMarketingInsightsService = async (
-  status: "active" | "inactive" | "pending" = "active"
-) => {
+export const getMarketingInsightsService = async () => {
   try {
-    const response = await axiosInstance.get("/marketing/insights", {
-      params: { status },
-    });
+    const response = await axiosInstance.get("/marketing/insights");
 
     return response.data;
   } catch (error) {
@@ -38,4 +33,3 @@ export const fetchCompetitorsService = async (company) => {
     throw error;
   }
 };
-

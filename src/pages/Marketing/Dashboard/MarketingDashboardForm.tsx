@@ -60,8 +60,6 @@ const MarketingDashboardForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ---------- NESTED FIELD UPDATER ----------
-  // This function updates nested fields like "socialLinks.instagram"
   const updateNestedField = (obj, fieldPath, value) => {
     const keys = fieldPath.split(".");
     if (keys.length === 1) {
@@ -184,7 +182,18 @@ const MarketingDashboardForm = () => {
 
         navigate("/marketing/dashboard");
       } catch (err) {
+        const serverError =
+          err?.response?.data?.error || err?.response?.data?.message || "";
+
+        // If it includes "E11000", we know it's the duplicate key error.
+        if (serverError.includes("E11000 duplicate key error")) {
+          // This means the user already has data, so go to the dashboard.
+          navigate("/marketing/dashboard");
+          return;
+        }
+
         setError("Failed to fetch marketing insights");
+        navigate("/marketing/dashboard");
         console.error(err);
       } finally {
         setIsLoading(false);
