@@ -21,7 +21,7 @@ import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
 import UtilityDash from "../pages/Reports/UtilityDash";
 import HelpCenter from "../pages/HelpCenter";
-import MarketingDashboardForm from "../pages/Marketing/Dashboard/MarketingDashboardForm";
+// import MarketingDashboardForm from "../pages/Marketing/Dashboard/MarketingDashboardForm";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -39,7 +39,7 @@ export const autRoutes: any[] = [
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
 
   { id: 4, path: "/engagementTab", component: <EngagementTab /> },
-  { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboardForm /> },
+  { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   {
     id: 5.1,
     path: "/marketing/whatsappdashboard",

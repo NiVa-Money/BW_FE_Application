@@ -1,19 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import {
   Box,
-  Card,
   Typography,
   TextField,
   Button,
-  Select,
-  MenuItem,
+  Card,
   styled,
 } from "@mui/material";
-import MarketingDashboard from "./MarketingDashboard";
-import { fetchMarketingInsightsService } from "../../../api/services/marketingDashboardService";
-import { CountryEnum } from "../../../enums";
+import {
+  fetchCompetitorsService,
+  fetchMarketingInsightsService,
+} from "../../../api/services/marketingDashboardService";
+import { useNavigate } from "react-router-dom";
 
+// ---------- STYLED COMPONENTS ----------
 const StyledCard = styled(Card)({
   maxWidth: "1200px",
   margin: "auto",
@@ -28,10 +28,17 @@ const HeaderBox = styled(Box)({
   padding: "24px",
 });
 
+// ---------- MAIN COMPONENT ----------
 const MarketingDashboardForm = () => {
-  const [formData, setFormData] = useState({
+  // STEP CONTROL
+  const [step, setStep] = useState(1);
+
+  // COMPANY STATE
+  const [companyData, setCompanyData] = useState({
     company: {
       name: "",
+      description: "",
+      industry: "",
       socialLinks: {
         instagram: "",
         twitter: "",
@@ -39,338 +46,482 @@ const MarketingDashboardForm = () => {
       },
     },
     country: "",
-    competitors: [
-      {
-        name: "",
-        socialLinks: {
-          instagram: "",
-          twitter: "",
-          linkedin: "",
-        },
-      },
-    ],
-    nextUpdateInHours: 24,
-    newsKeywords: "",
-    trendsKeywords: [],
+    nextUpdateInHours: "", // will be converted to a number when sending payload
   });
 
-  const [showDashboard, setShowDashboard] = useState(false);
+  // COMPETITORS STATE: an array of objects
+  const [competitorsData, setCompetitorsData] = useState([]);
+
+  // SINGLE "News Keywords" & "Trends Keywords" for the entire payload
+  const [newsKeywords, setNewsKeywords] = useState("");
+  const [trendsKeywords, setTrendsKeywords] = useState("");
+
+  // UI STATES
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData((prev) => {
-      const newFormData = { ...prev };
+  // ---------- NESTED FIELD UPDATER ----------
+  // This function updates nested fields like "socialLinks.instagram"
+  const updateNestedField = (obj, fieldPath, value) => {
+    const keys = fieldPath.split(".");
+    if (keys.length === 1) {
+      return { ...obj, [fieldPath]: value };
+    }
+    const [head, ...rest] = keys;
+    return {
+      ...obj,
+      [head]: updateNestedField(obj[head] || {}, rest.join("."), value),
+    };
+  };
 
-      if (field.startsWith("company.socialLinks.")) {
-        const subField = field.split(".")[2];
-        newFormData.company = {
-          ...newFormData.company,
-          socialLinks: {
-            ...newFormData.company.socialLinks,
-            [subField]: value,
-          },
-        };
-      } else if (field.startsWith("company.")) {
-        const subField = field.split(".")[1];
-        newFormData.company = {
-          ...newFormData.company,
-          [subField]: value,
-        };
-      } else if (
-        field.startsWith("competitors[") &&
-        field.includes(".socialLinks.")
-      ) {
-        const matches = field.match(/competitors\[(\d+)\]\.socialLinks\.(\w+)/);
-        if (matches) {
-          const competitorIndex = Number(matches[1]);
-          const subField = matches[2];
-          const newCompetitors = [...newFormData.competitors];
-          newCompetitors[competitorIndex] = {
-            ...newCompetitors[competitorIndex],
-            socialLinks: {
-              ...newCompetitors[competitorIndex].socialLinks,
-              [subField]: value,
-            },
-          };
-          newFormData.competitors = newCompetitors;
-        }
-      } else if (field.startsWith("competitors[")) {
-        const matches = field.match(/competitors\[(\d+)\]\.(\w+)/);
-        if (matches) {
-          const competitorIndex = Number(matches[1]);
-          const subField = matches[2];
-          const newCompetitors = [...newFormData.competitors];
-          newCompetitors[competitorIndex] = {
-            ...newCompetitors[competitorIndex],
-            [subField]: value,
-          };
-          newFormData.competitors = newCompetitors;
-        }
-      } else {
-        (newFormData as any)[field] = value;
-      }
+  // ---------- COMPANY FIELD HANDLER ----------
+  const handleCompanyChange = (fieldPath, value) => {
+    setCompanyData((prev) => updateNestedField(prev, fieldPath, value));
+  };
 
-      return newFormData;
+  // ---------- COMPETITOR FIELD HANDLER ----------
+  // We pass an index so we can update the correct competitor in the array.
+  const handleCompetitorChange = (index, fieldPath, value) => {
+    setCompetitorsData((prev) => {
+      const newCompetitors = [...prev];
+      newCompetitors[index] = updateNestedField(
+        newCompetitors[index],
+        fieldPath,
+        value
+      );
+      return newCompetitors;
     });
   };
 
-  const newsKeywordsArray = formData.newsKeywords
-    .split(",")
-    .map((keyword) => keyword.trim())
-    .filter((keyword) => keyword !== "");
-
-  const handleSubmit = async () => {
+  const navigate = useNavigate();
+  // ---------- STEP HANDLER ----------
+  const handleNextStep = async () => {
     setError(null);
 
-    if (!formData.country) {
-      setError("Please select a country.");
-      return;
-    }
+    if (step === 1) {
+      // STEP 1: Fetch competitor data from the API
+      setIsLoading(true);
+      try {
+        const payload = {
+          company: {
+            name: companyData.company.name,
+            description: companyData.company.description,
+            industry: companyData.company.industry,
+            socialLinks: {
+              instagram: companyData.company.socialLinks.instagram,
+              twitter: companyData.company.socialLinks.twitter,
+              linkedin: companyData.company.socialLinks.linkedin,
+            },
+          },
+          country: companyData.country,
+        };
 
-    if (!formData.company.name) {
-      setError("Please enter a company name.");
-      return;
-    }
+        const response = await fetchCompetitorsService(payload);
+        console.log("API response for competitors:", response);
 
-    if (formData.competitors.length === 0 || !formData.competitors[0].name) {
-      setError("Please enter at least one competitor.");
-      return;
-    }
+        // The array of competitors is located at: response.competitors.competitors
+        const fetchedCompetitors = response?.competitors?.competitors || [];
 
-    setIsLoading(true);
+        // Convert them into the shape you want in the UI
+        const mappedCompetitors = fetchedCompetitors.map((c) => ({
+          name: c.name || "",
+          description: c.description || "",
+          industry: c.industry || "",
+          socialLinks: {
+            instagram: c.socialLinks?.instagram || "",
+            twitter: c.socialLinks?.twitter || "",
+            linkedin: c.socialLinks?.linkedin || "",
+          },
+        }));
 
-    try {
-      const insights = await fetchMarketingInsightsService(
-        formData.company.name,
-        formData.country,
-        formData.competitors.map((c) => c.name),
-        formData.nextUpdateInHours,
-        newsKeywordsArray,
-        formData.trendsKeywords
-      );
+        // Store them in state
+        setCompetitorsData(mappedCompetitors);
+        setStep(2);
+      } catch (err) {
+        setError("Failed to fetch competitor data");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (step === 2) {
+      // STEP 2: Send the data to fetch Marketing Insights
+      setIsLoading(true);
+      try {
+        const payload = {
+          company: {
+            name: companyData.company.name,
+            description: companyData.company.description,
+            industry: companyData.company.industry,
+            socialLinks: {
+              instagram: companyData.company.socialLinks.instagram,
+              twitter: companyData.company.socialLinks.twitter,
+              linkedin: companyData.company.socialLinks.linkedin,
+            },
+          },
+          country: companyData.country,
+          // Only the first 5 competitors
+          competitors: competitorsData.slice(0, 5).map((comp) => ({
+            name: comp.name,
+            description: comp.description,
+            industry: comp.industry,
+            socialLinks: {
+              instagram: comp.socialLinks.instagram,
+              twitter: comp.socialLinks.twitter,
+              linkedin: comp.socialLinks.linkedin,
+            },
+          })),
+          nextUpdateInHours: Number(companyData.nextUpdateInHours),
+          // Single news/trends for the entire payload
+          newsKeywords: newsKeywords,
+          trendsKeywords: trendsKeywords
+            .split(",")
+            .map((k) => k.trim())
+            .filter((k) => k), // remove empty strings
+        };
 
-      console.log("insights api response", insights);
-      setShowDashboard(true);
-    } catch (error) {
-      console.error("Failed to fetch marketing insights", error);
-      setError("Failed to fetch marketing insights. Please try again.");
-    } finally {
-      setIsLoading(false);
+        const response = await fetchMarketingInsightsService(payload);
+        console.log("Insights response:", response);
+
+        navigate("/marketing/dashboard");
+      } catch (err) {
+        setError("Failed to fetch marketing insights");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  if (showDashboard) {
-    return <MarketingDashboard />;
-  }
+  // ---------- RENDERING THE STEPS ----------
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <Box>
+            <HeaderBox
+              sx={{
+                backgroundImage: "url(/assets/marketing1.svg)",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                height: "20vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+              }}
+            />
+            <Box sx={{ p: 3 }}>
+              <TextField
+                fullWidth
+                label="Name of the Company"
+                value={companyData.company.name}
+                onChange={(e) =>
+                  handleCompanyChange("company.name", e.target.value)
+                }
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Description of your brand"
+                value={companyData.company.description}
+                onChange={(e) =>
+                  handleCompanyChange("company.description", e.target.value)
+                }
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Enter your Industry Name"
+                value={companyData.company.industry}
+                onChange={(e) =>
+                  handleCompanyChange("company.industry", e.target.value)
+                }
+                sx={{ mb: 2 }}
+              />
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 2,
+                  mb: 2,
+                }}
+              >
+                <TextField
+                  fullWidth
+                  label="Instagram"
+                  value={companyData.company.socialLinks.instagram}
+                  onChange={(e) =>
+                    handleCompanyChange(
+                      "company.socialLinks.instagram",
+                      e.target.value
+                    )
+                  }
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 2,
+                  mb: 2,
+                }}
+              >
+                <TextField
+                  fullWidth
+                  label="Twitter"
+                  value={companyData.company.socialLinks.twitter}
+                  onChange={(e) =>
+                    handleCompanyChange(
+                      "company.socialLinks.twitter",
+                      e.target.value
+                    )
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="LinkedIn"
+                  value={companyData.company.socialLinks.linkedin}
+                  onChange={(e) =>
+                    handleCompanyChange(
+                      "company.socialLinks.linkedin",
+                      e.target.value
+                    )
+                  }
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 2,
+                }}
+              >
+                <TextField
+                  fullWidth
+                  label="Location of the company"
+                  value={companyData.country}
+                  onChange={(e) =>
+                    handleCompanyChange("country", e.target.value)
+                  }
+                />
+                <TextField
+                  fullWidth
+                  label="Next Updates Need In (Hours)"
+                  type="number"
+                  value={companyData.nextUpdateInHours}
+                  onChange={(e) =>
+                    handleCompanyChange("nextUpdateInHours", e.target.value)
+                  }
+                />
+              </Box>
+            </Box>
+          </Box>
+        );
 
+      case 2:
+        return (
+          <Box>
+            <Box
+              sx={{
+                background: "black",
+                color: "white",
+                p: 3,
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+              }}
+            >
+              <Typography variant="h4" sx={{ textAlign: "center" }}>
+                Your Competitors
+              </Typography>
+            </Box>
+
+            {/* Show only the first 5 competitors */}
+            {competitorsData.slice(0, 5).map((comp, index) => (
+              <Box sx={{ p: 3, borderBottom: "1px solid #ccc" }} key={index}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Competitor {index + 1}
+                </Typography>
+
+                <TextField
+                  fullWidth
+                  label="Name of the Competitor Company"
+                  value={comp.name}
+                  onChange={(e) =>
+                    handleCompetitorChange(index, "name", e.target.value)
+                  }
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Description of the Competitor"
+                  value={comp.description}
+                  onChange={(e) =>
+                    handleCompetitorChange(index, "description", e.target.value)
+                  }
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Enter Industry Name"
+                  value={comp.industry}
+                  onChange={(e) =>
+                    handleCompetitorChange(index, "industry", e.target.value)
+                  }
+                  sx={{ mb: 2 }}
+                />
+
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 2,
+                    mb: 2,
+                  }}
+                >
+                  <TextField
+                    fullWidth
+                    label="LinkedIn"
+                    value={comp.socialLinks.linkedin}
+                    onChange={(e) =>
+                      handleCompetitorChange(
+                        index,
+                        "socialLinks.linkedin",
+                        e.target.value
+                      )
+                    }
+                  />
+                  <TextField
+                    fullWidth
+                    label="Instagram"
+                    value={comp.socialLinks.instagram}
+                    onChange={(e) =>
+                      handleCompetitorChange(
+                        index,
+                        "socialLinks.instagram",
+                        e.target.value
+                      )
+                    }
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 2,
+                  }}
+                >
+                  <TextField
+                    fullWidth
+                    label="Twitter"
+                    value={comp.socialLinks.twitter}
+                    onChange={(e) =>
+                      handleCompetitorChange(
+                        index,
+                        "socialLinks.twitter",
+                        e.target.value
+                      )
+                    }
+                  />
+                </Box>
+              </Box>
+            ))}
+
+            {/* Single fields for News & Trends (not iterated) */}
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Marketing Keywords
+              </Typography>
+              <TextField
+                fullWidth
+                label="News Keywords"
+                value={newsKeywords}
+                onChange={(e) => setNewsKeywords(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Trends Keywords (comma separated)"
+                value={trendsKeywords}
+                onChange={(e) => setTrendsKeywords(e.target.value)}
+              />
+            </Box>
+          </Box>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // ---------- RENDER ----------
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        p: 5,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        minHeight: "100vh",
+        background: "#f4f6f9",
+        p: 5,
       }}
     >
       <StyledCard>
-        {/* Header section */}
-        <HeaderBox
+        <Card
           sx={{
-            backgroundImage: "url(/assets/marketing1.svg)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            height: "20vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
+            width: "100%",
+            maxWidth: 600,
+            borderRadius: 4,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
           }}
         >
-          <Typography variant="h4" sx={{ textAlign: "center" }}>
-            Create Marketing Insights
-          </Typography>
-        </HeaderBox>
+          {renderStep()}
 
-        {/* Main form */}
-        <Box sx={{ p: 4 }}>
-          <TextField
-            fullWidth
-            label="Company Name"
-            value={formData.company.name}
-            onChange={(e) => handleInputChange("company.name", e.target.value)}
-            sx={{ mb: 2 }}
-          />
-
+          {/* FOOTER BUTTONS */}
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 2,
-              mb: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              p: 2,
+              borderTop: "1px solid #e0e0e0",
             }}
           >
-            <TextField
-              fullWidth
-              label="Instagram"
-              value={formData.company.socialLinks.instagram}
-              onChange={(e) =>
-                handleInputChange(
-                  "company.socialLinks.instagram",
-                  e.target.value
-                )
-              }
-            />
-            <TextField
-              fullWidth
-              label="Twitter"
-              value={formData.company.socialLinks.twitter}
-              onChange={(e) =>
-                handleInputChange("company.socialLinks.twitter", e.target.value)
-              }
-            />
-            <TextField
-              fullWidth
-              label="LinkedIn"
-              value={formData.company.socialLinks.linkedin}
-              onChange={(e) =>
-                handleInputChange(
-                  "company.socialLinks.linkedin",
-                  e.target.value
-                )
-              }
-            />
+            {step > 1 && (
+              <Button
+                variant="outlined"
+                onClick={() => setStep((prev) => prev - 1)}
+                sx={{
+                  textTransform: "none",
+                  color: "#6a11cb",
+                  borderColor: "#6a11cb",
+                }}
+              >
+                Back
+              </Button>
+            )}
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+              <Button
+                variant="contained"
+                onClick={handleNextStep}
+                disabled={isLoading}
+                sx={{
+                  bgcolor: "#65558F",
+                  color: "white",
+                  borderRadius: "8px",
+                  textTransform: "none",
+                }}
+              >
+                {step === 2 ? "Done" : "Next"}
+              </Button>
+            </Box>
           </Box>
 
-          <Select
-            fullWidth
-            value={formData.country}
-            onChange={(e) => handleInputChange("country", e.target.value)}
-            displayEmpty
-            sx={{ mb: 2 }}
-          >
-            <MenuItem value="" disabled>
-              Select Country
-            </MenuItem>
-            {Object.entries(CountryEnum).map(([name, code]) => (
-              <MenuItem key={code} value={code}>
-                {name} ({code})
-              </MenuItem>
-            ))}
-          </Select>
-
-          <TextField
-            fullWidth
-            label="Competitor Name"
-            value={formData.competitors[0].name}
-            onChange={(e) =>
-              handleInputChange("competitors[0].name", e.target.value)
-            }
-            sx={{ mb: 2 }}
-          />
-
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 2,
-              mb: 2,
-            }}
-          >
-            <TextField
-              fullWidth
-              label="Competitor Instagram"
-              value={formData.competitors[0].socialLinks.instagram}
-              onChange={(e) =>
-                handleInputChange(
-                  "competitors[0].socialLinks.instagram",
-                  e.target.value
-                )
-              }
-            />
-            <TextField
-              fullWidth
-              label="Competitor Twitter"
-              value={formData.competitors[0].socialLinks.twitter}
-              onChange={(e) =>
-                handleInputChange(
-                  "competitors[0].socialLinks.twitter",
-                  e.target.value
-                )
-              }
-            />
-            <TextField
-              fullWidth
-              label="Competitor LinkedIn"
-              value={formData.competitors[0].socialLinks.linkedin}
-              onChange={(e) =>
-                handleInputChange(
-                  "competitors[0].socialLinks.linkedin",
-                  e.target.value
-                )
-              }
-            />
-          </Box>
-
-          <TextField
-            fullWidth
-            label="Next Update Hours (1-168)"
-            type="number"
-            inputProps={{ min: 1, max: 168 }}
-            value={formData.nextUpdateInHours}
-            onChange={(e) =>
-              handleInputChange("nextUpdateInHours", Number(e.target.value))
-            }
-            sx={{ mb: 2 }}
-          />
-
-          <TextField
-            fullWidth
-            label="News Keywords"
-            value={formData.newsKeywords}
-            onChange={(e) => handleInputChange("newsKeywords", e.target.value)}
-            sx={{ mb: 2 }}
-          />
-
-          <TextField
-            fullWidth
-            label="Trends Keywords (comma-separated)"
-            value={formData.trendsKeywords.join(", ")}
-            onChange={(e) =>
-              handleInputChange(
-                "trendsKeywords",
-                e.target.value
-                  .split(",")
-                  .map((k) => k.trim())
-                  .filter((k) => k)
-              )
-            }
-            sx={{ mb: 2 }}
-          />
-
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Button
-              variant="contained"
-              sx={{
-                bgcolor: "#65558F",
-                color: "white",
-                borderRadius: "8px",
-                textTransform: "none",
-              }}
-              onClick={handleSubmit}
-              disabled={isLoading}
-            >
-              {isLoading ? "Submitting..." : "Done"}
-            </Button>
-          </Box>
-
+          {/* ERROR DISPLAY */}
           {error && (
-            <Typography color="error" sx={{ mt: 2 }}>
+            <Typography color="error" sx={{ textAlign: "center", p: 2 }}>
               {error}
             </Typography>
           )}
-        </Box>
+        </Card>
       </StyledCard>
     </Box>
   );
