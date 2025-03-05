@@ -32,7 +32,7 @@ export function* createWhatsAppCampaignSaga({
 
     // Extract campaignId from the response data
     const campaignId = campaignResponse?.data?.campaignId;
-   console.log('campaignid' , campaignId)
+    console.log("campaignid", campaignId);
 
     yield put({
       type: CREATE_WHATSAPP_CAMPAIGN_SUCCESS,
@@ -95,15 +95,21 @@ export function* createWhatsAppTemplateSaga(action: {
   payload: any;
 }): Generator<any, void, any> {
   try {
-    yield call(createWhatsAppTemplateService, action.payload);
+    // Call the service with the payload.
+    const response = yield call(createWhatsAppTemplateService, action.payload);
+
+    // Dispatch success action with the response data.
     yield put({
       type: CREATE_WHATSAPP_TEMPLATE_SUCCESS,
+      payload: response,
     });
-  } catch (error) {
+  } catch (error: any) {
+    // Dispatch failure action with the error message.
     yield put({
       type: CREATE_WHATSAPP_TEMPLATE_FAILURE,
-      payload: (error as Error).message || "Failed to create template.",
+      payload: error.message || "Failed to create template.",
     });
-    notifyError("Failed to create WhatsApp template.");
+    // Optionally notify error.
+    yield call(notifyError, "Failed to create WhatsApp template.");
   }
 }

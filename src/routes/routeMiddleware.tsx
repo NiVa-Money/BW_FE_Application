@@ -36,8 +36,13 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
     [key: number]: boolean;
   }>({});
   const [menuItems, setMenuItems] = useState<any>([]);
-  const handleToggle = (id: number) => {
+  const handleSubItemsToggle = (id: number) => {
     setOpenDropdown((prev) => ({ ...prev, [id]: !prev[id] }));
+    handleToggle();
+  };
+
+  const handleToggle = () => {
+    // To handle anything on click of sidaebar sub items
   };
   const navigate = useNavigate();
   const toggleSidebar = () => setOpen(!open);
@@ -81,6 +86,8 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
               color: COLORS.NEUTRALVIOLET,
             },
           }}
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
         >
           {/* Fixed Header */}
           <div className="flex justify-between gap-1 p-2 bg-white z-10">
@@ -116,7 +123,11 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                   <ListItem
                     component={item.subItems ? "div" : NavLink}
                     to={!item.subItems ? item.path || "/" : undefined}
-                    onClick={() => item.subItems && handleToggle(item.id)}
+                    onClick={() =>
+                      item.subItems
+                        ? handleSubItemsToggle(item.id)
+                        : handleToggle()
+                    }
                     sx={{
                       minHeight: 48,
                       "&.active": {
@@ -173,6 +184,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                             key={subItem.id}
                             component={NavLink}
                             to={subItem.path}
+                            onClick={handleToggle}
                             sx={{
                               pl: open ? 4 : "auto",
                               minHeight: 48,

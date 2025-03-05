@@ -117,3 +117,65 @@ export const createWhatsAppTemplateService = async (templateData: any) => {
     throw error;
   }
 };
+
+// interface UploadResponse {
+//   fileHandle: any;
+//   url: string;
+// }
+
+// export const uploadWhatsAppMediaService = async (
+//   formData: FormData,
+//   integrationId: string
+// ): Promise<UploadResponse> => {
+//   const response = await axiosInstance.post("/whatsapp/media/upload", formData, {
+//     params: { integrationId },
+//     headers: { "Content-Type": "multipart/form-data" },
+//   });
+//   // Now TS knows this function returns an object with shape { url: string }
+//   return response.data;
+// };
+
+interface UploadResponse {
+  fileHandle: string;
+}
+
+export const uploadWhatsAppMediaService = async (
+  file: File, // Ensure `file` is a valid File or Blob object
+  integrationId: string
+): Promise<UploadResponse> => {
+  const formData = new FormData();
+  formData.append("file", file); // Append the file
+  formData.append("integrationId", integrationId); // Append the integrationId
+
+  // Log FormData for debugging
+  console.log("FormData contents:");
+  for (const [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
+  try {
+    const response = await axios.post<UploadResponse>(
+      "/whatsapp/media/upload", // Ensure the full URL is correct
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${integrationId}`,
+          // Axios automatically sets `Content-Type: multipart/form-data` for FormData
+        },
+      }
+    );
+
+    // Log the response for debugging
+    console.log("API Response:", response.data);
+
+    return response.data;
+  } catch (error) {
+    // Log the error for debugging
+    if (axios.isAxiosError(error)) {
+      console.error("Axios error:", error.response?.data || error.message);
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw new Error("Failed to upload media");
+  }
+};

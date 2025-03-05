@@ -57,10 +57,10 @@ export const initialState: any = {
     error: null,
     dashboardData: [],
     messages: [],
-    campaignInsights : [],
+    campaignInsights: [],
   },
 
-  shopifyDashboard : {
+  shopifyDashboard: {
     loading: false,
     error: null,
     shopifyData: [],
@@ -91,4 +91,8 @@ export const initialState: any = {
       loader: false,
     },
   },
+  users: {
+    lists: { data: [], loader: false },
+    delete: { data: null, loader: false }
+  }
 };

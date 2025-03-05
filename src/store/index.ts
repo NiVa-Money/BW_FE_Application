@@ -2,7 +2,9 @@ import { configureStore } from "@reduxjs/toolkit";
 import createSagaMiddleware from "redux-saga";
 import botProfileReducers from "./reducers/botReducers";
 import rootSaga from "./sagas";
-import whatsappCampaignReducer, { whatsappTemplateReducer } from "./reducers/whatsappCampaignReducer";
+import whatsappCampaignReducer, {
+  whatsappTemplateReducer,
+} from "./reducers/whatsappCampaignReducer";
 import {
   integrationReducer,
   whatsappcrudReducer,
@@ -10,6 +12,7 @@ import {
 import userChatReducers from "./reducers/conversationReducers";
 import { whatsappDashboardReducer } from "./reducers/whatsappDashboardReducers";
 import { shopifyDashboardReducer } from "./reducers/reportReducers";
+import usersReducers from "./reducers/usersReducers";
 const sagaMiddleware = createSagaMiddleware();
 
 const rootReducer = {
@@ -18,9 +21,10 @@ const rootReducer = {
   crudIntegration: whatsappcrudReducer,
   whatsappCampaign: whatsappCampaignReducer,
   whatsappTemplates: whatsappTemplateReducer,
-  whatsappDashboard : whatsappDashboardReducer,
-  shopifyDashboard : shopifyDashboardReducer, 
+  whatsappDashboard: whatsappDashboardReducer,
+  shopifyDashboard: shopifyDashboardReducer,
   userChat: userChatReducers,
+  users: usersReducers,
 };
 
 const store = configureStore({

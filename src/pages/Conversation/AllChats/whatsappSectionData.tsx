@@ -35,7 +35,7 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
           return (
             <div
               key={index}
-              className={`flex ${isUserQuery ? "justify-end" : "justify-start"
+              className={`flex ${isUserQuery ? "justify-start" : "justify-end"
                 } mb-2`}
             >
               <MessageComponent
@@ -43,7 +43,7 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
                 msg={msg}
                 isUserQuery={isUserQuery}
                 content={content}
-                index={index}
+                // index={index}
               />
             </div>
           );

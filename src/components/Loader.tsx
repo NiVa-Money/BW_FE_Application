@@ -1,23 +1,3 @@
-// import React from "react";
-// import CircularProgress from "@mui/material/CircularProgress";
-
-// interface LoaderProps {
-//   loading: boolean;
-//   className?: string;
-// }
-
-// const Loader: React.FC<LoaderProps> = ({ loading, className }) => {
-//   if (!loading) return null;
-
-//   return (
-//     <div className={`flex justify-center items-center h-full ${className}`}>
-//       <CircularProgress />
-//     </div>
-//   );
-// };
-
-// export default Loader;
-
 import React from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 

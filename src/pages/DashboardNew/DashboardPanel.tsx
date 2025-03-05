@@ -261,6 +261,7 @@ const DashboardPanel = () => {
           className="flex items-center justify-between p-4 border max-w-xl"
           sx={{
             borderColor: COLORS.DARKGRAY,
+            backgroundColor: COLORS.VERYLIGHTVIOLET,
             borderRadius: "12px",
             boxShadow: "none",
           }}

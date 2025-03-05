@@ -61,6 +61,8 @@ import {
 } from "../actionTypes/conversationActionsTypes";
 import { FETCH_SHOPIFY_DASHBOARD_REQUEST } from "../actionTypes/reportActionTypes";
 import { fetchShopifyDashboardSaga } from "./reportSagas";
+import { DELETE_USER, GET_USERS } from "../actionTypes/userActionTypes";
+import { deleteUserSaga, getUsersSaga } from "./usersSagas";
 
 export default function* rootSaga() {
   yield takeEvery(CREATE_BOT, createBotSaga);
@@ -84,4 +86,6 @@ export default function* rootSaga() {
   yield takeEvery(USER_ALL_SESSION_LIVE, getUserAllSessionLiveSaga);
   yield takeEvery(ADVANCE_FEATURE, getAdvanceFeatureSaga);
   yield takeEvery(FETCH_SHOPIFY_DASHBOARD_REQUEST, fetchShopifyDashboardSaga);
+  yield takeEvery(GET_USERS, getUsersSaga);
+  yield takeEvery(DELETE_USER, deleteUserSaga);
 }
