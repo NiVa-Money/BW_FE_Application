@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, IconButton } from "@mui/material";
+import { Card, CardContent, CardHeader } from "@mui/material";
 import {
-  MoreHoriz,
   Instagram,
   WhatsApp,
   TrendingUp,
+  ChevronRight,
+  ChevronLeft,
 } from "@mui/icons-material";
 import {
   LineChart,
@@ -77,11 +78,6 @@ const DashboardCard = ({
     }}
   >
     <CardHeader
-      action={
-        <IconButton size="small">
-          <MoreHoriz />
-        </IconButton>
-      }
       title={title}
       sx={{ borderBottom: 1, borderColor: "divider" }}
     />
@@ -114,31 +110,55 @@ const DashboardUI = () => {
     fetchInsights();
   }, []);
 
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // Divide insights into groups of 3
+  const insightPages = Array.from(
+    {
+      length: Math.ceil(insightsData?.actionableSocialMediaInsights.length / 3),
+    },
+    (_, i) =>
+      insightsData?.actionableSocialMediaInsights.slice(i * 3, i * 3 + 3)
+  );
+
+  const handleNext = () => {
+    setCurrentPage((prev) => (prev + 1) % insightPages.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentPage((prev) => (prev === 0 ? insightPages.length - 1 : prev - 1));
+  };
+
   const transformFollowerData = (followerData) => {
-    // Create a map to aggregate followers by brand and platform
     const brandPlatformMap = {};
 
     followerData.forEach((item) => {
+      // Skip 'N/A' values
       if (item.followers !== "N/A") {
         if (!brandPlatformMap[item.brand]) {
-          brandPlatformMap[item.brand] = {};
+          brandPlatformMap[item.brand] = {
+            brand: item.brand,
+            Instagram: 0,
+            Twitter: 0,
+            LinkedIn: 0,
+          };
         }
+
+        // Safely add followers to the correct platform
         brandPlatformMap[item.brand][item.platform] = Number(item.followers);
       }
     });
 
-    // Transform the map into a format suitable for MixBarChart
-    return Object.keys(brandPlatformMap).map((brand) => ({
-      brand,
-      Instagram: brandPlatformMap[brand]["Instagram"] || 0,
-      Twitter: brandPlatformMap[brand]["Twitter"] || 0,
-      LinkedIn: brandPlatformMap[brand]["LinkedIn"] || 0,
-    }));
+    // Convert map to array, ensuring all brands have all platforms
+    return Object.values(brandPlatformMap);
   };
 
   const processedData = insightsData?.followerData
     ? transformFollowerData(insightsData.followerData)
     : [];
+
+  // Debug logging
+  console.log("Processed Follower Data:", processedData);
 
   if (loading) return <div>Loading...</div>;
   if (!insightsData) return <div>No data available</div>;
@@ -146,46 +166,6 @@ const DashboardUI = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* <DashboardCard title="Market News">
-          <div className="space-y-4">
-            {loading ? (
-              <div className="flex justify-center items-center h-40">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-[#BC9AE0] border-solid"></div>
-              </div>
-            ) : !error && formattedNews.length > 0 ? (
-              <div className="relative h-40">
-                <motion.div
-                  className="carousel-item"
-                  key={currentIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <div className="bg-gray-100 p-4 rounded-md shadow-md max-h-[230px] flex flex-col overflow-y-scroll">
-                    <h3 className="text-lg font-semibold">
-                      {formattedNews[currentIndex].title}
-                    </h3>
-                    <ReactMarkdown className="text-sm text-gray-600">
-                      {formattedNews[currentIndex].content}
-                    </ReactMarkdown>
-                  </div>
-                </motion.div>
-              </div>
-            ) : (
-              <p className="text-gray-500">No news available.</p>
-            )}
-          </div>
-          <div className="flex justify-between items-end px-8">
-            <IconButton onClick={handlePrev}>
-              <ArrowBackIosIcon />
-            </IconButton>
-            <IconButton onClick={handleNext}>
-              <ArrowForwardIosIcon />
-            </IconButton>
-          </div>
-        </DashboardCard> */}
-
         <DashboardCard title="Market News">
           <div className="space-y-4">
             {insightsData.newsArticles.news
@@ -202,14 +182,58 @@ const DashboardUI = () => {
         </DashboardCard>
 
         <DashboardCard title="Social Media Trends">
-          <div className="space-y-4">
-            {insightsData.actionableSocialMediaInsights
-              .slice(1, 4) // Take first 3 actionable insights
-              .map((trend, i) => (
-                <div key={i} className="flex items-center space-x-2">
-                  <ReactMarkdown className="text-sm" children={trend} />
+          <div className="relative">
+            <div className="space-y-4 min-h-[150px]">
+              {insightsData?.actionableSocialMediaInsights &&
+                Array.from(
+                  {
+                    length: Math.ceil(
+                      insightsData.actionableSocialMediaInsights.length / 3
+                    ),
+                  },
+                  (_, i) =>
+                    insightsData.actionableSocialMediaInsights.slice(
+                      i * 3,
+                      i * 3 + 3
+                    )
+                )[currentPage].map((trend, i) => (
+                  <div key={i} className="flex items-center space-x-2">
+                    <ReactMarkdown className="text-sm" children={trend} />
+                  </div>
+                ))}
+            </div>
+
+            {insightsData?.actionableSocialMediaInsights &&
+              insightsData.actionableSocialMediaInsights.length > 3 && (
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={handlePrev}
+                    className="p-2 hover:bg-gray-100 rounded"
+                  >
+                    <ChevronLeft />
+                  </button>
+                  <div className="flex space-x-2">
+                    {Array.from({
+                      length: Math.ceil(
+                        insightsData.actionableSocialMediaInsights.length / 3
+                      ),
+                    }).map((_, index) => (
+                      <div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          index === currentPage ? "bg-blue-500" : "bg-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleNext}
+                    className="p-2 hover:bg-gray-100 rounded"
+                  >
+                    <ChevronRight />
+                  </button>
                 </div>
-              ))}
+              )}
           </div>
         </DashboardCard>
 
