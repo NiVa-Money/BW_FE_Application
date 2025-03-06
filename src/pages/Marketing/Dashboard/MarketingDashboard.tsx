@@ -237,21 +237,20 @@ const DashboardUI = () => {
         </DashboardCard> */}
 
         <DashboardCard title="Market News">
-          <div className="relative min-h-[150px]">
+          <div className="relative h-[250px] overflow-auto">
             {allNews.length > 0 && (
               <>
                 {/* Slide Content */}
-                <div className="space-y-4">
+                <div className="space-y-4 mb-10">
                   <div className="flex items-center space-x-2">
-                    <TrendingUp fontSize="small" color="primary" />
                     <ReactMarkdown className="text-sm">
                       {allNews[currentNewsIndex].insights}
                     </ReactMarkdown>
                   </div>
                 </div>
-                {/* Pagination Controls */}
+                {/* Pagination Controls - Positioned at bottom */}
                 {allNews.length > 1 && (
-                  <div className="flex justify-between mt-4">
+                  <div className="flex justify-between absolute bottom-0 left-0 right-0 mt-4">
                     <button
                       onClick={handleNewsPrev}
                       className="p-2 hover:bg-gray-100 rounded"
