@@ -162,7 +162,7 @@ const Login = () => {
   return (
     <>
       <head>
-        <title>BotWot ICX - Login</title>
+        <title>BotWot iCX - Login</title>
       </head>
       <div className="overflow-hidden py-4 pr-4 pl-20 bg-white rounded-none max-md:pl-5">
         <div className="flex gap-5 max-md:flex-col">
@@ -299,14 +299,15 @@ const Login = () => {
           </div>
 
           {/* Right Section */}
+
           <div className="flex flex-col ml-5 w-[55%] max-md:ml-0 max-md:w-full">
             <img
               loading="lazy"
-              src="/assets/login_banner.svg"
+              src="/assets/login.gif"
               width={500}
-              height={500}
-              alt="Main Banner"
-              className="object-contain grow w-full rounded-none aspect-[0.78] max-md:mt-10 max-md:max-w-full"
+              height={300}
+              alt="Animated GIF"
+              className="w-full rounded-none max-md:mt-10 max-md:max-w-full"
             />
           </div>
         </div>

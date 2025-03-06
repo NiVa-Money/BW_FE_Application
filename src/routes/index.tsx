@@ -21,6 +21,7 @@ import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
 import UtilityDash from "../pages/Reports/UtilityDash";
 import HelpCenter from "../pages/HelpCenter";
+import Settings from "../pages/Settings";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -97,6 +98,8 @@ export const autRoutes: any[] = [
     component: <CrudIntegration />,
   },
   { id: 11, component: <HelpCenter />, path: "/help-center" },
+
+  { id: 12, component: <Settings />, path: "/settings" },
 
   // {
   //   path: "/integrations",
