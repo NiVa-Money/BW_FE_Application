@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader } from "@mui/material";
 import {
   Instagram,
   WhatsApp,
-  TrendingUp,
   ChevronRight,
   ChevronLeft,
 } from "@mui/icons-material";
@@ -21,6 +20,9 @@ import {
   BarChart,
   Bar,
   Legend,
+  Cell,
+  Pie,
+  PieChart,
 } from "recharts";
 import ReactMarkdown from "react-markdown";
 import WhatsappDash from "../Whatsapp/WhatsappDashboard";
@@ -33,13 +35,13 @@ import MarketingDashboardForm from "./MarketingDashboardForm";
 /* ========================
    Dummy data for charts
 ======================== */
-// const socialData = [
-//   { name: "LinkedIn", value: 300 },
-//   { name: "Instagram Reels", value: 500 },
-//   { name: "Instagram Posts", value: 400 },
-//   { name: "Facebook", value: 700 },
-//   { name: "X (Twitter)", value: 200 },
-// ];
+const socialData = [
+  { name: "LinkedIn", value: 300 },
+  { name: "Instagram Reels", value: 500 },
+  { name: "Instagram Posts", value: 400 },
+  { name: "Facebook", value: 700 },
+  { name: "X (Twitter)", value: 200 },
+];
 
 const COLORS = ["#A5FFD6", "#3F2181", "#FF8042", "#78C9F1", "#DBAEFF"];
 
@@ -485,7 +487,7 @@ const DashboardUI = () => {
       </div>
 
       {/* ===== Row 4: Single column for Competitor Trends ===== */}
-      {/* <div>
+      <div>
         <DashboardCard title="Competitor Trends - Social Listings">
           <div className="space-y-2 flex-col mb-4">
             {socialData.map((entry, index) => (
@@ -522,7 +524,7 @@ const DashboardUI = () => {
             </ResponsiveContainer>
           </div>
         </DashboardCard>
-      </div> */}
+      </div>
     </div>
   );
 };
