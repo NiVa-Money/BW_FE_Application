@@ -100,7 +100,6 @@ export const autRoutes: any[] = [
   { id: 11, component: <HelpCenter />, path: "/help-center" },
 
   { id: 12, component: <Settings />, path: "/settings" },
-  
 ];
 
 export const publicRoutes: any[] = [

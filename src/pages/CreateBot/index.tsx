@@ -595,21 +595,15 @@ const CreateBot: React.FC = () => {
             </div>
           </div>
 
-          {/* Agent Role + Bot Identity */}
+          {/* Bot Identity */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <label htmlFor="botIdentity">Agent Role</label>
-            <input
-              type="text"
-              className="h-[40px] w-full rounded-[12px] bg-[#F3F2F6] px-4 mb-2"
-              placeholder="E-commerce's Assistant"
-              value={formValues.agentRole || ""}
-              onChange={(e) =>
-                setFormValues({ ...formValues, agentRole: e.target.value })
-              }
-            />
             <Field
               name="botIdentity"
               component={FormikFieldToggleComponent}
+              onChange={(e) =>
+                setFormValues({ ...formValues, botIdentity: e.target.value })
+              }
               options={[
                 { label: "Customer Service", value: "Customer Service" },
                 { label: "Sales", value: "Sales" },
@@ -624,6 +618,10 @@ const CreateBot: React.FC = () => {
             <label htmlFor="botTone">Tone of voice</label>
             <Field
               name="botTone"
+              onChange={(value: string) => {
+                setFormValues({ ...formValues, botTone: value });
+                // Perform additional logic if needed
+              }}
               component={FormikFieldToggleComponent}
               options={[
                 { label: "Friendly", value: "friendly" },
@@ -707,7 +705,7 @@ const CreateBot: React.FC = () => {
           {/* Chat Guidelines */}
           <div className="flex flex-col w-full mb-8 text-black">
             <div className="flex justify-between items-center">
-              <label className="text-lg font-medium">Chat Guidelines</label>
+              <label className="text-lg font-medium">Conversations Guidelines</label>
             </div>
             <p className="text-sm text-gray-500 mb-2">
               Set clear rules for how your agent should respond in chat channels
@@ -780,7 +778,7 @@ const CreateBot: React.FC = () => {
           {/* Bot limit per Message */}
           <div className="flex flex-col w-full mb-8 text-black">
             <label className="text-lg font-medium mb-4">
-              Bot limit per Message
+              Agent limit per Message
             </label>
             <div className="w-full">
               <input
