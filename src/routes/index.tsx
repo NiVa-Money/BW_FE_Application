@@ -38,7 +38,7 @@ export const autRoutes: any[] = [
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
 
-  { id: 4, path: "/engagementTab", component: <EngagementTab /> },
+  { id: 4, path: "/engagement", component: <EngagementTab /> },
   { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   {
     id: 5.1,
@@ -57,7 +57,7 @@ export const autRoutes: any[] = [
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
   { id: 3, path: "/testbot/:id", component: <TestBot /> },
-  { id: 4, path: "/engagementTab", component: <EngagementTab /> },
+  { id: 4, path: "/engagement", component: <EngagementTab /> },
   { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
@@ -100,24 +100,7 @@ export const autRoutes: any[] = [
   { id: 11, component: <HelpCenter />, path: "/help-center" },
 
   { id: 12, component: <Settings />, path: "/settings" },
-
-  // {
-  //   path: "/integrations",
-  //   component: <IntegrationsPage />
-  // },
-  // {
-  //   path: "/Integration/IntegrationApp",
-  //   component: <WhatsAppIntegration />
-  // },
-  // { path: '/createbot', component: <CreateBot /> },
-  // { path: '/editbot/:id', component: <EditBot /> },
-
-  // { path: '/myagents', component: <MyBots /> },
-
-  // { path: "/marketing/whatsappDashboard", component: <WhatsApp /> },
-
-  // { path: "/integration", component: <IntegrationTab /> },
-  // { path: "/integration/whatsapp", component: <WhatsAppIntegration /> }
+  
 ];
 
 export const publicRoutes: any[] = [

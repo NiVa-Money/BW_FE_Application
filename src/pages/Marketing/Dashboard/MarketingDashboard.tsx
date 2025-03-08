@@ -199,14 +199,67 @@ const DashboardUI = () => {
     })
   );
 
+  const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
+
+  // Dropdown options for the different metrics.
+  const metricOptions = [
+    { label: "Followers", value: "followers" },
+    { label: "Engagement Rate", value: "engagementRate" },
+    { label: "Average Engagement Per Post", value: "avgEngagementPerPost" },
+    { label: "Total Engagements", value: "totalEngagements" },
+    { label: "Total Likes", value: "totalLikes" },
+    { label: "Total Posts", value: "totalPosts" },
+    {
+      label: "Instagram Involvement",
+      value: "platformInvolvement.instagram.rawValue",
+    },
+    {
+      label: "Twitter Involvement",
+      value: "platformInvolvement.twitter.rawValue",
+    },
+    {
+      label: "LinkedIn Involvement",
+      value: "platformInvolvement.linkedin.rawValue",
+    },
+  ];
+  const getNestedValue = (obj, keyString) => {
+    return keyString.split(".").reduce((acc, key) => {
+      return acc && acc[key] !== undefined ? acc[key] : undefined;
+    }, obj);
+  };
+
+  // Compute competitor trends data based on the selected metric.
   const competitorTrendsData = Object.keys(
     insightsData?.brand_engagement_metrics || {}
-  ).map((brand) => ({
-    name: brand,
-    value: insightsData.brand_engagement_metrics[brand].totalEngagements,
-  }));
+  ).map((brand) => {
+    const brandData = insightsData.brand_engagement_metrics[brand];
+    let metricValue = 0;
+
+    // If the metric string includes a dot, retrieve the nested value.
+    if (selectedMetric.includes(".")) {
+      const nestedValue = getNestedValue(brandData, selectedMetric);
+      metricValue = nestedValue !== undefined ? nestedValue : 0;
+    } else if (brandData[selectedMetric] !== undefined) {
+      // Otherwise, if the metric exists directly on the brand, use it.
+      metricValue = brandData[selectedMetric];
+    } else if (brandData.platforms) {
+      // Fallback: Sum the values across all available platforms.
+      metricValue = Object.keys(brandData.platforms).reduce((acc, platform) => {
+        const platformData = brandData.platforms[platform];
+        if (platformData[selectedMetric] !== undefined) {
+          return acc + platformData[selectedMetric];
+        }
+        return acc;
+      }, 0);
+    }
+    return { name: brand, value: metricValue };
+  });
 
   console.log("competitorTrendsData", competitorTrendsData);
+
+  const noData =
+    competitorTrendsData.length === 0 ||
+    competitorTrendsData.every((entry) => Number(entry.value) === 0);
 
   if (loading) return <div>Loading...</div>;
   if (!insightsData)
@@ -471,42 +524,67 @@ const DashboardUI = () => {
       </div>
 
       {/* ===== Row 4: Single column for Competitor Trends ===== */}
+
       <div>
         <DashboardCard title="Competitor Trends - Social Listening">
-          <div className="space-y-2 flex-col mb-4">
-            {competitorTrendsData.map((entry, index) => (
-              <div key={index} className="flex items-center">
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                />
-                <span className="ml-2 text-sm">{entry.name}</span>
-              </div>
-            ))}
+          <div className="mb-4">
+            <label htmlFor="metric-select" className="mr-2">
+              Select Metric:
+            </label>
+            <select
+              id="metric-select"
+              value={selectedMetric}
+              onChange={(e) => setSelectedMetric(e.target.value)}
+            >
+              {metricOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="h-60">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={competitorTrendsData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label
-                >
-                  {competitorTrendsData.map((_entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+          {noData ? (
+            <div className="text-center py-8">NO data available</div>
+          ) : (
+            <>
+              <div className="space-y-2 flex-col mb-4">
+                {competitorTrendsData.map((entry, index) => (
+                  <div key={index} className="flex items-center">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+                    <span className="ml-2 text-sm">
+                      {entry.name}: {entry.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="h-60">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={competitorTrendsData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label
+                    >
+                      {competitorTrendsData.map((_entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
         </DashboardCard>
       </div>
     </div>
