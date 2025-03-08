@@ -57,7 +57,12 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       ],
     },
     { id: 3, text: "Agents", path: "/myagents", icon: <SmartToyIcon /> },
-    { id: 4, text: "Engagement Tab", path: "/engagementTab", icon: <GroupsIcon /> },
+    {
+      id: 4,
+      text: "Engagement",
+      path: "/engagement",
+      icon: <GroupsIcon />,
+    },
     {
       id: 5,
       text: "Marketing",
@@ -104,6 +109,14 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       text: "Settings",
       icon: <SettingsIcon />,
       path: "/settings",
+      // subItems: [
+      //   {
+      //     id: 12.1,
+      //     text: "Agent Guidelines",
+      //     path: "/settings/agent-guide",
+      //     icon: <DonutSmallIcon />,
+      //   },
+      // ],
     },
   ];
 

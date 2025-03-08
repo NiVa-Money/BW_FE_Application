@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -58,14 +60,16 @@ const SignUp: React.FC = () => {
       case "lastName":
         return value.trim() === "" ? "Last name is required" : "";
       case "email":
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return !emailRegex.test(value) ? "Please enter a valid email address" : "";
+        { const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return !emailRegex.test(value)
+          ? "Please enter a valid email address"
+          : ""; }
       case "phone":
-        const phoneRegex = /^[0-9]{10}$/;
-        return !phoneRegex.test(value) ? "Phone number must be 10 digits" : "";
+        { const phoneRegex = /^[0-9]{10}$/;
+        return !phoneRegex.test(value) ? "Phone number must be 10 digits" : ""; }
       case "password":
-        return value.length < 8 
-          ? "Password must be at least 8 characters long" 
+        return value.length < 8
+          ? "Password must be at least 8 characters long"
           : !value.match(/[A-Z]/)
           ? "Password must contain at least one uppercase letter"
           : !value.match(/[0-9]/)
@@ -78,49 +82,50 @@ const SignUp: React.FC = () => {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     const error = validateField(name as keyof FormData, value);
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [name]: error
+      [name]: error,
     }));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    
+
     // Validate all fields
     const newErrors: FormErrors = {};
-    (Object.keys(formData) as Array<keyof FormData>).forEach(key => {
+    (Object.keys(formData) as Array<keyof FormData>).forEach((key) => {
       const error = validateField(key, formData[key]);
       if (error) newErrors[key] = error;
     });
-  
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-  
+
     try {
       setIsSubmitting(true);
       setErrorMessage("");
-    
-      const response: SignUpResponse & { error?: string } = await SignUpUserService({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        emailId: formData.email,
-        mobileNo: formData.phone,
-        password: formData.password,
-      });
-    
+
+      const response: SignUpResponse & { error?: string } =
+        await SignUpUserService({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          emailId: formData.email,
+          mobileNo: formData.phone,
+          password: formData.password,
+        });
+
       if (response.success) {
         setSaveDataEmail(formData.email);
         setOtpModalOpen(true);
-  
+
         // Clear the form data
         setFormData({
           firstName: "",
@@ -131,16 +136,20 @@ const SignUp: React.FC = () => {
         });
         setErrors({}); // Reset errors as well
       } else {
-        setErrorMessage(response.error || response.message || "Signup failed. Please try again.");
+        setErrorMessage(
+          response.error ||
+            response.message ||
+            "Signup failed. Please try again."
+        );
       }
     } catch (error: any) {
-      const errorMsg = error?.response?.data?.error || "An error occurred. Please try again.";
+      const errorMsg =
+        error?.response?.data?.error || "An error occurred. Please try again.";
       setErrorMessage(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
-  }; 
-  
+  };
 
   const handleOtpVerification = async (): Promise<void> => {
     try {
@@ -152,7 +161,9 @@ const SignUp: React.FC = () => {
       if (response.success) {
         navigate("/login");
       } else {
-        setOtpErrorMessage(response.message || "OTP verification failed. Please try again.");
+        setOtpErrorMessage(
+          response.message || "OTP verification failed. Please try again."
+        );
       }
     } catch (error) {
       setOtpErrorMessage("An error occurred while verifying OTP.");
@@ -211,16 +222,17 @@ const SignUp: React.FC = () => {
           <div className="flex flex-col self-stretch my-auto max-md:mt-10 max-md:max-w-full">
             {/* Header */}
             <div className="flex flex-col justify-center w-full max-md:max-w-full">
-              <div className="flex gap-4 justify-center items-center self-start text-3xl font-semibold text-neutral-700">
-                <img
-                  loading="lazy"
-                  src="/assets/botwot_logo.svg"
-                  width={50}
-                  height={50}
-                  alt="BotWot Logo"
-                  className="object-contain shrink-0 self-stretch my-auto aspect-square w-[50px]"
-                />
-                <div className="self-stretch my-auto">BotWot ICX</div>
+              <div className="flex z-0 flex-col justify-center items-start w-full ">
+                <div className="flex gap-4 justify-center items-center">
+                  <a href="https://botwot.io" className="cursor-pointer">
+                    <img
+                      loading="lazy"
+                      src="/assets/logo.svg"
+                      alt="BotWot Logo"
+                      className="object-contain shrink-0 self-stretch my-auto w-[300px]"
+                    />
+                  </a>
+                </div>
               </div>
               <div className="mt-6 text-xl font-medium text-zinc-600">
                 Create Account
@@ -232,7 +244,10 @@ const SignUp: React.FC = () => {
               </div>
             </div>
             {/* Input Fields */}
-            <form onSubmit={handleSubmit} className="flex flex-col justify-center text-black self-center mt-10 rounded-[128px] max-w-full w-[600px]">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col justify-center text-black self-center rounded-[128px] max-w-full w-[600px]"
+            >
               {fields.map((field, index) => (
                 <div key={index} className="relative">
                   <div className="flex gap-2.5 items-center px-8 py-4 mt-7 w-full bg-neutral-100 text-black rounded-[128px] max-md:px-5 max-md:max-w-full">
@@ -260,7 +275,7 @@ const SignUp: React.FC = () => {
                   )}
                 </div>
               ))}
-              
+
               {errorMessage && (
                 <div className="text-red-500 text-sm mt-4 text-center">
                   {errorMessage}
@@ -277,10 +292,10 @@ const SignUp: React.FC = () => {
               </button>
             </form>
             {/* Footer */}
-            <div className="mt-8 text-base text-center font-medium text-black">
+            <div className="mt-4 text-base text-center font-medium text-black">
               - OR -
             </div>
-            <div className="flex gap-1 justify-center items-start mt-8 text-base">
+            <div className="flex gap-1 justify-center items-start mt-2 text-lg">
               <div className="text-center text-black">
                 Already have an account?
               </div>
