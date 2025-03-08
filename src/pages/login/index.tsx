@@ -307,7 +307,7 @@ const Login = () => {
               width={500}
               height={300}
               alt="Animated GIF"
-              className="w-full rounded-none max-md:mt-10 max-md:max-w-full"
+              className="w-full rounded-3xl max-md:mt-10 max-md:max-w-full"
             />
           </div>
         </div>

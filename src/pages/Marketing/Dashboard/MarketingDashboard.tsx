@@ -32,17 +32,6 @@ import { getMarketingInsightsService } from "../../../api/services/marketingDash
 import MarketingDashboardForm from "./MarketingDashboardForm";
 // import MapComponent from "./MapComponent";
 
-/* ========================
-   Dummy data for charts
-======================== */
-const socialData = [
-  { name: "LinkedIn", value: 300 },
-  { name: "Instagram Reels", value: 500 },
-  { name: "Instagram Posts", value: 400 },
-  { name: "Facebook", value: 700 },
-  { name: "X (Twitter)", value: 200 },
-];
-
 const COLORS = ["#A5FFD6", "#3F2181", "#FF8042", "#78C9F1", "#DBAEFF"];
 
 /* ================================
@@ -149,7 +138,7 @@ const DashboardUI = () => {
   const transformFollowerData = (followerData: any[]) => {
     const brandPlatformMap = {};
 
-    followerData.forEach(
+    followerData?.forEach(
       (item: {
         followers: string;
         brand: string | number;
@@ -184,7 +173,7 @@ const DashboardUI = () => {
   // console.log("Processed Follower Data:", processedData);
 
   const transformTrendsChartData = (timelineData: any[]) => {
-    return timelineData.map((item) => {
+    return timelineData?.map((item) => {
       const dataPoint: any = { date: item.date };
       // For each value, add a key with the query name and assign its extracted value
       item.values.forEach((entry: any) => {
@@ -203,12 +192,21 @@ const DashboardUI = () => {
 
   // console.log("Process", transformedTrendsData);
 
-  const dataForChart = insightsData?.geographicalActivity.interestByRegion.map(
+  const dataForChart = insightsData?.geographicalActivity?.interestByRegion.map(
     (region: { location: any; value: any }) => ({
       name: region.location,
       value: Number(region.value),
     })
   );
+
+  const competitorTrendsData = Object.keys(
+    insightsData?.brand_engagement_metrics || {}
+  ).map((brand) => ({
+    name: brand,
+    value: insightsData.brand_engagement_metrics[brand].totalEngagements,
+  }));
+
+  console.log("competitorTrendsData", competitorTrendsData);
 
   if (loading) return <div>Loading...</div>;
   if (!insightsData)
@@ -223,20 +221,6 @@ const DashboardUI = () => {
       {/* ===== Row 1: 3 columns ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Market News */}
-        {/* <DashboardCard title="Market News">
-          <div className="space-y-4">
-            {insightsData.newsArticles.news
-              .slice(0, 3)
-              .map((article: { title: string }, index: React.Key) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <TrendingUp fontSize="small" color="primary" />
-                  <ReactMarkdown className="text-sm">
-                    {article.title}
-                  </ReactMarkdown>
-                </div>
-              ))}
-          </div>
-        </DashboardCard> */}
 
         <DashboardCard title="Market News">
           <div className="relative h-[250px] overflow-auto">
@@ -488,9 +472,9 @@ const DashboardUI = () => {
 
       {/* ===== Row 4: Single column for Competitor Trends ===== */}
       <div>
-        <DashboardCard title="Competitor Trends - Social Listings">
+        <DashboardCard title="Competitor Trends - Social Listening">
           <div className="space-y-2 flex-col mb-4">
-            {socialData.map((entry, index) => (
+            {competitorTrendsData.map((entry, index) => (
               <div key={index} className="flex items-center">
                 <div
                   className="h-3 w-3 rounded-full"
@@ -504,7 +488,7 @@ const DashboardUI = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={socialData}
+                  data={competitorTrendsData}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
@@ -512,7 +496,7 @@ const DashboardUI = () => {
                   outerRadius={80}
                   label
                 >
-                  {socialData.map((_entry, index) => (
+                  {competitorTrendsData.map((_entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
