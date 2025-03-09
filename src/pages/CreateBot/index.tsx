@@ -520,13 +520,6 @@ const CreateBot: React.FC = () => {
         setFormValues({ ...formValues, goals: updatedGoals });
       };
 
-      const addGoal = () => {
-        setFormValues({
-          ...formValues,
-          goals: [...(formValues.goals || []), ""],
-        });
-      };
-
       // --- Helper functions for Guidelines ---
       const handleGuidelineChange = (index, newValue) => {
         const updatedGuidelines = [...(formValues.guidelines || [])];
@@ -539,13 +532,6 @@ const CreateBot: React.FC = () => {
           (_, i) => i !== index
         );
         setFormValues({ ...formValues, guidelines: updatedGuidelines });
-      };
-
-      const addGuideline = () => {
-        setFormValues({
-          ...formValues,
-          guidelines: [...(formValues.guidelines || []), ""],
-        });
       };
 
       // Map the slider steps (0..3) to actual numeric limits
@@ -609,21 +595,15 @@ const CreateBot: React.FC = () => {
             </div>
           </div>
 
-          {/* Agent Role + Bot Identity */}
+          {/* Bot Identity */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <label htmlFor="botIdentity">Agent Role</label>
-            <input
-              type="text"
-              className="h-[40px] w-full rounded-[12px] bg-[#F3F2F6] px-4 mb-2"
-              placeholder="E-commerce's Assistant"
-              value={formValues.agentRole || ""}
-              onChange={(e) =>
-                setFormValues({ ...formValues, agentRole: e.target.value })
-              }
-            />
             <Field
               name="botIdentity"
               component={FormikFieldToggleComponent}
+              onChange={(e) =>
+                setFormValues({ ...formValues, botIdentity: e.target.value })
+              }
               options={[
                 { label: "Customer Service", value: "Customer Service" },
                 { label: "Sales", value: "Sales" },
@@ -638,6 +618,10 @@ const CreateBot: React.FC = () => {
             <label htmlFor="botTone">Tone of voice</label>
             <Field
               name="botTone"
+              onChange={(value: string) => {
+                setFormValues({ ...formValues, botTone: value });
+                // Perform additional logic if needed
+              }}
               component={FormikFieldToggleComponent}
               options={[
                 { label: "Friendly", value: "friendly" },
@@ -650,14 +634,8 @@ const CreateBot: React.FC = () => {
 
           {/* Agent Goals */}
           <div className="flex flex-col w-full mb-8 text-black">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-2">
               <label className="text-lg font-medium">Agent Goals</label>
-              <button
-                className="bg-[#65558F] text-white w-[134px] h-10 rounded-[100px]"
-                onClick={addGoal}
-              >
-                AI Gen
-              </button>
             </div>
             {(formValues.goals || []).map((goal, index) => (
               <div key={index} className="relative mb-3">
@@ -685,20 +663,51 @@ const CreateBot: React.FC = () => {
                 </button>
               </div>
             ))}
-          </div>
 
-          {/* Chat Guidelines */}
-          <div className="flex flex-col w-full mb-8 text-black">
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-lg font-medium">Chat Guidelines</label>
+            {/* New input field with AI Gen button */}
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={formValues.newGoalPrompt || ""}
+                onChange={(e) =>
+                  setFormValues({
+                    ...formValues,
+                    newGoalPrompt: e.target.value,
+                  })
+                }
+                className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
+                placeholder="Enter a prompt for goal generation..."
+              />
               <button
-                className="bg-[#65558F] text-white w-[134px] h-10 rounded-[100px]"
-                onClick={addGuideline}
+                className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
+                onClick={() => {
+                  if (formValues.newGoalPrompt) {
+                    // Simulate AI generation
+                    const generatedGoal =
+                      "Help customers find products that match their needs and provide support during their shopping journey.";
+                    const updatedGoals = [
+                      ...(formValues.goals || []),
+                      generatedGoal,
+                    ];
+                    setFormValues({
+                      ...formValues,
+                      goals: updatedGoals,
+                      newGoalPrompt: "", // Clear the prompt field
+                    });
+                  }
+                }}
               >
                 AI Gen
               </button>
             </div>
-            <p className="text-sm text-gray-500 mb-4">
+          </div>
+
+          {/* Chat Guidelines */}
+          <div className="flex flex-col w-full mb-8 text-black">
+            <div className="flex justify-between items-center">
+              <label className="text-lg font-medium">Conversations Guidelines</label>
+            </div>
+            <p className="text-sm text-gray-500 mb-2">
               Set clear rules for how your agent should respond in chat channels
             </p>
             {(formValues.guidelines || []).map((guideline, index) => (
@@ -727,12 +736,49 @@ const CreateBot: React.FC = () => {
                 </button>
               </div>
             ))}
+
+            {/* New input field with AI Gen button */}
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={formValues.newGuidelinePrompt || ""}
+                onChange={(e) =>
+                  setFormValues({
+                    ...formValues,
+                    newGuidelinePrompt: e.target.value,
+                  })
+                }
+                className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
+                placeholder="Enter a prompt for guideline generation..."
+              />
+              <button
+                className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
+                onClick={() => {
+                  if (formValues.newGuidelinePrompt) {
+                    // Simulate AI generation
+                    const generatedGuideline =
+                      "Always respond within 30 seconds and maintain a friendly, helpful tone with customers.";
+                    const updatedGuidelines = [
+                      ...(formValues.guidelines || []),
+                      generatedGuideline,
+                    ];
+                    setFormValues({
+                      ...formValues,
+                      guidelines: updatedGuidelines,
+                      newGuidelinePrompt: "", // Clear the prompt field
+                    });
+                  }
+                }}
+              >
+                AI Gen
+              </button>
+            </div>
           </div>
 
           {/* Bot limit per Message */}
           <div className="flex flex-col w-full mb-8 text-black">
             <label className="text-lg font-medium mb-4">
-              Bot limit per Message
+              Agent limit per Message
             </label>
             <div className="w-full">
               <input

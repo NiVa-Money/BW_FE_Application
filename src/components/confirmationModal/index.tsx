@@ -50,7 +50,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: "end", gap: 1, mt: 2 }}>
                     <Button onClick={closeBotHandler} variant="outlined" color="primary" className="rounded-[100px]">
-                        View Bots
+                        View Agents
                     </Button>
                     <Button
                         onClick={onConfirm}

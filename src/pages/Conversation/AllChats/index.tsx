@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useEffect, useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
@@ -101,7 +101,7 @@ const AllChats = () => {
       data.phoneNumber = searchValue.trim();
     }
     try {
-      const response =  dispatch(getAllSession(data));
+      const response = dispatch(getAllSession(data));
       if (response?.payload?.success) {
         const filteredSessions = response.payload.data.sessions;
         setSearchResults(filteredSessions);
@@ -265,6 +265,13 @@ const AllChats = () => {
       (obj) =>
         obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
     );
+
+    // 1. Check if the session is handled by a human
+    if (selectedSession?.handledBy === "Human") {
+      setTalkWithHuman(true);
+    } else {
+      setTalkWithHuman(false);
+    }
 
     const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
     const userPhoneNumberId = selectedSession?.userPhoneId;
@@ -451,17 +458,21 @@ const AllChats = () => {
     }
   };
 
-  const handleSendMessage = async (selectedSessionId: string) => {
-    if (!userMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!userMessage.trim() || !sessionId) return;
+
+    // Optimistically update UI
     setMessages((prev) => [...prev, { content: userMessage, sender: "agent" }]);
 
     const selectedSession = sessionsDataRedux?.sessions.find(
-      (obj) =>
-        obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
+      (obj) => obj._id === sessionId || obj.userPhoneId === sessionId
     );
+
+    if (!selectedSession) return;
 
     const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
     const userPhoneNumberId = selectedSession?.userPhoneId;
+
     if (talkWithHuman) {
       try {
         const payload = {
@@ -483,6 +494,7 @@ const AllChats = () => {
         console.error("API Error:", error);
       }
     }
+
     setUserMessage("");
   };
 
@@ -721,7 +733,7 @@ const AllChats = () => {
       </div>
 
       {/* Main Container */}
-      <div className="flex bg-gray-100 h-full h-[calc(100vh - 120px)]">
+      <div className="flex bg-gray-100 h-[calc(100vh-120px)]">
         <SessionsList
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
@@ -739,11 +751,11 @@ const AllChats = () => {
           }
         />
 
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 p-4 space-y-4">
-            {channelNameVal === "whatsapp" && sessionId?.length ? (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 p-4 overflow-y-auto">
+            {channelNameVal === "whatsapp" && sessionId ? (
               <WhatsappSectionData messages={messages} />
-            ) : sessionId?.length ? (
+            ) : sessionId ? (
               <WebsiteSectionData messages={messages} />
             ) : null}
           </div>
@@ -761,7 +773,16 @@ const AllChats = () => {
               <span className="select-none text-lg">
                 {isEnablingManualMode ? "Enabling..." : "Talk with Human"}
               </span>
-              <div className="relative w-12 h-6 ml-2 bg-gray-200 peer-checked:bg-[#65558F] rounded-full after:content-[''] after:absolute after:top-[2px] after:right-[22px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              <div
+                className="
+          relative w-12 h-6 ml-2
+          bg-gray-200 rounded-full
+          peer-checked:bg-[#65558F]
+          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+          after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
+          peer-checked:after:translate-x-6
+        "
+              ></div>
             </label>
           </div>
 
@@ -772,6 +793,7 @@ const AllChats = () => {
             </div>
           )}
 
+          {/* Message Input */}
           {talkWithHuman && (
             <div className="p-4 border-t flex items-center space-x-2">
               <input
@@ -781,12 +803,12 @@ const AllChats = () => {
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSendMessage(sessionId);
+                  if (e.key === "Enter") handleSendMessage();
                 }}
               />
               <button
                 className="p-2 bg-gray-100 rounded-lg"
-                onClick={() => handleSendMessage(sessionId)}
+                onClick={handleSendMessage}
               >
                 <SendIcon className="w-5 h-5 text-gray-400" />
               </button>
@@ -794,7 +816,7 @@ const AllChats = () => {
           )}
         </div>
 
-        <div className="w-80 bg-gray-50 p-4 overflow-y-scroll">
+        <div className="w-80 bg-gray-50 p-4 overflow-y-auto">
           {analysisSections?.map((section, index) => {
             const isSentiment = section.title === "Sentiment Analysis";
             const isSales = section.title === "Sales Intelligence";

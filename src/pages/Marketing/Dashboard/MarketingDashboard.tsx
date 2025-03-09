@@ -1,83 +1,49 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader } from "@mui/material";
 import {
-  useState,
-  useEffect,
-  ReactNode,
-  useMemo,
-  useCallback,
-  useRef,
-} from "react";
-import { motion } from "framer-motion";
-import axios from "axios";
-import { Card, CardContent, CardHeader, IconButton } from "@mui/material";
-import {
-  MoreHoriz,
   Instagram,
   WhatsApp,
-  TrendingUp,
+  ChevronRight,
+  ChevronLeft,
 } from "@mui/icons-material";
 import {
-  AreaChart,
-  Area,
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  PieChart,
-  Pie,
-  Cell,
   ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend,
+  Cell,
+  Pie,
+  PieChart,
 } from "recharts";
-import axiosInstance from "../../../api/axiosConfig";
 import ReactMarkdown from "react-markdown";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos"; // Left Arrow Icon
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"; // Right Arrow Icon
 import WhatsappDash from "../Whatsapp/WhatsappDashboard";
-import { useNavigate } from "react-router-dom";
 
-const followerData = [
-  { day: 1, value: 25000 },
-  { day: 2, value: 75000 },
-  { day: 3, value: 35000 },
-  { day: 4, value: 55000 },
-  { day: 5, value: 85000 },
-  { day: 6, value: 65000 },
-  { day: 7, value: 45000 },
-];
+// Import your API service functions
+import { getMarketingInsightsService } from "../../../api/services/marketingDashboardService";
+import MarketingDashboardForm from "./MarketingDashboardForm";
+// import MapComponent from "./MapComponent";
 
-const socialData = [
-  { name: "LinkedIn", value: 300 },
-  { name: "Instagram Reels", value: 500 },
-  { name: "Instagram Posts", value: 400 },
-  { name: "Facebook", value: 700 },
-  { name: "X (Twitter)", value: 200 },
-];
+const COLORS = ["#A5FFD6", "#3F2181", "#FF8042", "#78C9F1", "#DBAEFF"];
 
-const keywordData = Array.from({ length: 7 }, (_, i) => ({
-  month: ["January", "February", "March", "April", "May", "June", "July"][i],
-  dataset1: Math.sin(i) * 1000,
-  dataset2: Math.cos(i) * 800,
-}));
-
-const geographyData = [
-  { name: "USA", value: 400 },
-  { name: "Canada", value: 300 },
-  { name: "Germany", value: 200 },
-  { name: "Brazil", value: 100 },
-];
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-
+/* ================================
+   Dashboard Card & Dashboard View
+================================ */
 const DashboardCard = ({
   title,
   children,
   className = "",
 }: {
   title: string;
-  children: ReactNode;
+  children: React.ReactNode;
   className?: string;
 }) => (
   <Card
@@ -85,15 +51,10 @@ const DashboardCard = ({
     elevation={0}
     sx={{
       borderRadius: 2,
-      backgroundColor: "rgba(101, 85, 143, 0.08)", // Adding the background color with 8% opacity
+      backgroundColor: "rgba(101, 85, 143, 0.08)",
     }}
   >
     <CardHeader
-      action={
-        <IconButton size="small">
-          <MoreHoriz />
-        </IconButton>
-      }
       title={title}
       sx={{ borderBottom: 1, borderColor: "divider" }}
     />
@@ -101,161 +62,312 @@ const DashboardCard = ({
   </Card>
 );
 
-const MarketingDashboard = () => {
+const DashboardUI = () => {
   const [loading, setLoading] = useState(false);
-  const [newsData, setNewsData] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  // const [isFetched, setIsFetched] = useState(false);
   const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
-
   const navigate = useNavigate();
-
-  const fetchInsights = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await axiosInstance.post(
-        "/marketing/insights",
-        {
-          newsQuery: "bitcoin",
-          trendKeywords: ["software", "java"],
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      const newsInsights = response?.data?.data?.newsInsights?.buisnessInsights;
-
-      if (newsInsights && typeof newsInsights === "string") {
-        const formattedData = newsInsights.split("\n\n").filter(Boolean);
-        setNewsData(formattedData);
-      } else {
-        setNewsData([]);
-      }
-    } catch (err) {
-      setError(
-        axios.isAxiosError(err)
-          ? err.message || "Failed to fetch data."
-          : "Failed to fetch data."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // useEffect(() => {
-  //   if (!isFetched) {
-  //     fetchInsights();
-  //     setIsFetched(true); // Mark as fetched
-  //   }
-  // }, [isFetched]);
-
-  const isFetchedRef = useRef(false);
-
-  useEffect(() => {
-    if (!isFetchedRef.current) {
-      fetchInsights();
-      isFetchedRef.current = true; // Ensure it doesn't run again
-    }
-  }, []);
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? newsData.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev === newsData.length - 1 ? 0 : prev + 1));
-  };
+  const [insightsData, setInsightsData] = useState(null);
 
   const handleViewDashboard = () => {
     navigate(`/marketing/whatsappdashboard`);
   };
 
-  const formatNewsForCarousel = useCallback(() => {
-    return newsData.map((item) => {
-      const match = item.match(/^(\d+\.\s\*\*(.*?)\*\*):(.*)$/s); // Matches title & content
-      if (match) {
-        // Transform ### into bold markdown
-        const transformedContent = match[3].replace(/### (.*)/g, "**$1**");
-        return { title: match[2].trim(), content: transformedContent.trim() };
+  useEffect(() => {
+    const fetchInsights = async () => {
+      try {
+        const response = await getMarketingInsightsService();
+        setInsightsData(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch marketing insights", error);
+        setLoading(false);
       }
-      const transformedItem = item.replace(/### (.*)/g, "**$1**");
-      return { title: "", content: transformedItem.trim() };
-    });
-  }, [newsData]);
+    };
 
-  // const formattedNews = formatNewsForCarousel();
-  const formattedNews = useMemo(
-    () => formatNewsForCarousel(),
-    [formatNewsForCarousel]
+    fetchInsights();
+  }, []);
+
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // if (
+  //   !Array.isArray(insightsData.followerData) ||
+  //   insightsData.followerData.length === 0 ||
+  //   !Array.isArray(insightsData.actionableSocialMediaInsights) ||
+  //   insightsData.actionableSocialMediaInsights.length === 0 ||
+  //   !Array.isArray(insightsData.geographicalActivity?.interestByRegion) ||
+  //   insightsData.geographicalActivity.interestByRegion.length === 0 ||
+  //   !Array.isArray(insightsData.trendsData?.interestOverTime?.timeline_data) ||
+  //   insightsData.trendsData.interestOverTime.timeline_data.length === 0 ||
+  //   !Array.isArray(insightsData.trendsKeywords) ||
+  //   insightsData.trendsKeywords.length === 0
+  // ) {
+  //   return <div>Data is getting processed</div>;
+  // }
+
+  // Divide insights into groups of 3
+  const insightPages = Array.from(
+    {
+      length: Math.ceil(insightsData?.actionableSocialMediaInsights.length / 3),
+    },
+    (_, i) =>
+      insightsData?.actionableSocialMediaInsights.slice(i * 3, i * 3 + 3)
   );
 
+  const handleNext = () => {
+    setCurrentPage((prev) => (prev + 1) % insightPages.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentPage((prev) => (prev === 0 ? insightPages.length - 1 : prev - 1));
+  };
+
+  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+
+  const allNews = insightsData?.newsArticles?.insights
+    ? [{ insights: insightsData.newsArticles.insights }]
+    : [];
+
+  const handleNewsNext = () => {
+    setCurrentNewsIndex((prev) => (prev + 1) % allNews.length);
+  };
+
+  const handleNewsPrev = () => {
+    setCurrentNewsIndex((prev) => (prev === 0 ? allNews.length - 1 : prev - 1));
+  };
+
+  const transformFollowerData = (followerData: any[]) => {
+    const brandPlatformMap = {};
+
+    followerData?.forEach(
+      (item: {
+        followers: string;
+        brand: string | number;
+        platform: string | number;
+      }) => {
+        // Skip 'N/A' values
+        if (item.followers !== "N/A") {
+          if (!brandPlatformMap[item.brand]) {
+            brandPlatformMap[item.brand] = {
+              brand: item.brand,
+              Instagram: 0,
+              Twitter: 0,
+              LinkedIn: 0,
+            };
+          }
+
+          // Safely add followers to the correct platform
+          brandPlatformMap[item.brand][item.platform] = Number(item.followers);
+        }
+      }
+    );
+
+    // Convert map to array, ensuring all brands have all platforms
+    return Object.values(brandPlatformMap);
+  };
+
+  const processedData = insightsData?.followerData
+    ? transformFollowerData(insightsData.followerData)
+    : [];
+
+  // Debug logging
+  // console.log("Processed Follower Data:", processedData);
+
+  const transformTrendsChartData = (timelineData: any[]) => {
+    return timelineData?.map((item) => {
+      const dataPoint: any = { date: item.date };
+      // For each value, add a key with the query name and assign its extracted value
+      item.values.forEach((entry: any) => {
+        dataPoint[entry.query] = Number(entry.extracted_value);
+      });
+      return dataPoint;
+    });
+  };
+
+  const transformedTrendsData = insightsData?.trendsData?.interestOverTime
+    ?.timeline_data
+    ? transformTrendsChartData(
+        insightsData.trendsData.interestOverTime.timeline_data
+      )
+    : [];
+
+  // console.log("Process", transformedTrendsData);
+
+  const dataForChart = insightsData?.geographicalActivity?.interestByRegion.map(
+    (region: { location: any; value: any }) => ({
+      name: region.location,
+      value: Number(region.value),
+    })
+  );
+
+  const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
+
+  // Dropdown options for the different metrics.
+  const metricOptions = [
+    { label: "Followers", value: "followers" },
+    { label: "Engagement Rate", value: "engagementRate" },
+    { label: "Average Engagement Per Post", value: "avgEngagementPerPost" },
+    { label: "Total Engagements", value: "totalEngagements" },
+    { label: "Total Likes", value: "totalLikes" },
+    { label: "Total Posts", value: "totalPosts" },
+    {
+      label: "Instagram Involvement",
+      value: "platformInvolvement.instagram.rawValue",
+    },
+    {
+      label: "Twitter Involvement",
+      value: "platformInvolvement.twitter.rawValue",
+    },
+    {
+      label: "LinkedIn Involvement",
+      value: "platformInvolvement.linkedin.rawValue",
+    },
+  ];
+  const getNestedValue = (obj, keyString) => {
+    return keyString.split(".").reduce((acc, key) => {
+      return acc && acc[key] !== undefined ? acc[key] : undefined;
+    }, obj);
+  };
+
+  // Compute competitor trends data based on the selected metric.
+  const competitorTrendsData = Object.keys(
+    insightsData?.brand_engagement_metrics || {}
+  ).map((brand) => {
+    const brandData = insightsData.brand_engagement_metrics[brand];
+    let metricValue = 0;
+
+    // If the metric string includes a dot, retrieve the nested value.
+    if (selectedMetric.includes(".")) {
+      const nestedValue = getNestedValue(brandData, selectedMetric);
+      metricValue = nestedValue !== undefined ? nestedValue : 0;
+    } else if (brandData[selectedMetric] !== undefined) {
+      // Otherwise, if the metric exists directly on the brand, use it.
+      metricValue = brandData[selectedMetric];
+    } else if (brandData.platforms) {
+      // Fallback: Sum the values across all available platforms.
+      metricValue = Object.keys(brandData.platforms).reduce((acc, platform) => {
+        const platformData = brandData.platforms[platform];
+        if (platformData[selectedMetric] !== undefined) {
+          return acc + platformData[selectedMetric];
+        }
+        return acc;
+      }, 0);
+    }
+    return { name: brand, value: metricValue };
+  });
+
+  console.log("competitorTrendsData", competitorTrendsData);
+
+  const noData =
+    competitorTrendsData.length === 0 ||
+    competitorTrendsData.every((entry) => Number(entry.value) === 0);
+
+  if (loading) return <div>Loading...</div>;
+  if (!insightsData)
+    return (
+      <div>
+        <MarketingDashboardForm />;
+      </div>
+    );
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50 min-h-screen space-y-6">
+      {/* ===== Row 1: 3 columns ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Market News */}
+
         <DashboardCard title="Market News">
-          <div className="space-y-4">
-
-
-            {loading ? (
-              // Display loading spinner while fetching data
-              <div className="flex justify-center items-center h-40">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-[#BC9AE0] border-solid"></div>
-              </div>
-            ) : !error && formattedNews.length > 0 ? (
-              <div className="relative h-40">
-                <motion.div
-                  className="carousel-item"
-                  key={currentIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <div className="bg-gray-100 p-4 rounded-md shadow-md max-h-[230px] flex flex-col overflow-y-scroll">
-                    <h3 className="text-lg font-semibold">
-                      {formattedNews[currentIndex].title}
-                    </h3>
-                    <ReactMarkdown className="text-sm text-gray-600">
-                      {`${formattedNews[currentIndex].content}`}
-
+          <div className="relative h-[250px] overflow-auto">
+            {allNews.length > 0 && (
+              <>
+                {/* Slide Content */}
+                <div className="space-y-4 mb-10">
+                  <div className="flex items-center space-x-2">
+                    <ReactMarkdown className="text-sm">
+                      {allNews[currentNewsIndex].insights}
                     </ReactMarkdown>
                   </div>
-                </motion.div>
-              </div>
-            ) : (
-              <p className="text-gray-500">No news available.</p>
+                </div>
+                {/* Pagination Controls - Positioned at bottom */}
+                {allNews.length > 1 && (
+                  <div className="flex justify-between absolute bottom-0 left-0 right-0 mt-4">
+                    <button
+                      onClick={handleNewsPrev}
+                      className="p-2 hover:bg-gray-100 rounded"
+                    >
+                      <ChevronLeft />
+                    </button>
+                    <div className="flex space-x-2">
+                      {allNews.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`h-2 w-2 rounded-full ${
+                            index === currentNewsIndex
+                              ? "bg-blue-500"
+                              : "bg-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <button
+                      onClick={handleNewsNext}
+                      className="p-2 hover:bg-gray-100 rounded"
+                    >
+                      <ChevronRight />
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
-          {/* Navigation Buttons */}
-          <div className="  bottom-200 left-0 right-0 flex justify-between items-end px-8">
-            <IconButton onClick={handlePrev}>
-              <ArrowBackIosIcon />
-            </IconButton>
-            <IconButton onClick={handleNext}>
-              <ArrowForwardIosIcon />
-            </IconButton>
-          </div>
         </DashboardCard>
 
+        {/* Social Media Trends */}
         <DashboardCard title="Social Media Trends">
-          <div className="space-y-4">
-            {[
-              "Short-form videos are dominating engagement",
-              "Brands leveraging AI for personalized content",
-              "Influencer collaborations driving higher ROI",
-            ].map((trend, i) => (
-              <div key={i} className="flex items-center space-x-2">
-                <TrendingUp fontSize="small" color="primary" />
-                <span className="text-sm">{trend}</span>
-              </div>
-            ))}
+          <div className="relative">
+            <div className="space-y-4 min-h-[150px]">
+              {insightsData?.actionableSocialMediaInsights &&
+                insightPages[currentPage]?.map(
+                  (trend: string, i: React.Key) => (
+                    <div key={i} className="flex items-center space-x-2">
+                      <ReactMarkdown className="text-sm" children={trend} />
+                    </div>
+                  )
+                )}
+            </div>
+            {/* Pagination Controls */}
+            {insightsData?.actionableSocialMediaInsights &&
+              insightsData.actionableSocialMediaInsights.length > 3 && (
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={handlePrev}
+                    className="p-2 hover:bg-gray-100 rounded"
+                  >
+                    <ChevronLeft />
+                  </button>
+                  <div className="flex space-x-2">
+                    {Array.from({
+                      length: insightPages.length,
+                    }).map((_, index) => (
+                      <div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${
+                          index === currentPage ? "bg-blue-500" : "bg-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleNext}
+                    className="p-2 hover:bg-gray-100 rounded"
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              )}
           </div>
         </DashboardCard>
 
+        {/* AI Insight & Recommendation */}
         <DashboardCard title="AI Insight and Recommendation">
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
@@ -267,14 +379,14 @@ const MarketingDashboard = () => {
                 <h4 className="font-medium mb-2">Insight</h4>
                 <p className="text-sm text-gray-600">
                   AI tools are increasingly being used for content creation,
-                  campaign analysis, and customer insights
+                  campaign analysis, and customer insights.
                 </p>
               </div>
               <div>
                 <h4 className="font-medium mb-2">Action</h4>
                 <p className="text-sm text-gray-600">
                   Utilize AI for content creation, analyzing campaign
-                  performance, and generating customer insights
+                  performance, and generating customer insights.
                 </p>
               </div>
             </div>
@@ -286,83 +398,55 @@ const MarketingDashboard = () => {
             </button>
           </div>
         </DashboardCard>
+      </div>
 
-        <div className="lg:col-span-1">
-          <DashboardCard title="Competitor Follower Insights">
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={followerData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </DashboardCard>
-        </div>
-
-        <DashboardCard title="Geography Activity Insights">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="text-sm font-medium">Your brand</span>
-              </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={geographyData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    label
-                  >
-                    {geographyData.map((_entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <span className="text-sm font-medium">Competitor</span>
-              </div>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={geographyData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    label
-                  >
-                    {geographyData.map((_entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+      {/* ===== Row 2: 2 columns ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Competitor Follower Insights */}
+        <DashboardCard title="Competitor Follower Insights">
+          <div className="w-full h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={processedData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="brand" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="Instagram" stackId="a" fill="#DBAEFF" />
+                <Bar dataKey="Twitter" stackId="a" fill="#2E2F5F" />
+                <Bar dataKey="LinkedIn" stackId="a" fill="#78C9F1" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </DashboardCard>
 
+        {/* Geography Activity Insights */}
+        <DashboardCard title="Geography Activity Insights">
+          <div className="w-full h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={dataForChart}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#65558F" />
+              </BarChart>
+            </ResponsiveContainer>
+            {/* <MapComponent /> */}
+          </div>
+        </DashboardCard>
+      </div>
+
+      {/* ===== Row 3: 3 columns (Campaigns + Key Words Trends) ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Campaigns Running */}
         <DashboardCard title="Campaigns Running">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -399,77 +483,148 @@ const MarketingDashboard = () => {
           </div>
         </DashboardCard>
 
+        {/* Key Words Trends (spans 2 columns) */}
         <div className="lg:col-span-2">
           <DashboardCard title="Key Words Trends">
-            <div className="flex space-x-4">
-              <select className="border rounded px-10 py-1 text-sm">
-                <option>India</option>
-                <option>Dubai</option>
-                <option>Germany</option>
-              </select>
-              <select className="border rounded px-10 py-1 text-sm">
-                <option>Past 24 Hours</option>
-                <option>Past 12 Hours</option>
-                <option>Past 6 Hours</option>
-              </select>
-              <select className="border rounded px-10 py-1 text-sm">
-                <option>All Categories</option>
-              </select>
+            <div className="mt-2">
+              <h4 className="text-base font-medium mb-2">Trends Keywords</h4>
+              <div className="flex flex-wrap gap-2">
+                {insightsData.trendsKeywords.map(
+                  (keyword: string, index: number) => (
+                    <span key={index} className="bg-gray-300 px-2 py-1 rounded">
+                      {keyword}
+                    </span>
+                  )
+                )}
+              </div>
             </div>
-            <div className="h-64 mt-20">
+            <div className="h-64 mt-8">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={keywordData}>
+                <LineChart data={transformedTrendsData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
+                  <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="dataset1" stroke="#8884d8" />
-                  <Line type="monotone" dataKey="dataset2" stroke="#82ca9d" />
+                  {/* Dynamically render a Line for each trend keyword */}
+                  {insightsData.trendsKeywords.map(
+                    (keyword: string, index: number) => (
+                      <Line
+                        key={keyword}
+                        type="monotone"
+                        dataKey={keyword}
+                        stroke={COLORS[index % COLORS.length]}
+                      />
+                    )
+                  )}
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </DashboardCard>
         </div>
+      </div>
 
-        <DashboardCard title="Competitor Trends - Social Listings">
-          <div className="space-y-2 flex-col">
-            {socialData.map((entry, index) => (
-              <div key={index} className="flex items-center">
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                />
-                <span className="ml-2 text-sm">{entry.name}</span>
-              </div>
-            ))}
+      {/* ===== Row 4: Single column for Competitor Trends ===== */}
+
+      <div>
+        <DashboardCard title="Competitor Trends - Social Listening">
+          <div className="mb-4">
+            <label htmlFor="metric-select" className="mr-2">
+              Select Metric:
+            </label>
+            <select
+              id="metric-select"
+              value={selectedMetric}
+              onChange={(e) => setSelectedMetric(e.target.value)}
+            >
+              {metricOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="h-60">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={socialData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label
-                >
-                  {socialData.map((_entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+          {noData ? (
+            <div className="text-center py-8">NO data available</div>
+          ) : (
+            <>
+              <div className="space-y-2 flex-col mb-4">
+                {competitorTrendsData.map((entry, index) => (
+                  <div key={index} className="flex items-center">
+                    <div
+                      className="h-3 w-3 rounded-full"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+                    <span className="ml-2 text-sm">
+                      {entry.name}: {entry.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="h-60">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={competitorTrendsData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label
+                    >
+                      {competitorTrendsData.map((_entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </>
+          )}
         </DashboardCard>
       </div>
     </div>
   );
 };
 
-export default MarketingDashboard;
+/* =====================================================
+   Wrapper Component: Conditionally show Dashboard or Form
+===================================================== */
+const MarketingDashboardWrapper: React.FC = () => {
+  const [hasInsights, setHasInsights] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkMarketingInsights = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.log("token", token);
+          setHasInsights(false);
+          return;
+        }
+
+        const response = await getMarketingInsightsService();
+
+        // Check if the response is null or empty
+        setHasInsights(response && Object.keys(response).length > 0);
+      } catch (error) {
+        console.error("Error fetching marketing insights:", error);
+        setHasInsights(false);
+      }
+    };
+
+    checkMarketingInsights();
+  }, []);
+
+  if (hasInsights === null) {
+    return <div>Loading...</div>;
+  }
+
+  return hasInsights ? <DashboardUI /> : <MarketingDashboardForm />;
+};
+
+export default MarketingDashboardWrapper;
