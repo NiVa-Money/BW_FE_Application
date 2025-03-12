@@ -99,12 +99,23 @@ const CreateBot: React.FC = () => {
     // Page 1 validation
     Yup.object({
       botName: Yup.string().required("Agent Name is required"),
-    }),
-    // Page 2 validation
-    Yup.object({
+      greetingMessage: Yup.string().required("Greeting Message is required"),
       email: Yup.string()
         .email("Invalid email format")
         .required("Email is required"),
+      phoneNumber: Yup.string()
+        .matches(/^\d+$/, "Phone number must contain only digits")
+        .min(10, "Phone number must be at least 10 digits")
+        .required("Phone number is required"),
+      appoimentLink: Yup.string()
+        .url("Must be a valid URL")
+        .required("Appointment link is required"),
+    }),
+    // Page 2 validation
+    Yup.object({
+      botIdentity: Yup.string().required("Agent Role is required"),
+      botTone: Yup.string().required("Tone of voice is required"),
+      botLimit: Yup.number().required("Message limit is required"),
     }),
   ];
 
@@ -601,9 +612,9 @@ const CreateBot: React.FC = () => {
             <Field
               name="botIdentity"
               component={FormikFieldToggleComponent}
-              onChange={(e) =>
-                setFormValues({ ...formValues, botIdentity: e.target.value })
-              }
+              onChange={(value) => {
+                setFormValues({ ...formValues, botIdentity: value });
+              }}
               options={[
                 { label: "Customer Service", value: "Customer Service" },
                 { label: "Sales", value: "Sales" },
@@ -705,7 +716,9 @@ const CreateBot: React.FC = () => {
           {/* Chat Guidelines */}
           <div className="flex flex-col w-full mb-8 text-black">
             <div className="flex justify-between items-center">
-              <label className="text-lg font-medium">Conversations Guidelines</label>
+              <label className="text-lg font-medium">
+                Conversations Guidelines
+              </label>
             </div>
             <p className="text-sm text-gray-500 mb-2">
               Set clear rules for how your agent should respond in chat channels
