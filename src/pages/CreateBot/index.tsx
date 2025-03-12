@@ -113,24 +113,37 @@ const CreateBot: React.FC = () => {
     }),
     // Page 2 validation
     Yup.object({
+      knowledgeBaseFile: Yup.mixed().required(
+        "Knowledge Base file is required."
+      ),
       botIdentity: Yup.string().required("Agent Role is required"),
       botTone: Yup.string().required("Tone of voice is required"),
+      goals: Yup.array()
+        .of(Yup.string().required("Goal cannot be empty"))
+        .min(1, "At least one goal is required"),
+      guidelines: Yup.array()
+        .of(Yup.string().required("Guideline cannot be empty"))
+        .min(1, "At least one guideline is required"),
       botLimit: Yup.number().required("Message limit is required"),
     }),
   ];
 
   const initialValues: any = {
-    name: "",
+    botName: "",
     theme: "",
     botTone: "",
     botFont: "",
     greetingMessage: "",
     botIdentity: "",
     phoneNumber: "",
+    botLimit: "",
     email: "",
     botSmartness: true,
     appoimentLink: "",
     botIconOption: BOTICONS.list,
+    knowledgeBaseFile: null,
+    goals: [""],
+    guidelines: [""],
   };
 
   const handleSubmit = () => {
@@ -158,6 +171,50 @@ const CreateBot: React.FC = () => {
     formData.append("botTheme", theme);
 
     dispatch(createBotAction(formData));
+  };
+
+  const handleFormikSubmit = async (values: any, actions: any) => {
+    try {
+      // Validate using the combined schema
+      await validationSchema[currentPage - 1].validate(values, {
+        abortEarly: false,
+      });
+      // If valid, proceed with form submission
+      handleSubmit();
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        // Convert Yup error array to an errors object
+        const errors = err.inner.reduce((acc: any, error: any) => {
+          acc[error.path] = error.message;
+          return acc;
+        }, {});
+
+        // Mark all error fields as touched so that errors are shown
+        const touchedFields = Object.keys(errors).reduce((acc: any, key) => {
+          acc[key] = true;
+          return acc;
+        }, {});
+        actions.setErrors(errors);
+        actions.setTouched(touchedFields);
+
+        // Define which fields belong to each page
+        const page1Fields = [
+          "botName",
+          "greetingMessage",
+          "email",
+          "phoneNumber",
+          "appoimentLink",
+        ];
+        const page2Fields = ["botIdentity", "botTone", "botLimit"];
+
+        // Navigate to the page where the first error exists
+        if (page1Fields.some((field) => errors[field])) {
+          setCurrentPage(1);
+        } else if (page2Fields.some((field) => errors[field])) {
+          setCurrentPage(2);
+        }
+      }
+    }
   };
 
   const handleColorClick = (color: any) => {
@@ -276,10 +333,10 @@ const CreateBot: React.FC = () => {
               type="text"
               id="botName"
               name="botName"
-              value={botName}
+              // value={botName}
               placeholder="Enter your Agent Name"
               component={FormikFieldInputComponent}
-              onChange={handleChange}
+              // onChange={handleChange}
             />
           </div>
           <div className="flex flex-col w-[85%] mb-3 text-black">
@@ -425,9 +482,9 @@ const CreateBot: React.FC = () => {
               id="greetingMessage"
               name="greetingMessage"
               placeholder="Enter your Agent Greeting Message"
-              value={greetingMessage}
+              // value={greetingMessage}
               component={FormikFieldInputComponent}
-              onChange={handleChange}
+              // onChange={handleChange}
             />
           </div>
           {/* Open by Default */}
@@ -479,10 +536,10 @@ const CreateBot: React.FC = () => {
               type="text"
               id="appoimentLink"
               name="appoimentLink"
-              value={appoimentLink}
+              // value={appoimentLink}
               placeholder="Enter your Appointment Link"
               component={FormikFieldInputComponent}
-              onChange={handleChange}
+              // onChange={handleChange}
             />
           </div>
           <div className=" flex flex-col w-[85%] mb-3 text-black">
@@ -496,10 +553,10 @@ const CreateBot: React.FC = () => {
               type="text"
               id="phoneNumber"
               name="phoneNumber"
-              value={phoneNumber}
+              // value={phoneNumber}
               placeholder="Enter your Phone Number"
               component={FormikFieldInputComponent}
-              onChange={handleChange}
+              // onChange={handleChange}
               onKeyPress={handleKeyPress}
             />
           </div>
@@ -508,10 +565,10 @@ const CreateBot: React.FC = () => {
               type="email"
               id="email"
               name="email"
-              value={email}
+              // value={email}
               placeholder="Enter your Email"
               component={FormikFieldInputComponent}
-              onChange={handleChange}
+              // onChange={handleChange}
             />
           </div>
         </>
@@ -612,9 +669,9 @@ const CreateBot: React.FC = () => {
             <Field
               name="botIdentity"
               component={FormikFieldToggleComponent}
-              onChange={(value) => {
-                setFormValues({ ...formValues, botIdentity: value });
-              }}
+              // onChange={(value) => {
+              //   setFormValues({ ...formValues, botIdentity: value });
+              // }}
               options={[
                 { label: "Customer Service", value: "Customer Service" },
                 { label: "Sales", value: "Sales" },
@@ -629,10 +686,10 @@ const CreateBot: React.FC = () => {
             <label htmlFor="botTone">Tone of voice</label>
             <Field
               name="botTone"
-              onChange={(value: string) => {
-                setFormValues({ ...formValues, botTone: value });
-                // Perform additional logic if needed
-              }}
+              // onChange={(value: string) => {
+              //   setFormValues({ ...formValues, botTone: value });
+              //   // Perform additional logic if needed
+              // }}
               component={FormikFieldToggleComponent}
               options={[
                 { label: "Friendly", value: "friendly" },
@@ -928,7 +985,7 @@ const CreateBot: React.FC = () => {
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema[currentPage - 1]}
-          onSubmit={handleSubmit}
+          onSubmit={handleFormikSubmit}
         >
           {() => (
             <Form className="w-[95%] m-auto h-[95%] grid grid-cols-[60%_40%]">
