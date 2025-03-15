@@ -130,7 +130,7 @@ const CreateBot: React.FC = () => {
           botFont: Yup.string().required("Font is required"),
         })
       : Yup.object().shape({
-          botIdentity: Yup.string().required("Agent Role is required"),
+          agentRole: Yup.string().required("Agent Role is required"),
           botTone: Yup.string().required("Tone is required"),
           agentsGoals: Yup.array()
             .of(Yup.string().required("Goal cannot be empty"))
@@ -199,7 +199,7 @@ const CreateBot: React.FC = () => {
     }
   };
 
-  const userId: string = localStorage.getItem("user_id") || "";
+  // const userId: string = localStorage.getItem("user_id") || "";
 
   const handleSubmit = async (values: any, { setSubmitting }) => {
     setSubmitting(true); // Show loading state
@@ -217,12 +217,12 @@ const CreateBot: React.FC = () => {
       formData.append("botColor", chatColor || "");
       formData.append("customBotImage", imageFile || "");
       formData.append("botGreetingMessage", values.botGreetingMessage || "");
-      formData.append("botIdentity", values.botIdentity || "");
+      // formData.append("botIdentity", values.botIdentity || "");
       formData.append("supportNumber", values.supportNumber || "");
       formData.append("supportEmail", values.supportEmail || "");
       formData.append("docName", filename || "");
       formData.append("docType", filename ? "pdf" : "");
-      formData.append("knowledgeBaseFile", values.knowledgeBaseFile || "");
+      formData.append("file", values.knowledgeBaseFile || "");
       formData.append(
         "appointmentSchedulerLink",
         values.appointmentSchedulerLink || ""
@@ -245,7 +245,7 @@ const CreateBot: React.FC = () => {
       );
       formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
 
-      formData.append("userId", userId || "");
+      // formData.append("userId", userId || "");
 
       // Dispatch the API call and wait for the response
       await dispatch(createBotAction(formData));
@@ -557,7 +557,7 @@ const CreateBot: React.FC = () => {
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <label>Agent Role</label>
             <Field
-              name="botIdentity"
+              name="agentRole"
               component={FormikFieldToggleComponent}
               options={[
                 { label: "Customer Service", value: "Customer Service" },
@@ -566,9 +566,9 @@ const CreateBot: React.FC = () => {
                 { label: "Custom", value: "Custom" },
               ]}
             />
-            {formik.touched.botIdentity && formik.errors.botIdentity && (
+            {formik.touched.agentRole && formik.errors.agentRole && (
               <div className="text-red-500 text-sm mt-1">
-                {formik.errors.botIdentity}
+                {formik.errors.agentRole}
               </div>
             )}
           </div>
@@ -959,7 +959,7 @@ const CreateBot: React.FC = () => {
                 contentComponent={
                   <BotSuccessContent
                     subHeading1={`Your Agent ${formik.values.botName} Is Ready!`}
-                    subHeading2={`Your ${formik.values.botIdentity} Agent is ready for action`}
+                    subHeading2={`Your ${formik.values.agentRole} Agent is ready for action`}
                     bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${formik.values.botName} into your social media platforms.`}
                     open={false}
                     onClose={() => {}}

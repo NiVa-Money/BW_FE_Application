@@ -2,7 +2,7 @@
 import React from "react";
 import SendIcon from "@mui/icons-material/Send";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import {  FormControlLabel, Switch } from "@mui/material";
+import { FormControlLabel, Switch } from "@mui/material";
 interface CreateBotRightContainerProps {
   botName?: string;
   imageSrc?: any;

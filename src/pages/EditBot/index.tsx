@@ -780,7 +780,6 @@ const EditBot: React.FC = () => {
               botName="Botwot Assistant"
               theme={theme}
               color={chatColor}
-              handleSubmit={handleSubmit}
               font={botFont}
               botSmartness={botSmartness}
               botSmartnessHandle={botSmartnessHandle}
