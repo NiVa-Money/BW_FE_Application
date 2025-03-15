@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "../axiosConfig";
 
 export const createBotProfileService = async (payload: any) => {
@@ -66,5 +68,14 @@ export const botTestService = async (payload: any) => {
     return response.data;
   } catch (error) {
     throw new Error("Error in Creating Bot");
+  }
+};
+
+export const generatePromptService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post("/user/generate-prompt", payload);
+    return response.data;
+  } catch (error) {
+    throw new Error("Error generating prompt"); 
   }
 };
