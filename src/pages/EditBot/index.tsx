@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import React, { useEffect, useRef, useState } from "react";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
@@ -51,7 +51,6 @@ const EditBot: React.FC = () => {
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [base64Image, setBase64Image] = useState("");
   const [botId, setBotId] = useState("");
-  const [, _setBase64File] = useState("");
   const [formValues, setFormValues] = useState<any>({
     botName: "",
     theme: "",
@@ -813,3 +812,4 @@ const EditBot: React.FC = () => {
 };
 
 export default EditBot;
+

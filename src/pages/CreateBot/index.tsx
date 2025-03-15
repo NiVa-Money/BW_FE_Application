@@ -124,21 +124,12 @@ const CreateBot: React.FC = () => {
           supportEmail: Yup.string()
             .email("Invalid email")
             .required("Email is required"),
-          appointmentSchedulerLink: Yup.string()
-            .url("Must be a valid URL")
-            .required("Appointment link is required"),
           botTheme: Yup.string().required("Theme is required"),
           botFont: Yup.string().required("Font is required"),
         })
       : Yup.object().shape({
           agentRole: Yup.string().required("Agent Role is required"),
           botTone: Yup.string().required("Tone is required"),
-          agentsGoals: Yup.array()
-            .of(Yup.string().required("Goal cannot be empty"))
-            .min(1, "At least one goal is required"),
-          conversationGuidelines: Yup.array()
-            .of(Yup.string().required("Guideline cannot be empty"))
-            .min(1, "At least one guideline is required"),
           knowledgeBaseFile: Yup.mixed()
             .required("Knowledge Base file is required")
             .test("fileSize", "File too large", (value) => {
@@ -239,7 +230,12 @@ const CreateBot: React.FC = () => {
       );
 
       // Append additional fields
-      formData.append("agentRole", values.agentRole || "");
+      formData.append(
+        "agentRole",
+        values.agentRole === "Custom"
+          ? values.customAgentRole || ""
+          : values.agentRole || ""
+      );
       formData.append(
         "agentRoleDescription",
         values.agentRoleDescription || ""
@@ -495,11 +491,7 @@ const CreateBot: React.FC = () => {
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <label>Support Contact</label>
-            <p className="text-md mt-2 mb-2 text-gray-600">
-              For assistance, please contact our support team at
-              support@botwoticx.com or call us at +1 (123) 456-7890. Our team is
-              available 24/7 to assist you with any inquiries.
-            </p>
+
             <Field
               type="text"
               name="supportNumber"
@@ -555,7 +547,7 @@ const CreateBot: React.FC = () => {
               )}
           </div>
 
-          <div className="flex flex-col w-[85%] mb-3 text-black">
+          {/* <div className="flex flex-col w-[85%] mb-3 text-black">
             <label>Agent Role</label>
             <Field
               name="agentRole"
@@ -567,6 +559,44 @@ const CreateBot: React.FC = () => {
                 { label: "Custom", value: "Custom" },
               ]}
             />
+            {formik.touched.agentRole && formik.errors.agentRole && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.agentRole}
+              </div>
+            )}
+          </div> */}
+
+          <div className="flex flex-col w-[85%] mb-3 text-black">
+            <label>Agent Role</label>
+            <Field
+              name="agentRole"
+              component={FormikFieldToggleComponent}
+              options={[
+                { label: "Customer Service", value: "Customer Service" },
+                { label: "Sales", value: "Sales" },
+                { label: "Human Resources", value: "Human Resource" },
+                { label: "Custom", value: "Custom" },
+              ]}
+              onChange={(value) => {
+                formik.setFieldValue("agentRole", value);
+                if (value !== "Custom") {
+                  formik.setFieldValue("customAgentRole", ""); // Clear custom field if not selected
+                }
+              }}
+            />
+
+            {formik.values.agentRole === "Custom" && (
+              <div className="mt-2">
+                <label>Custom Role</label>
+                <Field
+                  name="customAgentRole"
+                  type="text"
+                  className="border p-2 rounded"
+                  placeholder="Enter custom role"
+                />
+              </div>
+            )}
+
             {formik.touched.agentRole && formik.errors.agentRole && (
               <div className="text-red-500 text-sm mt-1">
                 {formik.errors.agentRole}
