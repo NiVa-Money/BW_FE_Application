@@ -1003,7 +1003,7 @@ const CreateBot: React.FC = () => {
                   botSmartness={formik.values.botSmartness}
                   imageSrc={imageSrc}
                   botName={formik.values.botName || "Bot Assistant"}
-                  theme={formik.values.theme}
+                  theme={formik.values.botTheme}
                   color={chatColor}
                   botSmartnessHandle={(val) =>
                     formik.setFieldValue("botSmartness", val)
