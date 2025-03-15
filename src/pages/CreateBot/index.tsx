@@ -19,6 +19,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import { createBotAction } from "../../store/actions/botActions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
+import { generatePromptService } from "../../api/services/botService";
 
 enum BOTICONS {
   list = "list",
@@ -93,11 +94,11 @@ const CreateBot: React.FC = () => {
     const updatedGoals = [...formik.values.agentsGoals];
     updatedGoals.splice(index, 1);
 
-    // If you want at least one empty string after deletion:
-    if (updatedGoals.length === 0) {
-      updatedGoals.push("");
-    }
-    formik.setFieldValue("agentsGoals", updatedGoals);
+    // Force a state update even when array becomes empty
+    formik.setFieldValue(
+      "agentsGoals",
+      updatedGoals.length > 0 ? updatedGoals : [""]
+    );
   };
 
   const handleGuidelineChange = (index: number, value: string, formik: any) => {
@@ -607,7 +608,7 @@ const CreateBot: React.FC = () => {
                   placeholder="Your main goal is to assist customers in their shopping journey."
                 />
 
-                {formik.values.agentGoals?.length > 1 && (
+                {formik.values.agentsGoals?.length > 1 && (
                   <button
                     type="button"
                     onClick={() => deleteGoal(index, formik)}
@@ -639,19 +640,36 @@ const CreateBot: React.FC = () => {
                 className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
                 placeholder="Enter a prompt for goal generation..."
               />
+
               <button
                 type="button"
                 className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
-                onClick={() => {
-                  const generatedGoal =
-                    "Help customers find products matching their needs.";
+                onClick={async () => {
                   if (formik.values.newGoalPrompt) {
-                    const updatedGoals = [
-                      ...formik.values.agentsGoals,
-                      generatedGoal,
-                    ];
-                    formik.setFieldValue("agentsGoals", updatedGoals);
-                    formik.setFieldValue("newGoalPrompt", "");
+                    try {
+                      const response = await generatePromptService({
+                        initialPrompt: formik.values.newGoalPrompt,
+                        purpose: "agent goal",
+                      });
+
+                      // Split the prompt into individual guidelines
+                      const generatedGoals = response.prompt
+                        .split("\n")
+                        .map((line) => line.replace(/^- /, "").trim()) // Remove markdown-style bullets
+                        .filter((line) => line.length > 0);
+
+                      // Add all generated goals to the existing ones
+                      const updatedGoals = [
+                        ...formik.values.agentsGoals,
+                        ...generatedGoals,
+                      ].filter((goal) => goal.trim().length > 0); // Remove empty goals
+
+                      formik.setFieldValue("agentsGoals", updatedGoals);
+                      formik.setFieldValue("newGoalPrompt", "");
+                    } catch (error) {
+                      console.error("Goal generation failed:", error);
+                      // Add error notification here
+                    }
                   }
                 }}
               >
@@ -669,7 +687,7 @@ const CreateBot: React.FC = () => {
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex justify-between items-center">
               <label className="text-lg font-medium">
-                Conversations Guidelines
+                Conversation Guidelines {/* Fixed typo in label */}
               </label>
             </div>
             <p className="text-sm text-gray-500 mb-2">
@@ -721,19 +739,32 @@ const CreateBot: React.FC = () => {
               <button
                 type="button"
                 className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
-                onClick={() => {
-                  const generatedGuideline =
-                    "Always respond within 30 seconds and maintain a friendly tone.";
+                onClick={async () => {
                   if (formik.values.newGuidelinePrompt) {
-                    const updatedGuidelines = [
-                      ...formik.values.conversationGuidelines,
-                      generatedGuideline,
-                    ];
-                    formik.setFieldValue(
-                      "conversationGuidelines",
-                      updatedGuidelines
-                    );
-                    formik.setFieldValue("newGuidelinePrompt", "");
+                    try {
+                      const response = await generatePromptService({
+                        initialPrompt: formik.values.newGuidelinePrompt,
+                        purpose: "conversation guidelines",
+                      });
+
+                      const generatedGuidelines = response.prompt
+                        .split("\n")
+                        .map((line) => line.replace(/^- /, "").trim())
+                        .filter((line) => line.length > 0);
+
+                      const updatedGuidelines = [
+                        ...formik.values.conversationGuidelines,
+                        ...generatedGuidelines,
+                      ].filter((guideline) => guideline.trim().length > 0);
+
+                      formik.setFieldValue(
+                        "conversationGuidelines",
+                        updatedGuidelines
+                      );
+                      formik.setFieldValue("newGuidelinePrompt", "");
+                    } catch (error) {
+                      console.error("Guideline generation failed:", error);
+                    }
                   }
                 }}
               >

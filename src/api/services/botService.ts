@@ -73,7 +73,7 @@ export const botTestService = async (payload: any) => {
 
 export const generatePromptService = async (payload: any) => {
   try {
-    const response = await axiosInstance.post("/user/generate-prompt", payload);
+    const response = await axiosInstance.post("/user/genrate-prompt", payload);
     return response.data;
   } catch (error) {
     throw new Error("Error generating prompt"); 
