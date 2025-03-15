@@ -489,7 +489,7 @@ const CreateBot: React.FC = () => {
             />
           </div>
 
-          <div className="flex flex-col w-[85%] mb-3 text-black">
+          <div className="flex flex-col w-[85%] mb-3 gap-2 text-black">
             <label>Support Contact</label>
 
             <Field
