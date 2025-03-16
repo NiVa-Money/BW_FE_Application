@@ -456,7 +456,7 @@ const WhatsappCampaign: React.FC = () => {
   }, [success, navigate]);
 
   const handleGoWizard = () => {
-    alert("AI Wizard feature is under development!");
+    alert("AI feature is under development!");
   };
 
   return (
@@ -669,11 +669,11 @@ const WhatsappCampaign: React.FC = () => {
               }}
             >
               <label className="text-slate-700 font-medium text-lg">
-                AI Wizard
+                Omnigen Content Studio
               </label>
               <p className="mt-1 text-zinc-500">
-                Allow our Wizard AI to assist you in creating the perfect
-                template for your campaign.
+                Allow our AI to assist you in creating the perfect content for
+                your campaign.
               </p>
 
               <button
