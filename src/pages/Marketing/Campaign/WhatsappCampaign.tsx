@@ -456,7 +456,7 @@ const WhatsappCampaign: React.FC = () => {
   }, [success, navigate]);
 
   const handleGoWizard = () => {
-    alert("AI feature is under development!");
+    navigate('/marketing/omnigenStudio');
   };
 
   return (

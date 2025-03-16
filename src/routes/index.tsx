@@ -23,6 +23,7 @@ import UtilityDash from "../pages/Reports/UtilityDash";
 import HelpCenter from "../pages/HelpCenter";
 import Settings from "../pages/Settings";
 import MarketingDashboardForm from "../pages/Marketing/Dashboard/MarketingDashboardForm";
+import OmnigenUI from "../pages/Marketing/OmniGen";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -63,6 +64,8 @@ export const autRoutes: any[] = [
   { id: 5.1, path: "/marketing/dashboardform", component: <MarketingDashboardForm /> },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
+  { id: 5.2, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
+
   { id: 6, path: "/agent", component: <AdminPanel /> },
   {
     id: 7,
