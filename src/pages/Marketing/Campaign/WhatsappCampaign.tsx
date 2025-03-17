@@ -17,7 +17,6 @@ import {
 } from "../../../store/actions/whatsappCampaignActions";
 import {
   convertCsvToJsonService,
-  uploadWhatsAppMediaService,
 } from "../../../api/services/whatsappCampaignService";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
 import CreateTemplateModal from "./CreateTemplate";
@@ -213,15 +212,127 @@ const WhatsappCampaign: React.FC = () => {
       integration.phoneNumberId.toString() === selectedPhoneNumberId
   );
 
-  const handleTemplateDone = async (templateData: {
+  // const handleTemplateDone = async (data: {
+  //   name: string;
+  //   header?: { type: string; content: string };
+  //   body: { text: string };
+  //   footer?: { text: string };
+  //   buttons: TemplateButton[];
+  // }) => {
+  //   if (
+  //     !selectedIntegration ||
+  //     !selectedIntegration.secretToken ||
+  //     selectedIntegration.secretToken.length !== 24
+  //   ) {
+  //     alert(
+  //       "Invalid integration selected. Please check your integration configuration."
+  //     );
+  //     return;
+  //   }
+
+  //   // 1) Upload file if image/video/document
+  //   let fileHandle = "";
+  //   if (
+  //     data.header &&
+  //     ["IMAGE", "VIDEO", "DOCUMENT"].includes(data.header.type.toUpperCase())
+  //   ) {
+  //     try {
+  //       if (!data.header.content) {
+  //         throw new Error("No file provided for upload.");
+  //       }
+  //       const formData = new FormData();
+  //       formData.append("file", data.header.content as unknown as Blob); // Ensure it's a File object
+  //       const file = new File(
+  //         [data.header.content as unknown as Blob],
+  //         "uploaded_media"
+  //       );
+  //       const response = await uploadWhatsAppMediaService(
+  //         file,
+  //         selectedIntegration.secretToken
+  //       );
+
+  //       if (response?.fileHandle) {
+  //         fileHandle = response.fileHandle;
+  //       } else {
+  //         throw new Error("File handle missing in response");
+  //       }
+  //     } catch (error) {
+  //       console.error("Header upload failed:", error);
+  //       alert("Failed to upload header media.");
+  //       return;
+  //     }
+  //   }
+
+  //   // 2) Build the final header
+  //   let headerType = "NONE" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
+  //   let headerContent = "";
+
+  //   if (data.header) {
+  //     headerType = data.header.type.toUpperCase() as
+  //       | "TEXT"
+  //       | "IMAGE"
+  //       | "DOCUMENT"
+  //       | "VIDEO"
+  //       | "NONE";
+  //     headerContent =
+  //       ["IMAGE", "VIDEO", "DOCUMENT"].includes(headerType) && fileHandle
+  //         ? fileHandle
+  //         : data.header.content;
+  //   }
+
+  //   // 3) Convert buttons to the doc's ButtonDto
+  //   // ButtonDto.type can be "QUICK_REPLY", "URL", "PHONE_NUMBER"
+  //   const mappedButtons = data.buttons.map((btn) => {
+  //     if (btn.type === "quick_reply") {
+  //       return {
+  //         type: "QUICK_REPLY" as const,
+  //         text: btn.text,
+  //       };
+  //     } else {
+  //       return btn.ctaType === "url"
+  //         ? {
+  //             type: "URL" as const,
+  //             text: btn.text,
+  //             url: btn.url || "",
+  //           }
+  //         : {
+  //             type: "PHONE_NUMBER" as const,
+  //             text: btn.text,
+  //             phoneNumber: btn.phoneNumber || "",
+  //           };
+  //     }
+  //   });
+
+  //   // 4) Build final payload
+  //   const payload = {
+  //     integrationId: selectedIntegration.secretToken,
+  //     name: data.name,
+  //     language: "en_US",
+  //     category: "MARKETING",
+  //     header: {
+  //       type: headerType, // "TEXT", "IMAGE", "DOCUMENT", "VIDEO", or "NONE"
+  //       content: headerContent, // If text, user input; if file, fileHandle
+  //     },
+  //     body: {
+  //       text: data.body.text,
+  //     },
+  //     footer: {
+  //       text: data.footer ? data.footer.text : "",
+  //     },
+  //     buttons: mappedButtons,
+  //   };
+
+  //   // 5) Dispatch
+  //   dispatch(createWhatsAppTemplateAction(payload));
+  //   setCustomizeScreen(false);
+  // };
+
+  const handleTemplateDone = async (data: {
     name: string;
-    language: string; // e.g. "en_US"
-    headerType: string; // "none" | "text" | "image" | "video" | "document"
-    headerText?: string;
-    headerFile?: File | null;
-    bodyText: string;
-    footerText?: string;
-    buttons: TemplateButton[]; // "quick_reply" or "call_to_action"
+    header?: { type: string; content: string };
+    body: { text: string };
+    footer?: { text: string };
+    buttons: TemplateButton[];
   }) => {
     if (
       !selectedIntegration ||
@@ -233,110 +344,84 @@ const WhatsappCampaign: React.FC = () => {
       );
       return;
     }
-
-    // 1) Upload file if image/video/document
-    let fileHandle = "";
-    if (
-      templateData.headerFile &&
-      ["image", "video", "document"].includes(templateData.headerType)
-    ) {
-      try {
-        const formData = new FormData();
-        formData.append("file", templateData.headerFile);
-        const file = new File(
-          [templateData.headerFile],
-          templateData.headerFile.name
-        );
-        const response = await uploadWhatsAppMediaService(
-          file,
-          selectedIntegration.secretToken
-        );
-
-        if (response?.fileHandle) {
-          fileHandle = response.fileHandle;
-        } else {
-          throw new Error("File handle missing in response");
-        }
-      } catch (error) {
-        console.error("Header upload failed:", error);
-        alert("Failed to upload header media.");
+  
+    // Use the header provided from CreateTemplateModal.
+    // For media headers, the fileHandle is expected to be in header.content.
+    let headerType = "NONE" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
+    let headerContent = "";
+    if (data.header) {
+      headerType = data.header.type.toUpperCase() as
+        | "TEXT"
+        | "IMAGE"
+        | "DOCUMENT"
+        | "VIDEO"
+        | "NONE";
+      headerContent = data.header.content;
+      if (
+        ["IMAGE", "VIDEO", "DOCUMENT"].includes(headerType) &&
+        !headerContent
+      ) {
+        alert("Header media file handle is missing.");
         return;
       }
     }
-
-    // 2) Build the final header
-    let headerType = "TEXT" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
-    let headerContent = "";
-
-    if (templateData.headerType === "text") {
-      headerType = "TEXT";
-      headerContent = templateData.headerText || "";
-    } else if (templateData.headerType === "image") {
-      headerType = "IMAGE";
-      headerContent = fileHandle;
-    } else if (templateData.headerType === "video") {
-      headerType = "VIDEO";
-      headerContent = fileHandle;
-    } else if (templateData.headerType === "document") {
-      headerType = "DOCUMENT";
-      headerContent = fileHandle;
-    } else {
-      headerType = "NONE";
-    }
-
-    // 3) Convert buttons to the doc's ButtonDto
-    // Doc says: ButtonDto.type can be "QUICK_REPLY", "URL", "PHONE_NUMBER"
-    const mappedButtons = templateData.buttons.map((btn) => {
+  
+    // Map buttons to the expected ButtonDto format.
+    const mappedButtons = data.buttons.map((btn) => {
       if (btn.type === "quick_reply") {
-        // QUICK_REPLY
         return {
           type: "QUICK_REPLY" as const,
           text: btn.text,
         };
       } else {
-        // call_to_action
-        if (btn.ctaType === "url") {
-          // "URL"
-          return {
-            type: "URL" as const,
-            text: btn.text,
-            url: btn.url || "",
-          };
-        } else {
-          // "PHONE_NUMBER"
-          return {
-            type: "PHONE_NUMBER" as const,
-            text: btn.text,
-            phoneNumber: btn.phoneNumber || "",
-          };
-        }
+        return btn.ctaType === "url"
+          ? {
+              type: "URL" as const,
+              text: btn.text,
+              url: btn.url || "",
+            }
+          : {
+              type: "PHONE_NUMBER" as const,
+              text: btn.text,
+              phoneNumber: btn.phoneNumber || "",
+            };
       }
     });
-
-    // 4) Build final payload
+  
+    // Build the final payload.
     const payload = {
       integrationId: selectedIntegration.secretToken,
-      name: templateData.name,
-      language: templateData.language || "en_US",
+      name: data.name,
+      language: "en_US",
       category: "MARKETING",
       header: {
-        type: headerType, // "TEXT", "IMAGE", "DOCUMENT", "VIDEO", or "NONE"
-        content: headerContent, // If text, user input; if file, fileHandle
+        type: headerType,
+        content: headerContent,
       },
       body: {
-        text: templateData.bodyText,
+        text: data.body.text,
       },
       footer: {
-        text: templateData.footerText || "",
+        text: data.footer ? data.footer.text : "",
       },
       buttons: mappedButtons,
     };
-
-    // 5) Dispatch
+  
+    // Dispatch the template creation action.
     dispatch(createWhatsAppTemplateAction(payload));
+
+    setSelectedTemplate({
+      name: data.name,
+      header: headerContent,
+      body: data.body.text,
+      footer: data.footer ? data.footer.text : "",
+      buttons: data.buttons,
+    });
+    
     setCustomizeScreen(false);
   };
-
+  
+  
   React.useEffect(() => {
     if (success) navigate("/marketing/dashboard");
   }, [success, navigate]);
