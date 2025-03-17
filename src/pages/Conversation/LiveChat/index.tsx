@@ -45,7 +45,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   // ---------- Effects ----------
   useEffect(() => {
-    // Load the list of bots on mount (if we have a userId)
     if (userId?.length) {
       dispatch(getBotsAction(userId));
     }
@@ -210,11 +209,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   // ---------- Render ----------
   return (
-    /**
-     * 1) Use full viewport height (h-screen) with flex layout.
-     * 2) Header (title, stats, etc.) is flex-none (no scrolling).
-     * 3) Main content area is flex-1 and scrolls within it.
-     */
     <div className="h-screen flex flex-col">
       {/* Header Section */}
       <div className="px-6 pt-4 flex-none">
@@ -266,7 +260,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
       </div>
 
       {/* Main Content (3-column layout) */}
-      <div className="px-6 flex-1 overflow-hidden">
+      <div className="px-6 flex-1 overflow-y-auto pb-10">
         <div className="grid grid-cols-3 gap-6 h-full">
           {/* Left Section */}
           <div className="space-y-4 overflow-y-auto">
@@ -432,232 +426,225 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
           </div>
 
-          {/* Right Section (Agent Assist / Customer Details) */}
+          {/* Right Section (Customer Details - Always visible) */}
           <div className="overflow-y-auto">
-            {isAgentAssistOpen ? (
-              <div className="transition-all duration-300 block">
-                <div className="space-y-4">
-                  {/* Add to workflow */}
-                  <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
-                    <div className="grid grid-cols-2 gap-6 items-start">
-                      <div>
-                        <h2 className="font-medium">Add to workflow</h2>
-                        <p className="text-base text-gray-500">
-                          Integrate this customer interaction into your workflow
-                          for seamless tracking and management.
-                        </p>
-                        <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                          Add to workflow
-                        </button>
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Summary and Next Steps</h3>
-                        <div className="space-y-1 mt-2">
-                          <div className="flex justify-between ">
-                            <span className="text-gray-600 text-base">
-                              Resolution Likelihood
-                            </span>
-                            <span className="font-medium">High</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 text-base">
-                              Retention <br /> Probability
-                            </span>
-                            <span className="font-medium">95%</span>
-                          </div>
-                        </div>
-                        <button className="mt-5 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                          View Detailed Steps
-                        </button>
-                      </div>
+            <div className="space-y-4">
+              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                      <span className="text-purple-600">A</span>
                     </div>
+                    <span className="font-medium">Customer Detail</span>
                   </div>
+                  <button className="text-gray-600">⋮</button>
+                </div>
 
-                  {/* Vulnerability Analysis */}
-                  <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
-                    <h2 className="font-medium">
-                      Vulnerability Analysis and Sales Intelligence
-                    </h2>
-                    <div className="space-y-1 mt-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Potential Risk</span>
-                        <span>Low</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Sales Opportunity</span>
-                        <span>High</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Upcoming Trends</span>
-                        <span>Increased AI Adoption</span>
-                      </div>
-                    </div>
-                    <button className="mt-5 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                      Explore Insights
-                    </button>
+                <div className="mb-4">
+                  <h2 className="text-lg font-medium">Nitya Prakhar</h2>
+                  <p className="text-gray-600 text-sm">nitya@gmail.com</p>
+                  <p className="text-[#65558F] text-md mt-1">
+                    View Tickets : 3
+                  </p>
+                  <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                    View History
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="border-solid border-[#DCDCDC] border"></div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Name</span>
+                    <span>Nitya Prakhar</span>
                   </div>
-
-                  {/* CSAT Section */}
-                  <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-red-500 font-medium">20%</span>
-                      <span>Customer Satisfaction (CSAT)</span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
-                      <div className="h-full w-1/5 bg-gradient-to-r from-green-400 via-yellow-400 to-red-400"></div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-gray-600 text-sm">
-                            Chat Cue
-                          </span>
-                          <p>Customer is anxious</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 text-sm">Reason</span>
-                          <p>Order mix up</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 text-sm">
-                            Next Step
-                          </span>
-                          <p>Confirm order details</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 text-sm">
-                            Predictive AI
-                          </span>
-                          <p>High resolution</p>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-gray-600 text-sm">Emotion</span>
-                          <p>Neutral</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 text-sm">Intent</span>
-                          <p>Inquiry</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-600 text-sm">
-                            Sentiment
-                          </span>
-                          <p>Positive</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <button className="flex-1  text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                        Schedule Follow up
-                      </button>
-                      <button className="flex-1 bg-[#65558F] text-white px-4 py-2 rounded-full">
-                        Escalate to Manager
-                      </button>
-                    </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Last Contact</span>
+                    <span>2 days ago</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Email</span>
+                    <span>nitya@gmail.com</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Number</span>
+                    <span>+1 12344567808</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Channel</span>
+                    <span>Email</span>
                   </div>
                 </div>
-              </div>
-            ) : (
-              // When Agent Assist is closed, show a different panel (example)
-              <div className="space-y-4">
-                <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                        <span className="text-purple-600">A</span>
-                      </div>
-                      <span className="font-medium">Customer Detail</span>
-                    </div>
-                    <button className="text-gray-600">⋮</button>
-                  </div>
 
-                  <div className="mb-4">
-                    <h2 className="text-lg font-medium">Nitya Prakhar</h2>
-                    <p className="text-gray-600 text-sm">nitya@gmail.com</p>
-                    <p className="text-[#65558F] text-md mt-1">
-                      View Tickets : 3
+                <div className="flex gap-2 mt-4">
+                  <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                    Send Email
+                  </button>
+                  <button className="mt-2 whitespace-nowrap text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                    Send Whatsapp message
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
+                <h3 className="text-center mb-4">Ticket Details</h3>
+                <div className="text-center mb-4">
+                  <span className="text-6xl font-medium">33%</span>
+                  <p className="text-gray-500 text-sm">Satisfaction</p>
+                </div>
+                <div className="flex justify-between text-sm border-t border-[#DCDCDC] pt-4">
+                  <div>
+                    <p className="text-gray-500">Status</p>
+                    <p>Open/closed</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-gray-500">Date and time</p>
+                    <p>01/05/2023</p>
+                    <p>2:23:09</p>
+                  </div>
+                </div>
+                <div className="mt-5 border-dashed w-full border-[#DCDCDC] border-2"></div>
+                <div className="mt-4 text-center">
+                  <h3>Details of Consumers</h3>
+                </div>
+                <div className="flex mt-6 justify-between text-xs">
+                  <div>
+                    <p className="text-red-500 font-semibold">Complaint</p>
+                    <p className="text-gray-600 mt-2">Order misplaced</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-700 font-semibold">
+                      Issue Raised by
                     </p>
-                    <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                      View History
-                    </button>
+                    <p className="text-sm font-medium mt-2">SJ</p>
                   </div>
-
-                  <div className="space-y-3">
-                    <div className="border-solid border-[#DCDCDC] border"></div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Name</span>
-                      <span>Nitya Prakhar</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Last Contact</span>
-                      <span>2 days ago</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Email</span>
-                      <span>nitya@gmail.com</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Number</span>
-                      <span>+1 12344567808</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Channel</span>
-                      <span>Email</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 mt-4">
-                    <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                      Send Email
-                    </button>
-                    <button className="mt-2 whitespace-nowrap text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                      Send Whatsapp message
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
-                  <h3 className="text-center mb-4">Ticket Details</h3>
-                  <div className="text-center mb-4">
-                    <span className="text-6xl font-medium">33%</span>
-                    <p className="text-gray-500 text-sm">Satisfaction</p>
-                  </div>
-                  <div className="flex justify-between text-sm border-t border-[#DCDCDC] pt-4">
-                    <div>
-                      <p className="text-gray-500">Status</p>
-                      <p>Open/closed</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-gray-500">Date and time</p>
-                      <p>01/05/2023</p>
-                      <p>2:23:09</p>
-                    </div>
-                  </div>
-                  <div className="mt-5 border-dashed w-full border-[#DCDCDC] border-2"></div>
-                  <div className="mt-4 text-center">
-                    <h3>Details of Consumers</h3>
-                  </div>
-                  <div className="flex mt-6 justify-between text-xs">
-                    <div>
-                      <p className="text-red-500 font-semibold">Complaint</p>
-                      <p className="text-gray-600 mt-2">Order misplaced</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-700 font-semibold">
-                        Issue Raised by
-                      </p>
-                      <p className="text-sm font-medium mt-2">SJ</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-700 font-semibold">Platform</p>
-                      <p className="text-sm font-medium mt-2">Whatsapp</p>
-                    </div>
+                  <div>
+                    <p className="text-gray-700 font-semibold">Platform</p>
+                    <p className="text-sm font-medium mt-2">Whatsapp</p>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Agent Assist Overlay */}
+      <div
+        className={`fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+          isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="p-6 h-full overflow-y-auto">
+          <div className="space-y-4">
+            <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
+              <div className="grid grid-cols-2 gap-6 items-start">
+                <div>
+                  <h2 className="font-medium">Add to workflow</h2>
+                  <p className="text-base text-gray-500">
+                    Integrate this customer interaction into your workflow for
+                    seamless tracking and management.
+                  </p>
+                  <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                    Add to workflow
+                  </button>
+                </div>
+                <div>
+                  <h3 className="font-medium">Summary and Next Steps</h3>
+                  <div className="space-y-1 mt-2">
+                    <div className="flex justify-between ">
+                      <span className="text-gray-600 text-base">
+                        Resolution Likelihood
+                      </span>
+                      <span className="font-medium">High</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 text-base">
+                        Retention <br /> Probability
+                      </span>
+                      <span className="font-medium">95%</span>
+                    </div>
+                  </div>
+                  <button className="mt-5 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                    View Detailed Steps
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
+              <h2 className="font-medium">
+                Vulnerability Analysis and Sales Intelligence
+              </h2>
+              <div className="space-y-1 mt-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Potential Risk</span>
+                  <span>Low</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Sales Opportunity</span>
+                  <span>High</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Upcoming Trends</span>
+                  <span>Increased AI Adoption</span>
+                </div>
+              </div>
+              <button className="mt-5 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                Explore Insights
+              </button>
+            </div>
+
+            <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-red-500 font-medium">20%</span>
+                <span>Customer Satisfaction (CSAT)</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
+                <div className="h-full w-1/5 bg-gradient-to-r from-green-400 via-yellow-400 to-red-400"></div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-gray-600 text-sm">Chat Cue</span>
+                    <p>Customer is anxious</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 text-sm">Reason</span>
+                    <p>Order mix up</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 text-sm">Next Step</span>
+                    <p>Confirm order details</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 text-sm">Predictive AI</span>
+                    <p>High resolution</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-gray-600 text-sm">Emotion</span>
+                    <p>Neutral</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 text-sm">Intent</span>
+                    <p>Inquiry</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 text-sm">Sentiment</span>
+                    <p>Positive</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <button className="flex-1  text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                  Schedule Follow up
+                </button>
+                <button className="flex-1 bg-[#65558F] text-white px-4 py-2 rounded-full">
+                  Escalate to Manager
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -665,7 +652,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
       {/* Toggle Button (fixed at bottom-right) */}
       <button
         onClick={() => setIsAgentAssistOpen(!isAgentAssistOpen)}
-        className="fixed bottom-2 right-8 bg-[#65558F] text-white px-4 py-2 rounded-full shadow-lg"
+        className="fixed bottom-4 right-4 z-50 bg-[#A5FFD6] text-black
+                   px-4 py-2 rounded-full shadow-lg
+                   transition-all duration-300 hover:scale-105"
       >
         {isAgentAssistOpen ? "Close Agent Assist" : "Open Agent Assist"}
       </button>
