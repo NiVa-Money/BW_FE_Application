@@ -28,6 +28,35 @@ interface ChartItemsProps {
     aiAgentPerformance: any[];
   };
 }
+const renderColorfulLegendText = (value: string, entry: any) => {
+  const { color } = entry;
+
+  return (
+    <div
+      className="flex items-center gap-2 rounded-full px-2 py-[1px]"
+      style={{ backgroundColor: COLORS.LIGHTGRAY }}
+    >
+      <span
+        className="w-10 h-4 rounded-lg"
+        style={{ backgroundColor: color }}
+      ></span>
+      <span style={{ color: "#474747" }}> {value}</span>
+    </div>
+  );
+};
+const CustomLegend = (props) => {
+  const { payload } = props;
+
+  return (
+    <div className="flex justify-center gap-2">
+      {payload.map((entry, index) => (
+        <div key={`item-${index}`} className="flex items-center gap-2">
+          {renderColorfulLegendText(entry.value, entry)}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
   const firstTableHeaders = constructedChartsData.chatTrafficOverview[0]
@@ -36,8 +65,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
 
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
     ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map(
-      (header) => header
-    )
+        (header) => header
+      )
     : [];
 
   const chartItems = [
@@ -67,8 +96,9 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           />
           <Legend
             verticalAlign="top"
-            iconType="square"
-            wrapperStyle={{ paddingBottom: 10 }}
+            iconType="rect"
+            content={CustomLegend}
+            wrapperStyle={{ paddingBottom: 20 }}
           />
         </LineChart>
       ),
@@ -205,7 +235,7 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
         {chartItems.map((item) => (
           <div key={item.id}>
             <ChartContainer
-              extraSX={{ backgroundColor: COLORS.LIGHTGRAY }}
+              extraSX={{ border: `1px solid ${COLORS.LAVENDERMIST}` }}
               title={item.title}
               component={item.component}
             />

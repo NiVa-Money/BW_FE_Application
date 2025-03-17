@@ -18,7 +18,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   component,
 }) => {
   const renderSingleChart = () => (
-    <Paper sx={{ p: 3, ...extraSX }}>
+    <Paper sx={{ p: 3, borderRadius: "12px", ...extraSX }}>
       {title && (
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
           <Typography variant="h6" component="h3">
