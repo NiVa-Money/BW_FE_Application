@@ -579,7 +579,7 @@ const DashboardUI = () => {
                     <Tooltip />
                     <Legend />
                     <Bar dataKey="value">
-                      {competitorTrendsData.map((entry, index) => (
+                      {competitorTrendsData.map((_entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
