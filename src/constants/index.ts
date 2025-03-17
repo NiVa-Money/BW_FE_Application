@@ -8,5 +8,6 @@ export const COLORS = {
   VIOLET: "#65558F",
   NEUTRALVIOLET: "#4A4458",
   DARKVIOLET: "#2E2F5F",
+  LAVENDERMIST : "#E7E0EC",
   BLUE: "#78C9F1",
 } as const;
