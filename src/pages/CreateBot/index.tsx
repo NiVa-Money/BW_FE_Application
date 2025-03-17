@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { HexColorPicker } from "react-colorful";
@@ -20,6 +20,7 @@ import { createBotAction } from "../../store/actions/botActions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { generatePromptService } from "../../api/services/botService";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 enum BOTICONS {
   list = "list",
@@ -120,10 +121,10 @@ const CreateBot: React.FC = () => {
       ? Yup.object().shape({
           botName: Yup.string().required("Agent Name is required"),
           botGreetingMessage: Yup.string().required("Greeting is required"),
-          supportNumber: Yup.string().required("Phone is required"),
+          supportNumber: Yup.string().required("Phone Number is required"),
           supportEmail: Yup.string()
             .email("Invalid email")
-            .required("Email is required"),
+            .required("EmailID is required"),
           botTheme: Yup.string().required("Theme is required"),
           botFont: Yup.string().required("Font is required"),
         })
@@ -299,19 +300,42 @@ const CreateBot: React.FC = () => {
     if (currentPage === 1) {
       return (
         <>
+          {/* Agent Name */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label htmlFor="botName">Agent Name</label>
+            <div className="flex items-center mb-2">
+              <label htmlFor="botName">Agent Name</label>
+              <Tooltip
+                title="Enter the name for your agent. This will be displayed in conversations."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <Field
               type="text"
               id="botName"
               name="botName"
-              placeholder="Enter your Agent Name"
+              // placeholder="Enter your Agent Name"
               component={FormikFieldInputComponent}
             />
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label htmlFor="chatColor">Chat Color</label>
+            <div className="flex items-center mb-2">
+              <label htmlFor="chatColor">Chat Color</label>
+              <Tooltip
+                title="Select a chat color for the agent's chat interface."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <div className="flex space-x-2">
               {[
                 "#78C9F1",
@@ -343,7 +367,18 @@ const CreateBot: React.FC = () => {
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Choose Agent Icon</label>
+            <div className="flex items-center mb-2">
+              <label>Choose Agent Icon</label>
+              <Tooltip
+                title="Select from available agent icons or choose a custom icon."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <Field
               name="botIconOption"
               component={FormikFieldChipComponent}
@@ -404,7 +439,18 @@ const CreateBot: React.FC = () => {
           )}
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Choose theme</label>
+            <div className="flex items-center mb-2">
+              <label>Choose theme</label>
+              <Tooltip
+                title="Select the theme for your agent's interface (light or dark)."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <Field
               name="botTheme"
               component={FormikFieldChipComponent}
@@ -416,7 +462,18 @@ const CreateBot: React.FC = () => {
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Agent Font</label>
+            <div className="flex items-center mb-2">
+              <label>Agent Font</label>
+              <Tooltip
+                title="Choose the font style for your agent's messages."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <Field
               name="botFont"
               component={FormikFieldToggleComponent}
@@ -429,20 +486,42 @@ const CreateBot: React.FC = () => {
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Agent Greeting Message</label>
+            <div className="flex items-center mb-2">
+              <label>Agent Greeting Message</label>
+              <Tooltip
+                title="Enter a greeting message that your agent will display when starting a chat."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <Field
               type="text"
               name="botGreetingMessage"
-              placeholder="Enter your Agent Greeting Message"
+              // placeholder="Enter your Agent Greeting Message"
               component={FormikFieldInputComponent}
             />
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Open by Default</label>
-            <p className="text-sm text-gray-600 mb-2">
+            <div className="flex items-center mb-2">
+              <label>Open by Default</label>
+              <Tooltip
+                title="Choose when the chatbot should appear on the page automatically."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
+            {/* <p className="text-sm text-gray-600 mb-2">
               Choose when chatbot will appear
-            </p>
+            </p> */}
             <select
               className="bg-[#F3F2F6] h-[50px] px-4 rounded-[12px] text-gray-500"
               value={formik.values.openByDefault}
@@ -460,7 +539,18 @@ const CreateBot: React.FC = () => {
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Pulsing</label>
+            <div className="flex items-center mb-2">
+              <label>Pulsing</label>
+              <Tooltip
+                title="Toggle a pulsing effect on the agent's avatar."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <div className="bg-[#F3F2F6] h-[50px] px-4 rounded-[12px] flex items-center justify-between">
               <span className="text-gray-500">
                 Add a pulsing effect on the avatar
@@ -480,17 +570,39 @@ const CreateBot: React.FC = () => {
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Appointment Link</label>
+            <div className="flex items-center mb-2">
+              <label>Appointment Link</label>
+              <Tooltip
+                title="Provide a link for scheduling appointments with your agent."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <Field
               type="text"
               name="appointmentSchedulerLink"
-              placeholder="Enter your Appointment Link"
+              // placeholder="Enter your Appointment Link"
               component={FormikFieldInputComponent}
             />
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 gap-2 text-black">
-            <label>Support Contact</label>
+            <div className="flex items-center mb-2">
+              <label>Support Contact</label>
+              <Tooltip
+                title="Enter support contact details including phone number and email."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
 
             <Field
               type="text"
@@ -512,7 +624,18 @@ const CreateBot: React.FC = () => {
       return (
         <>
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Knowledge Base</label>
+            <div className="flex items-center mb-2">
+              <label>Knowledge Base</label>
+              <Tooltip
+                title="Upload a knowledge base file (PDF, DOC, TXT) that contains information for your agent."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <div className="relative h-[50px]">
               <div className="flex items-center h-full w-full rounded-[12px] bg-[#F3F2F6] absolute">
                 <div className="flex items-center ml-4">
@@ -547,27 +670,19 @@ const CreateBot: React.FC = () => {
               )}
           </div>
 
-          {/* <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Agent Role</label>
-            <Field
-              name="agentRole"
-              component={FormikFieldToggleComponent}
-              options={[
-                { label: "Customer Service", value: "Customer Service" },
-                { label: "Sales", value: "Sales" },
-                { label: "Human Resources", value: "Human Resource" },
-                { label: "Custom", value: "Custom" },
-              ]}
-            />
-            {formik.touched.agentRole && formik.errors.agentRole && (
-              <div className="text-red-500 text-sm mt-1">
-                {formik.errors.agentRole}
-              </div>
-            )}
-          </div> */}
-
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Agent Role</label>
+            <div className="flex items-center mb-2">
+              <label>Agent Role</label>
+              <Tooltip
+                title="Select the role for your agent."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <Field
               name="agentRole"
               component={FormikFieldToggleComponent}
@@ -587,7 +702,18 @@ const CreateBot: React.FC = () => {
 
             {formik.values.agentRole === "Custom" && (
               <div className="mt-2">
-                <label>Custom Role</label>
+                <div className="flex items-center mb-2">
+                  <label>Custom Role</label>
+                  <Tooltip
+                    title="Enter a custom role for your agent if 'Custom' is selected."
+                    placement="right"
+                  >
+                    <InfoOutlinedIcon
+                      fontSize="medium"
+                      className="ml-1 text-gray-600 cursor-pointer"
+                    />
+                  </Tooltip>
+                </div>
                 <Field
                   name="customAgentRole"
                   type="text"
@@ -605,7 +731,18 @@ const CreateBot: React.FC = () => {
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <label>Tone of voice</label>
+            <div className="flex items-center mb-2">
+              <label>Tone of voice</label>
+              <Tooltip
+                title="Select the tone of voice your agent should use in conversations."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <Field
               name="botTone"
               component={FormikFieldToggleComponent}
@@ -623,8 +760,17 @@ const CreateBot: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center mb-2">
               <label className="text-lg font-medium">Agent Goals</label>
+              <Tooltip
+                title="List the main goals of your agent. You can also generate goals using AI."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
             </div>
             {formik.values.agentsGoals?.map((goal, index) => (
               <div key={index} className="relative mb-3">
@@ -715,10 +861,19 @@ const CreateBot: React.FC = () => {
 
           {/* Conversation Guidelines */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
-            <div className="flex justify-between items-center">
+          <div className="flex items-center mb-2">
               <label className="text-lg font-medium">
-                Conversation Guidelines {/* Fixed typo in label */}
+                Conversation Guidelines
               </label>
+              <Tooltip
+                title="Set clear rules for how your agent should respond in chat channels."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
             </div>
             <p className="text-sm text-gray-500 mb-2">
               Set clear rules for how your agent should respond in chat channels
@@ -808,10 +963,21 @@ const CreateBot: React.FC = () => {
                 </div>
               )}
           </div>
-          <div className="flex flex-col w-full mb-8 text-black">
-            <label className="text-lg font-medium mb-4">
-              Agent limit per Message
-            </label>
+          <div className="flex flex-col w-full mb-3 text-black">
+          <div className="flex items-center mb-2">
+              <label className="text-lg font-medium">
+                Agent limit per Message
+              </label>
+              <Tooltip
+                title="Select the maximum number of words per message your agent can use."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
             <div className="w-full">
               <input
                 type="range"
@@ -880,7 +1046,7 @@ const CreateBot: React.FC = () => {
 
   const renderNavigationButtons = (formik) => {
     return (
-      <div className="flex justify-between w-[85%] mt-4 mb-6">
+      <div className="flex justify-between w-[85%] mt-6 mb-6">
         {currentPage > 1 && (
           <Button
             variant="outlined"
