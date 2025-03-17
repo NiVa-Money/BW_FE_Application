@@ -1,5 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import {
   Drawer,
   List,
@@ -44,7 +47,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
   const handleToggle = () => {
     // To handle anything on click of sidaebar sub items
   };
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const toggleSidebar = () => setOpen(!open);
   const userData = localStorage.getItem("userData") || JSON.stringify({});
   const moduleMapping = JSON.parse(userData).moduleMap;
@@ -56,10 +59,10 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
   if (isProtected && !userId) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
-  const logOutHandler = () => {
-    navigate("/");
-    localStorage.clear();
-  };
+  // const logOutHandler = () => {
+  //   navigate("/");
+  //   localStorage.clear();
+  // };
 
   useEffect(() => {
     const data = sidebarNavLinks(moduleMapping);
@@ -104,9 +107,12 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
               </Box>
             </CustomTooltip>
             {open && (
-              <button onClick={logOutHandler}>
-                <span className="border px-2 py-1 rounded-lg">Log Out</span>
-              </button>
+              // <button onClick={logOutHandler}>
+              //   <span className="border px-2 py-1 rounded-lg">Log Out</span>
+              // </button>
+              <a href="https://botwot.io" onClick={() => localStorage.clear()}>
+                Log Out
+              </a>
             )}
           </div>
 

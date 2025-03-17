@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useEffect, useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@mui/icons-material/Close";
@@ -13,7 +13,6 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
-import { FormControlLabel, Switch } from "@mui/material";
 import { notifyError } from "../../../components/Toast";
 // import ReactMarkdown from "react-markdown";
 import SendIcon from "@mui/icons-material/Send";
@@ -32,6 +31,7 @@ import {
   getWhatsAppChatsService,
   sendWhatsAppManualReplyService,
 } from "../../../api/services/conversationServices";
+import { Switch } from "@mui/material";
 
 interface AnalysisSection {
   title: string;
@@ -53,7 +53,7 @@ const AllChats = () => {
   );
   const [aiLevel, setAiLevel] = useState(true);
   const [humanLevel, setHumanLevel] = useState(true);
-  const [isEnablingManualMode, setIsEnablingManualMode] = useState(false);
+
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
     (state: RootState) => state?.userChat?.advanceFeature?.data || {}
@@ -72,8 +72,10 @@ const AllChats = () => {
     (state: RootState) => state.bot?.lists?.loader
   );
   const [talkWithHuman, setTalkWithHuman] = useState(false);
+  const [isEnablingManualMode, setIsEnablingManualMode] = useState(false);
   const [userMessage, setUserMessage] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [intentVal, setIntentVal] = useState("");
 
   // New search handler function
   const handleSearch = async () => {
@@ -99,7 +101,7 @@ const AllChats = () => {
       data.phoneNumber = searchValue.trim();
     }
     try {
-      const response = await dispatch(getAllSession(data));
+      const response = dispatch(getAllSession(data));
       if (response?.payload?.success) {
         const filteredSessions = response.payload.data.sessions;
         setSearchResults(filteredSessions);
@@ -118,6 +120,22 @@ const AllChats = () => {
       }
     } catch (error) {
       console.log(error.message);
+    }
+  };
+
+  const handleIntentChange = (selectedIntent: string) => {
+    setIntentVal(selectedIntent);
+    if (botIdVal) {
+      dispatch(
+        getAllSession({
+          botId: botIdVal,
+          page: 1,
+          channelName: channelNameVal,
+          aiLevel,
+          humanLevel,
+          intent: selectedIntent,
+        })
+      );
     }
   };
 
@@ -158,6 +176,7 @@ const AllChats = () => {
       aiLevel,
       humanLevel,
       channelName: channelNameVal,
+      intentVal,
     };
 
     if (userPhoneId) {
@@ -178,12 +197,9 @@ const AllChats = () => {
     return { success };
   };
 
-  // useEffect(() => {
-  //   if (!isSearchActive) {
-  //     console.log("Search is not active" );
-  //     getChatHistory({});
-  //   }
-  // }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
+  useEffect(() => {
+    getChatHistory({});
+  }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
 
   const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -235,68 +251,6 @@ const AllChats = () => {
     },
   ]);
 
-  useEffect(() => {
-    if (advanceFeatureDataRedux?.data?.success) {
-      // Pull out the nested data object
-      const analysis = advanceFeatureDataRedux?.data?.data?.currentAnalysis;
-      console.log(analysis);
-
-      const {
-        emotion,
-        intent,
-        reason,
-        sentiments,
-        salesIntelligence,
-        smartSuggestion,
-        vulnerability,
-      } = analysis;
-
-      setAnalysisSections([
-        {
-          title: "Intent",
-          description: intent || "No intent detected.",
-          expanded: true,
-        },
-        {
-          title: "Reason",
-          description: reason || "No reason provided.",
-          expanded: true,
-        },
-        {
-          title: "Emotion Analysis",
-          description: emotion || "No emotion detected.",
-          expanded: true,
-        },
-        {
-          title: "Sentiment Analysis",
-          description: sentiments
-            ? `Negative: ${sentiments.Negative}, Neutral: ${sentiments.Neutral}, Positive: ${sentiments.Positive}`
-            : "No sentiment data.",
-          expanded: true,
-        },
-        {
-          title: "Sales Intelligence",
-          description: salesIntelligence
-            ? JSON.stringify(salesIntelligence)
-            : "No sales insights.",
-          expanded: true,
-        },
-        {
-          title: "Smart Suggestion",
-          description: smartSuggestion || "No suggestions available.",
-          expanded: true,
-        },
-        {
-          title: "Vulnerability",
-          description: vulnerability
-            ? JSON.stringify(vulnerability)
-            : "No vulnerabilities found.",
-          expanded: true,
-        },
-      ]);
-    }
-  }, [advanceFeatureDataRedux]);
-
   const handleSessionSelection = (selectedSessionId: string) => {
     const messagesData =
       channelNameVal !== "whatsapp"
@@ -311,6 +265,13 @@ const AllChats = () => {
       (obj) =>
         obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
     );
+
+    // 1. Check if the session is handled by a human
+    if (selectedSession?.handledBy === "Human") {
+      setTalkWithHuman(true);
+    } else {
+      setTalkWithHuman(false);
+    }
 
     const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
     const userPhoneNumberId = selectedSession?.userPhoneId;
@@ -473,9 +434,11 @@ const AllChats = () => {
     const userPhoneNumberId = selectedSession?.userPhoneId;
     const action = talkWithHuman ? "remove" : "append";
 
+    // Set loading state immediately
     setIsEnablingManualMode(true);
 
     try {
+      // Make the API call first before changing the UI state
       await enableWhatsAppManualModeService({
         botId: botIdVal,
         adminPhoneNumberId,
@@ -483,29 +446,33 @@ const AllChats = () => {
         action,
       });
 
-      if (selectedSession?.handledBy === "Human") {
-        setTalkWithHuman(true);
-      } else {
-        setTalkWithHuman(false);
-      }
+      // Update UI state after successful API call
+      setTalkWithHuman(!talkWithHuman);
 
       await getChatHistory({ userPhoneId: selectedSessionId });
+    } catch (error) {
+      console.error("API Error:", error);
+      notifyError("Failed to toggle manual mode");
     } finally {
       setIsEnablingManualMode(false);
     }
   };
 
-  const handleSendMessage = async (selectedSessionId: string) => {
-    if (!userMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!userMessage.trim() || !sessionId) return;
+
+    // Optimistically update UI
     setMessages((prev) => [...prev, { content: userMessage, sender: "agent" }]);
 
     const selectedSession = sessionsDataRedux?.sessions.find(
-      (obj) =>
-        obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
+      (obj) => obj._id === sessionId || obj.userPhoneId === sessionId
     );
+
+    if (!selectedSession) return;
 
     const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
     const userPhoneNumberId = selectedSession?.userPhoneId;
+
     if (talkWithHuman) {
       try {
         const payload = {
@@ -527,6 +494,7 @@ const AllChats = () => {
         console.error("API Error:", error);
       }
     }
+
     setUserMessage("");
   };
 
@@ -621,6 +589,31 @@ const AllChats = () => {
   const sentimentData = transformSentimentsData(analysis?.sentiments);
   const salesData = transformSalesData(analysis?.salesIntelligence);
   const vulnerabilityData = transformVulnerabilityData(analysis?.vulnerability);
+  const intentData = analysis?.intent || "No intent detected.";
+  const reasonData = analysis?.reason || "No reason provided.";
+  const emotionData = analysis?.emotion || "No emotion detected.";
+  const smartSuggestionData = analysis?.smartSuggestion || "No suggestions.";
+
+  useEffect(() => {
+    if (analysis) {
+      setAnalysisSections((prevSections) =>
+        prevSections.map((section) => {
+          switch (section.title) {
+            case "Intent":
+              return { ...section, description: intentData };
+            case "Reason":
+              return { ...section, description: reasonData };
+            case "Emotion Analysis":
+              return { ...section, description: emotionData };
+            case "Smart Suggestion":
+              return { ...section, description: smartSuggestionData };
+            default:
+              return section;
+          }
+        })
+      );
+    }
+  }, [analysis, intentData, reasonData, emotionData, smartSuggestionData]);
 
   return (
     <div className="flex flex-col min-h-screen p-6">
@@ -705,38 +698,42 @@ const AllChats = () => {
           ))}
         </select>
 
-        <div className="flex justify-center items-center">
-          <label htmlFor="AI Chats" className="text-black mr-2">
-            AI Chats
-          </label>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={Boolean(aiLevel)}
-                onClick={(e: any) => setAiLevel(e.target.checked)}
-                color="primary"
-              />
-            }
-            label=""
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          value={intentVal}
+          onChange={(e) => handleIntentChange(e.target.value)}
+        >
+          <option value="">Filter by intent</option>
+          <option value="Buying">Buying</option>
+          <option value="Sales">Sales</option>
+          <option value="Query">Query</option>
+          <option value="Complaint">Complaint</option>
+          <option value="Support Request">Support Request</option>
+          <option value="Feedback">Feedback</option>
+          <option value="Interest">Interest</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+          <span className="text-gray-800 font-medium">AI Chats</span>
+          <Switch
+            checked={Boolean(aiLevel)}
+            onChange={(e) => setAiLevel(e.target.checked)}
+            color="primary"
           />
         </div>
-
-        <div className="flex justify-center items-center">
-          <FormControlLabel
-            control={
-              <Switch
-                checked={Boolean(humanLevel)}
-                onClick={(e: any) => setHumanLevel(e.target.checked)}
-                color="primary"
-              />
-            }
-            label="Human Chats"
+        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+          <span className="text-gray-800 font-medium">Human Chats</span>
+          <Switch
+            checked={Boolean(humanLevel)}
+            onChange={(e) => setHumanLevel(e.target.checked)}
+            color="primary"
           />
         </div>
       </div>
 
       {/* Main Container */}
-      <div className="flex bg-gray-100 h-full h-[calc(100vh - 120px)]">
+      <div className="flex bg-gray-100 h-[calc(100vh-120px)]">
         <SessionsList
           botLists={botLists}
           onSessionSelect={handleSessionSelection}
@@ -754,17 +751,17 @@ const AllChats = () => {
           }
         />
 
-        <div className="flex-1 flex flex-col overflow-y-scroll">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {channelNameVal === "whatsapp" && sessionId?.length ? (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 p-4 overflow-y-auto">
+            {channelNameVal === "whatsapp" && sessionId ? (
               <WhatsappSectionData messages={messages} />
-            ) : sessionId?.length ? (
+            ) : sessionId ? (
               <WebsiteSectionData messages={messages} />
             ) : null}
           </div>
 
           <div className="flex items-end justify-end space-x-2 mb-4">
-            <label className="inline-flex items-center cursor-pointer">
+            <label className="inline-flex items-center mr-4 cursor-pointer">
               <input
                 type="checkbox"
                 className="sr-only peer"
@@ -773,10 +770,19 @@ const AllChats = () => {
                 onChange={() => handleTalkWithHumanToggle(sessionId)}
                 disabled={isEnablingManualMode || !sessionId}
               />
-              <span className="select-none text-lg ml-2">
+              <span className="select-none text-lg">
                 {isEnablingManualMode ? "Enabling..." : "Talk with Human"}
               </span>
-              <div className="relative w-12 h-6 ml-2 bg-gray-200 peer-checked:bg-[#65558F] rounded-full after:content-[''] after:absolute after:top-[2px] after:right-[22px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              <div
+                className="
+          relative w-12 h-6 ml-2
+          bg-gray-200 rounded-full
+          peer-checked:bg-[#65558F]
+          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+          after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
+          peer-checked:after:translate-x-6
+        "
+              ></div>
             </label>
           </div>
 
@@ -787,6 +793,7 @@ const AllChats = () => {
             </div>
           )}
 
+          {/* Message Input */}
           {talkWithHuman && (
             <div className="p-4 border-t flex items-center space-x-2">
               <input
@@ -796,12 +803,12 @@ const AllChats = () => {
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSendMessage(sessionId);
+                  if (e.key === "Enter") handleSendMessage();
                 }}
               />
               <button
                 className="p-2 bg-gray-100 rounded-lg"
-                onClick={() => handleSendMessage(sessionId)}
+                onClick={handleSendMessage}
               >
                 <SendIcon className="w-5 h-5 text-gray-400" />
               </button>
@@ -809,7 +816,7 @@ const AllChats = () => {
           )}
         </div>
 
-        <div className="w-80 bg-gray-50 p-4 overflow-y-scroll">
+        <div className="w-80 bg-gray-50 p-4 overflow-y-auto">
           {analysisSections?.map((section, index) => {
             const isSentiment = section.title === "Sentiment Analysis";
             const isSales = section.title === "Sales Intelligence";

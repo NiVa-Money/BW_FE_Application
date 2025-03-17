@@ -20,6 +20,8 @@ import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
 import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
 import UtilityDash from "../pages/Reports/UtilityDash";
+import HelpCenter from "../pages/HelpCenter";
+import Settings from "../pages/Settings";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -36,7 +38,7 @@ export const autRoutes: any[] = [
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
 
-  { id: 4, path: "/engagementTab", component: <EngagementTab /> },
+  { id: 4, path: "/engagement", component: <EngagementTab /> },
   { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   {
     id: 5.1,
@@ -55,7 +57,7 @@ export const autRoutes: any[] = [
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
   { id: 3, path: "/testbot/:id", component: <TestBot /> },
-  { id: 4, path: "/engagementTab", component: <EngagementTab /> },
+  { id: 4, path: "/engagement", component: <EngagementTab /> },
   { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
@@ -95,25 +97,9 @@ export const autRoutes: any[] = [
     path: "/editintegration",
     component: <CrudIntegration />,
   },
-  { id: 11, component: <AdminPanel />, path: "/help-center" },
+  { id: 11, component: <HelpCenter />, path: "/help-center" },
 
-  // {
-  //   path: "/integrations",
-  //   component: <IntegrationsPage />
-  // },
-  // {
-  //   path: "/Integration/IntegrationApp",
-  //   component: <WhatsAppIntegration />
-  // },
-  // { path: '/createbot', component: <CreateBot /> },
-  // { path: '/editbot/:id', component: <EditBot /> },
-
-  // { path: '/myagents', component: <MyBots /> },
-
-  // { path: "/marketing/whatsappDashboard", component: <WhatsApp /> },
-
-  // { path: "/integration", component: <IntegrationTab /> },
-  // { path: "/integration/whatsapp", component: <WhatsAppIntegration /> }
+  { id: 12, component: <Settings />, path: "/settings" },
 ];
 
 export const publicRoutes: any[] = [

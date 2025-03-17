@@ -1,3 +1,4 @@
+/* eslint-disable no-unsafe-optional-chaining */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,8 +9,8 @@ import {
 } from "../../api/services/authServices";
 import { Link } from "react-router-dom";
 import { loginWithGoogle } from "../../components/firebase/firebaseConfig";
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,8 +41,8 @@ const Login = () => {
             "userData",
             JSON.stringify({ moduleMap: response.moduleMap })
           );
-          setEmail('')
-          setPassword('')
+          setEmail("");
+          setPassword("");
           navigate("/dashboard");
           navigate(0);
         } else {
@@ -50,6 +51,7 @@ const Login = () => {
           );
         }
       } catch (err) {
+        console.error("Error logging in with Google:", err);
         setError("An unexpected error occurred.");
       } finally {
         setIsLoading(false);
@@ -131,7 +133,7 @@ const Login = () => {
                   } else {
                     setError(
                       response.message ||
-                      "Google login failed. Please try again."
+                        "Google login failed. Please try again."
                     );
                   }
                 } catch (error) {
@@ -160,7 +162,7 @@ const Login = () => {
   return (
     <>
       <head>
-        <title>BotWot ICX - Login</title>
+        <title>BotWot iCX - Login</title>
       </head>
       <div className="overflow-hidden py-4 pr-4 pl-20 bg-white rounded-none max-md:pl-5">
         <div className="flex gap-5 max-md:flex-col">
@@ -169,25 +171,24 @@ const Login = () => {
             <div className="flex flex-col items-center self-stretch my-auto h-[758px] max-md:mt-10 max-md:max-w-full">
               {/* Header */}
               <div className="flex relative flex-col justify-center self-stretch w-full max-md:max-w-full">
-                <div className="flex z-0 flex-col justify-center items-start w-full text-3xl font-semibold text-neutral-700 max-md:max-w-full">
+                <div className="flex z-0 flex-col justify-center items-start w-full ">
                   <div className="flex gap-4 justify-center items-center">
-                    <img
-                      loading="lazy"
-                      src="/assets/botwot_logo.svg"
-                      width={50}
-                      height={50}
-                      alt="BotWot Logo"
-                      className="object-contain shrink-0 self-stretch my-auto aspect-square w-[50px]"
-                    />
-                    <div className="self-stretch my-auto">BotWot ICX</div>
+                    <a href="https://botwot.io" className="cursor-pointer">
+                      <img
+                        loading="lazy"
+                        src="/assets/logo.svg"
+                        alt="BotWot Logo"
+                        className="object-contain shrink-0 self-stretch my-auto w-[300px]"
+                      />
+                    </a>
                   </div>
                 </div>
 
                 {/* Welcome Text */}
-                <div className="z-0 mt-6 text-5xl font-bold text-neutral-800">
+                <div className="mt-6 text-5xl font-bold text-neutral-800">
                   Welcome to
                   <br />
-                  Future of ICX
+                  Future of iCX
                 </div>
 
                 {/* Google Login */}
@@ -207,7 +208,7 @@ const Login = () => {
               </div>
 
               {/* Divider */}
-              <div className="mt-10 mb-0 text-base font-medium text-black">
+              <div className="mt-8 mb-0 text-base font-medium text-black">
                 - OR -
               </div>
 
@@ -260,7 +261,11 @@ const Login = () => {
                             onClick={() => setShowPassword((prev) => !prev)}
                             className=" text-gray-500 hover:text-gray-700 absolute flex justify-start right-[38px]"
                           >
-                            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                            {showPassword ? (
+                              <VisibilityIcon />
+                            ) : (
+                              <VisibilityOffIcon />
+                            )}
                           </button>
                         )}
                       </div>
@@ -294,14 +299,15 @@ const Login = () => {
           </div>
 
           {/* Right Section */}
+
           <div className="flex flex-col ml-5 w-[55%] max-md:ml-0 max-md:w-full">
             <img
               loading="lazy"
-              src="/assets/login_banner.svg"
+              src="/assets/login.gif"
               width={500}
-              height={500}
-              alt="Main Banner"
-              className="object-contain grow w-full rounded-none aspect-[0.78] max-md:mt-10 max-md:max-w-full"
+              height={300}
+              alt="Animated GIF"
+              className="w-full rounded-3xl max-md:mt-10 max-md:max-w-full"
             />
           </div>
         </div>

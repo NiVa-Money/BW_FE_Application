@@ -2,13 +2,12 @@
 import React from "react";
 import SendIcon from "@mui/icons-material/Send";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import { Button, FormControlLabel, Switch } from "@mui/material";
+import { FormControlLabel, Switch } from "@mui/material";
 interface CreateBotRightContainerProps {
   botName?: string;
   imageSrc?: any;
   theme: string;
   color: string;
-  handleSubmit: any;
   font: string;
   botSmartness: string;
   botSmartnessHandle: any;
@@ -17,7 +16,6 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
   botName,
   imageSrc,
   theme,
-  handleSubmit,
   font,
   color,
   botSmartness,
@@ -63,22 +61,6 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
             label=""
             // Display the label next to the switch
           />
-
-          <Button
-            variant="text"
-            type="submit"
-            className="bg-[#65558F] w-[134px] self-end rounded-[100px]"
-            onClick={handleSubmit}
-            sx={{
-              "&.MuiButtonBase-root": {
-                backgroundColor: "#65558F",
-                color: "white",
-                borderRadius: "100px",
-              },
-            }}
-          >
-            Submit
-          </Button>
         </div>
         <div
           className="w-[380px] mt-10 ml-24 border border-black h-[550px] flex justify-center items-center rounded-[12px]"

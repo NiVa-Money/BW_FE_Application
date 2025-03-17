@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import React, { useEffect, useRef, useState } from "react";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import { HexColorPicker } from "react-colorful";
-import DoneIcon from '@mui/icons-material/Done';
-import { Chip } from '@mui/material';
+import DoneIcon from "@mui/icons-material/Done";
+import { Chip } from "@mui/material";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import FormikFieldChipComponent from "../../components/FormikFieldChipComponent";
@@ -18,7 +18,7 @@ import { RootState } from "../../store";
 import { useNavigate, useParams } from "react-router-dom";
 import ConfirmationModal from "../../components/confirmationModal";
 import { MenuItem, Select, ToggleButton } from "@mui/material";
-import { ToggleButtonGroup } from '@mui/material';
+import { ToggleButtonGroup } from "@mui/material";
 import BotSuccessContent from "../../components/confirmationModal/BotSuccessContent";
 
 const EditBot: React.FC = () => {
@@ -50,8 +50,7 @@ const EditBot: React.FC = () => {
   const [filename, setFileName] = useState("");
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [base64Image, setBase64Image] = useState("");
-  const [botId, setBotId] = useState('')
-  const [, _setBase64File] = useState("");
+  const [botId, setBotId] = useState("");
   const [formValues, setFormValues] = useState<any>({
     botName: "",
     theme: "",
@@ -64,7 +63,7 @@ const EditBot: React.FC = () => {
     email: "",
     botSmartness: false,
     appoimentLink: "",
-    docId: ''
+    docId: "",
   });
   const botLimits: any[] = [
     { label: "50", value: 50 },
@@ -72,7 +71,7 @@ const EditBot: React.FC = () => {
     { label: "200", value: 200 },
     { label: "400", value: 400 },
     { label: "530", value: 530 },
-  ]
+  ];
   const botSamples = [
     {
       imageUrl: `/assets/bot1.svg`,
@@ -107,7 +106,7 @@ const EditBot: React.FC = () => {
     appoimentLink,
     botFont,
     docId,
-    botIconOption
+    botIconOption,
   }: any = formValues;
   const handleBotSampleClick = async (item: any) => {
     setImageSrc(item?.imageUrl);
@@ -116,7 +115,7 @@ const EditBot: React.FC = () => {
     const file = new File([blob], "image.jpg", { type: blob.type });
     setSelectedFileImage(file);
   };
-  const userId: string = localStorage.getItem("user_id") || '';
+  const userId: string = localStorage.getItem("user_id") || "";
 
   const validationSchema = Yup.object({
     botName: Yup.string().required("BotName is required"),
@@ -124,7 +123,7 @@ const EditBot: React.FC = () => {
       .email("Invalid email format")
       .required("Email is required"),
   });
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const initialValues: any = {
     name: "",
     theme: "",
@@ -136,8 +135,7 @@ const EditBot: React.FC = () => {
     email: "",
     botSmartness: false,
     appoimentLink: "",
-    botIconOption: BOTICONS.list
-
+    botIconOption: BOTICONS.list,
   };
   const handleSubmit = () => {
     // Handle form submission logic here
@@ -162,8 +160,7 @@ const EditBot: React.FC = () => {
     // formData.append("botFont", botFont);
     // formData.append("botTheme", theme);
     formData.append("botId", botId);
-    formData.append('docId', docId);
-
+    formData.append("docId", docId);
 
     dispatch(editBotAction(formData));
   };
@@ -209,62 +206,57 @@ const EditBot: React.FC = () => {
   };
   const handleClose = () => {
     setFormValues({
-      theme: '',
-      botTone: '',
-      botFont: '',
-      greetingMessage: '',
-      botIdentity: '',
-      phoneNumber: '',
-      email: '',
+      theme: "",
+      botTone: "",
+      botFont: "",
+      greetingMessage: "",
+      botIdentity: "",
+      phoneNumber: "",
+      email: "",
       botSmartness: false,
-      appoimentLink: '',
-      botIconOption: BOTICONS.list
-
-    })
-    setImageName('')
-    setFileName('')
-    setIsModalOpen(false)
+      appoimentLink: "",
+      botIconOption: BOTICONS.list,
+    });
+    setImageName("");
+    setFileName("");
+    setIsModalOpen(false);
   };
   const handleConfirmation = () => {
-    setIsModalOpen(false)
+    setIsModalOpen(false);
     setFormValues({
-      theme: '',
-      botTone: '',
-      botFont: '',
-      greetingMessage: '',
-      botIdentity: '',
-      phoneNumber: '',
-      email: '',
+      theme: "",
+      botTone: "",
+      botFont: "",
+      greetingMessage: "",
+      botIdentity: "",
+      phoneNumber: "",
+      email: "",
       botSmartness: false,
-      appoimentLink: '',
-      botIconOption: BOTICONS.list
-
-    })
-    setImageName('')
-    setFileName('')
-    navigate('/integrations')
-  }
+      appoimentLink: "",
+      botIconOption: BOTICONS.list,
+    });
+    setImageName("");
+    setFileName("");
+    navigate("/integrations");
+  };
   const botSmartnessHandle = (val) => {
     setFormValues({ ...formValues, botSmartness: val });
-  }
+  };
   useEffect(() => {
     if (editBotDataRedux !== null) {
-      const success = editBotDataRedux?.success
+      const success = editBotDataRedux?.success;
       if (success) {
-        setIsModalOpen(success)
-
-
+        setIsModalOpen(success);
       }
-
     }
-  }, [editBotDataRedux])
+  }, [editBotDataRedux]);
   useEffect(() => {
     if (botData.length) {
       setFormValues({
         botName: botData[0]?.botName,
         theme: botData[0]?.boTheme || THEME.dark,
         botTone: botData[0]?.botTone,
-        botFont: botData[0]?.botFont || 'serif',
+        botFont: botData[0]?.botFont || "serif",
         greetingMessage: botData[0]?.botGreetingMessage,
         botIdentity: botData[0]?.botIdentity,
         botLimit: botData[0]?.wordLimitPerMessage,
@@ -273,15 +265,18 @@ const EditBot: React.FC = () => {
         botSmartness: botData[0]?.botSmartness,
         appoimentLink: botData[0]?.appointmentSchedulerLink,
         docId: botData[0]?.knowledgeBaseId,
-        filename: botData[0]?.docName
+        filename: botData[0]?.docName,
       });
-      setFileName(botData[0]?.docName)
-      setSelectedFileImage(botData[0].botURL)
-      setBotId(botData[0]._id)
+      setFileName(botData[0]?.docName);
+      setSelectedFileImage(botData[0].botURL);
+      setBotId(botData[0]._id);
     }
-  }, [botData])
+  }, [botData]);
   return (
-    <div className="m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center " onClick={() => (showColorPicker ? setShowColorPicker(false) : '')}>
+    <div
+      className="m-[15px] max-w-[1400px]  w-[100vw] mx-[auto] my-[0]  flex justify-center items-center "
+      onClick={() => (showColorPicker ? setShowColorPicker(false) : "")}
+    >
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
@@ -292,7 +287,7 @@ const EditBot: React.FC = () => {
             <div>
               <div className="flex-col">
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
-                  <label htmlFor="botName">Bot Name</label>
+                  <label htmlFor="botName">Agent Name</label>
 
                   <Field
                     type="text"
@@ -318,11 +313,13 @@ const EditBot: React.FC = () => {
                       <button
                         key={color}
                         onClick={() => handleColorClick(color)}
-                        className={`w-8 h-8  rounded-full ${color === "rainbow"
-                          ? "bg-gradient-to-r from-red-500 via-green-500 to-blue-500"
-                          : ""
-                          }${chatColor === color ? "border-4 border-gray-400" : ""
-                          }`}
+                        className={`w-8 h-8  rounded-full ${
+                          color === "rainbow"
+                            ? "bg-gradient-to-r from-red-500 via-green-500 to-blue-500"
+                            : ""
+                        }${
+                          chatColor === color ? "border-4 border-gray-400" : ""
+                        }`}
                         style={{
                           backgroundColor:
                             color !== "rainbow" ? color : undefined,
@@ -340,8 +337,8 @@ const EditBot: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className=" flex flex-col w-[85%] mb-3 text-black" >
-                  <label htmlFor="theme"> Choose Bot Icon</label>
+                <div className=" flex flex-col w-[85%] mb-3 text-black">
+                  <label htmlFor="theme"> Choose Agent Icon</label>
 
                   <Field
                     name="botIconOption"
@@ -351,12 +348,12 @@ const EditBot: React.FC = () => {
                       // Perform additional logic if needed
                     }}
                     options={[
-                      { label: 'List', value: BOTICONS.list, },
-                      { label: 'Custom', value: BOTICONS.custom, },
+                      { label: "List", value: BOTICONS.list },
+                      { label: "Custom", value: BOTICONS.custom },
                     ]}
                   />
                 </div>
-                {botIconOption == BOTICONS.list ?
+                {botIconOption == BOTICONS.list ? (
                   <div className=" flex flex-col w-[85%] mb-3 text-black">
                     <label htmlFor="botIcon">Choose Profile</label>
                     <div className="grid grid-cols-6 gap-1 items-center">
@@ -372,9 +369,9 @@ const EditBot: React.FC = () => {
                         />
                       ))}
                     </div>
-                  </div> : null}
-                {botIconOption == BOTICONS.custom ?
-
+                  </div>
+                ) : null}
+                {botIconOption == BOTICONS.custom ? (
                   <div className=" flex flex-col w-[85%] mb-3 text-black">
                     <label>Choose Image</label>
 
@@ -415,11 +412,11 @@ const EditBot: React.FC = () => {
                         className="absolute w-[85%] h-[100%] top-[0] opacity-0 -[12px] cursor-pointer"
                       />
                     </div>
-                  </div> : null}
+                  </div>
+                ) : null}
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label htmlFor="theme">Choose theme</label>
                   <div className="flex space-x-2">
-
                     {[
                       {
                         label: "Light",
@@ -432,7 +429,6 @@ const EditBot: React.FC = () => {
                         icon: <BedtimeIcon />,
                       },
                     ].map((option) => (
-
                       <Chip
                         key={option.value}
                         label={
@@ -443,10 +439,14 @@ const EditBot: React.FC = () => {
                           </div>
                         }
                         clickable
-
-                        onClick={() => setFormValues({ ...formValues, theme: option.value })}
-                        className={`rounded-full px-4 py-1 ${theme === option.value ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'
-                          }`}
+                        onClick={() =>
+                          setFormValues({ ...formValues, theme: option.value })
+                        }
+                        className={`rounded-full px-4 py-1 ${
+                          theme === option.value
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
                       />
                     ))}
                   </div>
@@ -472,7 +472,7 @@ const EditBot: React.FC = () => {
                   /> */}
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
-                  <label htmlFor="botTone">Bot Tone</label>
+                  <label htmlFor="botTone">Agent Tone</label>
                   <ToggleButtonGroup
                     value={botTone}
                     exclusive
@@ -483,73 +483,77 @@ const EditBot: React.FC = () => {
                       { label: "Casual Tone", value: "casual" },
                       { label: "Enthusiastic Tone", value: "enthusiastic" },
                     ].map((option) => (
-
                       <ToggleButton
                         key={option.value}
                         name="botTone"
                         value={botTone}
-                        onClick={() => setFormValues({ ...formValues, botTone: option.value })}
-
+                        onClick={() =>
+                          setFormValues({
+                            ...formValues,
+                            botTone: option.value,
+                          })
+                        }
                         sx={{
-                          '&.Mui-selected': {
-                            backgroundColor: '#EADDFF',
-                            color: 'black',
-                            border: 'none',
-                            '&:hover': {
-                              backgroundColor: '#EADDFF',
-                              border: 'none',
+                          "&.Mui-selected": {
+                            backgroundColor: "#EADDFF",
+                            color: "black",
+                            border: "none",
+                            "&:hover": {
+                              backgroundColor: "#EADDFF",
+                              border: "none",
                             },
                           },
-                          '&.MuiButtonBase-root': {
-                            backgroundColor: botTone === option.value ? '#EADDFF' : 'white',
-                            borderColor: botTone === option.value ? '#8540f4' : '#454545f',
-
+                          "&.MuiButtonBase-root": {
+                            backgroundColor:
+                              botTone === option.value ? "#EADDFF" : "white",
+                            borderColor:
+                              botTone === option.value ? "#8540f4" : "#454545f",
                           },
                         }}
-
                       >
                         <span>{option.label}</span>
                       </ToggleButton>
                     ))}
                   </ToggleButtonGroup>
-
-
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
-                  <label htmlFor="botFont">Bot Font</label>
+                  <label htmlFor="botFont">Agent Font</label>
                   <ToggleButtonGroup
                     value={botFont}
                     exclusive
                     className=" w-max border h-[35px] border-gray-300 rounded-[50%]"
                   >
                     {[
-                      { label: 'Serif', value: 'serif' },
-                      { label: 'Monospace', value: 'monospace' },
-                      { label: 'Cursive', value: 'cursive' },
+                      { label: "Serif", value: "serif" },
+                      { label: "Monospace", value: "monospace" },
+                      { label: "Cursive", value: "cursive" },
                     ].map((option) => (
-
                       <ToggleButton
                         key={option.value}
                         value={botFont}
-                        onClick={() => setFormValues({ ...formValues, botFont: option.value })}
-
+                        onClick={() =>
+                          setFormValues({
+                            ...formValues,
+                            botFont: option.value,
+                          })
+                        }
                         sx={{
-                          '&.Mui-selected': {
-                            backgroundColor: '#EADDFF',
-                            color: 'black',
-                            border: 'none',
-                            '&:hover': {
-                              backgroundColor: '#EADDFF',
-                              border: 'none',
+                          "&.Mui-selected": {
+                            backgroundColor: "#EADDFF",
+                            color: "black",
+                            border: "none",
+                            "&:hover": {
+                              backgroundColor: "#EADDFF",
+                              border: "none",
                             },
                           },
-                          '&.MuiButtonBase-root': {
-                            backgroundColor: botFont === option.value ? '#EADDFF' : 'white',
-                            borderColor: botFont === option.value ? '#8540f4' : '#454545f',
-
+                          "&.MuiButtonBase-root": {
+                            backgroundColor:
+                              botFont === option.value ? "#EADDFF" : "white",
+                            borderColor:
+                              botFont === option.value ? "#8540f4" : "#454545f",
                           },
                         }}
-
                       >
                         <span>{option.label}</span>
                       </ToggleButton>
@@ -570,7 +574,9 @@ const EditBot: React.FC = () => {
                   /> */}
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
-                  <label htmlFor="greetingMessage">Bot Greeting Message</label>
+                  <label htmlFor="greetingMessage">
+                    Agent Greeting Message
+                  </label>
 
                   <Field
                     type="text"
@@ -583,7 +589,7 @@ const EditBot: React.FC = () => {
                   />
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
-                  <label htmlFor="botIdentity">Bot Identity</label>
+                  <label htmlFor="botIdentity">Agent Identity</label>
                   <ToggleButtonGroup
                     value={botIdentity}
                     exclusive
@@ -594,36 +600,42 @@ const EditBot: React.FC = () => {
                       { label: "Sales", value: "Sales" },
                       { label: "Human Resource", value: "Human Resource" },
                     ].map((option) => (
-
                       <ToggleButton
                         key={option.value}
                         name="botIdentity"
                         value={botIdentity}
-                        onClick={() => setFormValues({ ...formValues, botIdentity: option.value })}
-
+                        onClick={() =>
+                          setFormValues({
+                            ...formValues,
+                            botIdentity: option.value,
+                          })
+                        }
                         sx={{
-                          '&.Mui-selected': {
-                            backgroundColor: '#EADDFF',
-                            color: 'black',
-                            border: 'none',
-                            '&:hover': {
-                              backgroundColor: '#EADDFF',
-                              border: 'none',
+                          "&.Mui-selected": {
+                            backgroundColor: "#EADDFF",
+                            color: "black",
+                            border: "none",
+                            "&:hover": {
+                              backgroundColor: "#EADDFF",
+                              border: "none",
                             },
                           },
-                          '&.MuiButtonBase-root': {
-                            backgroundColor: botIdentity === option.value ? '#EADDFF' : 'white',
-                            borderColor: botIdentity === option.value ? '#8540f4' : '#454545f',
-
+                          "&.MuiButtonBase-root": {
+                            backgroundColor:
+                              botIdentity === option.value
+                                ? "#EADDFF"
+                                : "white",
+                            borderColor:
+                              botIdentity === option.value
+                                ? "#8540f4"
+                                : "#454545f",
                           },
                         }}
-
                       >
                         <span>{option.label}</span>
                       </ToggleButton>
                     ))}
                   </ToggleButtonGroup>
-
                 </div>
                 {/* <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label>Knowledge Base</label>
@@ -672,20 +684,20 @@ const EditBot: React.FC = () => {
                   />
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
-                  <label htmlFor="botLimit">Bot Limit per Message</label>
+                  <label htmlFor="botLimit">Agent Limit per Message</label>
                   <Select
-                    value={botLimit || ''}
-                    name='botLimit'
+                    value={botLimit || ""}
+                    name="botLimit"
                     onChange={handleChange}
                     sx={{
-                      '&.MuiInputBase-root': {
-                        backgroundColor: '#F3F2F6',
-                        height: '35px',
+                      "&.MuiInputBase-root": {
+                        backgroundColor: "#F3F2F6",
+                        height: "35px",
                       },
-                      '& .MuiOutlinedInput-root': {
-                        height: '35px',
-                        '& .MuiOutlinedInput-input': {
-                          height: '35px',
+                      "& .MuiOutlinedInput-root": {
+                        height: "35px",
+                        "& .MuiOutlinedInput-input": {
+                          height: "35px",
                         },
                       },
                     }}
@@ -696,7 +708,6 @@ const EditBot: React.FC = () => {
                       </MenuItem>
                     ))}
                   </Select>
-
                 </div>
                 <div className=" flex flex-col w-[85%] mb-3 text-black">
                   <label>Support Contact</label>
@@ -768,7 +779,6 @@ const EditBot: React.FC = () => {
               botName="Botwot Assistant"
               theme={theme}
               color={chatColor}
-              handleSubmit={handleSubmit}
               font={botFont}
               botSmartness={botSmartness}
               botSmartnessHandle={botSmartnessHandle}
@@ -776,13 +786,30 @@ const EditBot: React.FC = () => {
           </Form>
         )}
       </Formik>
-      <ConfirmationModal open={isModalOpen} onClose={handleClose} onConfirm={handleConfirmation} heading={'Congratulations!!!'} contentComponent={<BotSuccessContent subHeading1={`Your Agent ${botName} Is Ready!`} subHeading2={`Your ${botIdentity} Agent is ready for action`} bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`} open={false} onClose={function (): void {
-        throw new Error('Function not implemented.');
-      }} onConfirm={function (): void {
-        throw new Error('Function not implemented.');
-      }} heading={''} />} />
+      <ConfirmationModal
+        open={isModalOpen}
+        onClose={handleClose}
+        onConfirm={handleConfirmation}
+        heading={"Congratulations!!!"}
+        contentComponent={
+          <BotSuccessContent
+            subHeading1={`Your Agent ${botName} Is Ready!`}
+            subHeading2={`Your ${botIdentity} Agent is ready for action`}
+            bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${botName} into your social media platforms.`}
+            open={false}
+            onClose={function (): void {
+              throw new Error("Function not implemented.");
+            }}
+            onConfirm={function (): void {
+              throw new Error("Function not implemented.");
+            }}
+            heading={""}
+          />
+        }
+      />
     </div>
   );
 };
 
 export default EditBot;
+
