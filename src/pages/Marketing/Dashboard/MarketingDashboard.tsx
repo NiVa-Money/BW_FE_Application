@@ -21,8 +21,6 @@ import {
   Bar,
   Legend,
   Cell,
-  Pie,
-  PieChart,
 } from "recharts";
 import ReactMarkdown from "react-markdown";
 import WhatsappDash from "../Whatsapp/WhatsappDashboard";
@@ -396,6 +394,12 @@ const DashboardUI = () => {
             >
               Create a WhatsApp Campaign
             </button>
+            <button
+              onClick={() => navigate("/marketing/dashboardform")}
+              className="w-full bg-white text-[#65558F] py-2 rounded-lg mt-2"
+            >
+              Edit Marketing Form
+            </button>
           </div>
         </DashboardCard>
       </div>
@@ -527,6 +531,7 @@ const DashboardUI = () => {
 
       <div>
         <DashboardCard title="Competitor Trends - Social Listening">
+          {/* Dropdown for selecting metrics */}
           <div className="mb-4">
             <label htmlFor="metric-select" className="mr-2">
               Select Metric:
@@ -543,47 +548,48 @@ const DashboardUI = () => {
               ))}
             </select>
           </div>
+
           {noData ? (
             <div className="text-center py-8">NO data available</div>
           ) : (
-            <>
-              <div className="space-y-2 flex-col mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* --- Column 1: Brand/Value List --- */}
+              <div>
                 {competitorTrendsData.map((entry, index) => (
-                  <div key={index} className="flex items-center">
+                  <div key={index} className="flex items-center mb-2">
+                    {/* Colored bullet indicator */}
                     <div
-                      className="h-3 w-3 rounded-full"
+                      className="h-3 w-3 rounded-full mr-2"
                       style={{ backgroundColor: COLORS[index % COLORS.length] }}
                     />
-                    <span className="ml-2 text-sm">
+                    <span className="text-sm">
                       {entry.name}: {entry.value}
                     </span>
                   </div>
                 ))}
               </div>
+
+              {/* --- Column 2: Chart --- */}
               <div className="h-60">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={competitorTrendsData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      label
-                    >
-                      {competitorTrendsData.map((_entry, index) => (
+                  <BarChart data={competitorTrendsData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value">
+                      {competitorTrendsData.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
                         />
                       ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
-            </>
+            </div>
           )}
         </DashboardCard>
       </div>

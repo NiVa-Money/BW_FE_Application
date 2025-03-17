@@ -154,7 +154,7 @@ export const uploadWhatsAppMediaService = async (
   }
 
   try {
-    const response = await axios.post<UploadResponse>(
+    const response = await axiosInstance.post<UploadResponse>(
       "/whatsapp/media/upload", // Ensure the full URL is correct
       formData,
       {
