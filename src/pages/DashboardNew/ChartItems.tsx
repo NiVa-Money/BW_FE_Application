@@ -65,8 +65,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
 
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
     ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map(
-        (header) => header
-      )
+      (header) => header
+    )
     : [];
 
   const chartItems = [
@@ -105,7 +105,7 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
     },
     {
       id: 2,
-      title: "Escalation Rate",
+      title: "Escalation Rate (%)",
       component: (
         <BarChart
           width={500}
@@ -133,23 +133,59 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
             nameKey="name"
             cx="50%"
             cy="50%"
+            endAngle={0}
+            innerRadius={100}
+            outerRadius={120}
+            startAngle={180}
             labelLine={false}
             fill="#8884d8"
           >
             {constructedChartsData.sentiments.map((_, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={[COLORS.LIGHTGREEN, COLORS.GRAY, COLORS.BLUE][index % 3]}
+                fill={['#b4a9fa', COLORS.GRAY, COLORS.BLUE][index % 3]}
               />
             ))}
           </Pie>
           <Tooltip />
-          <Legend iconType="square" wrapperStyle={{ paddingBottom: 10 }} />
+          <Legend iconType="square" content={CustomLegend}
+            wrapperStyle={{ paddingBottom: 10 }} />
         </PieChart>
       ),
     },
     {
       id: 4,
+      title: "Net Promoter Score",
+      component: (
+        <PieChart width={500} height={300}>
+          <Pie
+            data={constructedChartsData.sentiments}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+
+            innerRadius={100}
+            outerRadius={120}
+
+            labelLine={false}
+            fill="#8884d8"
+          >
+            {constructedChartsData.sentiments.map((_, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={['#b4a9fa', COLORS.GRAY, COLORS.BLUE][index % 3]}
+              />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend iconType="square" content={CustomLegend}
+            wrapperStyle={{ paddingBottom: 10 }} />
+        </PieChart>
+      ),
+    },
+    {
+      id: 5,
       title: "Resolved Chats",
       component: (
         <LineChart
@@ -180,23 +216,24 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
         </LineChart>
       ),
     },
-    {
-      id: 5,
-      title: "Chat Traffic Overview",
-      component: (
-        <CommonTable
-          headers={firstTableHeaders}
-          rows={constructedChartsData.chatTrafficOverview}
-        />
-      ),
-    },
+    // {
+    //   id: 5,
+    //   title: "Chat Traffic Overview",
+    //   component: (
+    //     <CommonTable
+    //       headers={firstTableHeaders}
+    //       rows={constructedChartsData.chatTrafficOverview}
+    //     />
+    //   ),
+    // },
     {
       id: 6,
-      title: "Average Handling Time",
+      title: "Average Handling Time (secs)",
       component: (
         <BarChart
           width={500}
           height={300}
+          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           data={constructedChartsData.averageHandlingTime}
         >
           <CartesianGrid strokeDasharray="3 3" />

@@ -24,6 +24,7 @@ import {
 } from "./types";
 import ChartItems from "./ChartItems";
 import useLatestFetchData from "../../hooks/useLatestFetchData";
+import { formatDateString } from "../../hooks/functions";
 
 // StatsCard Component
 const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
@@ -61,32 +62,30 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
   const processedStats = headerData
     ? [
-        {
-          title: "Resolution Rate",
-          content: `${
-            (headerData.resolutionRate &&
-              headerData.resolutionRate?.toFixed(2)) ||
-            0
+      {
+        title: "Resolution Rate",
+        content: `${(headerData.resolutionRate &&
+          headerData.resolutionRate?.toFixed(2)) ||
+          0
           }%`,
-          iconSrc: "/assets/icons/three-bars.svg",
-        },
-        {
-          title: "Live chat Vs ended the chat",
-          content: `Live: ${headerData.liveVsEndedSessions.live}, Ended: ${headerData.liveVsEndedSessions.ended}`,
-        },
-        {
-          title: "AI vs. Human Resolution Rate",
-          content: `AI: ${headerData.aiVsHumanResolutionRate.ai}%, Human: ${headerData.aiVsHumanResolutionRate.human}%`,
-        },
-        {
-          title: "Consumed messages / Total messages ",
-          content: `${
-            headerData.messages.consumed ||
-            headerData.messages.total - headerData.messages.left
+        iconSrc: "/assets/icons/three-bars.svg",
+      },
+      {
+        title: "Live chat Vs ended the chat",
+        content: `Live: ${headerData.liveVsEndedSessions.live}, Ended: ${headerData.liveVsEndedSessions.ended}`,
+      },
+      {
+        title: "AI vs. Human Resolution Rate",
+        content: `AI: ${headerData.aiVsHumanResolutionRate.ai}%, Human: ${headerData.aiVsHumanResolutionRate.human}%`,
+      },
+      {
+        title: "Consumed messages / Total messages ",
+        content: `${headerData.messages.consumed ||
+          headerData.messages.total - headerData.messages.left
           }/${headerData.messages.total}`,
-        },
-        { title: "Escalation Rate", content: `${headerData.escalationRate}%` },
-      ]
+      },
+      { title: "Escalation Rate", content: `${headerData.escalationRate}%` },
+    ]
     : [];
 
   return (
@@ -126,19 +125,22 @@ const DashboardPanel = () => {
 
   // Fetch dashboard data
   const fetchData = async (
-    startDate: Date | null = (() => {
+    startDate: Date | null | string = (() => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       return today;
     })(),
-    endDate: Date | null = new Date()
+    endDate: Date | null | string = new Date()
   ) => {
     if (!botId) return;
     try {
       setIsLoading(true);
+      const formattedStartDate = startDate instanceof Date ? startDate.toISOString() : startDate;
+      const formattedEndDate = endDate instanceof Date ? endDate.toISOString() : endDate;
+      console.log(typeof startDate)
       const response: DashboardResponse = await dashBoardDataService({
-        startDate,
-        endDate,
+        startDate: formatDateString(formattedStartDate, true),
+        endDate: formatDateString(formattedEndDate, true),
         botIds: [botId],
       });
       if (response?.success) {
