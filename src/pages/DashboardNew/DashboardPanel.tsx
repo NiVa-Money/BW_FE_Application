@@ -33,12 +33,12 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
       sx={{
         p: 1.25,
         borderRadius: 2,
-        backgroundColor: "#65558F14",
+        backgroundColor: "#F7F2FA",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <div className="flex justify-between items-center gap-3">
+      <div className="flex items-center gap-3">
         {iconSrc && (
           <div className="h-12 w-12 rounded-full bg-[#65558F29] flex justify-center items-center">
             <img src={iconSrc} alt="icon" width="20" height="20" />
@@ -48,7 +48,9 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
           <Typography variant="body1" color="#ADAAB5">
             {title}
           </Typography>
-          <Typography variant="body1">{content}</Typography>
+          <Typography variant="body1" color={COLORS.DARKVIOLET}>
+            {content}
+          </Typography>
         </div>
       </div>
     </Paper>
@@ -258,7 +260,7 @@ const DashboardPanel = () => {
 
       <div className="flex justify-between items-center mb-4">
         <Card
-          className="flex items-center justify-between p-4 border max-w-xl"
+          className="flex items-center justify-between p-4 max-w-2xl"
           sx={{
             borderColor: COLORS.DARKGRAY,
             backgroundColor: COLORS.VERYLIGHTVIOLET,
