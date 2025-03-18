@@ -20,10 +20,19 @@ export const deleteWhatsappService = async (id: string) => {
   return response.data;
 };
 
-
 export const getWhatsappData = async (botId: string) => {
   const response = await axiosInstance.get(`/whatsapp/get`, {
     params: { botId },
   });
+  return response.data;
+};
+
+export const saveInstagramService = async (data: any) => {
+  const response = await axiosInstance.post("/instagram", data);
+  return response.data;
+};
+
+export const getInstagramData = async () => {
+  const response = await axiosInstance.get(`/instagram`);
   return response.data;
 };

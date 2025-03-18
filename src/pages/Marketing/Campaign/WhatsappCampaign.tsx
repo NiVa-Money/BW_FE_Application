@@ -15,9 +15,7 @@ import {
   createWhatsAppCampaignAction,
   createWhatsAppTemplateAction,
 } from "../../../store/actions/whatsappCampaignActions";
-import {
-  convertCsvToJsonService,
-} from "../../../api/services/whatsappCampaignService";
+import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
 import CreateTemplateModal from "./CreateTemplate";
 
@@ -46,12 +44,6 @@ const WhatsappCampaign: React.FC = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const phoneNumberId = useSelector(
-    (state: RootState) =>
-      state?.crudIntegration?.crudIntegration?.data?.phoneNumberId
-  );
-  console.log(" phoneNumberId:", phoneNumberId); // Debugging
 
   const handleSelectTemplate = (template: any) => {
     setSelectedTemplate(template);
@@ -344,7 +336,7 @@ const WhatsappCampaign: React.FC = () => {
       );
       return;
     }
-  
+
     // Use the header provided from CreateTemplateModal.
     // For media headers, the fileHandle is expected to be in header.content.
     let headerType = "NONE" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
@@ -365,7 +357,7 @@ const WhatsappCampaign: React.FC = () => {
         return;
       }
     }
-  
+
     // Map buttons to the expected ButtonDto format.
     const mappedButtons = data.buttons.map((btn) => {
       if (btn.type === "quick_reply") {
@@ -387,7 +379,7 @@ const WhatsappCampaign: React.FC = () => {
             };
       }
     });
-  
+
     // Build the final payload.
     const payload = {
       integrationId: selectedIntegration.secretToken,
@@ -406,7 +398,7 @@ const WhatsappCampaign: React.FC = () => {
       },
       buttons: mappedButtons,
     };
-  
+
     // Dispatch the template creation action.
     dispatch(createWhatsAppTemplateAction(payload));
 
@@ -417,11 +409,12 @@ const WhatsappCampaign: React.FC = () => {
       footer: data.footer ? data.footer.text : "",
       buttons: data.buttons,
     });
-    
+
     setCustomizeScreen(false);
   };
-  
-  
+
+  console.log("Selected Template:", selectedTemplate);
+
   React.useEffect(() => {
     if (success) navigate("/marketing/dashboard");
   }, [success, navigate]);
@@ -682,9 +675,10 @@ const WhatsappCampaign: React.FC = () => {
               </div>
 
               {/* Chat Area */}
-              <div className="p-4 h-full bg-gray-100">
-                {/* Single Message Bubble */}
-                <div className=" w-fit max-w-[80%] mt-10 rounded-lg bg-white p-2 mb-3">
+              {/* Chat Area (modified for overflow and button visibility) */}
+              <div className="p-4 h-full bg-gray-100 overflow-y-auto">
+                {/* Message Bubble */}
+                <div className="w-fit max-w-[80%] mt-10 rounded-lg bg-white p-2 mb-3">
                   {selectedTemplate && (
                     <div className="mt-4 p-4 rounded-md">
                       <h3 className="text-xl font-semibold">
@@ -698,6 +692,19 @@ const WhatsappCampaign: React.FC = () => {
                           className="w-full h-auto mt-2"
                         />
                       )}
+                      {selectedTemplate.buttons &&
+                        selectedTemplate.buttons.length > 0 && (
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {selectedTemplate.buttons.map((button, index) => (
+                              <button
+                                key={index}
+                                className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600"
+                              >
+                                {button.text}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   )}
                 </div>

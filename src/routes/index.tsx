@@ -13,9 +13,9 @@ import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
 import LiveChat from "../pages/Conversation/LiveChat";
 import TestBot from "../pages/TestBot";
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
-import IntegrationList from "../pages/Integration/IntegrationApp/integrationsList";
-import WhatsAppIntegration from "../pages/Integration/IntegrationApp";
-import CrudIntegration from "../pages/Integration/IntegrationApp/crudIntegration";
+import IntegrationList from "../pages/Integration/WhatsappIntegration/integrationsList";
+import WhatsAppIntegration from "../pages/Integration/WhatsappIntegration";
+import CrudIntegration from "../pages/Integration/WhatsappIntegration/crudIntegration";
 import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
 import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
@@ -24,6 +24,7 @@ import HelpCenter from "../pages/HelpCenter";
 import Settings from "../pages/Settings";
 import MarketingDashboardForm from "../pages/Marketing/Dashboard/MarketingDashboardForm";
 import OmnigenUI from "../pages/Marketing/OmniGen";
+import InstagramIntegrationList from "../pages/Integration/InstagramIntegration/InstagramIntegrationList";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -61,7 +62,11 @@ export const autRoutes: any[] = [
   { id: 3, path: "/testbot/:id", component: <TestBot /> },
   { id: 4, path: "/engagement", component: <EngagementTab /> },
   { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
-  { id: 5.1, path: "/marketing/dashboardform", component: <MarketingDashboardForm /> },
+  {
+    id: 5.1,
+    path: "/marketing/dashboardform",
+    component: <MarketingDashboardForm />,
+  },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
   { id: 5.2, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
@@ -91,6 +96,11 @@ export const autRoutes: any[] = [
     id: 10,
     path: "/integrationList",
     component: <IntegrationList />,
+  },
+  {
+    id: 10,
+    path: "/instagramIntegrationList",
+    component: <InstagramIntegrationList />,
   },
   {
     id: 10,
