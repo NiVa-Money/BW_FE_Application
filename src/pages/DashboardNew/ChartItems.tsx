@@ -12,6 +12,8 @@ import {
   PieChart,
   Pie,
   Cell,
+  AreaChart,
+  Area,
 } from "recharts";
 import CommonTable from "../../components/TableComponent";
 import { COLORS } from "../../constants";
@@ -188,15 +190,19 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       id: 5,
       title: "Resolved Chats",
       component: (
-        <LineChart
+        <AreaChart
           width={500}
           height={300}
+          style={{ backgroundColor: COLORS.LIGHTGRAY }}
           data={constructedChartsData.resolvedChats}
         >
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip />
-          <Line
+          <Area type="monotone" dataKey="web" stackId="1" stroke="#8884d8" fill={COLORS.GRAY} />
+          <Area type="monotone" dataKey="whatsapp" stackId="1" stroke="#8884d8" fill={COLORS.BLUE} />
+
+          {/* <Line
             type="monotone"
             dataKey="web"
             strokeWidth={2}
@@ -207,13 +213,14 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
             dataKey="whatsapp"
             strokeWidth={2}
             stroke={COLORS.BLUE}
-          />
+          /> */}
           <Legend
             verticalAlign="top"
-            iconType="square"
+            iconType="rect"
+            content={CustomLegend}
             wrapperStyle={{ paddingBottom: 10 }}
           />
-        </LineChart>
+        </AreaChart>
       ),
     },
     // {
@@ -270,15 +277,15 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
     <>
       <div className="grid grid-cols-3 gap-5 mb-4">
         {chartItems.map((item) => (
-          <div key={item.id}>
+          <div key={item.id} >
             <ChartContainer
-              extraSX={{ border: `1px solid ${COLORS.LAVENDERMIST}` }}
+              extraSX={{ border: `1px solid ${COLORS.LAVENDERMIST}`, backgroundColor: item.id == 5 ? '#e7e0eb' : '' }}
               title={item.title}
               component={item.component}
             />
           </div>
         ))}
-      </div>
+      </div >
 
       <ChartContainer
         extraSX={{ backgroundColor: COLORS.LIGHTGRAY, textAlign: "center" }}
