@@ -7,6 +7,8 @@ const VoiceChatComponent: React.FC = () => {
     "idle" | "connecting" | "listening" | "responding"
   >("idle");
 
+  const agentId = import.meta.env.VITE_ELEVENLABS_ID;
+
   const conversation = useConversation({
     onConnect: () => {
       setIsConnected(true);
@@ -31,7 +33,7 @@ const VoiceChatComponent: React.FC = () => {
     setAgentStatus("connecting");
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      await conversation.startSession({ agentId: "R4oI51KsehSdjihMAYwS" });
+      await conversation.startSession({ agentId });
     } catch (error) {
       console.error("Failed to start conversation:", error);
       setAgentStatus("idle");
