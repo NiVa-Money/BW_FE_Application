@@ -1,82 +1,3 @@
-// import React, { useState } from "react";
-// import { useConversation } from "@11labs/react";
-
-// const VoiceChatComponent: React.FC = () => {
-//   const [isConnected, setIsConnected] = useState(false);
-//   const [agentStatus, setAgentStatus] = useState("idle");
-
-//   const conversation = useConversation({
-//     onConnect: () => {
-//       console.log("Connected to the conversation.");
-//       setIsConnected(true);
-//     },
-//     onDisconnect: () => {
-//       console.log("Disconnected from the conversation.");
-//       setIsConnected(false);
-//     },
-//     onMessage: (message) => {
-//       if (message.source === "user") {
-//         console.log("User said:", message.message);
-//       } else if (message.source === "ai") {
-//         console.log("Agent responded:", message.message);
-//         setAgentStatus("responding"); // Example usage
-//         setTimeout(() => setAgentStatus("idle"), 3000); // Reset status after 3s
-//       }
-//     },
-
-//     onError: (error) => {
-//       console.error("Error:", error);
-//     },
-//   });
-
-//   // Function to start the conversation
-//   const handleConnect = async () => {
-//     try {
-//       await navigator.mediaDevices.getUserMedia({ audio: true });
-//       const conversationId = await conversation.startSession({
-//         agentId: "R4oI51KsehSdjihMAYwS",
-//       });
-//       console.log("Conversation started with ID:", conversationId);
-//     } catch (error) {
-//       console.error("Failed to start conversation:", error);
-//     }
-//   };
-
-//   // Function to disconnect from the conversation
-//   const handleDisconnect = () => {
-//     conversation.endSession();
-//     setIsConnected(false);
-//   };
-
-//   return (
-//     <div className="flex flex-col items-center p-4">
-//       <h1 className="text-2xl font-bold mb-4">ElevenLabs Voice Chat</h1>
-//       <p>Status: {isConnected ? "Connected" : "Disconnected"}</p>
-//       <p>Agent is currently {agentStatus}</p>
-
-//       <div className="mt-4 flex space-x-4">
-//         {!isConnected ? (
-//           <button
-//             className="px-4 py-2 bg-green-500 text-white rounded"
-//             onClick={handleConnect}
-//           >
-//             Connect
-//           </button>
-//         ) : (
-//           <button
-//             className="px-4 py-2 bg-red-500 text-white rounded"
-//             onClick={handleDisconnect}
-//           >
-//             Disconnect
-//           </button>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default VoiceChatComponent;
-
 import React, { useState } from "react";
 import { useConversation } from "@11labs/react";
 
@@ -137,7 +58,9 @@ const VoiceChatComponent: React.FC = () => {
         {/* Animated waveform circle */}
         <div
           className={`relative w-48 h-48 rounded-full flex items-center justify-center 
-            ${agentStatus === "responding" ? "bg-blue-500/20" : "bg-blue-500/10"}
+            ${
+              agentStatus === "responding" ? "bg-blue-500/20" : "bg-blue-500/10"
+            }
             transition-all duration-500`}
         >
           <div
