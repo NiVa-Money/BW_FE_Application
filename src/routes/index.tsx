@@ -25,6 +25,7 @@ import Settings from "../pages/Settings";
 import MarketingDashboardForm from "../pages/Marketing/Dashboard/MarketingDashboardForm";
 import OmnigenUI from "../pages/Marketing/OmniGen";
 import InstagramIntegrationList from "../pages/Integration/InstagramIntegration/InstagramIntegrationList";
+import CrudInstagramIntegration from "../pages/Integration/InstagramIntegration/crudInstagramIntegration";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -111,6 +112,11 @@ export const autRoutes: any[] = [
     id: 10,
     path: "/editintegration",
     component: <CrudIntegration />,
+  },
+  {
+    id: 10,
+    path: "/editInstagramIntegration/:id",
+    component: <CrudInstagramIntegration />,
   },
   { id: 11, component: <HelpCenter />, path: "/help-center" },
 
