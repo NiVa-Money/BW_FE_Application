@@ -128,7 +128,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { integrations } from "./integrations";
 import WhatsAppIntegration from "./WhatsappIntegration";
-import InstagramIntegration from "./InstagramIntegration"; // Import InstagramIntegration
+import InstagramIntegration from "./InstagramIntegration";
 
 interface Integration {
   icon: string;
@@ -165,11 +165,15 @@ const IntegrationTab: React.FC = () => {
         );
 
   const handleConnectClick = (variant: string) => {
-    setActiveIntegration(variant); // Set the active integration when Connect is clicked
+    setActiveIntegration(variant);
   };
 
-  const handleIntegrationDetailsClick = () => {
-    navigate("/integrationList"); // Navigate to /integrationList
+  const handleIntegrationDetailsClick = (variant: string) => {
+    if (variant === "instagram") {
+      navigate("/instagramIntegrationList");
+    } else {
+      navigate("/integrationList");
+    }
   };
 
   const renderIntegrationCard = (integration: Integration) => (
@@ -198,7 +202,7 @@ const IntegrationTab: React.FC = () => {
           {integration.connected ? "Connected" : "Connect"}
         </button>
         <button
-          onClick={handleIntegrationDetailsClick}
+          onClick={() => handleIntegrationDetailsClick(integration.variant)}
           className="flex-1 whitespace-nowrap px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200"
         >
           Integration Details →
@@ -207,7 +211,6 @@ const IntegrationTab: React.FC = () => {
     </div>
   );
 
-  // Main render
   if (activeIntegration === "whatsapp") {
     return <WhatsAppIntegration />;
   }

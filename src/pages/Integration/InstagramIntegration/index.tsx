@@ -4,91 +4,98 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { getBotsAction } from "../../../store/actions/botActions";
-import { saveWhatsapp } from "../../../store/actions/integrationActions";
 import Modal from "../WhatsappIntegration/IntegrationModal";
+import { saveInstagramService } from "../../../api/services/integrationServices";
 
 const InstagramIntegration: React.FC = () => {
   const [formData, setFormData] = useState({
     botId: "",
     accessToken: "",
-    appId: "",
-    phoneNumberId: "",
-    whatsappBusinessAccountId: "",
-    phoneNumber: "",
     commentEngagementEnable: false,
     dmEngagementEnable: false,
-    commentEngagementMode: "auto",
-    dmEngagementMode: "auto",
+    commentEngagementMode: "MANUAL",
+    dmEngagementMode: "MANUAL",
     commentAutoReply: "",
     dmAutoReply: "",
   });
 
- const [isModalOpen, setIsModalOpen] = useState(false);
-   const [botLists, setbotLists] = useState<any>([]);
- 
-   const botsDataRedux = useSelector(
-     (state: RootState) => state.bot?.lists?.data
-   );
-   const botsDataLoader = useSelector(
-     (state: RootState) => state.bot?.lists?.loader
-   );
-   const dispatch = useDispatch();
-   const navigate = useNavigate();
- 
-   useEffect(() => {
-     if (
-       Array.isArray(botsDataRedux) &&
-       botsDataRedux.length &&
-       !botsDataLoader
-     ) {
-       const formattedBots = botsDataRedux.map((bot: any) => ({
-         _id: bot._id,
-         botName: bot.botName,
-       }));
- 
-       setbotLists(formattedBots);
-     }
-   }, [botsDataRedux, botsDataLoader]);
- 
-   const userIdLocal = localStorage.getItem("user_id");
- 
-   useEffect(() => {
-     if (userIdLocal?.length) {
-       dispatch(getBotsAction(userIdLocal));
-     }
-   }, [dispatch, userIdLocal]);
- 
-   const handleSubmit = async () => {
-     const { phoneNumber, appId, accessToken } = formData;
- 
-     if (!phoneNumber || !appId || !accessToken) {
-       alert("Please fill in all required fields.");
-       return;
-     }
- 
-     try {
-       dispatch(saveWhatsapp(formData)); // Trigger API call
-       if (secretToken && webhookUrl) {
-         setIsModalOpen(true); // Only open the modal if the data is available
-       }
-     } catch (error) {
-       console.error("Error saving WhatsApp data:", error);
-     }
-   };
- 
-   const integration = useSelector((state: RootState) => state.integration);
- 
-   console.log("Integration Data:", integration); // Debugging
- 
-   const secretToken = useSelector(
-     (state: any) => state.integration?.secretToken || ""
-   );
- 
-   console.log("Secret Token:", secretToken); // Debugging
-   const webhookUrl = useSelector(
-     (state: any) => state.integration?.webhookUrl || ""
-   );
-   console.log("Webhook URL:", webhookUrl); // Debugging
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [botLists, setbotLists] = useState<any>([]);
+
+  const botsDataRedux = useSelector(
+    (state: RootState) => state.bot?.lists?.data
+  );
+  const botsDataLoader = useSelector(
+    (state: RootState) => state.bot?.lists?.loader
+  );
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const [modalData, setModalData] = useState({
+    webhookUrl: "",
+    secretToken: "",
+  });
+
+  useEffect(() => {
+    if (
+      Array.isArray(botsDataRedux) &&
+      botsDataRedux.length &&
+      !botsDataLoader
+    ) {
+      const formattedBots = botsDataRedux.map((bot: any) => ({
+        _id: bot._id,
+        botName: bot.botName,
+      }));
+
+      setbotLists(formattedBots);
+    }
+  }, [botsDataRedux, botsDataLoader]);
+
+  const userIdLocal = localStorage.getItem("user_id");
+
+  useEffect(() => {
+    if (userIdLocal?.length) {
+      dispatch(getBotsAction(userIdLocal));
+    }
+  }, [dispatch, userIdLocal]);
+
+  const handleSubmit = async () => {
+    const { commentEngagementEnable, dmEngagementEnable, accessToken } =
+      formData;
+
+    if (!commentEngagementEnable || !dmEngagementEnable || !accessToken) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const result = await saveInstagramService(formData);
+
+      if (result?.data) {
+        setModalData({
+          webhookUrl: result.data.webhookUrl,
+          secretToken: result.data.webhookSecretToken,
+        });
+        setIsModalOpen(true); // Open modal after setting data
+      }
+    } catch (error) {
+      console.error("Error saving Instagram data:", error);
+    }
+  };
+
+  const integration = useSelector((state: RootState) => state.integration);
+
+  console.log("Integration Data:", integration); // Debugging
+
+  const secretToken = useSelector(
+    (state: any) => state.integration?.secretToken || ""
+  );
+
+  console.log("Secret Token:", secretToken); // Debugging
+  const webhookUrl = useSelector(
+    (state: any) => state.integration?.webhookUrl || ""
+  );
+  console.log("Webhook URL:", webhookUrl); // Debugging
 
   return (
     <div className="w-full flex justify-center items-center">
@@ -167,8 +174,9 @@ const InstagramIntegration: React.FC = () => {
                     })
                   }
                 >
-                  <option value="auto">Auto</option>
-                  <option value="manual">Manual</option>
+                  <option value="MANUAL">MANUAL</option>
+                  <option value="AI">AI</option>
+                  <option value="CUSTOM_MESSAGE">CUSTOM_MESSAGE</option>
                 </select>
               </div>
 
@@ -205,20 +213,20 @@ const InstagramIntegration: React.FC = () => {
                   </button>
                 ) : (
                   <select
-                  className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-                  onChange={(e) =>
-                    setFormData({ ...formData, botId: e.target.value })
-                  }
-                >
-                  <option value="">Select a bot</option>
-                  {botLists.map(
-                    (bot: { _id: string | number; botName: string }) => (
-                      <option key={String(bot._id)} value={String(bot._id)}>
-                        {bot.botName}
-                      </option>
-                    )
-                  )}
-                </select>
+                    className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                    onChange={(e) =>
+                      setFormData({ ...formData, botId: e.target.value })
+                    }
+                  >
+                    <option value="">Select a bot</option>
+                    {botLists.map(
+                      (bot: { _id: string | number; botName: string }) => (
+                        <option key={String(bot._id)} value={String(bot._id)}>
+                          {bot.botName}
+                        </option>
+                      )
+                    )}
+                  </select>
                 )}
               </div>
 
@@ -256,8 +264,9 @@ const InstagramIntegration: React.FC = () => {
                     })
                   }
                 >
-                  <option value="auto">Auto</option>
-                  <option value="manual">Manual</option>
+                  <option value="MANUAL">MANUAL</option>
+                  <option value="AI">AI</option>
+                  <option value="CUSTOM_MESSAGE">CUSTOM_MESSAGE</option>
                 </select>
               </div>
 
@@ -282,10 +291,7 @@ const InstagramIntegration: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        data={{
-          secretToken: integration?.secretToken || "",
-          webhookUrl: integration?.webhookUrl || ""
-        }}
+        data={modalData}
       />
     </div>
   );
