@@ -78,14 +78,27 @@ export default {
           "dialogContentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)",
         // Drawer
         drawerSlideLeftAndFade:
-        "drawerSlideLeftAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)",
+          "drawerSlideLeftAndFade 150ms cubic-bezier(0.16, 1, 0.3, 1)",
         drawerSlideRightAndFade: "drawerSlideRightAndFade 150ms ease-in",
       },
       helperText: {
-        paddingLeft: '0rem', // Equivalent to text-sm
-         // Equivalent to mt-1
+        paddingLeft: "0rem", // Equivalent to text-sm
+        // Equivalent to mt-1
+      },
+      animation: {
+        ping: "ping 2s cubic-bezier(0, 0, 0.2, 1) infinite",
+        pulse: "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      },
+      keyframes: {
+        ping: {
+          "75%, 100%": { transform: "scale(2)", opacity: "0" },
+        },
+        pulse: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
       },
     },
   },
   plugins: [require("@tailwindcss/forms")],
-}
+};

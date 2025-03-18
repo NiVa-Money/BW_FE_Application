@@ -84,9 +84,9 @@ export const sidebarNavLinks = (moduleMapping: []) => {
     },
     {
       id: 6,
-      text: "Agent",
+      text: "Voice Agent",
       icon: <SupportAgentIcon />,
-      path: "/agent",
+      path: "/voiceagent",
     },
     { id: 7, text: "Workflow", icon: <AccountTreeIcon />, path: "/workflow" },
     { id: 8, text: "Reports", icon: <AssessmentIcon />, path: "/reports" },
