@@ -659,7 +659,7 @@ const VoiceChatComponent: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 mb-4">
+      <div className="max-w-6xl mx-auto px-4 mt-10 mb-4">
         <h2 className="text-2xl font-bold text-gray-800">
           Conversation History
         </h2>
