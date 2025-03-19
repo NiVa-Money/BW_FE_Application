@@ -479,6 +479,8 @@ const OmnigenUI = () => {
       return;
     }
 
+    console.log("videourl", videoUrl);
+
     setLoading(true);
     setVideoUrl(null);
 
