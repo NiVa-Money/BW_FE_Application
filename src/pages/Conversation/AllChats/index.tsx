@@ -720,13 +720,10 @@ const AllChats = () => {
           onChange={(e) => handleIntentChange(e.target.value)}
         >
           <option value="">Filter by intent</option>
-          <option value="Buying">Buying</option>
-          <option value="Sales">Sales</option>
-          <option value="Query">Query</option>
+          <option value="Sales_Lead">Sales Lead</option>
+          <option value="Inquiry">Inquiry</option>
           <option value="Complaint">Complaint</option>
-          <option value="Support Request">Support Request</option>
           <option value="Feedback">Feedback</option>
-          <option value="Interest">Interest</option>
           <option value="Other">Other</option>
         </select>
 
