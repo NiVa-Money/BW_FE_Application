@@ -61,9 +61,9 @@ const CustomLegend = (props) => {
 };
 
 const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
-  const firstTableHeaders = constructedChartsData.chatTrafficOverview[0]
-    ? Object.keys(constructedChartsData.chatTrafficOverview[0])
-    : [];
+  // const firstTableHeaders = constructedChartsData.chatTrafficOverview[0]
+  //   ? Object.keys(constructedChartsData.chatTrafficOverview[0])
+  //   : [];
 
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
     ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map(
