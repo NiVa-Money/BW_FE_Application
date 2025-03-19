@@ -333,10 +333,10 @@ const OmnigenUI = () => {
   const [loading, setLoading] = useState(false);
 
   // Video parameters
-  const [aspectRatio, setAspectRatio] = useState("16:9");
-  const [resolution, setResolution] = useState("480p");
+  // const [aspectRatio, setAspectRatio] = useState("16:9");
+  // const [resolution, setResolution] = useState("480p");
   const [duration, setDuration] = useState(5);
-  const [speed, setSpeed] = useState("1x");
+  // const [speed, setSpeed] = useState("1x");
 
   const [allVideos, setAllVideos] = useState<any[]>([]);
 
@@ -376,6 +376,7 @@ const OmnigenUI = () => {
       return;
     }
 
+    console.log('videourl', videoUrl);
     setLoading(true);
     setVideoUrl(null);
 
