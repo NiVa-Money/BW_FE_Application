@@ -1,160 +1,22 @@
-// import React, { useState } from "react";
-// import { useConversation } from "@11labs/react";
-
-// const VoiceChatComponent: React.FC = () => {
-//   const [isConnected, setIsConnected] = useState(false);
-//   const [agentStatus, setAgentStatus] = useState<
-//     "idle" | "connecting" | "listening" | "responding"
-//   >("idle");
-
-//   const agentId = import.meta.env.VITE_ELEVENLABS_ID;
-
-//   const conversation = useConversation({
-//     onConnect: () => {
-//       setIsConnected(true);
-//       setAgentStatus("listening");
-//     },
-//     onDisconnect: () => {
-//       setIsConnected(false);
-//       setAgentStatus("idle");
-//     },
-//     onMessage: (message) => {
-//       if (message.source === "user") {
-//         setAgentStatus("listening");
-//       } else if (message.source === "ai") {
-//         setAgentStatus("responding");
-//         setTimeout(() => setAgentStatus("listening"), 3000);
-//       }
-//     },
-//     onError: (error) => console.error("Error:", error),
-//   });
-
-//   const handleConnect = async () => {
-//     setAgentStatus("connecting");
-//     try {
-//       await navigator.mediaDevices.getUserMedia({ audio: true });
-//       await conversation.startSession({ agentId });
-//     } catch (error) {
-//       console.error("Failed to start conversation:", error);
-//       setAgentStatus("idle");
-//     }
-//   };
-
-//   const handleDisconnect = () => {
-//     conversation.endSession();
-//     setAgentStatus("idle");
-//   };
-
-//   // Handle file selection and upload for updating the knowledge base.
-//   const handleKnowledgeBaseUpload = async (
-//     event: React.ChangeEvent<HTMLInputElement>
-//   ) => {
-//     const file = event.target.files?.[0];
-//     if (file) {
-//       const formData = new FormData();
-//       formData.append("knowledgeBase", file);
-
-//       try {
-//         // Replace this endpoint with your actual API endpoint for updating the knowledge base.
-//         const response = await fetch("/api/upload-knowledge-base", {
-//           method: "POST",
-//           body: formData,
-//         });
-//         if (response.ok) {
-//           console.log("Knowledge base updated successfully");
-//         } else {
-//           console.error("Failed to update knowledge base");
-//         }
-//       } catch (error) {
-//         console.error("Error uploading file:", error);
-//       }
-//     }
-//   };
-
-//   const statusMessages = {
-//     connecting: "Connecting to AI...",
-//     listening: "Listening...",
-//     responding: "AI is responding",
-//     idle: "AI Assistant Ready",
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-//       <div className="relative bg-white shadow-lg rounded-2xl p-8 max-w-md w-full flex flex-col items-center">
-//         <h1 className="text-3xl font-bold text-black mb-6">Voice AI</h1>
-
-//         {/* Animated waveform circle */}
-//         <div
-//           className={`relative w-48 h-48 rounded-full flex items-center justify-center
-//             ${
-//               agentStatus === "responding"
-//                 ? "bg-blue-500/20"
-//                 : "bg-blue-500/10"
-//             }
-//             transition-all duration-500`}
-//         >
-//           <div
-//             className={`absolute inset-0 rounded-full border-2 border-blue-500/30
-//               ${agentStatus === "listening" ? "animate-ping" : ""}`}
-//           ></div>
-
-//           <div className="w-32 h-32 bg-gradient-to-br from-[#2E2F5F] to-blue-600 rounded-full flex items-center justify-center">
-//             <div className="text-white text-4xl">
-//               {agentStatus === "responding" ? "⚡" : "🎙"}
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Status text */}
-//         <div className="mt-6 text-center">
-//           <h2
-//             className={`text-xl font-semibold mb-2 ${
-//               agentStatus === "idle" ? "text-black" : "text-blue-500"
-//             } transition-colors duration-300`}
-//           >
-//             {statusMessages[agentStatus]}
-//           </h2>
-//           <p className="text-gray-600 text-sm">
-//             {isConnected ? "Connected to AI Agent" : "Press to connect"}
-//           </p>
-//         </div>
-
-//         {/* Connection button */}
-//         <button
-//           onClick={isConnected ? handleDisconnect : handleConnect}
-//           className={`mt-6 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-//             isConnected
-//               ? "bg-red-500 hover:bg-red-600 text-white"
-//               : "bg-blue-500 hover:bg-blue-600 text-white"
-//           }`}
-//         >
-//           {isConnected ? "Disconnect" : "Connect AI Agent"}
-//         </button>
-
-//         {/* Knowledge Base Upload Button */}
-//         <div className="mt-4">
-//           <label
-//             htmlFor="knowledge-upload"
-//             className="cursor-pointer inline-block px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg"
-//           >
-//             Upload Knowledge Base
-//           </label>
-//           <input
-//             id="knowledge-upload"
-//             type="file"
-//             className="hidden"
-//             onChange={handleKnowledgeBaseUpload}
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default VoiceChatComponent;
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useConversation } from "@11labs/react";
+import { Language } from "@11labs/client";
+interface VoiceOption {
+  voice_id: string;
+  name: string;
+  category?: string;
+  preview_url?: string;
+}
+
+const languageOptions = [
+  { code: "en", name: "English" },
+  { code: "ja", name: "Japanese" },
+  { code: "zh", name: "Chinese" },
+  { code: "de", name: "German" },
+  { code: "hi", name: "Hindi" },
+  { code: "fr", name: "French" },
+  { code: "ko", name: "Korean" },
+];
 
 const VoiceChatComponent: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -163,10 +25,22 @@ const VoiceChatComponent: React.FC = () => {
   >("idle");
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
+  const [agentName, setAgentName] = useState("");
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption | null>(null);
+  const [toneOfVoice, setToneOfVoice] = useState("");
+
+  const [language, setLanguage] = useState<Language>("en");
+
+  const [voiceOptions, setVoiceOptions] = useState<VoiceOption[]>([]);
+  const [previewAudio, setPreviewAudio] = useState<HTMLAudioElement | null>(
+    null
+  );
+
   const agentId = import.meta.env.VITE_ELEVENLABS_ID;
   const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+  const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
+  // 1) Setup conversation
   const conversation = useConversation({
     onConnect: () => {
       setIsConnected(true);
@@ -187,11 +61,36 @@ const VoiceChatComponent: React.FC = () => {
     onError: (error) => console.error("Error:", error),
   });
 
+  // 2) Fetch voices
+  useEffect(() => {
+    const fetchVoices = async () => {
+      try {
+        const res = await fetch("https://api.elevenlabs.io/v1/voices", {
+          headers: { "xi-api-key": apiKey },
+        });
+        if (!res.ok) throw new Error("Failed to fetch voices");
+        const data = await res.json();
+        setVoiceOptions(data.voices || []);
+      } catch (error) {
+        console.error("Error fetching voices:", error);
+      }
+    };
+    fetchVoices();
+  }, [apiKey]);
+
+  // 3) Connect
   const handleConnect = async () => {
     setAgentStatus("connecting");
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      await conversation.startSession({ agentId });
+      await conversation.startSession({
+        agentId,
+        overrides: {
+          agent: {
+            language, // <-- This sets the session's agent language
+          },
+        },
+      });
     } catch (error) {
       console.error("Failed to start conversation:", error);
       setAgentStatus("idle");
@@ -203,14 +102,32 @@ const VoiceChatComponent: React.FC = () => {
     setAgentStatus("idle");
   };
 
-  // Helper: Update the agent to include the new knowledge base document
-  // and update the first message so that the agent is aware of the new content.
-  const updateAgentKnowledgeBase = async (
-    newDocId: string,
-    fileName: string
-  ) => {
+  // 4) Preview logic
+  useEffect(() => {
+    if (previewAudio) {
+      previewAudio.pause();
+      setPreviewAudio(null);
+    }
+  }, [selectedVoice]);
+
+  const handlePreviewVoice = async () => {
+    if (!selectedVoice?.preview_url) return;
     try {
-      // 1. Get current agent config
+      if (previewAudio) {
+        previewAudio.pause();
+        setPreviewAudio(null);
+      }
+      const audio = new Audio(selectedVoice.preview_url);
+      setPreviewAudio(audio);
+      await audio.play();
+    } catch (err) {
+      console.error("Error playing preview:", err);
+    }
+  };
+
+  // 5) Update agent parameters
+  const updateAgentParameters = async () => {
+    try {
       const getRes = await fetch(
         `https://api.elevenlabs.io/v1/convai/agents/${agentId}`,
         { headers: { "xi-api-key": apiKey } }
@@ -218,34 +135,39 @@ const VoiceChatComponent: React.FC = () => {
       if (!getRes.ok) throw new Error("Failed to get agent config");
       const agentConfig = await getRes.json();
 
-      // 2. Merge knowledge base entries (with required fields)
-      const currentKB =
-        agentConfig.conversation_config?.agent?.prompt?.knowledge_base || [];
+      // Instead of "eleven_multilingual_v2",
+      // use "eleven_flash_v2_5" for non-English
+      const chosenModel =
+        language === "en" ? "eleven_flash_v2" : "eleven_flash_v2_5";
 
-      const updatedKB = [
-        ...currentKB,
-        {
-          id: newDocId,
-          type: "file", // REQUIRED by API schema
-          name: fileName, // REQUIRED by API schema
-          usage_mode: "prompt",
-        },
-      ];
+      const existingTTS = agentConfig.conversation_config?.tts || {};
+      const updatedTTS = {
+        ...existingTTS,
+        model_id: chosenModel,
+        voice_id: selectedVoice?.voice_id,
+        style: 0.7,
+        styled_degree: 0.7,
+        stability: 0.5,
+        similarity_boost: 0.8,
+        speed: 1.0,
+      };
 
-      // 3. Build PATCH payload
       const updatePayload = {
         conversation_config: {
+          ...agentConfig.conversation_config,
+          tts: updatedTTS,
           agent: {
+            ...agentConfig.conversation_config?.agent,
+            name: agentName || agentConfig.conversation_config?.agent?.name,
+            language, // for text generation
             prompt: {
               ...agentConfig.conversation_config?.agent?.prompt,
-              knowledge_base: updatedKB,
+              tone: toneOfVoice,
             },
-            first_message: `New document added: ${fileName}. Ask me about it!`,
           },
         },
       };
 
-      // 4. Send update request
       const updateRes = await fetch(
         `https://api.elevenlabs.io/v1/convai/agents/${agentId}`,
         {
@@ -257,7 +179,82 @@ const VoiceChatComponent: React.FC = () => {
           body: JSON.stringify(updatePayload),
         }
       );
+      if (!updateRes.ok) {
+        const errorDetails = await updateRes.json();
+        throw new Error(`API Error: ${JSON.stringify(errorDetails)}`);
+      }
 
+      console.log("Agent parameters updated successfully.");
+
+      // Force session restart
+      await conversation.endSession();
+      await conversation.startSession({
+        agentId,
+        overrides: {
+          agent: {
+            language,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Update agent parameters failed:", error);
+    }
+  };
+
+  // 6) Knowledge base
+  const updateAgentKnowledgeBase = async (
+    newDocId: string,
+    fileName: string
+  ) => {
+    try {
+      const getRes = await fetch(
+        `https://api.elevenlabs.io/v1/convai/agents/${agentId}`,
+        { headers: { "xi-api-key": apiKey } }
+      );
+      if (!getRes.ok) throw new Error("Failed to get agent config");
+      const agentConfig = await getRes.json();
+
+      const currentKB =
+        agentConfig.conversation_config?.agent?.prompt?.knowledge_base || [];
+
+      const updatedKB = [
+        ...currentKB,
+        {
+          id: newDocId,
+          type: "file",
+          name: fileName,
+          usage_mode: "prompt",
+        },
+      ];
+
+      const updatedPrompt = {
+        ...agentConfig.conversation_config?.agent?.prompt,
+        knowledge_base: updatedKB,
+      };
+
+      const updatedPayload = {
+        conversation_config: {
+          ...agentConfig.conversation_config,
+          agent: {
+            ...agentConfig.conversation_config?.agent,
+            prompt: updatedPrompt,
+            first_message: `New document added: ${fileName}. Ask me about it!`,
+            language,
+          },
+        },
+      };
+
+      const updateRes = await fetch(
+        `https://api.elevenlabs.io/v1/convai/agents/${agentId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "xi-api-key": apiKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedPayload),
+        }
+      );
       if (!updateRes.ok) {
         const errorDetails = await updateRes.json();
         throw new Error(`API Error: ${JSON.stringify(errorDetails)}`);
@@ -265,27 +262,32 @@ const VoiceChatComponent: React.FC = () => {
 
       setUploadMessage(`Knowledge base updated with file: ${fileName}`);
 
-      // 5. Force session restart
+      // Force session restart
       await conversation.endSession();
-      await conversation.startSession({ agentId });
+      await conversation.startSession({
+        agentId,
+        overrides: {
+          agent: {
+            language,
+          },
+        },
+      });
     } catch (error) {
       console.error("Update failed:", error);
     }
   };
 
-  // Handle file selection and upload to ElevenLabs’ knowledge base.
+  // 7) Upload new knowledge base
   const handleKnowledgeBaseUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Check file size limit: 20MB
       if (file.size > MAX_FILE_SIZE) {
         console.error({
           detail: {
             status: "invalid_file_size",
-            message:
-              "The file you uploaded is too large, only uploads up to 20mb are allowed.",
+            message: "The file you uploaded is too large.",
           },
         });
         return;
@@ -300,19 +302,14 @@ const VoiceChatComponent: React.FC = () => {
           "https://api.elevenlabs.io/v1/convai/knowledge-base",
           {
             method: "POST",
-            headers: {
-              "xi-api-key": apiKey,
-              // Content-Type header is set automatically when using FormData.
-            },
+            headers: { "xi-api-key": apiKey },
             body: formData,
           }
         );
-
         if (uploadResponse.ok) {
           const data = await uploadResponse.json();
           const newDocId = data.id;
           console.log("Knowledge base document created:", newDocId);
-          // Update the agent to include this new document and update its prompt.
           await updateAgentKnowledgeBase(newDocId, file.name);
         } else {
           console.error(
@@ -326,6 +323,7 @@ const VoiceChatComponent: React.FC = () => {
     }
   };
 
+  // 8) Display logic
   const statusMessages = {
     connecting: "Connecting to AI...",
     listening: "Listening...",
@@ -335,62 +333,202 @@ const VoiceChatComponent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="relative bg-white shadow-lg rounded-2xl p-8 max-w-md w-full flex flex-col items-center">
-        <h1 className="text-3xl font-bold text-black mb-6">Voice AI</h1>
+      <div className="relative shadow-2xl rounded-[2.5rem] p-8 max-w-4xl w-full flex flex-col md:flex-row items-center border border-gray-100/80">
+        {/* Left Column */}
+        <div className="w-full md:w-1/2 space-y-5 p-4">
+          <h1 className="text-4xl font-bold text-black mb-8 tracking-wide text-center md:text-left">
+            Voice AI Agent
+          </h1>
 
-        {/* Animated waveform circle */}
-        <div
-          className={`relative w-48 h-48 rounded-full flex items-center justify-center 
-            ${
-              agentStatus === "responding" ? "bg-blue-500/20" : "bg-blue-500/10"
-            }
-            transition-all duration-500`}
-        >
-          <div
-            className={`absolute inset-0 rounded-full border-2 border-blue-500/30 
-              ${agentStatus === "listening" ? "animate-ping" : ""}`}
-          ></div>
+          {/* Agent Name */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700/90">
+              Agent Name
+            </label>
+            <input
+              type="text"
+              placeholder="Enter agent name"
+              value={agentName}
+              onChange={(e) => setAgentName(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200/80 bg-gray-50/50 
+                         focus:bg-white focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 
+                         transition-all"
+            />
+          </div>
 
-          <div className="w-32 h-32 bg-gradient-to-br from-[#2E2F5F] to-blue-600 rounded-full flex items-center justify-center">
-            <div className="text-white text-4xl">
-              {agentStatus === "responding" ? "⚡" : "🎙"}
+          {/* Voice Profile */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700/90">
+              Voice Profile
+            </label>
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedVoice?.voice_id || ""}
+                onChange={(e) => {
+                  const found = voiceOptions.find(
+                    (voice) => voice.voice_id === e.target.value
+                  );
+                  setSelectedVoice(found || null);
+                }}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200/80 bg-gray-50/50 
+                           focus:bg-white focus:ring-2 focus:ring-blue-500/30 
+                           focus:border-blue-500 transition-all"
+              >
+                <option value="">Select a voice profile</option>
+                {voiceOptions.map((voice) => (
+                  <option key={voice.voice_id} value={voice.voice_id}>
+                    {voice.name} {voice.category ? `(${voice.category})` : ""}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handlePreviewVoice}
+                disabled={!selectedVoice?.preview_url}
+                className="px-4 py-3 rounded-xl bg-blue-100 hover:bg-blue-200 
+                           text-blue-800 font-medium transition-all"
+              >
+                Preview
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* Status text */}
-        <div className="mt-6 text-center">
-          <h2
-            className={`text-xl font-semibold mb-2 ${
-              agentStatus === "idle" ? "text-black" : "text-blue-500"
-            } transition-colors duration-300`}
+          {/* Tone of Voice */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700/90">
+              Tone of Voice
+            </label>
+            <input
+              type="text"
+              placeholder="Describe tone characteristics"
+              value={toneOfVoice}
+              onChange={(e) => setToneOfVoice(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200/80 bg-gray-50/50 
+                         focus:bg-white focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 
+                         transition-all"
+            />
+          </div>
+
+          {/* Language */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700/90">
+              Language
+            </label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200/80 bg-gray-50/50 
+                         focus:bg-white focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 
+                         transition-all"
+            >
+              {languageOptions.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={updateAgentParameters}
+            className="w-full max-w-xs px-8 py-4 rounded-xl font-medium transition-all 
+                       duration-300 shadow-lg bg-gradient-to-br from-green-500 to-blue-500 
+                       text-white hover:scale-[1.02]"
           >
-            {statusMessages[agentStatus]}
-          </h2>
-          <p className="text-gray-600 text-sm">
-            {isConnected ? "Connected to AI Agent" : "Press to connect"}
-          </p>
+            Update Agent Config
+          </button>
         </div>
 
-        {/* Connection button */}
-        <button
-          onClick={isConnected ? handleDisconnect : handleConnect}
-          className={`mt-6 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-            isConnected
-              ? "bg-red-500 hover:bg-red-600 text-white"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
-          }`}
-        >
-          {isConnected ? "Disconnect" : "Connect AI Agent"}
-        </button>
+        {/* Right Column */}
+        <div className="w-full md:w-1/2 flex flex-col items-center space-y-6 p-4">
+          {/* Animated Orb */}
+          <div className="relative w-40 h-40 md:w-60 md:h-60">
+            <div
+              className={`
+        absolute inset-0 rounded-full backdrop-blur-xl
+        ${
+          agentStatus === "responding"
+            ? "animate-pulse-slow bg-gradient-to-br from-blue-500/20 to-purple-500/20"
+            : "bg-blue-500/10"
+        }
+      `}
+            />
+            <div className="absolute inset-4 flex items-center justify-center">
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-[#2E2F5F] to-blue-600 flex items-center justify-center shadow-2xl">
+                <div className="text-white text-5xl transform transition-transform duration-300">
+                  {agentStatus === "responding" ? (
+                    <div className="animate-bounce">⚡</div>
+                  ) : (
+                    <div className="animate-float">🎙</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
-        {/* Knowledge Base Upload Button */}
-        <div className="mt-4">
+          {/* Status Indicator */}
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <div
+                className={`w-2.5 h-2.5 rounded-full ${
+                  agentStatus === "idle"
+                    ? "bg-gray-400"
+                    : "bg-green-400 animate-pulse"
+                }`}
+              />
+              <h2
+                className={`text-xl font-semibold ${
+                  agentStatus === "idle" ? "text-gray-600" : "text-gray-800"
+                }`}
+              >
+                {statusMessages[agentStatus]}
+              </h2>
+            </div>
+            <p className="text-sm text-gray-500/90 font-medium">
+              {isConnected
+                ? "Secure connection established"
+                : "Awaiting connection"}
+            </p>
+          </div>
+
+          {/* Connect/Disconnect Button */}
+          <button
+            onClick={isConnected ? handleDisconnect : handleConnect}
+            className={`
+      w-full max-w-xs px-8 py-4 rounded-xl font-medium 
+      transition-all duration-300 shadow-lg
+      ${
+        isConnected
+          ? "bg-gradient-to-br from-red-500 to-orange-500 hover:shadow-red-500/30"
+          : "bg-gradient-to-br from-[#2E2F5F] to-[#65558F] hover:shadow-blue-500/30"
+      }
+      text-white hover:scale-[1.02]
+    `}
+          >
+            {isConnected ? "Terminate Connection" : "Activate AI Agent"}
+          </button>
+
+          {/* Knowledge Upload */}
           <label
             htmlFor="knowledge-upload"
-            className="cursor-pointer inline-block px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg"
+            className="cursor-pointer flex items-center justify-center gap-2 px-6 py-3 
+               rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200/80 
+               transition-colors"
           >
-            Upload Knowledge Base
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+              />
+            </svg>
+            <span className="text-gray-700 font-medium">Upload Knowledge</span>
           </label>
           <input
             id="knowledge-upload"
@@ -398,14 +536,32 @@ const VoiceChatComponent: React.FC = () => {
             className="hidden"
             onChange={handleKnowledgeBaseUpload}
           />
-        </div>
 
-        {/* Upload message notification */}
-        {uploadMessage && (
-          <div className="mt-4 p-3 bg-green-100 text-green-700 rounded">
-            {uploadMessage}
-          </div>
-        )}
+          {uploadMessage && (
+            <div
+              className="mt-4 px-4 py-2.5 bg-green-50/90 border border-green-200 
+                 rounded-xl backdrop-blur-sm animate-slide-up"
+            >
+              <p className="text-sm text-green-700 flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                {uploadMessage}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
