@@ -1,4 +1,8 @@
-export const formatDateString = (dateString: string): string => {
+export const formatDateString = (
+  dateString: string,
+  withoutTime: boolean = false
+): string => {
+  console.log("withoutTime", withoutTime);
   const date = new Date(dateString);
 
   // Extract date components
@@ -11,7 +15,9 @@ export const formatDateString = (dateString: string): string => {
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
 
-  return `${day}-${month}-${year} at ${hours}:${minutes}:${secs}`;
+  return withoutTime
+    ? `${year}-${month}-${day}`
+    : `${day}-${month}-${year} at ${hours}:${minutes}:${secs}`;
 };
 
 export const camelCaseToWords = (camelCaseString) => {

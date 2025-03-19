@@ -24,6 +24,7 @@ import {
 } from "./types";
 import ChartItems from "./ChartItems";
 import useLatestFetchData from "../../hooks/useLatestFetchData";
+import { formatDateString } from "../../hooks/functions";
 
 // StatsCard Component
 const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
@@ -33,12 +34,12 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
       sx={{
         p: 1.25,
         borderRadius: 2,
-        backgroundColor: "#65558F14",
+        backgroundColor: "#F7F2FA",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <div className="flex justify-between items-center gap-3">
+      <div className="flex items-center gap-3">
         {iconSrc && (
           <div className="h-12 w-12 rounded-full bg-[#65558F29] flex justify-center items-center">
             <img src={iconSrc} alt="icon" width="20" height="20" />
@@ -48,7 +49,9 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
           <Typography variant="body1" color="#ADAAB5">
             {title}
           </Typography>
-          <Typography variant="body1">{content}</Typography>
+          <Typography variant="body1" color={COLORS.DARKVIOLET}>
+            {content}
+          </Typography>
         </div>
       </div>
     </Paper>
@@ -59,32 +62,30 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ headerData }) => {
   const processedStats = headerData
     ? [
-        {
-          title: "Resolution Rate",
-          content: `${
-            (headerData.resolutionRate &&
-              headerData.resolutionRate?.toFixed(2)) ||
-            0
+      {
+        title: "Resolution Rate",
+        content: `${(headerData.resolutionRate &&
+          headerData.resolutionRate?.toFixed(2)) ||
+          0
           }%`,
-          iconSrc: "/assets/icons/three-bars.svg",
-        },
-        {
-          title: "Live chat Vs ended the chat",
-          content: `Live: ${headerData.liveVsEndedSessions.live}, Ended: ${headerData.liveVsEndedSessions.ended}`,
-        },
-        {
-          title: "AI vs. Human Resolution Rate",
-          content: `AI: ${headerData.aiVsHumanResolutionRate.ai}%, Human: ${headerData.aiVsHumanResolutionRate.human}%`,
-        },
-        {
-          title: "Consumed messages / Total messages ",
-          content: `${
-            headerData.messages.consumed ||
-            headerData.messages.total - headerData.messages.left
+        iconSrc: "/assets/icons/three-bars.svg",
+      },
+      {
+        title: "Live chat Vs ended the chat",
+        content: `Live: ${headerData.liveVsEndedSessions.live}, Ended: ${headerData.liveVsEndedSessions.ended}`,
+      },
+      {
+        title: "AI vs. Human Resolution Rate",
+        content: `AI: ${headerData.aiVsHumanResolutionRate.ai}%, Human: ${headerData.aiVsHumanResolutionRate.human}%`,
+      },
+      {
+        title: "Consumed messages / Total messages ",
+        content: `${headerData.messages.consumed ||
+          headerData.messages.total - headerData.messages.left
           }/${headerData.messages.total}`,
-        },
-        { title: "Escalation Rate", content: `${headerData.escalationRate}%` },
-      ]
+      },
+      { title: "Escalation Rate", content: `${headerData.escalationRate}%` },
+    ]
     : [];
 
   return (
@@ -124,19 +125,22 @@ const DashboardPanel = () => {
 
   // Fetch dashboard data
   const fetchData = async (
-    startDate: Date | null = (() => {
+    startDate: Date | null | string = (() => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       return today;
     })(),
-    endDate: Date | null = new Date()
+    endDate: Date | null | string = new Date()
   ) => {
     if (!botId) return;
     try {
       setIsLoading(true);
+      const formattedStartDate = startDate instanceof Date ? startDate.toISOString() : startDate;
+      const formattedEndDate = endDate instanceof Date ? endDate.toISOString() : endDate;
+      console.log(typeof startDate)
       const response: DashboardResponse = await dashBoardDataService({
-        startDate,
-        endDate,
+        startDate: formatDateString(formattedStartDate, true),
+        endDate: formatDateString(formattedEndDate, true),
         botIds: [botId],
       });
       if (response?.success) {
@@ -258,7 +262,7 @@ const DashboardPanel = () => {
 
       <div className="flex justify-between items-center mb-4">
         <Card
-          className="flex items-center justify-between p-4 border max-w-xl"
+          className="flex items-center justify-between p-4 max-w-2xl"
           sx={{
             borderColor: COLORS.DARKGRAY,
             backgroundColor: COLORS.VERYLIGHTVIOLET,

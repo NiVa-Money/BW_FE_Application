@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from "react";
@@ -17,14 +18,14 @@ import { notifyError } from "../../../components/Toast";
 // import ReactMarkdown from "react-markdown";
 import SendIcon from "@mui/icons-material/Send";
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
+  Area,
+  ComposedChart,
+  Line,
 } from "recharts";
 import {
   enableWhatsAppManualModeService,
@@ -126,16 +127,20 @@ const AllChats = () => {
   const handleIntentChange = (selectedIntent: string) => {
     setIntentVal(selectedIntent);
     if (botIdVal) {
-      dispatch(
-        getAllSession({
-          botId: botIdVal,
-          page: 1,
-          channelName: channelNameVal,
-          aiLevel,
-          humanLevel,
-          intent: selectedIntent,
-        })
-      );
+      const payload: any = {
+        botId: botIdVal,
+        page: 1,
+        channelName: channelNameVal,
+        aiLevel,
+        humanLevel,
+      };
+
+      // Only add intent filter if an intent is selected
+      if (selectedIntent) {
+        payload.intent = selectedIntent;
+      }
+
+      dispatch(getAllSession(payload));
     }
   };
 
@@ -594,6 +599,17 @@ const AllChats = () => {
   const emotionData = analysis?.emotion || "No emotion detected.";
   const smartSuggestionData = analysis?.smartSuggestion || "No suggestions.";
 
+  const overallVulnerabilityScore =
+    vulnerabilityData.length > 0
+      ? Math.min(
+          Math.round(
+            vulnerabilityData.reduce((acc, curr) => acc + curr.value, 0) /
+              vulnerabilityData.length
+          ),
+          100
+        )
+      : 0;
+
   useEffect(() => {
     if (analysis) {
       setAnalysisSections((prevSections) =>
@@ -704,13 +720,10 @@ const AllChats = () => {
           onChange={(e) => handleIntentChange(e.target.value)}
         >
           <option value="">Filter by intent</option>
-          <option value="Buying">Buying</option>
-          <option value="Sales">Sales</option>
-          <option value="Query">Query</option>
+          <option value="Sales_Lead">Sales Lead</option>
+          <option value="Inquiry">Inquiry</option>
           <option value="Complaint">Complaint</option>
-          <option value="Support Request">Support Request</option>
           <option value="Feedback">Feedback</option>
-          <option value="Interest">Interest</option>
           <option value="Other">Other</option>
         </select>
 
@@ -838,7 +851,7 @@ const AllChats = () => {
 
                 {section.expanded && (
                   <div className="mt-2 px-2">
-                    {isSentiment && (
+                    {/* {isSentiment && (
                       <div>
                         <p className="text-sm text-gray-600 mb-2">
                           {typeof section.description === "object"
@@ -855,6 +868,69 @@ const AllChats = () => {
                             <Bar dataKey="value" fill="#8884d8" />
                           </BarChart>
                         </ResponsiveContainer>
+                      </div>
+                    )} */}
+
+                    {isSentiment && (
+                      <div className="mt-4 p-2 rounded-lg">
+                        <h4 className="text-blue-600 font-semibold mb-4 text-center">
+                          Emotional Journey Through Conversation
+                        </h4>
+                        <ResponsiveContainer width="110%" height={250}>
+                          <ComposedChart data={sentimentData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis
+                              dataKey="name"
+                              label={{
+                                value: "Conversation Phase",
+                                position: "bottom",
+                                fill: "#3b82f6",
+                              }}
+                            />
+                            <YAxis
+                              label={{
+                                value: "Sentiment Intensity",
+                                angle: -90,
+                                position: "insideLeft",
+                                fill: "#3b82f6",
+                              }}
+                            />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "#dbeafe",
+                                border: "1px solid #93c5fd",
+                              }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="value"
+                              fill="#93c5fd"
+                              stroke="#3b82f6"
+                              name="Sentiment Level"
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="value"
+                              stroke="#1d4ed8"
+                              strokeWidth={2}
+                              dot={{ fill: "#1e3a8a" }}
+                            />
+                          </ComposedChart>
+                        </ResponsiveContainer>
+                        <div className="flex justify-center mt-4 gap-4">
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 bg-blue-300 mr-2"></div>
+                            <span className="text-sm text-blue-700">
+                              Positive Vibes
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 bg-blue-800 mr-2"></div>
+                            <span className="text-sm text-blue-700">
+                              Emotional Peaks
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     )}
 
@@ -922,26 +998,93 @@ const AllChats = () => {
                     )}
 
                     {isVulnerability && (
-                      <div>
-                        <BarChart
-                          width={250}
-                          height={200}
-                          data={vulnerabilityData}
-                          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" hide />
-                          <YAxis allowDecimals={false} />
-                          <Tooltip />
-                          <Bar dataKey="value" fill="#82ca9d" />
-                        </BarChart>
-                        <ul className="text-xs text-gray-700 mt-2">
-                          {vulnerabilityData.map((item) => (
-                            <li key={item.name}>• {item.name}</li>
+                      <div className="bg-red-50 border border-red-200 shadow-sm p-4 rounded-lg w-full max-w-md">
+                        {/* Title */}
+                        <h4 className="text-red-700 font-semibold text-center mb-4">
+                          System Weak Points Analysis
+                        </h4>
+
+                        {/* Existing Vulnerability List */}
+                        <div className="mt-6 space-y-4">
+                          {vulnerabilityData.map((vuln, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between gap-2"
+                            >
+                              {/* Vulnerability Name */}
+                              <div className="w-2/5 text-sm font-medium text-black break-words whitespace-normal">
+                                {vuln.name}
+                              </div>
+                              {/* Progress Meter */}
+                              <div className="flex-1 ml-2">
+                                <div className="relative w-full">
+                                  <div
+                                    className="absolute top-0 left-0 h-full bg-red-600 rounded-full"
+                                    style={{ width: `${vuln.value}%` }}
+                                  />
+                                  <div className="h-2 bg-gray-200 rounded-full" />
+                                </div>
+                              </div>
+                              {/* Percentage */}
+                              <div className="text-sm font-semibold text-red-700 w-12 text-right">
+                                {vuln.value}%
+                              </div>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
+
+                        {/* New Vulnerability Meter */}
+                        <div className="mt-6">
+                          <div className="relative h-16">
+                            {/* Meter Background */}
+                            <div className="h-3 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full w-full" />
+
+                            {/* Indicator Line */}
+                            <div
+                              className="absolute top-0 -translate-x-1/2"
+                              style={{ left: `${overallVulnerabilityScore}%` }}
+                            >
+                              <div className="w-0.5 h-8 bg-black" />
+                              <div className="text-center text-sm font-semibold mt-1">
+                                {overallVulnerabilityScore}%
+                              </div>
+                            </div>
+
+                            {/* Zone Labels */}
+                            <div className="flex justify-between text-xs mt-2">
+                              <span className="text-red-700">
+                                Do Not Proceed
+                              </span>
+                              <span className="text-yellow-700">Caution</span>
+                              <span className="text-green-700">Safe</span>
+                            </div>
+                          </div>
+
+                          {/* Legend */}
+                          <div className="mt-4 text-sm text-gray-800">
+                            <p>
+                              Overall System Vulnerability Score:{" "}
+                              {overallVulnerabilityScore}%
+                            </p>
+                            <div className="flex gap-4 mt-2">
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 bg-red-500 mr-1 rounded-sm" />
+                                <span>0–30%: High Risk</span>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 bg-yellow-500 mr-1 rounded-sm" />
+                                <span>31–70%: Medium Risk</span>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 bg-green-500 mr-1 rounded-sm" />
+                                <span>71–100%: Low Risk</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
+
                     {!isSentiment &&
                       !isSales &&
                       !isVulnerability &&
