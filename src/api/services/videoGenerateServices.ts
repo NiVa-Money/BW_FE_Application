@@ -32,3 +32,15 @@ export const enhancePromptService = async (payload) => {
     );
   }
 };
+
+
+export const deleteVideoService = async (requestId) => {
+  try {
+    const response = await axiosInstance.delete(`/text-to-video/${requestId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Error deleting text-to-video request"
+    );
+  }
+};
