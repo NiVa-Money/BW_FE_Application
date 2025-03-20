@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // import React, { useState, useEffect } from "react";
 // import { useConversation } from "@11labs/react";
 // import { Language } from "@11labs/client";
@@ -1315,7 +1316,7 @@ const VoiceChatComponent: React.FC = () => {
           {/* Right Column */}
           <div className="w-full md:w-1/2 flex flex-col items-center space-y-6 p-4">
             {/* Animated Orb */}
-            <div className="relative w-40 h-40 md:w-60 md:h-60">
+            {/* <div className="relative w-40 h-40 md:w-60 md:h-60">
               <div
                 className={`
                   absolute inset-0 rounded-full backdrop-blur-xl
@@ -1326,6 +1327,49 @@ const VoiceChatComponent: React.FC = () => {
                   }
                 `}
               />
+              <div className="absolute inset-4 flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#2E2F5F] to-blue-600 flex items-center justify-center shadow-2xl">
+                  <div className="text-white text-5xl transform transition-transform duration-300">
+                    {agentStatus === "responding" ? (
+                      <div className="animate-bounce">⚡</div>
+                    ) : (
+                      <div className="animate-float">🎙</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div> */}
+            {/* Animated Orb */}
+            <div className="relative w-40 h-40 md:w-60 md:h-60">
+              <div
+                className={`
+      absolute inset-0 rounded-full backdrop-blur-xl
+      ${
+        agentStatus === "responding"
+          ? "animate-pulse-slow bg-gradient-to-br from-blue-500/20 to-purple-500/20"
+          : "bg-blue-500/10"
+      }
+    `}
+              />
+              {agentStatus === "responding" && (
+                <>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-40 h-40 border-2 border-white/40 rounded-full animate-ping"></div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div
+                      className="w-48 h-48 border-2 border-white/30 rounded-full animate-ping"
+                      style={{ animationDelay: "0.3s" }}
+                    ></div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div
+                      className="w-56 h-56 border-2 border-white/20 rounded-full animate-ping"
+                      style={{ animationDelay: "0.6s" }}
+                    ></div>
+                  </div>
+                </>
+              )}
               <div className="absolute inset-4 flex items-center justify-center">
                 <div className="w-full h-full rounded-full bg-gradient-to-br from-[#2E2F5F] to-blue-600 flex items-center justify-center shadow-2xl">
                   <div className="text-white text-5xl transform transition-transform duration-300">
