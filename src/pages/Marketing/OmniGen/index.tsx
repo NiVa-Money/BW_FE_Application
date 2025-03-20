@@ -690,10 +690,10 @@ const OmnigenUI = () => {
                       className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl"
                     >
                       <option value="1:1">Square (1:1)</option>
-                      <option value="3:4">Vertical (3:4)</option>
-                      <option value="4:3">Standard (4:3)</option>
+                      {/* <option value="3:4">Vertical (3:4)</option>
+                      <option value="4:3">Standard (4:3)</option> */}
                       <option value="16:9">Widescreen (16:9)</option>
-                      <option value="9:16">Portrait (9:16)</option>
+                      {/* <option value="9:16">Portrait (9:16)</option> */}
                     </select>
                   </div>
                   <div className="space-y-2">
