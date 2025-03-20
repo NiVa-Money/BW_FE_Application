@@ -27,6 +27,7 @@ import OmnigenUI from "../pages/Marketing/OmniGen";
 import InstagramIntegrationList from "../pages/Integration/InstagramIntegration/InstagramIntegrationList";
 import CrudInstagramIntegration from "../pages/Integration/InstagramIntegration/crudInstagramIntegration";
 import VoiceChatComponent from "../pages/VoiceModule";
+import ContactsCRM from "../pages/Contacts";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -77,7 +78,7 @@ export const autRoutes: any[] = [
   {
     id: 7,
     path: "/workflow",
-    component: <AdminPanel />,
+    component: <ContactsCRM />,
   },
   {
     id: 8,
