@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+ 
 /** @type {import('tailwindcss').Config} */
 
 // (Optional) Import default theme when using a custom font (Step 7)
