@@ -511,18 +511,16 @@ const OmnigenUI = () => {
     }
   };
 
-  const handleDeleteContent = async (requestId: string) => {
+  const handleDeleteContent = async (id: string) => {
     try {
       if (mode === "text") {
-        await deleteVideoService(requestId);
-        setAllVideos((prev) =>
-          prev.filter((video) => video.requestId !== requestId)
-        );
+        // For videos, use requestId
+        await deleteVideoService(id);
+        setAllVideos((prev) => prev.filter((video) => video.requestId === id));
       } else if (mode === "image") {
-        await deleteImageService(requestId);
-        setAllImages((prev) =>
-          prev.filter((image) => image.requestId !== requestId)
-        );
+        // For images, use _id
+        await deleteImageService(id);
+        setAllImages((prev) => prev.filter((image) => image._id === id));
       }
     } catch (error) {
       console.error(
@@ -771,7 +769,7 @@ const OmnigenUI = () => {
                         )}
 
                         <div className="relative">
-                          <p className="text-sm text-gray-700 pr-8">
+                          <p className="text-base text-gray-700 mt-2 font-semibold pr-8">
                             {expandedPrompts[index]
                               ? video.prompt
                               : `${video.prompt.substring(0, 100)}${
@@ -874,7 +872,7 @@ const OmnigenUI = () => {
                         )}
 
                         <div className="relative">
-                          <p className="text-sm text-gray-700 pr-8">
+                          <p className="text-base text-gray-700 mt-2 font-semibold pr-8">
                             {expandedPrompts[index]
                               ? image.prompt
                               : `${image.prompt.substring(0, 100)}${
@@ -899,7 +897,7 @@ const OmnigenUI = () => {
                           </span>
                           <button
                             className="p-1.5 hover:bg-red-100 rounded-full transition-colors"
-                            onClick={() => handleDeleteContent(image.requestId)}
+                            onClick={() => handleDeleteContent(image._id)}
                           >
                             <DeleteIcon
                               className="text-red-500 hover:text-red-600"

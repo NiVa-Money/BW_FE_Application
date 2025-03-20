@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "../axiosConfig";
 
 export const generateTextToVideoService = async (payload) => {
@@ -70,15 +71,15 @@ export const fetchAllTextToImagesService = async () => {
   }
 };
 
-export const deleteImageService = async (requestId) => {
+export const deleteImageService = async (id: string) => {
   try {
     const response = await axiosInstance.delete(
-      `/media-generation/text-to-image/${requestId}`
+      `/media-generation/text-to-image/${id}`
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error deleting text-to-image request"
+      (error as any).response?.data?.message || "Error deleting text-to-image request"
     );
   }
-}
+};
