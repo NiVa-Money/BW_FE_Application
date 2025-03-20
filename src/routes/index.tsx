@@ -71,7 +71,7 @@ export const autRoutes: any[] = [
   },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
-  { id: 5.2, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
+  { id: 5.3, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
 
   { id: 6, path: "/voiceagent", component: <VoiceChatComponent /> },
   {
