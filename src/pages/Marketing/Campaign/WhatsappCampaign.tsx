@@ -644,7 +644,7 @@ const WhatsappCampaign: React.FC = () => {
                 onClick={handleGoWizard}
                 className="flex w-[200px] whitespace-nowrap justify-center mt-2 py-2 text-lg font-medium text-gray-100 bg-[#65558F] rounded-3xl"
               >
-                Go Wizard
+                Launch AI Assistant
               </button>
             </div>
 
