@@ -65,6 +65,9 @@ const DashboardUI = () => {
   const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
   const navigate = useNavigate();
   const [insightsData, setInsightsData] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
 
   const handleViewDashboard = () => {
     navigate(`/marketing/whatsappdashboard`);
@@ -85,7 +88,17 @@ const DashboardUI = () => {
     fetchInsights();
   }, []);
 
-  const [currentPage, setCurrentPage] = useState(0);
+  // Show a custom message if the data is still processing (not in final state)
+  if (insightsData && insightsData.status && insightsData.status !== "final") {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-xl text-gray-700">
+          We are processing your data (current status: {insightsData.status}).
+          Please hold on...
+        </div>
+      </div>
+    );
+  }
 
   // if (
   //   !Array.isArray(insightsData.followerData) ||
@@ -118,8 +131,6 @@ const DashboardUI = () => {
   const handlePrev = () => {
     setCurrentPage((prev) => (prev === 0 ? insightPages.length - 1 : prev - 1));
   };
-
-  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
 
   const allNews = insightsData?.newsArticles?.insights
     ? [{ insights: insightsData.newsArticles.insights }]
@@ -196,8 +207,6 @@ const DashboardUI = () => {
       value: Number(region.value),
     })
   );
-
-  const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
 
   // Dropdown options for the different metrics.
   const metricOptions = [
@@ -608,15 +617,13 @@ const MarketingDashboardWrapper: React.FC = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.log("token", token);
           setHasInsights(false);
           return;
         }
-
         const response = await getMarketingInsightsService();
 
-        // Check if the response is null or empty
-        setHasInsights(response && Object.keys(response).length > 0);
+        // Instead of just checking if response has keys, check a specific property
+        setHasInsights(response?.status === "final");
       } catch (error) {
         console.error("Error fetching marketing insights:", error);
         setHasInsights(false);
