@@ -404,7 +404,7 @@ const DashboardUI = () => {
               Create a WhatsApp Campaign
             </button>
             <button
-              onClick={() => navigate("/marketing/dashboardform")}
+              onClick={() => navigate("/marketing/editDashboardForm")}
               className="w-full bg-white text-[#65558F] py-2 rounded-lg mt-2"
             >
               Edit Marketing Form
@@ -620,10 +620,16 @@ const MarketingDashboardWrapper: React.FC = () => {
           setHasInsights(false);
           return;
         }
+
         const response = await getMarketingInsightsService();
 
-        // Instead of just checking if response has keys, check a specific property
-        setHasInsights(response?.status === "final");
+        // If the response indicates the user does have insights,
+        // then setHasInsights to true.
+        if (response && Object.keys(response).length > 0) {
+          setHasInsights(true);
+        } else {
+          setHasInsights(false);
+        }
       } catch (error) {
         console.error("Error fetching marketing insights:", error);
         setHasInsights(false);

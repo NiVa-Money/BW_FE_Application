@@ -27,6 +27,7 @@ import OmnigenUI from "../pages/Marketing/OmniGen";
 import InstagramIntegrationList from "../pages/Integration/InstagramIntegration/InstagramIntegrationList";
 import CrudInstagramIntegration from "../pages/Integration/InstagramIntegration/crudInstagramIntegration";
 import VoiceChatComponent from "../pages/VoiceModule";
+import EditMarketingDashboardForm from "../pages/Marketing/Dashboard/EditMarketingDashboardForm";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -68,6 +69,11 @@ export const autRoutes: any[] = [
     id: 5.1,
     path: "/marketing/dashboardform",
     component: <MarketingDashboardForm />,
+  },
+  {
+    id: 5.1,
+    path: "/marketing/editDashboardForm",
+    component: <EditMarketingDashboardForm />,
   },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
