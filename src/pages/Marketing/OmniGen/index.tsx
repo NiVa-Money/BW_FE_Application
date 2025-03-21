@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // import { useEffect, useState } from "react";
 // import {
@@ -6,6 +6,9 @@
 //   generateTextToVideoService,
 //   enhancePromptService,
 //   deleteVideoService,
+//   deleteImageService,
+//   fetchAllTextToImagesService,
+//   generateTextToImageService,
 // } from "../../../api/services/videoGenerateServices";
 // import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -15,28 +18,41 @@
 //   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 //   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 //   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+//   const [imageUrl, setImageUrl] = useState<string | null>(null);
 //   const [loading, setLoading] = useState(false);
 //   const [duration, setDuration] = useState(5);
 //   const [allVideos, setAllVideos] = useState<any[]>([]);
+//   const [allImages, setAllImages] = useState<any[]>([]);
 //   const [displayCount, setDisplayCount] = useState(6);
+//   const [aspectRatio, setAspectRatio] = useState("1:1");
+//   const [numberOfImages, setNumberOfImages] = useState(1);
+
 //   const [expandedPrompts, setExpandedPrompts] = useState<
 //     Record<number, boolean>
 //   >({});
 
 //   useEffect(() => {
-//     const loadAllVideos = async () => {
+//     const loadContent = async () => {
 //       try {
 //         setLoading(true);
-//         const fetched = await fetchAllTextToVideosService();
-//         setAllVideos(fetched.data);
+//         if (mode === "text") {
+//           const fetched = await fetchAllTextToVideosService();
+//           setAllVideos(fetched.data);
+//         } else if (mode === "image") {
+//           const fetched = await fetchAllTextToImagesService();
+//           setAllImages(fetched.data);
+//         }
 //       } catch (error) {
-//         console.error("Error loading videos:", error);
+//         console.error(
+//           `Error loading ${mode === "text" ? "videos" : "images"}:`,
+//           error
+//         );
 //       } finally {
 //         setLoading(false);
 //       }
 //     };
 
-//     if (mode === "text") loadAllVideos();
+//     if (mode === "text" || mode === "image") loadContent();
 //   }, [mode]);
 
 //   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,7 +92,7 @@
 //   };
 
 //   const handleGenerate = async () => {
-//     if (mode === "text" && prompt.trim() === "") {
+//     if ((mode === "text" || mode === "image") && prompt.trim() === "") {
 //       alert("Please enter a text prompt.");
 //       return;
 //     }
@@ -85,10 +101,12 @@
 //       return;
 //     }
 
-//     console.log("videourl", videoUrl);
+//     console.log("video", videoUrl);
+//     console.log("image", imageUrl);
 
 //     setLoading(true);
 //     setVideoUrl(null);
+//     setImageUrl(null);
 
 //     try {
 //       if (mode === "text") {
@@ -96,7 +114,17 @@
 //         setVideoUrl(response.videoUrl);
 //         const fetchedVideos = await fetchAllTextToVideosService();
 //         setAllVideos(fetchedVideos.data);
+//       } else if (mode === "image") {
+//         const response = await generateTextToImageService({
+//           prompt,
+//           aspect_ratio: aspectRatio,
+//           number_of_images: numberOfImages,
+//         });
+//         setImageUrl(response.imageUrl);
+//         const fetchedImages = await fetchAllTextToImagesService();
+//         setAllImages(fetchedImages.data);
 //       }
+//       // Note: Video mode implementation remains the same
 //     } catch {
 //       alert("Error generating content. Please try again.");
 //     } finally {
@@ -104,14 +132,22 @@
 //     }
 //   };
 
-//   const handleDeleteVideo = async (requestId: string) => {
+//   const handleDeleteContent = async (id: string) => {
 //     try {
-//       await deleteVideoService(requestId);
-//       setAllVideos((prev) =>
-//         prev.filter((video) => video.requestId !== requestId)
-//       );
+//       if (mode === "text") {
+//         // For videos, use requestId
+//         await deleteVideoService(id);
+//         setAllVideos((prev) => prev.filter((video) => video.requestId === id));
+//       } else if (mode === "image") {
+//         // For images, use _id
+//         await deleteImageService(id);
+//         setAllImages((prev) => prev.filter((image) => image._id === id));
+//       }
 //     } catch (error) {
-//       console.error("Error deleting video:", error);
+//       console.error(
+//         `Error deleting ${mode === "text" ? "video" : "image"}:`,
+//         error
+//       );
 //     }
 //   };
 
@@ -259,6 +295,47 @@
 //               </div>
 //             )}
 
+//             {mode === "image" && (
+//               <div className="space-y-6 mb-8">
+//                 <h3 className="text-xl font-semibold text-gray-800">
+//                   Image Parameters
+//                 </h3>
+//                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+//                   <div className="space-y-2">
+//                     <label className="block text-sm font-medium text-gray-600">
+//                       Aspect Ratio
+//                     </label>
+//                     <select
+//                       value={aspectRatio}
+//                       onChange={(e) => setAspectRatio(e.target.value)}
+//                       className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl"
+//                     >
+//                       <option value="1:1">Square (1:1)</option>
+//                       {/* <option value="3:4">Vertical (3:4)</option>
+//                       <option value="4:3">Standard (4:3)</option> */}
+//                       <option value="16:9">Widescreen (16:9)</option>
+//                       {/* <option value="9:16">Portrait (9:16)</option> */}
+//                     </select>
+//                   </div>
+//                   <div className="space-y-2">
+//                     <label className="block text-sm font-medium text-gray-600">
+//                       Number of Images
+//                     </label>
+//                     <input
+//                       type="number"
+//                       min="1"
+//                       max="4"
+//                       value={numberOfImages}
+//                       onChange={(e) =>
+//                         setNumberOfImages(Number(e.target.value))
+//                       }
+//                       className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl"
+//                     />
+//                   </div>
+//                 </div>
+//               </div>
+//             )}
+
 //             <button
 //               className="bg-gradient-to-r from-[#A5FFD6] to-[#7FE8C4] text-gray-900 px-8 py-4 rounded-xl font-semibold flex items-center gap-2
 //               transition-transform hover:scale-105 shadow-lg shadow-green-500/30 disabled:opacity-50 group w-full justify-center"
@@ -313,7 +390,7 @@
 //                         )}
 
 //                         <div className="relative">
-//                           <p className="text-sm text-gray-700 pr-8">
+//                           <p className="text-base text-gray-700 mt-2 font-semibold pr-8">
 //                             {expandedPrompts[index]
 //                               ? video.prompt
 //                               : `${video.prompt.substring(0, 100)}${
@@ -338,7 +415,7 @@
 //                           </span>
 //                           <button
 //                             className="p-1.5 hover:bg-red-100 rounded-full transition-colors"
-//                             onClick={() => handleDeleteVideo(video.requestId)}
+//                             onClick={() => handleDeleteContent(video.requestId)}
 //                           >
 //                             <DeleteIcon
 //                               className="text-red-500 hover:text-red-600"
@@ -371,6 +448,110 @@
 //               )}
 //             </section>
 //           )}
+
+//           {mode === "image" && (
+//             <section className="p-6 border border-gray-200 rounded-2xl bg-white shadow-sm">
+//               <h3 className="text-xl font-semibold mb-6 text-gray-800">
+//                 Generated Images
+//               </h3>
+
+//               {loading ? (
+//                 <div className="flex items-center justify-center h-48">
+//                   <div className="animate-pulse text-gray-600">
+//                     Loading creations...
+//                   </div>
+//                 </div>
+//               ) : allImages.length > 0 ? (
+//                 <>
+//                   <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+//                     {allImages.slice(0, displayCount).map((image, index) => (
+//                       <div
+//                         key={index}
+//                         className="relative bg-white rounded-xl shadow-lg p-4 text-black transition-all hover:shadow-xl hover:-translate-y-1"
+//                       >
+//                         {image.status === "completed" ? (
+//                           <div className="grid grid-cols-1 gap-2">
+//                             {image.images.map(
+//                               (imgUrl: string, imgIndex: number) => (
+//                                 <img
+//                                   key={`${image._id}-${imgIndex}`}
+//                                   src={imgUrl}
+//                                   alt={`Generated image ${
+//                                     imgIndex + 1
+//                                   } for: ${image.prompt.substring(0, 30)}...`}
+//                                   className="w-full h-48 object-cover rounded-lg"
+
+//                                 />
+//                               )
+//                             )}
+//                           </div>
+//                         ) : (
+//                           <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg mb-4">
+//                             <div className="animate-pulse text-gray-500 text-sm">
+//                               {image.status}...
+//                             </div>
+//                           </div>
+//                         )}
+
+//                         <div className="relative">
+//                           <p className="text-base text-gray-700 mt-2 font-semibold pr-8">
+//                             {expandedPrompts[index]
+//                               ? image.prompt
+//                               : `${image.prompt.substring(0, 100)}${
+//                                   image.prompt.length > 100 ? "..." : ""
+//                                 }`}
+//                           </p>
+//                           {image.prompt.length > 100 && (
+//                             <button
+//                               className="absolute top-0 right-0 text-[#65558F] hover:text-[#4D3C77] font-medium text-sm"
+//                               onClick={() => togglePromptExpansion(index)}
+//                             >
+//                               {expandedPrompts[index]
+//                                 ? "Show less"
+//                                 : "Show more"}
+//                             </button>
+//                           )}
+//                         </div>
+
+//                         <div className="mt-4 flex items-center justify-between">
+//                           <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#65558F]/10 text-[#65558F]">
+//                             {image.status}
+//                           </span>
+//                           <button
+//                             className="p-1.5 hover:bg-red-100 rounded-full transition-colors"
+//                             onClick={() => handleDeleteContent(image._id)}
+//                           >
+//                             <DeleteIcon
+//                               className="text-red-500 hover:text-red-600"
+//                               fontSize="small"
+//                             />
+//                           </button>
+//                         </div>
+//                       </div>
+//                     ))}
+//                   </div>
+
+//                   {allImages.length > displayCount && (
+//                     <div className="flex justify-center mt-8">
+//                       <button
+//                         onClick={() => setDisplayCount((prev) => prev + 6)}
+//                         className="bg-gradient-to-r from-[#65558F] to-[#4D3C77] text-white px-6 py-3 rounded-xl font-medium
+//                         hover:opacity-90 transition-opacity active:scale-95"
+//                       >
+//                         Load More...
+//                       </button>
+//                     </div>
+//                   )}
+//                 </>
+//               ) : (
+//                 <div className="flex items-center justify-center h-48">
+//                   <p className="text-gray-500">
+//                     Your creative visions will materialize here
+//                   </p>
+//                 </div>
+//               )}
+//             </section>
+//           )}
 //         </main>
 //       </div>
 //     </div>
@@ -379,6 +560,7 @@
 
 // export default OmnigenUI;
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import {
   fetchAllTextToVideosService,
@@ -406,9 +588,13 @@ const OmnigenUI = () => {
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [numberOfImages, setNumberOfImages] = useState(1);
 
+  // State to control expanding/collapsing prompts
   const [expandedPrompts, setExpandedPrompts] = useState<
     Record<number, boolean>
   >({});
+
+  // State to show a selected image in fullscreen
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -480,9 +666,6 @@ const OmnigenUI = () => {
       return;
     }
 
-    console.log("video", videoUrl);
-    console.log("image", imageUrl);
-
     setLoading(true);
     setVideoUrl(null);
     setImageUrl(null);
@@ -503,7 +686,7 @@ const OmnigenUI = () => {
         const fetchedImages = await fetchAllTextToImagesService();
         setAllImages(fetchedImages.data);
       }
-      // Note: Video mode implementation remains the same
+      // If there's a separate flow for "video" (Image-to-Video), handle it similarly here.
     } catch {
       alert("Error generating content. Please try again.");
     } finally {
@@ -532,6 +715,16 @@ const OmnigenUI = () => {
 
   const togglePromptExpansion = (index: number) => {
     setExpandedPrompts((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
+
+  // Handle opening the image in fullscreen
+  const handleImageClick = (imgUrl: string) => {
+    setSelectedImageUrl(imgUrl);
+  };
+
+  // Handle closing the fullscreen modal
+  const handleCloseModal = () => {
+    setSelectedImageUrl(null);
   };
 
   return (
@@ -567,6 +760,7 @@ const OmnigenUI = () => {
         </nav>
 
         <main className="grid gap-8">
+          {/* Prompt or Image Upload */}
           <section className="p-8 rounded-3xl shadow-xl border border-gray-200 bg-gradient-to-br from-white to-[#f8f7ff]">
             <h2 className="text-gray-900 mb-4 text-2xl font-semibold flex items-center gap-2">
               <span className="bg-gradient-to-r from-[#65558F] to-[#4D3C77] bg-clip-text text-transparent">
@@ -574,6 +768,7 @@ const OmnigenUI = () => {
               </span>
             </h2>
 
+            {/* For Image-to-Video */}
             {mode === "video" ? (
               <div className="mb-6">
                 <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-white hover:border-[#65558F] transition-colors group">
@@ -621,6 +816,7 @@ const OmnigenUI = () => {
                 )}
               </div>
             ) : (
+              /* For Text-to-Video or Text-to-Image */
               <div className="relative mb-6">
                 <textarea
                   className="w-full p-4 bg-white text-black focus:outline-none focus:ring-2 focus:ring-[#A5FFD6] rounded-2xl min-h-[120px] pr-[100px] border-2 border-gray-200 transition-all"
@@ -648,6 +844,7 @@ const OmnigenUI = () => {
               </div>
             )}
 
+            {/* Video Parameters */}
             {(mode === "text" || mode === "video") && (
               <div className="space-y-6 mb-8">
                 <h3 className="text-xl font-semibold text-gray-800">
@@ -674,6 +871,7 @@ const OmnigenUI = () => {
               </div>
             )}
 
+            {/* Image Parameters */}
             {mode === "image" && (
               <div className="space-y-6 mb-8">
                 <h3 className="text-xl font-semibold text-gray-800">
@@ -690,10 +888,7 @@ const OmnigenUI = () => {
                       className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl"
                     >
                       <option value="1:1">Square (1:1)</option>
-                      {/* <option value="3:4">Vertical (3:4)</option>
-                      <option value="4:3">Standard (4:3)</option> */}
                       <option value="16:9">Widescreen (16:9)</option>
-                      {/* <option value="9:16">Portrait (9:16)</option> */}
                     </select>
                   </div>
                   <div className="space-y-2">
@@ -734,6 +929,7 @@ const OmnigenUI = () => {
             </button>
           </section>
 
+          {/* Render Text-to-Video Results */}
           {mode === "text" && (
             <section className="p-6 border border-gray-200 rounded-2xl bg-white shadow-sm">
               <h3 className="text-xl font-semibold mb-6 text-gray-800">
@@ -828,6 +1024,7 @@ const OmnigenUI = () => {
             </section>
           )}
 
+          {/* Render Text-to-Image Results */}
           {mode === "image" && (
             <section className="p-6 border border-gray-200 rounded-2xl bg-white shadow-sm">
               <h3 className="text-xl font-semibold mb-6 text-gray-800">
@@ -858,7 +1055,9 @@ const OmnigenUI = () => {
                                   alt={`Generated image ${
                                     imgIndex + 1
                                   } for: ${image.prompt.substring(0, 30)}...`}
-                                  className="w-full h-48 object-cover rounded-lg"
+                                  className="w-full h-48 object-cover rounded-lg cursor-pointer"
+                                  // When user clicks an image, open it in fullscreen
+                                  onClick={() => handleImageClick(imgUrl)}
                                 />
                               )
                             )}
@@ -932,6 +1131,45 @@ const OmnigenUI = () => {
           )}
         </main>
       </div>
+
+      {/* Fullscreen Image Modal */}
+      {selectedImageUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="relative max-w-5xl max-h-[90%] overflow-auto"
+            onClick={(e) => e.stopPropagation()} // Prevent background clicks from closing
+          >
+            {/* The image displayed in fullscreen */}
+            <img
+              src={selectedImageUrl}
+              alt="Fullscreen"
+              className="max-w-full max-h-full rounded-md"
+            />
+
+            {/* Close & Download buttons at the top-right */}
+            <div className="absolute top-4 right-4 flex items-center space-x-2">
+              <a
+                href={selectedImageUrl}
+                download
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#65558F] text-white px-3 py-2 rounded hover:bg-green-700 transition"
+              >
+                Download
+              </a>
+              <button
+                onClick={handleCloseModal}
+                className="bg-gray-900 bg-opacity-50 text-white px-3 py-2 rounded hover:bg-opacity-70 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
