@@ -89,7 +89,7 @@ const DashboardUI = () => {
   }, []);
 
   // Show a custom message if the data is still processing (not in final state)
-  if (insightsData && insightsData.status && insightsData.status !== "final") {
+  if (insightsData && insightsData.status && insightsData.status !== "draft") {
     return (
       <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
         <div className="text-xl text-gray-700">
