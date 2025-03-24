@@ -41,7 +41,6 @@ const CreateBot: React.FC = () => {
   const [filename, setFileName] = useState("");
   const [, setSelectedFile] = useState<File | null>(null);
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
-  const [base64Image, setBase64Image] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const totalPages = 2;
   const imgViewerRef = useRef<HTMLInputElement>(null);
@@ -157,7 +156,7 @@ const CreateBot: React.FC = () => {
     setImageSrc(item.imageUrl);
     const response = await fetch(item.imageUrl);
     const blob = await response.blob();
-    const file = new File([blob], "image.jpg", { type: blob.type });
+    const file = new File([blob], "bot-icon.svg", { type: blob.type }); // Ensure proper filename
     setSelectedFileImage(file);
   };
 
@@ -174,12 +173,8 @@ const CreateBot: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file) return;
     setImageName(file.name);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setBase64Image(reader.result as string);
-    };
-    reader.readAsDataURL(file);
     setImageSrc(URL.createObjectURL(file));
+    setSelectedFileImage(file); // Directly use the File object
   };
 
   const handleFileChange = (
@@ -203,16 +198,17 @@ const CreateBot: React.FC = () => {
       // Build formData
       const formData = new FormData();
 
-      // Choose the correct image file
-      const imageFile = base64Image || selectedFileImage;
+      // // Choose the correct image file
+      // const imageFile = base64Image || selectedFileImage;
+      if (selectedFileImage) {
+        formData.append("customBotImage", selectedFileImage);
+      }
 
       // Append required form fields
       formData.append("botName", values.botName || "");
       formData.append("botTone", values.botTone || "");
       formData.append("botColor", chatColor || "");
-      formData.append("customBotImage", imageFile || "");
       formData.append("botGreetingMessage", values.botGreetingMessage || "");
-      // formData.append("botIdentity", values.botIdentity || "");
       formData.append("supportNumber", values.supportNumber || "");
       formData.append("supportEmail", values.supportEmail || "");
       formData.append("docName", filename || "");
@@ -810,6 +806,8 @@ const CreateBot: React.FC = () => {
               </div>
             )}
           </div>
+          {/* Agent Goals  */}
+          {/* Agent Goals */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label className="text-lg font-medium">Agent Goals</label>
@@ -823,6 +821,8 @@ const CreateBot: React.FC = () => {
                 />
               </Tooltip>
             </div>
+
+            {/* Render Existing Goals */}
             {formik.values.agentsGoals?.map((goal, index) => (
               <div key={index} className="relative mb-3">
                 <input
@@ -856,7 +856,7 @@ const CreateBot: React.FC = () => {
               </div>
             ))}
 
-            {/* New input field with AI Gen button */}
+            {/* New Goal Input + Buttons for Manual Add or AI Generation */}
             <div className="flex items-center">
               <input
                 type="text"
@@ -865,49 +865,63 @@ const CreateBot: React.FC = () => {
                   formik.setFieldValue("newGoalPrompt", e.target.value)
                 }
                 className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
-                placeholder="Enter a prompt for goal generation..."
+                placeholder="Enter a new goal or AI prompt..."
               />
 
+              {/* Manual Add Button */}
+              <button
+                type="button"
+                className="bg-[#65558F] text-white h-[50px] px-4"
+                onClick={() => {
+                  const newGoal = formik.values.newGoalPrompt.trim();
+                  if (newGoal) {
+                    const updatedGoals = [
+                      ...formik.values.agentsGoals,
+                      newGoal,
+                    ];
+                    formik.setFieldValue("agentsGoals", updatedGoals);
+                    formik.setFieldValue("newGoalPrompt", "");
+                  }
+                }}
+              >
+                Add Manual Goal
+              </button>
+
+              {/* AI Generation Button */}
               <button
                 type="button"
                 className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
                 onClick={async () => {
-                  if (formik.values.newGoalPrompt) {
-                    try {
-                      const response = await generatePromptService({
-                        initialPrompt: formik.values.newGoalPrompt,
-                        purpose: "agent goal",
-                      });
+                  const prompt = formik.values.newGoalPrompt.trim();
+                  if (!prompt) return;
+                  try {
+                    const response = await generatePromptService({
+                      initialPrompt: prompt,
+                      purpose: "agent goal",
+                    });
 
-                      // Split the prompt into individual guidelines
-                      const generatedGoals = response.prompt
-                        .split("\n")
-                        .map((line) => line.replace(/^- /, "").trim()) // Remove markdown-style bullets
-                        .filter((line) => line.length > 0);
+                    // Split the response into individual lines
+                    const generatedGoals = response.prompt
+                      .split("\n")
+                      .map((line) => line.replace(/^- /, "").trim()) // Remove any bullet chars
+                      .filter((line) => line.length > 0);
 
-                      // Add all generated goals to the existing ones
-                      const updatedGoals = [
-                        ...formik.values.agentsGoals,
-                        ...generatedGoals,
-                      ].filter((goal) => goal.trim().length > 0); // Remove empty goals
+                    // Merge with existing goals, removing empty ones
+                    const updatedGoals = [
+                      ...formik.values.agentsGoals,
+                      ...generatedGoals,
+                    ].filter((goal) => goal.trim().length > 0);
 
-                      formik.setFieldValue("agentsGoals", updatedGoals);
-                      formik.setFieldValue("newGoalPrompt", "");
-                    } catch (error) {
-                      console.error("Goal generation failed:", error);
-                      // Add error notification here
-                    }
+                    formik.setFieldValue("agentsGoals", updatedGoals);
+                    formik.setFieldValue("newGoalPrompt", "");
+                  } catch (error) {
+                    console.error("Goal generation failed:", error);
                   }
                 }}
               >
                 AI Gen
               </button>
             </div>
-            {formik.touched.agentsGoals && formik.errors.agentsGoals && (
-              <div className="text-red-500 text-sm mt-1">
-                {formik.errors.agentsGoals}
-              </div>
-            )}
           </div>
 
           {/* Conversation Guidelines */}
