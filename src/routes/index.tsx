@@ -12,7 +12,6 @@ import EditBot from "../pages/EditBot";
 import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
 import LiveChat from "../pages/Conversation/LiveChat";
 import TestBot from "../pages/TestBot";
-import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 import IntegrationList from "../pages/Integration/WhatsappIntegration/integrationsList";
 import WhatsAppIntegration from "../pages/Integration/WhatsappIntegration";
 import CrudIntegration from "../pages/Integration/WhatsappIntegration/crudIntegration";
@@ -28,6 +27,7 @@ import InstagramIntegrationList from "../pages/Integration/InstagramIntegration/
 import CrudInstagramIntegration from "../pages/Integration/InstagramIntegration/crudInstagramIntegration";
 import VoiceChatComponent from "../pages/VoiceModule";
 import EditMarketingDashboardForm from "../pages/Marketing/Dashboard/EditMarketingDashboardForm";
+import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -45,7 +45,6 @@ export const autRoutes: any[] = [
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
 
   { id: 4, path: "/engagement", component: <EngagementTab /> },
-  { id: 5.1, path: "/marketing/dashboard", component: <MarketingDashboard /> },
   {
     id: 5.1,
     path: "/marketing/whatsappdashboard",
