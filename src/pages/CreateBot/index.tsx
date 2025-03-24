@@ -51,7 +51,7 @@ const CreateBot: React.FC = () => {
     botName: "",
     botTone: "",
     botColor: "",
-    botGreetingMessage: "",
+    botGreetingMessage: "Hello, how can I assist you?",
     botIdentity: "",
     supportNumber: "",
     supportEmail: "",
@@ -121,7 +121,9 @@ const CreateBot: React.FC = () => {
       ? Yup.object().shape({
           botName: Yup.string().required("Agent Name is required"),
           botGreetingMessage: Yup.string().required("Greeting is required"),
-          supportNumber: Yup.string().required("Phone Number is required"),
+          supportNumber: Yup.string()
+            .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+            .required("Phone Number is required"),
           supportEmail: Yup.string()
             .email("Invalid email")
             .required("EmailID is required"),
@@ -397,7 +399,13 @@ const CreateBot: React.FC = () => {
                     key={idx}
                     src={item.imageUrl}
                     alt="logo"
-                    className="w-full h-auto cursor-pointer"
+                    className={`w-full h-auto cursor-pointer rounded-md
+            ${
+              imageSrc === item.imageUrl
+                ? "bg-[#65558F] bg-opacity-[0.5] rounded-md " // Highlight style
+                : " bg-transparent"
+            }
+          `}
                     onClick={() => handleBotSampleClick(item)}
                   />
                 ))}
@@ -406,33 +414,73 @@ const CreateBot: React.FC = () => {
           )}
 
           {formik.values.botIconOption === BOTICONS.custom && (
+            // <div className="flex flex-col w-[85%] mb-3 text-black">
+            //   <div className="relative h-[50px]">
+            //     {/* Container for displaying file name + remove button */}
+            //     <div className="flex items-center h-full w-full rounded-[12px] bg-[#F3F2F6] absolute z-0">
+            //       <div className="flex items-center ml-4">
+            //         {imageName && (
+            //           <img src={imageSrc} alt="logo" className="w-5 h-5 mr-2" />
+            //         )}
+            //         <span>{imageName || "Choose Icon"}</span>
+            //       </div>
+            //       {imageName && (
+            //         <button
+            //           onClick={(e) => {
+            //             e.stopPropagation(); // Prevent click from reaching the file input
+            //             // Clear all states
+            //             setSelectedFileImage(null);
+            //             setImageName("");
+            //             setImageSrc("");
+            //           }}
+            //           className="ml-auto mr-4 text-black relative z-10"
+            //         >
+            //           ×
+            //         </button>
+            //       )}
+            //     </div>
+            //     {/* The file input covers the entire container, but sits behind the button because of z-index */}
+            //     <input
+            //       type="file"
+            //       onChange={handleImageUpload}
+            //       ref={imgViewerRef}
+            //       accept="image/*"
+            //       className="absolute w-full h-full top-0 left-0 opacity-0 cursor-pointer z-0"
+            //     />
+            //   </div>
+            // </div>
             <div className="flex flex-col w-[85%] mb-3 text-black">
               <div className="relative h-[50px]">
-                <div className="flex items-center h-full w-full rounded-[12px] bg-[#F3F2F6] absolute">
+                <label
+                  htmlFor="customIcon"
+                  className="flex items-center h-full w-full rounded-[12px] bg-[#F3F2F6] cursor-pointer"
+                >
                   <div className="flex items-center ml-4">
                     {imageName && (
                       <img src={imageSrc} alt="logo" className="w-5 h-5 mr-2" />
                     )}
                     <span>{imageName || "Choose Icon"}</span>
                   </div>
-                  {imageName && (
-                    <button
-                      onClick={() => {
-                        setImageName("");
-                        setImageSrc("");
-                      }}
-                      className="ml-auto mr-4 text-black"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
+                </label>
+                {imageName && (
+                  <button
+                    onClick={() => {
+                      setSelectedFileImage(null);
+                      setImageName("");
+                      setImageSrc("");
+                    }}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-black"
+                  >
+                    ×
+                  </button>
+                )}
                 <input
+                  id="customIcon"
                   type="file"
                   onChange={handleImageUpload}
-                  ref={imgViewerRef}
                   accept="image/*"
-                  className="absolute w-full h-full opacity-0 cursor-pointer"
+                  ref={imgViewerRef}
+                  className="hidden"
                 />
               </div>
             </div>
@@ -609,6 +657,9 @@ const CreateBot: React.FC = () => {
               name="supportNumber"
               placeholder="Enter your Phone Number"
               component={FormikFieldInputComponent}
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+              }}
             />
             <Field
               type="email"
@@ -861,7 +912,7 @@ const CreateBot: React.FC = () => {
 
           {/* Conversation Guidelines */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
-          <div className="flex items-center mb-2">
+            <div className="flex items-center mb-2">
               <label className="text-lg font-medium">
                 Conversation Guidelines
               </label>
@@ -964,7 +1015,7 @@ const CreateBot: React.FC = () => {
               )}
           </div>
           <div className="flex flex-col w-full mb-3 text-black">
-          <div className="flex items-center mb-2">
+            <div className="flex items-center mb-2">
               <label className="text-lg font-medium">
                 Agent limit per Message
               </label>
