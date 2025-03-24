@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 
 interface Conversation {
+  call_duration_secs: string;
   conversation_id: string;
   agent_name: string;
   status: string;
@@ -121,6 +122,12 @@ const ConversationsTable: React.FC = () => {
               <th className="px-6 py-4 text-left text-base font-semibold text-black">
                 Created
               </th>
+              <th className="px-6 py-4 text-left text-base font-semibold text-black">
+                Start Time
+              </th>
+              <th className="px-6 py-4 text-left text-base font-semibold text-black">
+                Duration (s)
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -153,6 +160,14 @@ const ConversationsTable: React.FC = () => {
                   {new Date(
                     conv.start_time_unix_secs * 1000
                   ).toLocaleDateString()}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {new Date(
+                    conv.start_time_unix_secs * 1000
+                  ).toLocaleTimeString()}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {conv.call_duration_secs}
                 </td>
               </tr>
             ))}

@@ -60,7 +60,7 @@ const DashboardCard = ({
   </Card>
 );
 
-const DashboardUI = () => {
+const MarketingDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
   const navigate = useNavigate();
@@ -75,9 +75,15 @@ const DashboardUI = () => {
 
   useEffect(() => {
     const fetchInsights = async () => {
+      setLoading(true);
       try {
         const response = await getMarketingInsightsService();
-        setInsightsData(response.data);
+        console.log("API Response data:", response);
+
+        // Immediately use the data from the response
+        if (response) {
+          setInsightsData(response);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch marketing insights", error);
@@ -88,32 +94,22 @@ const DashboardUI = () => {
     fetchInsights();
   }, []);
 
-  // Show a custom message if the data is still processing (not in final state)
-  if (insightsData && insightsData.status && insightsData.status !== "final") {
+  if (!insightsData) {
+    console.log("No insights data, showing form");
+    return <MarketingDashboardForm />;
+  }
+
+  // If data exists but status is draft, show the message
+  if (insightsData.status === "draft") {
+    console.log("Status is draft, showing draft message");
     return (
       <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
         <div className="text-xl text-gray-700">
-          We are processing your data (current status: {insightsData.status}).
-          Please hold on...
+          {insightsData.message || "Your data is currently being processed"}
         </div>
       </div>
     );
   }
-
-  // if (
-  //   !Array.isArray(insightsData.followerData) ||
-  //   insightsData.followerData.length === 0 ||
-  //   !Array.isArray(insightsData.actionableSocialMediaInsights) ||
-  //   insightsData.actionableSocialMediaInsights.length === 0 ||
-  //   !Array.isArray(insightsData.geographicalActivity?.interestByRegion) ||
-  //   insightsData.geographicalActivity.interestByRegion.length === 0 ||
-  //   !Array.isArray(insightsData.trendsData?.interestOverTime?.timeline_data) ||
-  //   insightsData.trendsData.interestOverTime.timeline_data.length === 0 ||
-  //   !Array.isArray(insightsData.trendsKeywords) ||
-  //   insightsData.trendsKeywords.length === 0
-  // ) {
-  //   return <div>Data is getting processed</div>;
-  // }
 
   // Divide insights into groups of 3
   const insightPages = Array.from(
@@ -606,44 +602,4 @@ const DashboardUI = () => {
   );
 };
 
-/* =====================================================
-   Wrapper Component: Conditionally show Dashboard or Form
-===================================================== */
-const MarketingDashboardWrapper: React.FC = () => {
-  const [hasInsights, setHasInsights] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const checkMarketingInsights = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setHasInsights(false);
-          return;
-        }
-
-        const response = await getMarketingInsightsService();
-
-        // If the response indicates the user does have insights,
-        // then setHasInsights to true.
-        if (response && Object.keys(response).length > 0) {
-          setHasInsights(true);
-        } else {
-          setHasInsights(false);
-        }
-      } catch (error) {
-        console.error("Error fetching marketing insights:", error);
-        setHasInsights(false);
-      }
-    };
-
-    checkMarketingInsights();
-  }, []);
-
-  if (hasInsights === null) {
-    return <div>Loading...</div>;
-  }
-
-  return hasInsights ? <DashboardUI /> : <MarketingDashboardForm />;
-};
-
-export default MarketingDashboardWrapper;
+export default MarketingDashboard;
