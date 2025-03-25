@@ -142,7 +142,7 @@ const MyBots: React.FC = () => {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900">My Agents</h2>
           <button
-            className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold 
+            className="bg-[#65558F] text-white px-6 py-3 rounded-full font-medium 
                        hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
             onClick={createBotHandler}
           >

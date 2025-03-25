@@ -522,9 +522,14 @@ const CreateBot: React.FC = () => {
               name="botFont"
               component={FormikFieldToggleComponent}
               options={[
-                { label: "Serif", value: "serif" },
-                { label: "Monospace", value: "monospace" },
+                { label: "Georgia", value: "Georgia" },
+                { label: "Helvetica", value: "Helvetica, sans-serif" },
+                {
+                  label: "Monospace",
+                  value: "monospace",
+                },
                 { label: "Cursive", value: "cursive" },
+                { label: "Poppins (default)", value: "poppins" },
               ]}
             />
           </div>
@@ -1236,6 +1241,7 @@ const CreateBot: React.FC = () => {
                   botName={formik.values.botName || "Bot Assistant"}
                   theme={formik.values.botTheme}
                   color={chatColor}
+                  greetingMessage={formik.values.botGreetingMessage}
                   botSmartnessHandle={(val) =>
                     formik.setFieldValue("botSmartness", val)
                   }
