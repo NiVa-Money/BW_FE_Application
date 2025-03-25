@@ -142,7 +142,7 @@ const MyBots: React.FC = () => {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900">My Agents</h2>
           <button
-            className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold 
+            className="bg-[#65558F] text-white px-6 py-3 rounded-full font-medium 
                        hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
             onClick={createBotHandler}
           >
@@ -203,29 +203,32 @@ const MyBots: React.FC = () => {
                 <div className="px-6 pb-6">
                   <div className="grid grid-cols-2 gap-2">
                     <button
-                      className="bg-[#65558F] text-white px-4 py-2 rounded-md 
-                               flex items-center justify-center gap-1 hover:bg-[#65558F]/90 transition-colors"
+                      className="bg-indigo-500 text-white px-4 py-2 rounded-md 
+           flex items-center justify-center gap-1 hover:bg-indigo-600 transition-colors"
                       onClick={() => handleEdit(bot._id)}
                     >
                       <EditIcon fontSize="small" /> Edit
                     </button>
+
                     <button
-                      className="bg-[#6cc2ed] text-white px-4 py-2 rounded-md 
-                               flex items-center justify-center gap-1 hover:bg-blue-600 transition-colors"
+                      className="bg-[#7398D9] text-white px-4 py-2 rounded-md 
+           flex items-center justify-center gap-1 hover:bg-[#7398D9]/80 transition-colors"
                       onClick={() => handleTest(bot._id)}
                     >
                       <PlayArrowIcon fontSize="small" /> Test
                     </button>
+
                     <button
-                      className="bg-[#c38def] text-white px-4 py-2 rounded-md 
-                               flex items-center justify-center gap-1 hover:bg-green-600 transition-colors"
+                      className="bg-green-500 text-white px-4 py-2 rounded-md 
+           flex items-center justify-center gap-1 hover:bg-green-600 transition-colors"
                       onClick={() => handleExport(bot._id)}
                     >
                       <FileExportIcon fontSize="small" /> Export
                     </button>
+
                     <button
                       className="bg-red-500 text-white px-4 py-2 rounded-md 
-                               flex items-center justify-center gap-1 hover:bg-red-600 transition-colors"
+           flex items-center justify-center gap-1 hover:bg-red-600 transition-colors"
                       onClick={() => handleOpen(bot._id)}
                     >
                       <DeleteIcon fontSize="small" /> Delete

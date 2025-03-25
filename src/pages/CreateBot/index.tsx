@@ -229,12 +229,7 @@ const CreateBot: React.FC = () => {
       );
 
       // Append additional fields
-      formData.append(
-        "agentRole",
-        values.agentRole === "Custom"
-          ? values.customAgentRole || ""
-          : values.agentRole || ""
-      );
+      formData.append("agentRole", values.agentRole || "");
       formData.append(
         "agentRoleDescription",
         values.agentRoleDescription || ""
@@ -522,9 +517,14 @@ const CreateBot: React.FC = () => {
               name="botFont"
               component={FormikFieldToggleComponent}
               options={[
-                { label: "Serif", value: "serif" },
-                { label: "Monospace", value: "monospace" },
+                { label: "Georgia", value: "Georgia" },
+                { label: "Helvetica", value: "Helvetica, sans-serif" },
+                {
+                  label: "Monospace",
+                  value: "monospace",
+                },
                 { label: "Cursive", value: "cursive" },
+                { label: "Poppins (default)", value: "poppins" },
               ]}
             />
           </div>
@@ -737,17 +737,14 @@ const CreateBot: React.FC = () => {
                 { label: "Customer Service", value: "Customer Service" },
                 { label: "Sales", value: "Sales" },
                 { label: "Human Resources", value: "Human Resource" },
-                { label: "Custom", value: "Custom" },
+                { label: "Custom", value: "CUSTOM_FLAG" },
               ]}
-              onChange={(value) => {
-                formik.setFieldValue("agentRole", value);
-                if (value !== "Custom") {
-                  formik.setFieldValue("customAgentRole", ""); // Clear custom field if not selected
-                }
-              }}
             />
 
-            {formik.values.agentRole === "Custom" && (
+            {(formik.values.agentRole === "CUSTOM_FLAG" ||
+              !["Customer Service", "Sales", "Human Resource"].includes(
+                formik.values.agentRole
+              )) && (
               <div className="mt-2">
                 <div className="flex items-center mb-2">
                   <label>Custom Role</label>
@@ -762,10 +759,28 @@ const CreateBot: React.FC = () => {
                   </Tooltip>
                 </div>
                 <Field
-                  name="customAgentRole"
+                  name="agentRole"
                   type="text"
-                  className="border p-2 rounded"
-                  placeholder="Enter custom role"
+                  className="border p-2 rounded mb-3 w-full"
+                  placeholder="Enter custom role name"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    formik.setFieldValue("agentRole", value || "CUSTOM_FLAG");
+                  }}
+                />
+
+                {/* Custom Role Description */}
+                <div className="flex items-center mb-2">
+                  <label>Role Description</label>
+                  <Tooltip title="Describe the responsibilities of this custom role">
+                    <InfoOutlinedIcon className="ml-1 text-gray-600 cursor-pointer" />
+                  </Tooltip>
+                </div>
+                <Field
+                  name="agentRoleDescription"
+                  as="textarea"
+                  className="border p-2 rounded w-full h-24"
+                  placeholder="Describe the role's responsibilities..."
                 />
               </div>
             )}
@@ -806,7 +821,7 @@ const CreateBot: React.FC = () => {
               </div>
             )}
           </div>
-          {/* Agent Goals  */}
+
           {/* Agent Goals */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
@@ -986,6 +1001,28 @@ const CreateBot: React.FC = () => {
                 className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
                 placeholder="Enter a prompt for guideline generation..."
               />
+
+              <button
+                type="button"
+                className="bg-[#65558F] text-white h-[50px] px-4"
+                onClick={() => {
+                  const newGuideline = formik.values.newGuidelinePrompt.trim();
+                  if (newGuideline) {
+                    const updatedGuidelines = [
+                      ...formik.values.conversationGuidelines,
+                      newGuideline,
+                    ];
+                    formik.setFieldValue(
+                      "conversationGuidelines",
+                      updatedGuidelines
+                    );
+                    formik.setFieldValue("newGuidelinePrompt", "");
+                  }
+                }}
+              >
+                Add Manual Guideline
+              </button>
+
               <button
                 type="button"
                 className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
@@ -1236,6 +1273,7 @@ const CreateBot: React.FC = () => {
                   botName={formik.values.botName || "Bot Assistant"}
                   theme={formik.values.botTheme}
                   color={chatColor}
+                  greetingMessage={formik.values.botGreetingMessage}
                   botSmartnessHandle={(val) =>
                     formik.setFieldValue("botSmartness", val)
                   }

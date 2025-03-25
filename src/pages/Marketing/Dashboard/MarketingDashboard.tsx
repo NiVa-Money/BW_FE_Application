@@ -133,7 +133,7 @@ const MarketingDashboard = () => {
             </p>
           </div>
 
-          {/* Interactive Button */}
+          {/* Interactive Button
           <button
             onClick={() => navigate("/marketing/editDashboardForm")}
             className="px-10 py-4 bg-gradient-to-r from-[#65558F] to-[#2E2F5F] hover:from-[#2E2F5F] hover:to-[#65558F] text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:bg-[#2E2F5F] active:scale-95"
@@ -149,7 +149,7 @@ const MarketingDashboard = () => {
               </svg>
               Edit Marketing Form
             </span>
-          </button>
+          </button> */}
         </div>
       </div>
     );
