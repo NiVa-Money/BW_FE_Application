@@ -782,6 +782,7 @@ const EditBot: React.FC = () => {
               font={botFont}
               botSmartness={botSmartness}
               botSmartnessHandle={botSmartnessHandle}
+              greetingMessage={greetingMessage}
             />
           </Form>
         )}
