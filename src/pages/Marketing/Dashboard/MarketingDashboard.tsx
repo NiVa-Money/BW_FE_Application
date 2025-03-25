@@ -60,11 +60,14 @@ const DashboardCard = ({
   </Card>
 );
 
-const DashboardUI = () => {
+const MarketingDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
   const navigate = useNavigate();
   const [insightsData, setInsightsData] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
 
   const handleViewDashboard = () => {
     navigate(`/marketing/whatsappdashboard`);
@@ -72,9 +75,15 @@ const DashboardUI = () => {
 
   useEffect(() => {
     const fetchInsights = async () => {
+      setLoading(true);
       try {
         const response = await getMarketingInsightsService();
-        setInsightsData(response.data);
+        console.log("API Response data:", response);
+
+        // Immediately use the data from the response
+        if (response) {
+          setInsightsData(response);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch marketing insights", error);
@@ -85,22 +94,22 @@ const DashboardUI = () => {
     fetchInsights();
   }, []);
 
-  const [currentPage, setCurrentPage] = useState(0);
+  if (!insightsData) {
+    console.log("No insights data, showing form");
+    return <MarketingDashboardForm />;
+  }
 
-  // if (
-  //   !Array.isArray(insightsData.followerData) ||
-  //   insightsData.followerData.length === 0 ||
-  //   !Array.isArray(insightsData.actionableSocialMediaInsights) ||
-  //   insightsData.actionableSocialMediaInsights.length === 0 ||
-  //   !Array.isArray(insightsData.geographicalActivity?.interestByRegion) ||
-  //   insightsData.geographicalActivity.interestByRegion.length === 0 ||
-  //   !Array.isArray(insightsData.trendsData?.interestOverTime?.timeline_data) ||
-  //   insightsData.trendsData.interestOverTime.timeline_data.length === 0 ||
-  //   !Array.isArray(insightsData.trendsKeywords) ||
-  //   insightsData.trendsKeywords.length === 0
-  // ) {
-  //   return <div>Data is getting processed</div>;
-  // }
+  // If data exists but status is draft, show the message
+  if (insightsData.status === "draft") {
+    console.log("Status is draft, showing draft message");
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+        <div className="text-xl text-gray-700">
+          {insightsData.message || "Your data is currently being processed"}
+        </div>
+      </div>
+    );
+  }
 
   // Divide insights into groups of 3
   const insightPages = Array.from(
@@ -118,8 +127,6 @@ const DashboardUI = () => {
   const handlePrev = () => {
     setCurrentPage((prev) => (prev === 0 ? insightPages.length - 1 : prev - 1));
   };
-
-  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
 
   const allNews = insightsData?.newsArticles?.insights
     ? [{ insights: insightsData.newsArticles.insights }]
@@ -196,8 +203,6 @@ const DashboardUI = () => {
       value: Number(region.value),
     })
   );
-
-  const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
 
   // Dropdown options for the different metrics.
   const metricOptions = [
@@ -395,7 +400,7 @@ const DashboardUI = () => {
               Create a WhatsApp Campaign
             </button>
             <button
-              onClick={() => navigate("/marketing/dashboardform")}
+              onClick={() => navigate("/marketing/editDashboardForm")}
               className="w-full bg-white text-[#65558F] py-2 rounded-lg mt-2"
             >
               Edit Marketing Form
@@ -597,40 +602,4 @@ const DashboardUI = () => {
   );
 };
 
-/* =====================================================
-   Wrapper Component: Conditionally show Dashboard or Form
-===================================================== */
-const MarketingDashboardWrapper: React.FC = () => {
-  const [hasInsights, setHasInsights] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const checkMarketingInsights = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.log("token", token);
-          setHasInsights(false);
-          return;
-        }
-
-        const response = await getMarketingInsightsService();
-
-        // Check if the response is null or empty
-        setHasInsights(response && Object.keys(response).length > 0);
-      } catch (error) {
-        console.error("Error fetching marketing insights:", error);
-        setHasInsights(false);
-      }
-    };
-
-    checkMarketingInsights();
-  }, []);
-
-  if (hasInsights === null) {
-    return <div>Loading...</div>;
-  }
-
-  return hasInsights ? <DashboardUI /> : <MarketingDashboardForm />;
-};
-
-export default MarketingDashboardWrapper;
+export default MarketingDashboard;

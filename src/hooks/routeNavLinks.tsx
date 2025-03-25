@@ -80,12 +80,12 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           path: "/marketing/campaign",
           icon: <CampaignIcon />,
         },
-        // {
-        //   id: 5.3,
-        //   text: "Omnigen Content Studio",
-        //   path: "/marketing/omnigenStudio",
-        //   icon: <CampaignIcon />,
-        // },
+        {
+          id: 5.3,
+          text: "Omnigen Content Studio",
+          path: "/marketing/omnigenStudio",
+          icon: <CampaignIcon />,
+        },
       ],
     },
     {
