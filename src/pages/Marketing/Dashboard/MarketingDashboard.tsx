@@ -100,12 +100,56 @@ const MarketingDashboard = () => {
   }
 
   // If data exists but status is draft, show the message
+  // if (insightsData.status === "draft") {
+  //   console.log("Status is draft, showing draft message");
+  //   return (
+  //     <>
+  //       <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+  //         <div className="flex flex-col items-center gap-4">
+  //           <div className="text-xl text-gray-700 text-center">
+  //             {insightsData.message || "Your data is currently being processed"}
+  //           </div>
+  //           <button
+  //             onClick={() => navigate("/marketing/editDashboardForm")}
+  //             className="w-full max-w-xs bg-[#65558F] text-white py-2 rounded-lg"
+  //           >
+  //             Edit Marketing Form
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </>
+  //   );
+  // }
   if (insightsData.status === "draft") {
     console.log("Status is draft, showing draft message");
     return (
-      <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-700">
-          {insightsData.message || "Your data is currently being processed"}
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full flex flex-col items-center gap-8">
+          {/* Content */}
+          <div className="text-center space-y-4">
+            <p className="text-4xl font-semibold text-[#2E2F5F]">
+              {insightsData.message ||
+                "Advanced analytics processing in progress..."}
+            </p>
+          </div>
+
+          {/* Interactive Button */}
+          <button
+            onClick={() => navigate("/marketing/editDashboardForm")}
+            className="px-10 py-4 bg-gradient-to-r from-[#65558F] to-[#2E2F5F] hover:from-[#2E2F5F] hover:to-[#65558F] text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:bg-[#2E2F5F] active:scale-95"
+          >
+            <span className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-white"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+              Edit Marketing Form
+            </span>
+          </button>
         </div>
       </div>
     );
