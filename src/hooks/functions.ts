@@ -19,6 +19,26 @@ export const formatDateString = (
     ? `${year}-${month}-${day}`
     : `${day}-${month}-${year} at ${hours}:${minutes}:${secs}`;
 };
+export const formatDateWithOrdinal = (date) => {
+  const dateObj = new Date(date);
+  const day = dateObj.getDate();
+
+  const getOrdinalSuffix = (d) => {
+    if (d > 3 && d < 21) return "th"; // covers 11th-13th
+    switch (d % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  };
+
+  return `${day}${getOrdinalSuffix(day)}`;
+};
 
 export const camelCaseToWords = (camelCaseString) => {
   if (!camelCaseString || typeof camelCaseString !== "string") {

@@ -21,6 +21,7 @@ import {
 import CommonTable from "../../components/TableComponent";
 import { COLORS } from "../../constants";
 import ChartContainer from "./ChartContainer";
+import { formatDateWithOrdinal } from "../../hooks/functions";
 
 interface ChartItemsProps {
   constructedChartsData: {
@@ -153,20 +154,24 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           height={300}
           data={constructedChartsData.totalConversation}
         >
-          <XAxis dataKey="date" />
-          <YAxis />
+          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
+            vertical={false} />
+          <XAxis dataKey="date" tickFormatter={formatDateWithOrdinal} />
+          <YAxis domain={[0, 'auto']} />
           <Tooltip />
           <Line
-            type="linear"
+            type="monotone"
             dataKey="web"
             strokeWidth={2}
             stroke={COLORS.GRAY}
+            dot={false}
           />
           <Line
-            type="linear"
+            type="monotone"
             dataKey="whatsapp"
             strokeWidth={2}
             stroke={COLORS.BLUE}
+            dot={false}
           />
           <Legend
             verticalAlign="top"
@@ -186,7 +191,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           height={300}
           data={constructedChartsData.escalationMatrix}
         >
-          <CartesianGrid strokeDasharray="5 5" />
+          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
+            vertical={false} />
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
@@ -200,7 +206,7 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       id: 3,
       title: "Customer Sentiment Analysis",
       component: (
-        <PieChart width={500} height={300}>
+        <PieChart width={500} height={400}>
           <Pie
             data={constructedChartsData.sentiments}
             dataKey="value"
@@ -251,7 +257,6 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
 
 
           </Pie>
-
           <Tooltip />
           <Legend iconType="square" content={CustomLegend}
             wrapperStyle={{ paddingBottom: 10 }} />
@@ -291,8 +296,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
             ))}
           </Pie>
           {/* <Tooltip /> */}
-          {/* <Legend iconType="square" content={CustomLegend}
-            wrapperStyle={{ paddingBottom: 10 }} /> */}
+          <Legend iconType="square" content={CustomLegend}
+            wrapperStyle={{ paddingBottom: 10 }} />
         </PieChart>
       ),
     },
@@ -306,24 +311,13 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           style={{ backgroundColor: COLORS.LIGHTGRAY }}
           data={constructedChartsData.resolvedChats}
         >
-          <XAxis dataKey="date" />
-          <YAxis />
+          <XAxis dataKey="date" tickFormatter={formatDateWithOrdinal} />
+          <YAxis domain={[0, 'auto']} />
           <Tooltip />
-          <Area type="monotone" dataKey="web" stackId="1" stroke="#8884d8" fill={COLORS.GRAY} />
-          <Area type="monotone" dataKey="whatsapp" stackId="1" stroke="#8884d8" fill={COLORS.BLUE} />
+          <Area type="monotone" dataKey="web" stackId="1" stroke="#8884d8" fill={COLORS.GRAY} dot={false} />
+          <Area type="monotone" dataKey="whatsapp" stackId="1" stroke="#8884d8" fill={COLORS.BLUE} dot={false} />
 
-          {/* <Line
-            type="monotone"
-            dataKey="web"
-            strokeWidth={2}
-            stroke={COLORS.GRAY}
-          />
-          <Line
-            type="monotone"
-            dataKey="whatsapp"
-            strokeWidth={2}
-            stroke={COLORS.BLUE}
-          /> */}
+
           <Legend
             verticalAlign="top"
             iconType="rect"
@@ -375,7 +369,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           ]}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid stroke="#f5f5f5" />
+          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
+            vertical={false} />
           <XAxis dataKey="name" scale="band" />
           <YAxis />
           <Tooltip />
@@ -387,7 +382,7 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       ),
     },
   ];
-
+  console.log('aiAgentPerformanceHeaders', aiAgentPerformanceHeaders)
   const performanceBar = [
     {
       id: 1,
