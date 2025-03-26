@@ -135,6 +135,7 @@ const DashboardPanel = () => {
     })(),
     endDate: Date | null | string = new Date()
   ) => {
+    debugger
     console.log('botId', botId, startDate, endDate)
     if (!botId) return;
     try {
@@ -250,6 +251,9 @@ const DashboardPanel = () => {
       fetchData(startDate, endDate);
     }
   };
+  // useEffect(() => {
+  //   botId?.length && handleDateRangeChange(dateRange.startDate, dateRange.endDate);
+  // }, [botId])
 
   // Fetch bots data
   useEffect(() => {
@@ -305,7 +309,7 @@ const DashboardPanel = () => {
               setIsToday(value); // Update isToday state asynchronously
               isTodayRef.current = value; // Update ref synchronously
             }}
-            onDateRangeChange={handleDateRangeChange}
+            onDateRangeChange={botId?.length ? handleDateRangeChange : () => { }}
           />
 
           {botsDataRedux?.length > 0 && Array.isArray(botsDataRedux) && (
