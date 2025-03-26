@@ -314,7 +314,7 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           <XAxis dataKey="date" tickFormatter={formatDateWithOrdinal} />
           <YAxis domain={[0, 'auto']} />
           <Tooltip />
-          <Area type="monotone" dataKey="web" stackId="1" stroke="#8884d8" fill={COLORS.GRAY} dot={false} />
+          <Area type="monotone" dataKey="web" stackId="1" stroke={COLORS.GRAY} fill={COLORS.GRAY} dot={false} />
           <Area type="monotone" dataKey="whatsapp" stackId="1" stroke="#8884d8" fill={COLORS.BLUE} dot={false} />
 
 
@@ -382,7 +382,6 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       ),
     },
   ];
-  console.log('aiAgentPerformanceHeaders', aiAgentPerformanceHeaders)
   const performanceBar = [
     {
       id: 1,

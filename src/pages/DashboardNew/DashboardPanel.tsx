@@ -135,13 +135,10 @@ const DashboardPanel = () => {
     })(),
     endDate: Date | null | string = new Date()
   ) => {
-    debugger
-    console.log('botId', botId, startDate, endDate, botsDataRedux[0])
     try {
       setIsLoading(true);
       const formattedStartDate = startDate instanceof Date ? startDate.toISOString() : startDate;
       const formattedEndDate = endDate instanceof Date ? endDate.toISOString() : endDate;
-      console.log(typeof startDate)
       const response: DashboardResponse = await dashBoardDataService({
         startDate: formatDateString(formattedStartDate, true),
         endDate: formatDateString(formattedEndDate, true),
@@ -173,7 +170,6 @@ const DashboardPanel = () => {
 
   // Construct charts data
   const constructedChartsData = useMemo(() => {
-    console.log("stats", stats);
     if (!stats) {
       return {
         totalConversation: [],
@@ -243,8 +239,6 @@ const DashboardPanel = () => {
 
   // Handle date range change
   const handleDateRangeChange = (startDate: Date, endDate: Date) => {
-    console.log("startDate", startDate, "endDate", endDate);
-    debugger
     setDateRange({ startDate, endDate });
     if (!isTodayRef.current) {
       fetchData(startDate, endDate);

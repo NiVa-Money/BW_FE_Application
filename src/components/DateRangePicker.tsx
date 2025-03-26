@@ -53,7 +53,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     isCustomRange ? formatDateRange(startDate, endDate) : selectedRange;
 
   const handleRangeSelect = (range: string) => {
-    console.log("range", range);
     if (range === "Specific Date Range") {
       setMenuOpen(false);
       setPopoverOpen(true);
@@ -97,7 +96,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   };
   useEffect(() => {
-    console.log("botsDataRedux", botsDataRedux, selectedRange);
     botsDataRedux?.length && selectedRange === 'Last 30 days' ?
       handleRangeSelect(selectedRange) : null
   }, [botsDataRedux, selectedRange])
