@@ -96,6 +96,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   };
   useEffect(() => {
+    console.log("botsDataRedux", botsDataRedux, selectedRange);
     botsDataRedux?.length ?
       handleRangeSelect(selectedRange) : null
   }, [botsDataRedux])
