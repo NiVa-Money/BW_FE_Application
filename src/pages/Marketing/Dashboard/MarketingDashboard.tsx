@@ -78,11 +78,11 @@ const MarketingDashboard = () => {
       setLoading(true);
       try {
         const response = await getMarketingInsightsService();
-        console.log("API Response data:", response);
+        console.log("API Response data:", response.data);
 
         // Immediately use the data from the response
-        if (response) {
-          setInsightsData(response);
+        if (response.data) {
+          setInsightsData(response.data);
         }
         setLoading(false);
       } catch (error) {
@@ -158,7 +158,9 @@ const MarketingDashboard = () => {
   // Divide insights into groups of 3
   const insightPages = Array.from(
     {
-      length: Math.ceil(insightsData?.actionableSocialMediaInsights.length / 3),
+      length: Math.ceil(
+        insightsData?.actionableSocialMediaInsights?.length / 3
+      ),
     },
     (_, i) =>
       insightsData?.actionableSocialMediaInsights.slice(i * 3, i * 3 + 3)
@@ -279,7 +281,7 @@ const MarketingDashboard = () => {
   const competitorTrendsData = Object.keys(
     insightsData?.brand_engagement_metrics || {}
   ).map((brand) => {
-    const brandData = insightsData.brand_engagement_metrics[brand];
+    const brandData = insightsData?.brand_engagement_metrics[brand];
     let metricValue = 0;
 
     // If the metric string includes a dot, retrieve the nested value.
@@ -304,17 +306,23 @@ const MarketingDashboard = () => {
 
   console.log("competitorTrendsData", competitorTrendsData);
 
-  const noData =
-    competitorTrendsData.length === 0 ||
-    competitorTrendsData.every((entry) => Number(entry.value) === 0);
+  // const noData =
+  //   competitorTrendsData.length === 0 ||
+  //   competitorTrendsData.every((entry) => Number(entry.value) === 0);
+
+  const noData = competitorTrendsData.length === 0;
 
   if (loading) return <div>Loading...</div>;
-  if (!insightsData)
-    return (
-      <div>
-        <MarketingDashboardForm />;
-      </div>
-    );
+  // if (!insightsData)
+  //   return (
+  //     <div>
+  //       <MarketingDashboardForm />;
+  //     </div>
+  //   );
+  if (!insightsData) {
+    navigate("/marketing/dashboardform");
+    return null;
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-6">
@@ -542,7 +550,7 @@ const MarketingDashboard = () => {
             <div className="mt-2">
               <h4 className="text-base font-medium mb-2">Trends Keywords</h4>
               <div className="flex flex-wrap gap-2">
-                {insightsData.trendsKeywords.map(
+                {insightsData?.trendsKeywords?.map(
                   (keyword: string, index: number) => (
                     <span key={index} className="bg-gray-300 px-2 py-1 rounded">
                       {keyword}
@@ -559,7 +567,7 @@ const MarketingDashboard = () => {
                   <YAxis />
                   <Tooltip />
                   {/* Dynamically render a Line for each trend keyword */}
-                  {insightsData.trendsKeywords.map(
+                  {insightsData?.trendsKeywords?.map(
                     (keyword: string, index: number) => (
                       <Line
                         key={keyword}
@@ -598,7 +606,7 @@ const MarketingDashboard = () => {
             </select>
           </div>
 
-          {noData ? (
+          {competitorTrendsData.length === 0 ? (
             <div className="text-center py-8">NO data available</div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
