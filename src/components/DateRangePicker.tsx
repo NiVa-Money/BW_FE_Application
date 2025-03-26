@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Menu,
@@ -11,8 +11,8 @@ import { subDays, format } from "date-fns";
 import { COLORS } from "../constants";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import CustomDatePicker from "./CustomDatePicker";
-import { useSelector } from "react-redux";
-import { RootState } from "../store";
+// import { useSelector } from "react-redux";
+// import { RootState } from "../store";
 
 interface DateRangePickerProps {
   onToday: (value: boolean) => void;
@@ -45,9 +45,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       ? format(start, "MMM dd, yyyy")
       : `${format(start, "MMM dd, yyyy")} - ${format(end, "MMM dd, yyyy")}`;
   };
-  const botsDataRedux = useSelector(
-    (state: RootState) => state.bot?.lists?.data
-  );
+  // const botsDataRedux = useSelector(
+  //   (state: RootState) => state.bot?.lists?.data
+  // );
 
   const getDisplayText = () =>
     isCustomRange ? formatDateRange(startDate, endDate) : selectedRange;
