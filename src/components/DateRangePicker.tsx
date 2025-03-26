@@ -53,6 +53,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     isCustomRange ? formatDateRange(startDate, endDate) : selectedRange;
 
   const handleRangeSelect = (range: string) => {
+    console.log("range", range);
     if (range === "Specific Date Range") {
       setMenuOpen(false);
       setPopoverOpen(true);
