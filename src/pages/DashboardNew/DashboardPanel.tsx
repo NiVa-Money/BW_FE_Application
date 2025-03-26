@@ -136,8 +136,7 @@ const DashboardPanel = () => {
     endDate: Date | null | string = new Date()
   ) => {
     debugger
-    console.log('botId', botId, startDate, endDate)
-    if (!botId) return;
+    console.log('botId', botId, startDate, endDate, botsDataRedux[0])
     try {
       setIsLoading(true);
       const formattedStartDate = startDate instanceof Date ? startDate.toISOString() : startDate;
@@ -146,7 +145,7 @@ const DashboardPanel = () => {
       const response: DashboardResponse = await dashBoardDataService({
         startDate: formatDateString(formattedStartDate, true),
         endDate: formatDateString(formattedEndDate, true),
-        botIds: [botId],
+        botIds: [botId?.length ? botId : botsDataRedux[0]._id],
       });
       if (response?.success) {
         setStats(response);
@@ -309,7 +308,7 @@ const DashboardPanel = () => {
               setIsToday(value); // Update isToday state asynchronously
               isTodayRef.current = value; // Update ref synchronously
             }}
-            onDateRangeChange={botId?.length ? handleDateRangeChange : () => { }}
+            onDateRangeChange={handleDateRangeChange}
           />
 
           {botsDataRedux?.length > 0 && Array.isArray(botsDataRedux) && (
