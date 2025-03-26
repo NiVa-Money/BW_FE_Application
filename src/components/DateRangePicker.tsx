@@ -35,7 +35,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [buttonRef, setButtonRef] = useState<HTMLElement | null>(null);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [selectedRange, setSelectedRange] = useState("Last 30 days");
+  const [selectedRange, setSelectedRange] = useState("Today");
   const [menuOpen, setMenuOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isCustomRange, setIsCustomRange] = useState(false);
@@ -95,11 +95,11 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       onDateRangeChange(startDate, date);
     }
   };
-  useEffect(() => {
-    console.log("botsDataRedux", botsDataRedux, selectedRange);
-    botsDataRedux?.length ?
-      handleRangeSelect(selectedRange) : null
-  }, [botsDataRedux])
+  // useEffect(() => {
+  //   console.log("botsDataRedux", botsDataRedux, selectedRange);
+  //   botsDataRedux?.length ?
+  //     handleRangeSelect(selectedRange) : null
+  // }, [botsDataRedux])
 
 
   return (
