@@ -41,7 +41,6 @@ const CreateBot: React.FC = () => {
   const [filename, setFileName] = useState("");
   const [, setSelectedFile] = useState<File | null>(null);
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
-  const [base64Image, setBase64Image] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const totalPages = 2;
   const imgViewerRef = useRef<HTMLInputElement>(null);
@@ -51,7 +50,7 @@ const CreateBot: React.FC = () => {
     botName: "",
     botTone: "",
     botColor: "",
-    botGreetingMessage: "",
+    botGreetingMessage: "Hello, how can I assist you?",
     botIdentity: "",
     supportNumber: "",
     supportEmail: "",
@@ -121,7 +120,9 @@ const CreateBot: React.FC = () => {
       ? Yup.object().shape({
           botName: Yup.string().required("Agent Name is required"),
           botGreetingMessage: Yup.string().required("Greeting is required"),
-          supportNumber: Yup.string().required("Phone Number is required"),
+          supportNumber: Yup.string()
+            .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+            .required("Phone Number is required"),
           supportEmail: Yup.string()
             .email("Invalid email")
             .required("EmailID is required"),
@@ -155,7 +156,7 @@ const CreateBot: React.FC = () => {
     setImageSrc(item.imageUrl);
     const response = await fetch(item.imageUrl);
     const blob = await response.blob();
-    const file = new File([blob], "image.jpg", { type: blob.type });
+    const file = new File([blob], "bot-icon.svg", { type: blob.type }); // Ensure proper filename
     setSelectedFileImage(file);
   };
 
@@ -172,12 +173,8 @@ const CreateBot: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file) return;
     setImageName(file.name);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setBase64Image(reader.result as string);
-    };
-    reader.readAsDataURL(file);
     setImageSrc(URL.createObjectURL(file));
+    setSelectedFileImage(file); // Directly use the File object
   };
 
   const handleFileChange = (
@@ -201,16 +198,17 @@ const CreateBot: React.FC = () => {
       // Build formData
       const formData = new FormData();
 
-      // Choose the correct image file
-      const imageFile = base64Image || selectedFileImage;
+      // // Choose the correct image file
+      // const imageFile = base64Image || selectedFileImage;
+      if (selectedFileImage) {
+        formData.append("customBotImage", selectedFileImage);
+      }
 
       // Append required form fields
       formData.append("botName", values.botName || "");
       formData.append("botTone", values.botTone || "");
       formData.append("botColor", chatColor || "");
-      formData.append("customBotImage", imageFile || "");
       formData.append("botGreetingMessage", values.botGreetingMessage || "");
-      // formData.append("botIdentity", values.botIdentity || "");
       formData.append("supportNumber", values.supportNumber || "");
       formData.append("supportEmail", values.supportEmail || "");
       formData.append("docName", filename || "");
@@ -231,12 +229,7 @@ const CreateBot: React.FC = () => {
       );
 
       // Append additional fields
-      formData.append(
-        "agentRole",
-        values.agentRole === "Custom"
-          ? values.customAgentRole || ""
-          : values.agentRole || ""
-      );
+      formData.append("agentRole", values.agentRole || "");
       formData.append(
         "agentRoleDescription",
         values.agentRoleDescription || ""
@@ -397,7 +390,13 @@ const CreateBot: React.FC = () => {
                     key={idx}
                     src={item.imageUrl}
                     alt="logo"
-                    className="w-full h-auto cursor-pointer"
+                    className={`w-full h-auto cursor-pointer rounded-md
+            ${
+              imageSrc === item.imageUrl
+                ? "bg-[#65558F] bg-opacity-[0.5] rounded-md " // Highlight style
+                : " bg-transparent"
+            }
+          `}
                     onClick={() => handleBotSampleClick(item)}
                   />
                 ))}
@@ -406,33 +405,73 @@ const CreateBot: React.FC = () => {
           )}
 
           {formik.values.botIconOption === BOTICONS.custom && (
+            // <div className="flex flex-col w-[85%] mb-3 text-black">
+            //   <div className="relative h-[50px]">
+            //     {/* Container for displaying file name + remove button */}
+            //     <div className="flex items-center h-full w-full rounded-[12px] bg-[#F3F2F6] absolute z-0">
+            //       <div className="flex items-center ml-4">
+            //         {imageName && (
+            //           <img src={imageSrc} alt="logo" className="w-5 h-5 mr-2" />
+            //         )}
+            //         <span>{imageName || "Choose Icon"}</span>
+            //       </div>
+            //       {imageName && (
+            //         <button
+            //           onClick={(e) => {
+            //             e.stopPropagation(); // Prevent click from reaching the file input
+            //             // Clear all states
+            //             setSelectedFileImage(null);
+            //             setImageName("");
+            //             setImageSrc("");
+            //           }}
+            //           className="ml-auto mr-4 text-black relative z-10"
+            //         >
+            //           ×
+            //         </button>
+            //       )}
+            //     </div>
+            //     {/* The file input covers the entire container, but sits behind the button because of z-index */}
+            //     <input
+            //       type="file"
+            //       onChange={handleImageUpload}
+            //       ref={imgViewerRef}
+            //       accept="image/*"
+            //       className="absolute w-full h-full top-0 left-0 opacity-0 cursor-pointer z-0"
+            //     />
+            //   </div>
+            // </div>
             <div className="flex flex-col w-[85%] mb-3 text-black">
               <div className="relative h-[50px]">
-                <div className="flex items-center h-full w-full rounded-[12px] bg-[#F3F2F6] absolute">
+                <label
+                  htmlFor="customIcon"
+                  className="flex items-center h-full w-full rounded-[12px] bg-[#F3F2F6] cursor-pointer"
+                >
                   <div className="flex items-center ml-4">
                     {imageName && (
                       <img src={imageSrc} alt="logo" className="w-5 h-5 mr-2" />
                     )}
                     <span>{imageName || "Choose Icon"}</span>
                   </div>
-                  {imageName && (
-                    <button
-                      onClick={() => {
-                        setImageName("");
-                        setImageSrc("");
-                      }}
-                      className="ml-auto mr-4 text-black"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
+                </label>
+                {imageName && (
+                  <button
+                    onClick={() => {
+                      setSelectedFileImage(null);
+                      setImageName("");
+                      setImageSrc("");
+                    }}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-black"
+                  >
+                    ×
+                  </button>
+                )}
                 <input
+                  id="customIcon"
                   type="file"
                   onChange={handleImageUpload}
-                  ref={imgViewerRef}
                   accept="image/*"
-                  className="absolute w-full h-full opacity-0 cursor-pointer"
+                  ref={imgViewerRef}
+                  className="hidden"
                 />
               </div>
             </div>
@@ -478,9 +517,14 @@ const CreateBot: React.FC = () => {
               name="botFont"
               component={FormikFieldToggleComponent}
               options={[
-                { label: "Serif", value: "serif" },
-                { label: "Monospace", value: "monospace" },
+                { label: "Georgia", value: "Georgia" },
+                { label: "Helvetica", value: "Helvetica, sans-serif" },
+                {
+                  label: "Monospace",
+                  value: "monospace",
+                },
                 { label: "Cursive", value: "cursive" },
+                { label: "Poppins (default)", value: "poppins" },
               ]}
             />
           </div>
@@ -609,6 +653,9 @@ const CreateBot: React.FC = () => {
               name="supportNumber"
               placeholder="Enter your Phone Number"
               component={FormikFieldInputComponent}
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+              }}
             />
             <Field
               type="email"
@@ -690,17 +737,14 @@ const CreateBot: React.FC = () => {
                 { label: "Customer Service", value: "Customer Service" },
                 { label: "Sales", value: "Sales" },
                 { label: "Human Resources", value: "Human Resource" },
-                { label: "Custom", value: "Custom" },
+                { label: "Custom", value: "CUSTOM_FLAG" },
               ]}
-              onChange={(value) => {
-                formik.setFieldValue("agentRole", value);
-                if (value !== "Custom") {
-                  formik.setFieldValue("customAgentRole", ""); // Clear custom field if not selected
-                }
-              }}
             />
 
-            {formik.values.agentRole === "Custom" && (
+            {(formik.values.agentRole === "CUSTOM_FLAG" ||
+              !["Customer Service", "Sales", "Human Resource"].includes(
+                formik.values.agentRole
+              )) && (
               <div className="mt-2">
                 <div className="flex items-center mb-2">
                   <label>Custom Role</label>
@@ -715,10 +759,28 @@ const CreateBot: React.FC = () => {
                   </Tooltip>
                 </div>
                 <Field
-                  name="customAgentRole"
+                  name="agentRole"
                   type="text"
-                  className="border p-2 rounded"
-                  placeholder="Enter custom role"
+                  className="border p-2 rounded mb-3 w-full"
+                  placeholder="Enter custom role name"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    formik.setFieldValue("agentRole", value || "CUSTOM_FLAG");
+                  }}
+                />
+
+                {/* Custom Role Description */}
+                <div className="flex items-center mb-2">
+                  <label>Role Description</label>
+                  <Tooltip title="Describe the responsibilities of this custom role">
+                    <InfoOutlinedIcon className="ml-1 text-gray-600 cursor-pointer" />
+                  </Tooltip>
+                </div>
+                <Field
+                  name="agentRoleDescription"
+                  as="textarea"
+                  className="border p-2 rounded w-full h-24"
+                  placeholder="Describe the role's responsibilities..."
                 />
               </div>
             )}
@@ -759,6 +821,8 @@ const CreateBot: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Agent Goals */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label className="text-lg font-medium">Agent Goals</label>
@@ -772,6 +836,8 @@ const CreateBot: React.FC = () => {
                 />
               </Tooltip>
             </div>
+
+            {/* Render Existing Goals */}
             {formik.values.agentsGoals?.map((goal, index) => (
               <div key={index} className="relative mb-3">
                 <input
@@ -805,7 +871,7 @@ const CreateBot: React.FC = () => {
               </div>
             ))}
 
-            {/* New input field with AI Gen button */}
+            {/* New Goal Input + Buttons for Manual Add or AI Generation */}
             <div className="flex items-center">
               <input
                 type="text"
@@ -814,54 +880,68 @@ const CreateBot: React.FC = () => {
                   formik.setFieldValue("newGoalPrompt", e.target.value)
                 }
                 className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
-                placeholder="Enter a prompt for goal generation..."
+                placeholder="Enter a new goal or AI prompt..."
               />
 
+              {/* Manual Add Button */}
+              <button
+                type="button"
+                className="bg-[#65558F] text-white h-[50px] px-4"
+                onClick={() => {
+                  const newGoal = formik.values.newGoalPrompt.trim();
+                  if (newGoal) {
+                    const updatedGoals = [
+                      ...formik.values.agentsGoals,
+                      newGoal,
+                    ];
+                    formik.setFieldValue("agentsGoals", updatedGoals);
+                    formik.setFieldValue("newGoalPrompt", "");
+                  }
+                }}
+              >
+                Add Manual Goal
+              </button>
+
+              {/* AI Generation Button */}
               <button
                 type="button"
                 className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
                 onClick={async () => {
-                  if (formik.values.newGoalPrompt) {
-                    try {
-                      const response = await generatePromptService({
-                        initialPrompt: formik.values.newGoalPrompt,
-                        purpose: "agent goal",
-                      });
+                  const prompt = formik.values.newGoalPrompt.trim();
+                  if (!prompt) return;
+                  try {
+                    const response = await generatePromptService({
+                      initialPrompt: prompt,
+                      purpose: "agent goal",
+                    });
 
-                      // Split the prompt into individual guidelines
-                      const generatedGoals = response.prompt
-                        .split("\n")
-                        .map((line) => line.replace(/^- /, "").trim()) // Remove markdown-style bullets
-                        .filter((line) => line.length > 0);
+                    // Split the response into individual lines
+                    const generatedGoals = response.prompt
+                      .split("\n")
+                      .map((line) => line.replace(/^- /, "").trim()) // Remove any bullet chars
+                      .filter((line) => line.length > 0);
 
-                      // Add all generated goals to the existing ones
-                      const updatedGoals = [
-                        ...formik.values.agentsGoals,
-                        ...generatedGoals,
-                      ].filter((goal) => goal.trim().length > 0); // Remove empty goals
+                    // Merge with existing goals, removing empty ones
+                    const updatedGoals = [
+                      ...formik.values.agentsGoals,
+                      ...generatedGoals,
+                    ].filter((goal) => goal.trim().length > 0);
 
-                      formik.setFieldValue("agentsGoals", updatedGoals);
-                      formik.setFieldValue("newGoalPrompt", "");
-                    } catch (error) {
-                      console.error("Goal generation failed:", error);
-                      // Add error notification here
-                    }
+                    formik.setFieldValue("agentsGoals", updatedGoals);
+                    formik.setFieldValue("newGoalPrompt", "");
+                  } catch (error) {
+                    console.error("Goal generation failed:", error);
                   }
                 }}
               >
                 AI Gen
               </button>
             </div>
-            {formik.touched.agentsGoals && formik.errors.agentsGoals && (
-              <div className="text-red-500 text-sm mt-1">
-                {formik.errors.agentsGoals}
-              </div>
-            )}
           </div>
 
           {/* Conversation Guidelines */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
-          <div className="flex items-center mb-2">
+            <div className="flex items-center mb-2">
               <label className="text-lg font-medium">
                 Conversation Guidelines
               </label>
@@ -921,6 +1001,28 @@ const CreateBot: React.FC = () => {
                 className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
                 placeholder="Enter a prompt for guideline generation..."
               />
+
+              <button
+                type="button"
+                className="bg-[#65558F] text-white h-[50px] px-4"
+                onClick={() => {
+                  const newGuideline = formik.values.newGuidelinePrompt.trim();
+                  if (newGuideline) {
+                    const updatedGuidelines = [
+                      ...formik.values.conversationGuidelines,
+                      newGuideline,
+                    ];
+                    formik.setFieldValue(
+                      "conversationGuidelines",
+                      updatedGuidelines
+                    );
+                    formik.setFieldValue("newGuidelinePrompt", "");
+                  }
+                }}
+              >
+                Add Manual Guideline
+              </button>
+
               <button
                 type="button"
                 className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
@@ -964,7 +1066,7 @@ const CreateBot: React.FC = () => {
               )}
           </div>
           <div className="flex flex-col w-full mb-3 text-black">
-          <div className="flex items-center mb-2">
+            <div className="flex items-center mb-2">
               <label className="text-lg font-medium">
                 Agent limit per Message
               </label>
@@ -1171,6 +1273,7 @@ const CreateBot: React.FC = () => {
                   botName={formik.values.botName || "Bot Assistant"}
                   theme={formik.values.botTheme}
                   color={chatColor}
+                  greetingMessage={formik.values.botGreetingMessage}
                   botSmartnessHandle={(val) =>
                     formik.setFieldValue("botSmartness", val)
                   }

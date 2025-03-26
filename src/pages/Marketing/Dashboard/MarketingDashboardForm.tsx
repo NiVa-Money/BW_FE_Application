@@ -742,3 +742,412 @@ const MarketingDashboardForm = () => {
 };
 
 export default MarketingDashboardForm;
+
+// import { useState } from "react";
+// import {
+//   Box,
+//   Typography,
+//   TextField,
+//   Button,
+//   Card,
+//   styled,
+//   MenuItem,
+// } from "@mui/material";
+// import { useNavigate } from "react-router-dom";
+
+// // ---------- STYLED COMPONENTS ----------
+// const StyledCard = styled(Card)(() => ({
+//   maxWidth: "800px",
+//   margin: "auto",
+//   borderRadius: "16px",
+//   boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.05)",
+//   overflow: "hidden",
+//   backgroundColor: "white",
+// }));
+
+// const SectionHeader = styled(Box)(() => ({
+//   padding: "24px",
+//   background: "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
+//   color: "white",
+//   textAlign: "center",
+//   borderBottom: "1px solid rgba(255,255,255,0.2)",
+// }));
+
+// const FormContainer = styled(Box)(() => ({
+//   padding: "24px",
+// }));
+
+// const countryCodes = {
+//   AFGHANISTAN: "AF",
+//   ALBANIA: "AL",
+//   ALGERIA: "DZ",
+//   ANDORRA: "AD",
+//   ANGOLA: "AO",
+//   // ... include remaining country codes as needed
+// };
+
+// const MarketingDashboardForm = () => {
+//   const navigate = useNavigate();
+
+//   // COMPANY STATE
+//   const [companyData, setCompanyData] = useState({
+//     name: "",
+//     description: "",
+//     industry: "",
+//     socialLinks: {
+//       instagram: "",
+//       twitter: "",
+//       linkedin: "",
+//     },
+//     country: "",
+//     nextUpdateInHours: "",
+//   });
+
+//   // COMPETITOR STATE: an array of 5 competitor objects
+//   const [competitorsData, setCompetitorsData] = useState(
+//     Array.from({ length: 5 }, () => ({
+//       name: "",
+//       description: "",
+//       industry: "",
+//       socialLinks: {
+//         linkedin: "",
+//         instagram: "",
+//         twitter: "",
+//       },
+//     }))
+//   );
+
+//   // UI STATES
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [error, setError] = useState("");
+
+//   // ---------- COMPANY FIELD HANDLER ----------
+//   const handleCompanyChange = (fieldPath, value) => {
+//     const keys = fieldPath.split(".");
+//     if (keys.length === 1) {
+//       setCompanyData((prev) => ({ ...prev, [fieldPath]: value }));
+//     } else {
+//       setCompanyData((prev) => ({
+//         ...prev,
+//         [keys[0]]: { ...prev[keys[0]], [keys[1]]: value },
+//       }));
+//     }
+//   };
+
+//   // ---------- COMPETITOR FIELD HANDLER ----------
+//   const handleCompetitorChange = (index, fieldPath, value) => {
+//     setCompetitorsData((prev) => {
+//       const newCompetitors = [...prev];
+//       const keys = fieldPath.split(".");
+//       if (keys.length === 1) {
+//         newCompetitors[index] = {
+//           ...newCompetitors[index],
+//           [fieldPath]: value,
+//         };
+//       } else {
+//         newCompetitors[index] = {
+//           ...newCompetitors[index],
+//           [keys[0]]: {
+//             ...newCompetitors[index][keys[0]],
+//             [keys[1]]: value,
+//           },
+//         };
+//       }
+//       return newCompetitors;
+//     });
+//   };
+
+//   // ---------- AI GENERATION HANDLER ----------
+//   const handleAIGenerate = async () => {
+//     setIsLoading(true);
+//     setError("");
+//     try {
+//       // Simulate an API call delay
+//       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+//       // Replace this simulated data with your actual API call results.
+//       // For example, auto-fill the first competitor's fields via AI.
+//       setCompetitorsData((prev) => {
+//         const newCompetitors = [...prev];
+//         newCompetitors[0] = {
+//           ...newCompetitors[0],
+//           name: "AI Generated Competitor Inc.",
+//           description: "A leading competitor in innovative solutions.",
+//           industry: "Technology",
+//         };
+//         return newCompetitors;
+//       });
+//     } catch (err) {
+//       setError("Failed to generate competitor data via AI");
+//       console.error(err);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   // ---------- SUBMISSION HANDLER ----------
+//   const handleSubmit = async () => {
+//     setError("");
+
+//     const payload = {
+//       company: {
+//         name: companyData.name,
+//         description: companyData.description,
+//         industry: companyData.industry,
+//         socialLinks: {
+//           instagram: companyData.socialLinks.instagram,
+//           twitter: companyData.socialLinks.twitter,
+//           linkedin: companyData.socialLinks.linkedin,
+//         },
+//         country: companyData.country,
+//         nextUpdateInHours: Number(companyData.nextUpdateInHours),
+//       },
+//       competitors: competitorsData, // sending all competitor objects
+//     };
+
+//     console.log("Submitting payload:", payload);
+//     // Replace the console log with your API call. On success, navigate accordingly:
+//     navigate("/marketing/dashboard");
+//   };
+
+//   return (
+//     <Box
+//       sx={{
+//         display: "flex",
+//         justifyContent: "center",
+//         alignItems: "center",
+//         minHeight: "100vh",
+//         background: "#f4f6f9",
+//         p: 2,
+//       }}
+//     >
+//       <StyledCard>
+//         {/* Company Details Section */}
+//         <SectionHeader>
+//           <Typography variant="h5" component="h1">
+//             Company Details
+//           </Typography>
+//         </SectionHeader>
+//         <FormContainer>
+//           <TextField
+//             fullWidth
+//             label="Name of the Company"
+//             value={companyData.name}
+//             onChange={(e) => handleCompanyChange("name", e.target.value)}
+//             sx={{ mb: 2 }}
+//           />
+//           <TextField
+//             fullWidth
+//             label="Description of your brand"
+//             value={companyData.description}
+//             onChange={(e) => handleCompanyChange("description", e.target.value)}
+//             sx={{ mb: 2 }}
+//           />
+//           <TextField
+//             fullWidth
+//             label="Industry"
+//             value={companyData.industry}
+//             onChange={(e) => handleCompanyChange("industry", e.target.value)}
+//             sx={{ mb: 2 }}
+//           />
+//           <Box
+//             sx={{
+//               display: "grid",
+//               gridTemplateColumns: "1fr 1fr",
+//               gap: 2,
+//               mb: 2,
+//             }}
+//           >
+//             <TextField
+//               fullWidth
+//               label="Instagram"
+//               value={companyData.socialLinks.instagram}
+//               onChange={(e) =>
+//                 handleCompanyChange("socialLinks.instagram", e.target.value)
+//               }
+//             />
+//             <TextField
+//               fullWidth
+//               label="Twitter"
+//               value={companyData.socialLinks.twitter}
+//               onChange={(e) =>
+//                 handleCompanyChange("socialLinks.twitter", e.target.value)
+//               }
+//             />
+//           </Box>
+//           <Box
+//             sx={{
+//               display: "grid",
+//               gridTemplateColumns: "1fr 1fr",
+//               gap: 2,
+//             }}
+//           >
+//             <TextField
+//               select
+//               fullWidth
+//               label="Location of the Company"
+//               value={companyData.country}
+//               onChange={(e) => handleCompanyChange("country", e.target.value)}
+//             >
+//               {Object.entries(countryCodes).map(([countryName, code]) => (
+//                 <MenuItem key={code} value={code}>
+//                   {countryName} ({code})
+//                 </MenuItem>
+//               ))}
+//             </TextField>
+//             <TextField
+//               fullWidth
+//               label="Next Update In (Hours)"
+//               type="number"
+//               value={companyData.nextUpdateInHours}
+//               onChange={(e) =>
+//                 handleCompanyChange("nextUpdateInHours", e.target.value)
+//               }
+//             />
+//           </Box>
+//         </FormContainer>
+
+//         {/* Competitor Details Section */}
+//         <SectionHeader sx={{ background: "#000", backgroundImage: "none" }}>
+//           <Typography variant="h5" component="h2">
+//             Competitor Details
+//           </Typography>
+//         </SectionHeader>
+//         <FormContainer>
+//           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+//             <Button
+//               variant="contained"
+//               onClick={handleAIGenerate}
+//               disabled={isLoading}
+//               sx={{
+//                 textTransform: "none",
+//                 borderRadius: "8px",
+//                 bgcolor: "#2575fc",
+//                 boxShadow: "0px 4px 12px rgba(0,0,0,0.1)",
+//               }}
+//             >
+//               Generate via AI
+//             </Button>
+//           </Box>
+//           {competitorsData.map((comp, index) => (
+//             <Box
+//               key={index}
+//               sx={{ borderBottom: "1px solid #eee", mb: 2, pb: 2 }}
+//             >
+//               <Typography variant="h6" sx={{ mb: 2 }}>
+//                 Competitor {index + 1}
+//               </Typography>
+//               <TextField
+//                 fullWidth
+//                 label="Competitor Name"
+//                 value={comp.name}
+//                 onChange={(e) =>
+//                   handleCompetitorChange(index, "name", e.target.value)
+//                 }
+//                 sx={{ mb: 2 }}
+//               />
+//               <TextField
+//                 fullWidth
+//                 label="Competitor Description"
+//                 value={comp.description}
+//                 onChange={(e) =>
+//                   handleCompetitorChange(index, "description", e.target.value)
+//                 }
+//                 sx={{ mb: 2 }}
+//               />
+//               <TextField
+//                 fullWidth
+//                 label="Competitor Industry"
+//                 value={comp.industry}
+//                 onChange={(e) =>
+//                   handleCompetitorChange(index, "industry", e.target.value)
+//                 }
+//                 sx={{ mb: 2 }}
+//               />
+//               <Box
+//                 sx={{
+//                   display: "grid",
+//                   gridTemplateColumns: "1fr 1fr",
+//                   gap: 2,
+//                   mb: 2,
+//                 }}
+//               >
+//                 <TextField
+//                   fullWidth
+//                   label="LinkedIn"
+//                   value={comp.socialLinks.linkedin}
+//                   onChange={(e) =>
+//                     handleCompetitorChange(
+//                       index,
+//                       "socialLinks.linkedin",
+//                       e.target.value
+//                     )
+//                   }
+//                 />
+//                 <TextField
+//                   fullWidth
+//                   label="Instagram"
+//                   value={comp.socialLinks.instagram}
+//                   onChange={(e) =>
+//                     handleCompetitorChange(
+//                       index,
+//                       "socialLinks.instagram",
+//                       e.target.value
+//                     )
+//                   }
+//                 />
+//               </Box>
+//               <Box
+//                 sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}
+//               >
+//                 <TextField
+//                   fullWidth
+//                   label="Twitter"
+//                   value={comp.socialLinks.twitter}
+//                   onChange={(e) =>
+//                     handleCompetitorChange(
+//                       index,
+//                       "socialLinks.twitter",
+//                       e.target.value
+//                     )
+//                   }
+//                 />
+//               </Box>
+//             </Box>
+//           ))}
+//         </FormContainer>
+
+//         {/* Footer Submission */}
+//         <Box
+//           sx={{
+//             display: "flex",
+//             justifyContent: "flex-end",
+//             p: 2,
+//             borderTop: "1px solid #e0e0e0",
+//           }}
+//         >
+//           <Button
+//             variant="contained"
+//             onClick={handleSubmit}
+//             disabled={isLoading}
+//             sx={{
+//               textTransform: "none",
+//               borderRadius: "8px",
+//               bgcolor: "#65558F",
+//               color: "white",
+//             }}
+//           >
+//             Submit
+//           </Button>
+//         </Box>
+//         {error && (
+//           <Typography color="error" sx={{ textAlign: "center", p: 2 }}>
+//             {error}
+//           </Typography>
+//         )}
+//       </StyledCard>
+//     </Box>
+//   );
+// };
+
+// export default MarketingDashboardForm;

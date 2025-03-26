@@ -1316,30 +1316,6 @@ const VoiceChatComponent: React.FC = () => {
           {/* Right Column */}
           <div className="w-full md:w-1/2 flex flex-col items-center space-y-6 p-4">
             {/* Animated Orb */}
-            {/* <div className="relative w-40 h-40 md:w-60 md:h-60">
-              <div
-                className={`
-                  absolute inset-0 rounded-full backdrop-blur-xl
-                  ${
-                    agentStatus === "responding"
-                      ? "animate-pulse-slow bg-gradient-to-br from-blue-500/20 to-purple-500/20"
-                      : "bg-blue-500/10"
-                  }
-                `}
-              />
-              <div className="absolute inset-4 flex items-center justify-center">
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#2E2F5F] to-blue-600 flex items-center justify-center shadow-2xl">
-                  <div className="text-white text-5xl transform transition-transform duration-300">
-                    {agentStatus === "responding" ? (
-                      <div className="animate-bounce">⚡</div>
-                    ) : (
-                      <div className="animate-float">🎙</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div> */}
-            {/* Animated Orb */}
             <div className="relative w-40 h-40 md:w-60 md:h-60">
               <div
                 className={`
