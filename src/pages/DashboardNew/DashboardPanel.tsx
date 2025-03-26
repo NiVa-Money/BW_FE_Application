@@ -122,6 +122,9 @@ const DashboardPanel = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
+  const botsDataLoader = useSelector(
+    (state: RootState) => state.bot?.lists?.loader
+  );
 
   // Fetch dashboard data
   const fetchData = async (
@@ -169,6 +172,7 @@ const DashboardPanel = () => {
 
   // Construct charts data
   const constructedChartsData = useMemo(() => {
+    console.log("stats", stats);
     if (!stats) {
       return {
         totalConversation: [],
@@ -207,7 +211,7 @@ const DashboardPanel = () => {
       escalationMatrix: stats.data.escalationRate,
       chatTrafficOverview: stats.data.chatTrafficOverview,
     };
-  }, [stats]);
+  }, [stats, botsDataLoader]);
 
   // Handle date range change
   const handleDateRangeChange = (startDate: Date, endDate: Date) => {
