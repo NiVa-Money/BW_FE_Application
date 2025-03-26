@@ -392,7 +392,8 @@ const EditMarketingDashboardForm = () => {
         const response = await fetchMarketingInsightsService(payload);
         console.log("Created new marketing insights:", response);
       }
-      navigate("/marketing/dashboard");
+      // navigate("/marketing/dashboard");
+      window.location.href = "/marketing/dashboard";
     } catch (err) {
       const serverError =
         err?.response?.data?.error || err?.response?.data?.message || "";
@@ -406,6 +407,12 @@ const EditMarketingDashboardForm = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      console.log("EditMarketingDashboardForm unmounted");
+    };
+  }, []);
 
   return (
     <Box
