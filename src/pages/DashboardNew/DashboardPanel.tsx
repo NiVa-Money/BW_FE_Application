@@ -214,16 +214,6 @@ const DashboardPanel = () => {
     };
   }, [stats, botsDataLoader]);
 
-  // Handle date range change
-  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
-    console.log("startDate", startDate, "endDate", endDate);
-    debugger
-    setDateRange({ startDate, endDate });
-    if (!isTodayRef.current) {
-      fetchData(startDate, endDate);
-    }
-  };
-
   // Handle bot selection
   const handleBotSelection = (selectedBotId: string) => {
     const selectedBot = botsDataRedux.find((bot) => bot._id === selectedBotId);
@@ -250,6 +240,16 @@ const DashboardPanel = () => {
       setBotName(botsDataRedux[0].botName);
     }
   }, [botsDataRedux]);
+
+  // Handle date range change
+  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
+    console.log("startDate", startDate, "endDate", endDate);
+    debugger
+    setDateRange({ startDate, endDate });
+    if (!isTodayRef.current) {
+      fetchData(startDate, endDate);
+    }
+  };
 
   // Fetch bots data
   useEffect(() => {
