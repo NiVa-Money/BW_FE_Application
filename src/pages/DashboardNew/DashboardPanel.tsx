@@ -135,6 +135,7 @@ const DashboardPanel = () => {
     })(),
     endDate: Date | null | string = new Date()
   ) => {
+    console.log('botId', botId, startDate, endDate)
     if (!botId) return;
     try {
       setIsLoading(true);
