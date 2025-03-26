@@ -211,6 +211,8 @@ const DashboardPanel = () => {
 
   // Handle date range change
   const handleDateRangeChange = (startDate: Date, endDate: Date) => {
+    console.log("startDate", startDate, "endDate", endDate);
+    debugger
     setDateRange({ startDate, endDate });
     if (!isTodayRef.current) {
       fetchData(startDate, endDate);
