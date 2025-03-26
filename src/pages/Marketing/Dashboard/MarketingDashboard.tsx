@@ -310,7 +310,7 @@ const MarketingDashboard = () => {
   //   competitorTrendsData.length === 0 ||
   //   competitorTrendsData.every((entry) => Number(entry.value) === 0);
 
-  const noData = competitorTrendsData.length === 0;
+  // const noData = competitorTrendsData.length === 0;
 
   if (loading) return <div>Loading...</div>;
   // if (!insightsData)
