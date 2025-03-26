@@ -730,7 +730,7 @@ const DashboardCard = ({
 );
 
 const MarketingDashboard = () => {
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
   const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
   const navigate = useNavigate();
