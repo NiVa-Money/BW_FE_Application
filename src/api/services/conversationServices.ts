@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import axios from "axios";
 import axiosInstance from "../axiosConfig";
 
 export const getUserAllSessionService = async (payload: any) => {
@@ -74,23 +75,76 @@ export const getWhatsAppChatsService = async (payload: {
   botId: string;
   adminPhoneNumberId: string;
   userPhoneNumberId: string;
-  aiLevel,
-  humanLevel,
+  aiLevel;
+  humanLevel;
 }) => {
   try {
     const response = await axiosInstance.get(`/whatsapp/chats`, {
-      params: payload
+      params: payload,
     });
     return response.data;
-  
   } catch (error: any) {
     if (error.response?.data) {
       return error.response.data;
     } else {
       return {
         status: "error",
-        message: error.message || "Error retrieving WhatsApp chats"
+        message: error.message || "Error retrieving WhatsApp chats",
       };
     }
+  }
+};
+
+export const markWhatsAppMessageAsRead = async (
+  userPhoneId: string,
+  adminPhoneNumberId: string
+): Promise<any> => {
+  try {
+    const response = await axiosInstance.post(
+      "/whatsapp/messages/mark_as_read",
+      {
+        userPhoneId,
+        adminPhoneNumberId,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error marking WhatsApp message as read:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const markWhatsAppMessageAsUnread = async (
+  userPhoneId: string,
+  adminPhoneNumberId: string
+): Promise<any> => {
+  try {
+    const response = await axiosInstance.post(
+      "/whatsapp/messages/mark_as_unread",
+      {
+        userPhoneId,
+        adminPhoneNumberId,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error marking WhatsApp message as unread:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
   }
 };
