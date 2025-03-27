@@ -13,7 +13,6 @@ import {
   getMarketingInsightsService,
   updateMarketingInsightsService,
 } from "../../../api/services/marketingDashboardService";
-import { useNavigate } from "react-router-dom";
 
 // ---------- STYLED COMPONENTS ----------
 const StyledCard = styled(Card)(() => ({
@@ -235,7 +234,7 @@ const countryCodes = {
 };
 
 const EditMarketingDashboardForm = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // COMPANY STATE (nested under "company" as per existing data structure)
   const [companyData, setCompanyData] = useState({
@@ -398,7 +397,8 @@ const EditMarketingDashboardForm = () => {
       const serverError =
         err?.response?.data?.error || err?.response?.data?.message || "";
       if (serverError.includes("E11000 duplicate key error")) {
-        navigate("/marketing/dashboard");
+        // navigate("/marketing/dashboard");
+        window.location.href = "/marketing/dashboard";
         return;
       }
       setError("Failed to update marketing insights");

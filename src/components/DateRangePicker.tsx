@@ -96,9 +96,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
   };
   useEffect(() => {
-    botsDataRedux?.length ?
+    botsDataRedux?.length && selectedRange === 'Last 30 days' ?
       handleRangeSelect(selectedRange) : null
-  }, [botsDataRedux])
+  }, [botsDataRedux, selectedRange])
 
 
   return (

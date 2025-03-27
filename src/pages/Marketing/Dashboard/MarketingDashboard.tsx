@@ -104,36 +104,25 @@ const MarketingDashboard = () => {
 
   useEffect(() => {
     let pollingTimeout: NodeJS.Timeout;
-    const POLLING_INTERVAL = 5000;
-    const MAX_POLLING_ATTEMPTS = 12;
-    let pollingAttempts = 0;
+    const POLLING_INTERVAL = 5000; // Poll every 5 seconds
 
     const fetchInsights = async () => {
       setLoading(true);
       try {
         const response = await getMarketingInsightsService();
-        console.log("API Response data:", response.data);
 
         if (response.data) {
           setInsightsData(response.data);
 
+          // Stop polling ONLY if status is "final"
           if (response.data.status === "final") {
             setLoading(false);
             setHasFetched(true);
-            return; // Stop polling
+            return;
           }
         }
 
-        pollingAttempts++;
-
-        if (pollingAttempts < MAX_POLLING_ATTEMPTS) {
-          // Schedule next poll
-          pollingTimeout = setTimeout(fetchInsights, POLLING_INTERVAL);
-        } else {
-          setLoading(false);
-          setHasFetched(true);
-          console.warn("Max polling attempts reached without final status");
-        }
+        pollingTimeout = setTimeout(fetchInsights, POLLING_INTERVAL);
       } catch (error) {
         console.error("Failed to fetch marketing insights", error);
         setLoading(false);
@@ -141,12 +130,11 @@ const MarketingDashboard = () => {
       }
     };
 
-    fetchInsights();
+    fetchInsights(); // Initial fetch
 
+    // Cleanup: Cancel pending timeout on unmount
     return () => {
-      if (pollingTimeout) {
-        clearTimeout(pollingTimeout);
-      }
+      if (pollingTimeout) clearTimeout(pollingTimeout);
     };
   }, []);
 
@@ -729,16 +717,16 @@ const MarketingDashboard = () => {
                     <YAxis
                       type="category"
                       dataKey="name"
-                      width={200} 
+                      width={200}
                       axisLine={true}
                       tickLine={true}
                       tick={{
                         fill: "#374151",
-                        fontSize: 11, 
-                        width: 250, 
+                        fontSize: 11,
+                        width: 250,
                       }}
                       interval={0}
-                      tickMargin={20} 
+                      tickMargin={20}
                     />
                     <Tooltip
                       formatter={(value: number) => [`${value}%`, "Engagement"]}

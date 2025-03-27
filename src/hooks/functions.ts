@@ -2,7 +2,6 @@ export const formatDateString = (
   dateString: string,
   withoutTime: boolean = false
 ): string => {
-  console.log("withoutTime", withoutTime);
   const date = new Date(dateString);
 
   // Extract date components
