@@ -148,3 +148,55 @@ export const markWhatsAppMessageAsUnread = async (
     throw error;
   }
 };
+
+export const blockWhatsAppUserService = async (payload: {
+  adminPhoneNumberId: string;
+  userPhoneId: string;
+  reason: string;
+}): Promise<any> => {
+  try {
+    const response = await axiosInstance.post(`/whatsapp/block-users`, payload);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error blocking user on WhatsApp:",
+        error.response?.data || error.message
+      );
+      // Optionally return the server data if it exists
+      if (error.response?.data) {
+        return error.response.data;
+      }
+    } else {
+      console.error("Unexpected error blocking user on WhatsApp:", error);
+    }
+    throw error;
+  }
+};
+
+export const unblockWhatsAppUserService = async (payload: {
+  adminPhoneNumberId: string;
+  userPhoneId: string;
+}): Promise<any> => {
+  try {
+    const response = await axiosInstance.post(
+      `/whatsapp/unblock-users`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error unblocking user on WhatsApp:",
+        error.response?.data || error.message
+      );
+      // Optionally return the server data if it exists
+      if (error.response?.data) {
+        return error.response.data;
+      }
+    } else {
+      console.error("Unexpected error unblocking user on WhatsApp:", error);
+    }
+    throw error;
+  }
+};
