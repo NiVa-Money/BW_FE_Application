@@ -14,7 +14,7 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
-import { notifyError } from "../../../components/Toast";
+import { notifyError, notifySuccess } from "../../../components/Toast";
 // import ReactMarkdown from "react-markdown";
 import SendIcon from "@mui/icons-material/Send";
 import {
@@ -28,9 +28,11 @@ import {
   Line,
 } from "recharts";
 import {
+  blockWhatsAppUserService,
   enableWhatsAppManualModeService,
   getWhatsAppChatsService,
   sendWhatsAppManualReplyService,
+  unblockWhatsAppUserService,
 } from "../../../api/services/conversationServices";
 import { Switch } from "@mui/material";
 
@@ -77,6 +79,11 @@ const AllChats = () => {
   const [userMessage, setUserMessage] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [intentVal, setIntentVal] = useState("");
+
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [showBlockInput, setShowBlockInput] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // New search handler function
   const handleSearch = async () => {
@@ -463,6 +470,83 @@ const AllChats = () => {
     }
   };
 
+  const getCurrentSession = () => {
+    // If there's no sessions array yet, return null
+    if (!sessionsDataRedux?.sessions) {
+      return null;
+    }
+    return sessionsDataRedux.sessions.find(
+      (obj: any) => obj._id === sessionId || obj.userPhoneId === sessionId
+    );
+  };
+
+ // Handle Block Contact
+const handleBlockContact = async () => {
+  if (!blockReason.trim()) {
+    setErrorMessage("Please provide a reason for blocking.");
+    return;
+  }
+
+  const selectedSession = getCurrentSession();
+  if (!selectedSession) {
+    setErrorMessage("No session selected.");
+    return;
+  }
+
+  try {
+    const response = await blockWhatsAppUserService({
+      adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+      userPhoneId: selectedSession.userPhoneId,
+      reason: blockReason,
+    });
+
+    // Check for actual success message from BE
+    if (response?.message === "User blocked successfully") {
+      // Immediate UI update
+      setIsBlocked(true);
+      setShowBlockInput(false);
+      setBlockReason("");
+      notifySuccess("Contact blocked successfully!");
+      setErrorMessage(null); // Clear any existing errors
+    } else {
+      // Handle API business logic errors
+      setErrorMessage(response?.message || "Failed to block contact.");
+    }
+  } catch (err) {
+    // Handle network/HTTP errors
+    console.error("Block failed:", err);
+    setErrorMessage("Failed to block contact. Please try again.");
+  }
+};
+
+// Handle Unblock Contact
+const handleUnblockContact = async () => {
+  const selectedSession = getCurrentSession();
+  if (!selectedSession) {
+    setErrorMessage("No session selected.");
+    return;
+  }
+
+  try {
+    const response = await unblockWhatsAppUserService({
+      adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+      userPhoneId: selectedSession.userPhoneId,
+    });
+
+    // Check for expected success indicator
+    if (response?.message?.includes("unblocked")) { // Adjust based on your actual success message
+      setIsBlocked(false);
+      notifySuccess("Contact unblocked successfully!");
+      setErrorMessage(null);
+    } else {
+      setErrorMessage(response?.message || "Failed to unblock contact.");
+    }
+  } catch (err) {
+    console.error("Unblock failed:", err);
+    setErrorMessage("Failed to unblock contact. Please try again.");
+  }
+};
+
   const handleSendMessage = async () => {
     if (!userMessage.trim() || !sessionId) return;
 
@@ -773,6 +857,71 @@ const AllChats = () => {
             ) : null}
           </div>
 
+          {/* Block / Unblock and Chat Input Section */}
+          {/* Add Error Popup Component */}
+          {errorMessage && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg max-w-md w-full">
+                <h3 className="text-xl font-bold text-red-600 mb-4">Error</h3>
+                <p className="text-gray-700">{errorMessage}</p>
+                <button
+                  onClick={() => setErrorMessage(null)}
+                  className="mt-4 bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Block/Unblock Section */}
+          <div className="p-4 border-t flex flex-col gap-2">
+            <div className="flex justify-between items-center">
+              {isBlocked ? (
+                <button
+                  onClick={handleUnblockContact}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-colors"
+                >
+                  Unblock Contact
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowBlockInput((prev) => !prev)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full transition-colors"
+                >
+                  Block Contact
+                </button>
+              )}
+            </div>
+
+            {/* Block Reason Input */}
+            {showBlockInput && !isBlocked && (
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter reason for blocking..."
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleBlockContact}
+                  className="bg-red-500 hover:bg-red-600 w-[200px] text-white px-4 py-2 rounded-full transition-colors"
+                >
+                  Confirm Block
+                </button>
+              </div>
+            )}
+
+            {/* Blocked Message */}
+            {isBlocked && (
+              <div className="text-sm text-gray-500 italic">
+                This contact is blocked. You cannot send messages.
+              </div>
+            )}
+          </div>
+
+          {/* Human Toggle */}
           <div className="flex items-end justify-end space-x-2 mb-4">
             <label className="inline-flex items-center mr-4 cursor-pointer">
               <input
