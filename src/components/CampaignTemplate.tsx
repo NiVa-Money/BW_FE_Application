@@ -1,4 +1,3 @@
- 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect } from "react";
@@ -103,42 +102,18 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
     console.log("Selected template:", template);
 
     const mappedTemplate = {
-      name: template.templateName,
-      body: template.components
-        ?.filter((comp: any) => comp.type === "BODY")
-        .map((body: any) => body.text)
-        .join(" "),
+      template: {
+        name: template.templateName,
+        body: template.components
+          ?.filter((comp: any) => comp.type === "BODY")
+          .map((body: any) => body.text)
+          .join(" "),
+      },
     };
 
     setSelectedTemplate(mappedTemplate); // Store template in state
     setCustomizeScreen(true);
   };
-
-  // const handleCreateCampaign = (template: any) => {
-  //   // const templateData = {
-  //   //   text,
-  //   //   image,
-  //   // };
-  //   // dispatch(createWhatsAppTemplateAction(templateData));
-  //   // setCustomizeScreen(false);
-  //   if (imageUrl) {
-  //     console.log("Selected Image URL:", imageUrl);
-  //     const selectedTemplate = {
-  //       ...template, // Reuse the template object that was selected
-  //       name: template.templateName, // Assign a fallback name if templateName is missing
-  //       body: template.components
-  //         ?.filter((comp: any) => comp.type === "BODY")
-  //         .map((body: any) => body.text)
-  //         .join(" "),
-  //       header: imageUrl, // Now set the uploaded image URL as the header
-  //     };
-
-  //     // Pass the finalized template to onSelectTemplate
-  //     onSelectTemplate(selectedTemplate);
-  //     console.log("Selected Templatessss with Name:", selectedTemplate); // Verify if name is correctly passed
-  //   }
-  //   onClose();
-  // };
 
   const handleCreateCampaign = () => {
     if (!selectedTemplate) {
@@ -147,7 +122,7 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
     }
 
     const finalTemplate = {
-      ...selectedTemplate,
+      ...selectedTemplate.template,
       header: imageUrl || "", // Attach uploaded image if available
     };
 
@@ -173,17 +148,6 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
         {customizeScreen ? (
           <div className="rounded-lg shadow-sm p-6">
             <div className="space-y-6">
-              {/* <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Text
-                </label>
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  className="w-full h-32 px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div> */}
-
               <div>
                 <label className="block text-xl font-medium text-gray-700 mb-4">
                   Image
