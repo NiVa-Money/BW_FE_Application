@@ -40,8 +40,6 @@ export default function CampaignManager() {
       state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp
   );
 
-
-
   console.log("campaign list", campaignData);
   useEffect(() => {
     dispatch(fetchCampaignsAction({ payload: {} }));
@@ -101,7 +99,7 @@ export default function CampaignManager() {
                   <span className="font-medium">{campaign.messageType}</span>
                 </p>
 
-                {campaign.messageContent.template.header?.image && (
+                {campaign.messageContent?.template?.header?.image && (
                   <div className="mt-2">
                     <img
                       src={campaign.messageContent.template.header.image}
@@ -110,11 +108,10 @@ export default function CampaignManager() {
                     />
                   </div>
                 )}
-
                 <p className="text-sm text-gray-500 mt-2">
                   Message:{" "}
                   <span className="font-medium">
-                    {campaign.messageContent.template.body?.text?.join(" ") ||
+                    {campaign.messageContent?.template?.body?.text?.join(" ") ||
                       "No message"}
                   </span>
                 </p>

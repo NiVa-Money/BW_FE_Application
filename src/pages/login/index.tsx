@@ -1,5 +1,5 @@
 /* eslint-disable no-unsafe-optional-chaining */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getUserProfileService,
@@ -159,11 +159,12 @@ const Login = () => {
     }
   };
 
+  useEffect(() => {
+    document.title = "BotWot iCX - Login";
+  }, []);
+
   return (
     <>
-      <head>
-        <title>BotWot iCX - Login</title>
-      </head>
       <div className="overflow-hidden py-4 pr-4 pl-20 bg-white rounded-none max-md:pl-5">
         <div className="flex gap-5 max-md:flex-col">
           {/* Left Section */}
