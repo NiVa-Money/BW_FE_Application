@@ -25,10 +25,6 @@ const Login = () => {
     /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
   const isValidForm = () => email && password && isValidEmail(email);
 
-  useEffect(() => {
-    document.title = "BotWot iCX - Login";
-  }, []);
-
   // Handle form login submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +158,10 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    document.title = "BotWot iCX - Login";
+  }, []);
 
   return (
     <>
