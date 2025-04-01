@@ -15,7 +15,10 @@ import {
   createWhatsAppCampaignAction,
   createWhatsAppTemplateAction,
 } from "../../../store/actions/whatsappCampaignActions";
-import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
+import {
+  convertCsvToJsonService,
+  downloadSampleCsvService,
+} from "../../../api/services/whatsappCampaignService";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
 import CreateTemplateModal from "./CreateTemplate";
 
@@ -45,9 +48,38 @@ const WhatsappCampaign: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  // Verify your template selection handler
   const handleSelectTemplate = (template: any) => {
+    if (!template?.id) {
+      console.error("Selected template has no ID:", template);
+      return;
+    }
+
     setSelectedTemplate(template);
     setShowTemplate(false);
+    // Remove templateId state if using selectedTemplate.id directly
+  };
+
+  const handleDownloadSample = async () => {
+    if (!selectedTemplate?.id) {
+      alert("Please select a template first");
+      return;
+    }
+
+    try {
+      const blob = await downloadSampleCsvService(selectedTemplate.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `sample_${selectedTemplate.name}.csv`; // Use template name
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert("Failed to download sample CSV. Please try again.");
+    }
   };
 
   const handleCampaignNameChange = (
@@ -56,19 +88,37 @@ const WhatsappCampaign: React.FC = () => {
     setCampaignName(event.target.value);
   };
 
-  const handleContactListUpload = (
+  const handleContactListUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files) {
       const file = event.target.files[0];
-      const validFileTypes = ["text/csv"];
 
-      if (validFileTypes.includes(file.type)) {
-        setContactList(file);
-        setFileName(file.name);
-      } else {
-        alert("Please upload a valid CSV file.");
+      // Validate file type
+      if (!file.type.includes("csv")) {
+        alert("Only CSV files are allowed");
+        return;
       }
+
+      // Read CSV headers
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csv = e.target?.result as string;
+        const headers = csv.split("\n")[0].split(",");
+
+        // Validate headers (example validation)
+        const requiredHeaders = ["number", "countrycode"];
+        const isValid = requiredHeaders.every((h) => headers.includes(h));
+
+        if (!isValid) {
+          alert("CSV must include 'number' and 'countrycode' columns");
+          return;
+        }
+      };
+      reader.readAsText(file);
+
+      setContactList(file);
+      setFileName(file.name);
     }
   };
 
@@ -557,15 +607,7 @@ const WhatsappCampaign: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-2.5 items-start mt-2.5 w-full">
-              {/* <div className="flex flex-1 shrink justify-between items-center p-2.5 text-base leading-loose whitespace-nowrap rounded-xl basis-0 bg-slate-500 bg-opacity-10 min-w-[240px] text-zinc-400">
-                <div className="flex flex-1 shrink gap-6 items-center self-stretch my-auto w-full basis-0">
-                  <div className="flex-1 shrink self-stretch my-auto basis-0 rotate-[2.4492937051703357e-16rad]">
-                    Select
-                  </div>
-                  <ArrowDropDown className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square" />
-                </div>
-              </div> */}
-
+              {/* Upload CSV Button */}
               <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
                 <input
                   type="file"
@@ -579,10 +621,23 @@ const WhatsappCampaign: React.FC = () => {
                 >
                   <Upload sx={{ fontSize: 24 }} />
                   <span className="ml-2 text-zinc-400">
-                    {contactList ? contactList.name : "Upload CSV Contact List"}
+                    {contactList ? contactList.name : "Upload CSV"}
                   </span>
                 </label>
               </div>
+
+              {/* Download Sample CSV Button */}
+              <button
+                onClick={handleDownloadSample}
+                disabled={!selectedTemplate} // Use template presence instead of ID
+                className={`p-3 rounded-3xl border ${
+                  !selectedTemplate
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-[#65558F] text-white hover:bg-[#7a6b9d] cursor-pointer"
+                } transition-colors`}
+              >
+                Download Sample CSV
+              </button>
             </div>
 
             {/* <div className="flex flex-col w-full font-[number:var(--sds-typography-body-font-weight-regular)] text-[length:var(--sds-typography-body-size-medium)]">
