@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import React, { useEffect, useState } from "react";
-import { SmartToy, Person, Image, AttachFile, Send } from "@mui/icons-material";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { SmartToy, Person, Send } from "@mui/icons-material";
 import Switch from "@mui/material/Switch";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
@@ -11,183 +9,168 @@ import CloseIcon from "@mui/icons-material/Close";
 import { getAllSessionLive } from "../../../store/actions/conversationActions";
 import { getBotsAction } from "../../../store/actions/botActions";
 import LiveSessionList from "./LiveSession";
+import { createSelector } from "reselect";
 
 const LiveChat: React.FC = (): React.ReactElement => {
   const dispatch = useDispatch();
 
   // ---------- State ----------
-  const [isAIEnabled, setIsAIEnabled] = useState(false);
   const [isAgentAssistOpen, setIsAgentAssistOpen] = useState(true);
-  const [_botIdVal, setBotIdVal] = useState("");
-  const [messages, setMessages] = useState<any>([]);
-  const [selectedSessionId, setSelectedSessionId] = useState<string>(
-    "67c6fc2df65853007a9ed304"
-  );
+  const [messages, setMessages] = useState<any[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState<string>("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [newMessage, setNewMessage] = useState<string>("");
   const [isChatEnabled, setIsChatEnabled] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [agentState, setAgentState] = useState<string>("disconnected");
+  const [isAIEnabled, setIsAIEnabled] = useState(false);
 
-  // ---------- Redux Selectors ----------
-  const sessionsDataRedux = useSelector(
-    (state: RootState) => state?.userChat?.allSessionLive?.data
+  // ---------- Memoized Selectors ----------
+  const selectUserChat = (state: RootState) => state.userChat;
+  const selectSessions = createSelector(
+    [selectUserChat],
+    (userChat) => userChat?.allSessionLive?.data?.sessions || []
   );
+  const sessionsDataRedux = useSelector(selectSessions);
+
+  const selectBots = (state: RootState) => state.bot?.lists;
   const botsDataRedux = useSelector(
-    (state: RootState) => state.bot?.lists?.data
-  );
-  const botsDataLoader = useSelector(
-    (state: RootState) => state.bot?.lists?.loader
+    (state: RootState) => selectBots(state)?.data
   );
 
   // ---------- Derived Values ----------
-  const botId = botsDataRedux?.[0]?._id;
   const userId = localStorage.getItem("user_id");
+  const botLists = useMemo(
+    () =>
+      (botsDataRedux || []).map((bot: any) => ({
+        value: bot._id,
+        name: bot.botName,
+      })),
+    [botsDataRedux]
+  );
 
   // ---------- Effects ----------
   useEffect(() => {
-    if (userId?.length) {
-      dispatch(getBotsAction(userId));
-    }
-  }, [userId]);
+    if (userId) dispatch(getBotsAction(userId));
+  }, [userId, dispatch]);
 
-  // Format the bots into a simpler array for <select>
-  const [botLists, setbotLists] = useState<any>([]);
+  // Socket initialization and management
   useEffect(() => {
-    if (
-      Array.isArray(botsDataRedux) &&
-      botsDataRedux.length &&
-      !botsDataLoader
-    ) {
-      const formattedBots = botsDataRedux.map((bot: any) => ({
-        value: bot._id,
-        name: bot.botName,
-      }));
-      setbotLists(formattedBots);
-    }
-  }, [botsDataRedux, botsDataLoader]);
+    if (!selectedSessionId || !userId) return;
 
-  // Initialize/Refresh socket when session/bot/user changes
-  useEffect(() => {
-    if (selectedSessionId && botId && userId) {
-      if (socket) {
-        socket.disconnect();
-      }
-      const newSocket = io(import.meta.env.VITE_FIREBASE_BASE_URL as string, {
-        query: {
-          userType: "AGENT",
-          sessionId: selectedSessionId,
-          botId: botId,
-          userId: userId,
-        },
-      });
+    const newSocket = io(import.meta.env.VITE_FIREBASE_BASE_URL as string, {
+      query: {
+        userType: "AGENT",
+        sessionId: selectedSessionId,
+        userId: userId,
+      },
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
 
-      newSocket.on("connect_error", (error: any) => {
-        console.error("Socket connection error:", error);
-      });
-
-      newSocket.on("agentConnected", (data: any) => {
-        console.log("Agent connected event received:", data);
-      });
-
+    newSocket.on("connect", () => {
+      setAgentState("connecting");
       newSocket.emit("joinSession", {
         sessionId: selectedSessionId,
         userId: userId,
-        botId: botId,
         userType: "AGENT",
       });
+    });
 
-      newSocket.on("messageToClient", (data: any) => {
-        if (data.chatMode === "ai") {
-          setMessages((prev: any) => [
-            ...prev,
-            {
-              chatMode: "ai",
-              question: data.question,
-              answer: data.answer,
-            },
-          ]);
-        } else if (data.chatMode === "manual") {
-          setMessages((prev: any) => [
-            ...prev,
-            {
-              chatMode: "manual",
-              sender: data.userType?.toLowerCase(),
-              text: data.message,
-            },
-          ]);
-        }
-      });
+    newSocket.on("agentConnected", (data: any) => {
+      setAgentState("connected");
+      console.log("Agent connected:", data);
+    });
 
-      setSocket(newSocket);
+    newSocket.on("messageToClient", (data: any) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          ...data,
+          timestamp: new Date().toISOString(),
+          sender: data.question ? "customer" : "agent",
+        },
+      ]);
+    });
 
-      // Fetch session messages after joining
-      getBotSession({
-        target: { value: botId },
-      } as React.ChangeEvent<HTMLSelectElement>);
+    newSocket.on("sessionClosed", handleSessionEnd);
+    newSocket.on("sessionEndedByAdmin", handleSessionEnd);
+    newSocket.on("adminEndedSession", handleSessionEnd);
 
-      return () => {
-        newSocket.disconnect();
-        setSocket(null);
-      };
-    }
-  }, [selectedSessionId, botId, userId]);
+    newSocket.on("connect_error", (error: any) => {
+      console.error("Connection error:", error);
+      setAgentState("disconnected");
+    });
 
-  // ---------- Handlers ----------
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+      setSocket(null);
+      setAgentState("disconnected");
+    };
+  }, [selectedSessionId, userId]);
+
   const handleToggle = (event: { target: { checked: boolean } }) => {
     setIsAIEnabled(event.target.checked);
   };
 
-  const getBotSession = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const botId = e.target.value;
-    setBotIdVal(botId);
-    dispatch(
-      getAllSessionLive({
-        botId: botId,
+  // ---------- Handlers ----------
+  const handleSessionEnd = useCallback(() => {
+    setIsChatEnabled(false);
+    setMessages([]);
+    setSelectedSessionId("");
+    socket?.disconnect();
+  }, [socket]);
+
+  const getBotSession = useCallback(
+    (botId: string) => {
+      dispatch(getAllSessionLive({ botId, userId }));
+    },
+    [dispatch, userId]
+  );
+
+  const handleSessionSelection = useCallback(
+    (sessionId: string) => {
+      const session = sessionsDataRedux.find((s: any) => s._id === sessionId);
+      if (session) {
+        setSelectedSessionId(sessionId);
+        setMessages(session.sessions || []);
+        setIsChatEnabled(true);
+      }
+    },
+    [sessionsDataRedux]
+  );
+
+  const sendMessage = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newMessage.trim() || !socket || !selectedSessionId) return;
+
+      const messageData = {
+        sessionId: selectedSessionId,
         userId: userId,
-      })
-    );
-  };
+        message: newMessage,
+        userType: "AGENT",
+        chatMode: "manual",
+      };
 
-  const handleSessionSelection = (sessionId: string) => {
-    const selectedSession = sessionsDataRedux?.sessions?.find(
-      (obj: any) => obj._id === sessionId
-    );
-    if (selectedSession) {
-      setMessages(selectedSession.sessions || []);
-      setSelectedSessionId(sessionId);
-    }
-  };
+      socket.emit("messageToServer", messageData);
+      setMessages((prev) => [
+        ...prev,
+        {
+          text: newMessage,
+          sender: "agent",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+      setNewMessage("");
+    },
+    [newMessage, socket, selectedSessionId, userId]
+  );
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !socket) return;
-
-    // Add locally
-    setMessages((prev) => [
-      ...prev,
-      { chatMode: "manual", text: newMessage, sender: "agent" },
-    ]);
-
-    // Send to server
-    socket.emit("messageToServer", {
-      sessionId: selectedSessionId,
-      userId: userId,
-      botId: botId,
-      message: newMessage,
-      userType: "AGENT",
-      chatMode: "manual",
-    });
-
-    setNewMessage("");
-  };
-
-  const handleToggleChat = () => {
-    if (isChatEnabled) {
-      setShowConfirmationModal(true);
-    } else {
-      setIsChatEnabled(true);
-    }
-  };
+  const botId = botsDataRedux?.[0]?._id;
 
   const handleResolution = (resolution: any) => {
     setShowConfirmationModal(false);
@@ -202,10 +185,24 @@ const LiveChat: React.FC = (): React.ReactElement => {
     }
   };
 
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    sendMessage(e);
+  const handleToggleChat = () => {
+    if (isChatEnabled) {
+      setShowConfirmationModal(true);
+    } else {
+      setIsChatEnabled(true);
+    }
   };
+
+  const handleCloseSession = useCallback(() => {
+    if (!socket || !selectedSessionId) return;
+
+    socket.emit("closeSession", {
+      sessionId: selectedSessionId,
+      userId: userId,
+      userType: "AGENT",
+    });
+    handleSessionEnd();
+  }, [socket, selectedSessionId, userId, handleSessionEnd]);
 
   // ---------- Render ----------
   return (
@@ -266,7 +263,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
           <div className="space-y-4 overflow-y-auto">
             <select
               className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-              onChange={(e) => getBotSession(e)}
+              onChange={(e) => getBotSession(e.target.value)}
             >
               <option value="">Select a bot</option>
               {botLists.map((bot: { value: string; name: string }) => (
@@ -396,30 +393,20 @@ const LiveChat: React.FC = (): React.ReactElement => {
                 )}
 
                 {isChatEnabled && (
-                  <form
-                    onSubmit={handleSubmit}
-                    className="flex items-center w-full gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50"
-                  >
-                    <button className="p-1.5 hover:bg-gray-200 rounded-full">
-                      <Image className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <button className="p-1.5 hover:bg-gray-200 rounded-full">
-                      <AttachFile className="w-5 h-5 text-gray-600" />
-                    </button>
-                    <input
-                      type="text"
-                      placeholder="Enter your message..."
-                      className="flex-1 bg-transparent outline-none text-sm text-gray-600"
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      value={newMessage}
-                    />
-                    <button
-                      className="p-1.5 hover:bg-gray-200 rounded-full"
-                      aria-label="Send message"
-                      type="submit"
-                    >
-                      <Send className="w-5 h-5 text-gray-600" />
-                    </button>
+                  <form onSubmit={sendMessage} className="mt-4">
+                    <div className="flex items-center gap-2 p-2 border rounded-lg">
+                      <input
+                        type="text"
+                        placeholder="Type your message..."
+                        className="flex-1 bg-transparent outline-none"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        disabled={agentState !== "connected"}
+                      />
+                      <button type="submit" className="text-[#65558F]">
+                        <Send />
+                      </button>
+                    </div>
                   </form>
                 )}
               </div>
@@ -527,6 +514,31 @@ const LiveChat: React.FC = (): React.ReactElement => {
           </div>
         </div>
       </div>
+
+      {showConfirmationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg">
+            <h2 className="text-lg font-bold mb-4">End this session?</h2>
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  handleCloseSession();
+                  setShowConfirmationModal(false);
+                }}
+                className="px-4 py-2 bg-red-500 text-white rounded"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setShowConfirmationModal(false)}
+                className="px-4 py-2 bg-gray-200 rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Agent Assist Overlay */}
       <div
