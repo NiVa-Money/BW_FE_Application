@@ -75,7 +75,6 @@ const MarketingDashboard = () => {
   const [allNewscurrentPage, setAllNewsCurrentPage] = useState(0);
 
   const [currentPage, setCurrentPage] = useState(0);
-  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
 
   const handleViewDashboard = () => {
@@ -189,12 +188,10 @@ const MarketingDashboard = () => {
   //   ? [{ insights: insightsData.newsArticles.insights }]
   //   : [];
   const allNews = insightsData?.newsArticles?.insights || [];
-  console.log("All news data:", allNews);
   const allNewsPages = Array.from(
     { length: Math.ceil(allNews.length) },
     (_, i) => allNews.slice(i, i + 1)
   );
-  console.log("All news pages:", allNewsPages);
   // Social Media Trends
   const actionableInsights =
     insightsData?.actionableSocialMediaInsights?.filter(
