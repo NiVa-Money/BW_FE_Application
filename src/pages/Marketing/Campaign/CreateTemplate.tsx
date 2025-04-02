@@ -26,6 +26,12 @@ interface CreateTemplateModalProps {
     };
     body: {
       text: string;
+      parameters?: {
+        type: "positional";
+        example: {
+          positional: string[];
+        };
+      };
     };
     footer?: {
       text: string;
@@ -82,8 +88,6 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
 
   const deleteVariable = (id: number) => {
     setVariables((prev) => prev.filter((v) => v.id !== id));
-
-    // Remove the placeholder from body text
     setBodyText((prev) =>
       prev.replace(new RegExp(`\\{\\{${id}\\}\\}`, "g"), "")
     );
@@ -228,60 +232,55 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
     setButtons((prev) => prev.filter((_, i) => i !== index));
   };
 
-  /**
-   * When the user clicks "Done", prepare the payload.
-   * For headers: if type is "text", send headerText; otherwise, send the uploaded file handle.
-   */
-  // const handleDone = () => {
-  //   let header: { type: string; content: string } | undefined;
-  //   if (headerType !== "none") {
-  //     if (headerType === "text") {
-  //       header = { type: "TEXT", content: headerText };
-  //     } else {
-  //       const content =
-  //         mediaSource === "upload" ? fileHandle : selectedMediaUrl;
-  //       header = { type: headerType.toUpperCase(), content };
-  //     }
-  //   }
-
-  //   onDone({
-  //     name,
-  //     header,
-  //     body: { text: bodyText },
-  //     footer: footerText ? { text: footerText } : undefined,
-  //     buttons,
-  //   });
-  // };
-
   const handleDone = () => {
     let header: { type: string; content: string } | undefined;
+
     if (headerType !== "none") {
       if (headerType === "text") {
         header = { type: "TEXT", content: headerText };
       } else {
-        const content =
-          mediaSource === "upload" ? fileHandle : selectedMediaUrl;
-        header = { type: headerType.toUpperCase(), content };
+        header = { type: headerType.toUpperCase(), content: fileHandle };
       }
     }
 
-    // Extract example values if variables exist
-    const bodyPayload: any = { text: bodyText };
-    if (variables.length > 0) {
+    // Prepare the body payload with the text containing placeholders.
+    const bodyPayload: any = {
+      text: bodyText,
+    };
+
+    // Use regex to detect all variable placeholders like {{1}}, {{2}}, etc.
+    const regex = /\{\{\s*(\d+)\s*\}\}/g;
+    const matches = Array.from(bodyText.matchAll(regex));
+
+    if (matches.length > 0) {
+      // For each placeholder, extract the variable id and get the corresponding example value.
+      const positionalExamples = matches.map((match) => {
+        const id = parseInt(match[1]);
+        const variable = variables.find((v) => v.id === id);
+        return variable ? variable.example : "";
+      });
+
+      // Add parameters only, which includes the extracted example values.
       bodyPayload.parameters = {
         type: "positional",
         example: {
-          positional: variables.map((v) => v.example),
+          positional: positionalExamples,
         },
       };
     }
+
+    // If your backend expects button types to be uppercase, map them accordingly.
+    const formattedButtons = buttons.map((btn) => ({
+      ...btn,
+      type: btn.type,
+    }));
 
     onDone({
       name,
       header,
       body: bodyPayload,
       footer: footerText ? { text: footerText } : undefined,
-      buttons,
+      buttons: formattedButtons,
     });
   };
 
@@ -291,7 +290,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
 
       {/* Modal Container */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 z-10 max-h-[80vh] overflow-y-auto">
+      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 z-10 max-h-[80vh] overflow-y-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Create WhatsApp Template
         </h2>
@@ -393,7 +392,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                       checked={mediaSource === "existing"}
                       onChange={() => setMediaSource("existing")}
                     />
-                    Select Existing
+                    Select from Omnigen Studio
                   </label>
                 )}
               </div>

@@ -51,13 +51,13 @@ const WhatsappCampaign: React.FC = () => {
   // Verify your template selection handler
   const handleSelectTemplate = (template: any) => {
     if (!template?.id) {
+      console.log("Template ID is missing:", template);
       console.error("Selected template has no ID:", template);
       return;
     }
 
     setSelectedTemplate(template);
     setShowTemplate(false);
-    // Remove templateId state if using selectedTemplate.id directly
   };
 
   const handleDownloadSample = async () => {
@@ -148,7 +148,10 @@ const WhatsappCampaign: React.FC = () => {
   }, [integrationList, selectedPhoneNumberId]);
 
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
-  // const campaignId = useSelector((state: RootState) => state.whatsappCampaign?.campaignId);
+
+  console.log("Success:", success);
+
+  
 
   const integrationId = useSelector(
     (state: RootState) =>
@@ -254,126 +257,19 @@ const WhatsappCampaign: React.FC = () => {
       integration.phoneNumberId.toString() === selectedPhoneNumberId
   );
 
-  // const handleTemplateDone = async (data: {
-  //   name: string;
-  //   header?: { type: string; content: string };
-  //   body: { text: string };
-  //   footer?: { text: string };
-  //   buttons: TemplateButton[];
-  // }) => {
-  //   if (
-  //     !selectedIntegration ||
-  //     !selectedIntegration.secretToken ||
-  //     selectedIntegration.secretToken.length !== 24
-  //   ) {
-  //     alert(
-  //       "Invalid integration selected. Please check your integration configuration."
-  //     );
-  //     return;
-  //   }
-
-  //   // 1) Upload file if image/video/document
-  //   let fileHandle = "";
-  //   if (
-  //     data.header &&
-  //     ["IMAGE", "VIDEO", "DOCUMENT"].includes(data.header.type.toUpperCase())
-  //   ) {
-  //     try {
-  //       if (!data.header.content) {
-  //         throw new Error("No file provided for upload.");
-  //       }
-  //       const formData = new FormData();
-  //       formData.append("file", data.header.content as unknown as Blob); // Ensure it's a File object
-  //       const file = new File(
-  //         [data.header.content as unknown as Blob],
-  //         "uploaded_media"
-  //       );
-  //       const response = await uploadWhatsAppMediaService(
-  //         file,
-  //         selectedIntegration.secretToken
-  //       );
-
-  //       if (response?.fileHandle) {
-  //         fileHandle = response.fileHandle;
-  //       } else {
-  //         throw new Error("File handle missing in response");
-  //       }
-  //     } catch (error) {
-  //       console.error("Header upload failed:", error);
-  //       alert("Failed to upload header media.");
-  //       return;
-  //     }
-  //   }
-
-  //   // 2) Build the final header
-  //   let headerType = "NONE" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
-  //   let headerContent = "";
-
-  //   if (data.header) {
-  //     headerType = data.header.type.toUpperCase() as
-  //       | "TEXT"
-  //       | "IMAGE"
-  //       | "DOCUMENT"
-  //       | "VIDEO"
-  //       | "NONE";
-  //     headerContent =
-  //       ["IMAGE", "VIDEO", "DOCUMENT"].includes(headerType) && fileHandle
-  //         ? fileHandle
-  //         : data.header.content;
-  //   }
-
-  //   // 3) Convert buttons to the doc's ButtonDto
-  //   // ButtonDto.type can be "QUICK_REPLY", "URL", "PHONE_NUMBER"
-  //   const mappedButtons = data.buttons.map((btn) => {
-  //     if (btn.type === "quick_reply") {
-  //       return {
-  //         type: "QUICK_REPLY" as const,
-  //         text: btn.text,
-  //       };
-  //     } else {
-  //       return btn.ctaType === "url"
-  //         ? {
-  //             type: "URL" as const,
-  //             text: btn.text,
-  //             url: btn.url || "",
-  //           }
-  //         : {
-  //             type: "PHONE_NUMBER" as const,
-  //             text: btn.text,
-  //             phoneNumber: btn.phoneNumber || "",
-  //           };
-  //     }
-  //   });
-
-  //   // 4) Build final payload
-  //   const payload = {
-  //     integrationId: selectedIntegration.secretToken,
-  //     name: data.name,
-  //     language: "en_US",
-  //     category: "MARKETING",
-  //     header: {
-  //       type: headerType, // "TEXT", "IMAGE", "DOCUMENT", "VIDEO", or "NONE"
-  //       content: headerContent, // If text, user input; if file, fileHandle
-  //     },
-  //     body: {
-  //       text: data.body.text,
-  //     },
-  //     footer: {
-  //       text: data.footer ? data.footer.text : "",
-  //     },
-  //     buttons: mappedButtons,
-  //   };
-
-  //   // 5) Dispatch
-  //   dispatch(createWhatsAppTemplateAction(payload));
-  //   setCustomizeScreen(false);
-  // };
-
   const handleTemplateDone = async (data: {
     id?: string;
     name: string;
     header?: { type: string; content: string };
-    body: { text: string };
+    body: {
+      text: string;
+      parameters?: {
+        type: "positional";
+        example: {
+          positional: string[];
+        };
+      };
+    };
     footer?: { text: string };
     buttons: TemplateButton[];
   }) => {
@@ -442,7 +338,8 @@ const WhatsappCampaign: React.FC = () => {
         content: headerContent,
       },
       body: {
-        text: data.body.text,
+        text: data.body.text, // Ensure it directly references the string, not an object
+        parameters: data.body.parameters, // Include parameters if they exist
       },
       footer: {
         text: data.footer ? data.footer.text : "",
@@ -454,7 +351,7 @@ const WhatsappCampaign: React.FC = () => {
     dispatch(createWhatsAppTemplateAction(payload));
 
     setSelectedTemplate({
-      id: data.id, 
+      id: data.id,
       name: data.name,
       header: headerContent,
       body: data.body.text,
@@ -631,7 +528,7 @@ const WhatsappCampaign: React.FC = () => {
               {/* Download Sample CSV Button */}
               <button
                 onClick={handleDownloadSample}
-                disabled={!selectedTemplate} 
+                disabled={!selectedTemplate}
                 className={`p-3 rounded-3xl border ${
                   !selectedTemplate
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"

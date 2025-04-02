@@ -12,6 +12,11 @@ import {
   resumeWhatsAppCampaignService,
 } from "../../../api/services/whatsappCampaignService";
 
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import StopIcon from "@mui/icons-material/Stop";
+import { Menu, MenuItem, IconButton } from "@mui/material";
+
 interface Campaign {
   campaignId: string;
   campaignName: string;
@@ -52,6 +57,9 @@ export default function CampaignManager() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<{
+    [key: string]: null | HTMLElement;
+  }>({});
 
   const campaignData = useSelector(
     (state: RootState) => state?.whatsappCampaign?.campaigns?.data
@@ -59,17 +67,7 @@ export default function CampaignManager() {
 
   console.log("campaign list", campaignData);
 
-  // useEffect(() => {
-  //   if (campaignData && Array.isArray(campaignData)) {
-  //     campaignData.forEach((campaign) => {
-  //       console.log('camoa')
-  //       dispatch(fetchCampaignsAction({ payload: { campaignId: campaign.campaignId } }));
-  //     });
-  //   }
-  // }, [dispatch, campaignData]);
-
   useEffect(() => {
-    console.log("api call happening");
     dispatch(fetchCampaignsAction({ payload: {} })); // Provide an empty payload object
   }, [dispatch]);
 
@@ -78,6 +76,17 @@ export default function CampaignManager() {
       ? campaignData
       : [campaignData]
     : [];
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    campaignId: string
+  ) => {
+    setAnchorEl((prev) => ({ ...prev, [campaignId]: event.currentTarget }));
+  };
+
+  const handleMenuClose = (campaignId: string) => {
+    setAnchorEl((prev) => ({ ...prev, [campaignId]: null }));
+  };
 
   const handlePauseResume = async (campaign: Campaign) => {
     try {
@@ -177,7 +186,7 @@ export default function CampaignManager() {
                   </span>
                 </p>
 
-                <div className="mt-4 flex gap-4 justify-end">
+                {/* <div className="mt-4 flex gap-4 justify-end">
                   <button
                     className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-purple-400 transition-colors"
                     onClick={() => handlePauseResume(campaign)}
@@ -198,7 +207,49 @@ export default function CampaignManager() {
                   <button className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-purple-400 transition-colors">
                     <EditIcon /> Edit
                   </button>
-                </div>
+                </div> */}
+                <IconButton
+                  className="absolute top-4 right-4"
+                  onClick={(e) => handleMenuOpen(e, campaign.campaignId)}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+
+                <Menu
+                  anchorEl={anchorEl[campaign.campaignId]}
+                  open={Boolean(anchorEl[campaign.campaignId])}
+                  onClose={() => handleMenuClose(campaign.campaignId)}
+                >
+                  <MenuItem
+                    onClick={() =>
+                      navigate(`/marketing/editcampaign/${campaign.campaignId}`)
+                    }
+                  >
+                    <EditIcon className="mr-2" /> Edit
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => handlePauseResume(campaign)}
+                    disabled={loadingId === campaign.campaignId}
+                  >
+                    {loadingId === campaign.campaignId ? (
+                      "Processing..."
+                    ) : campaign.status === "active" ? (
+                      <>
+                        <PauseIcon className="mr-2" /> Pause
+                      </>
+                    ) : (
+                      <>
+                        <PlayArrowIcon className="mr-2" /> Resume
+                      </>
+                    )}
+                  </MenuItem>
+                  <MenuItem>
+                    <FileCopyIcon className="mr-2" /> Clone
+                  </MenuItem>
+                  <MenuItem>
+                    <StopIcon className="mr-2" /> Stop
+                  </MenuItem>
+                </Menu>
               </div>
             ))}
           </div>

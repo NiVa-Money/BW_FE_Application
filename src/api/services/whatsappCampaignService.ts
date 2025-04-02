@@ -121,9 +121,9 @@ export const createWhatsAppTemplateService = async (templateData: any) => {
 export const downloadSampleCsvService = async (templateId: string) => {
   try {
     const response = await axiosInstance.get(
-      `/whatsapp/campaign-csv/${templateId}`,
+      `/whatsapp/sample-csv/${templateId}`,
       {
-        responseType: 'blob', // Important for handling binary CSV data
+        responseType: "blob", // Important for handling binary CSV data
       }
     );
     return response.data;
@@ -161,14 +161,35 @@ export const pauseWhatsAppCampaignService = async (campaignId: string) => {
 
 export const resumeWhatsAppCampaignService = async (campaignId: string) => {
   try {
-    const response = await axiosInstance.post(
-      `/whatsapp/${campaignId}/resume`
-    );
+    const response = await axiosInstance.post(`/whatsapp/${campaignId}/resume`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(
         "Error pausing WhatsApp campaign:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+export const editWhatsAppCampaignService = async (
+  campaignId: string,
+  campaignData: any
+) => {
+  try {
+    const response = await axiosInstance.patch(
+      `/whatsapp/campaign/${campaignId}`,
+      campaignData
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error editing WhatsApp campaign:",
         error.response?.data || error.message
       );
     } else {
