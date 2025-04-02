@@ -16,7 +16,7 @@ import {
   createWhatsAppTemplateAction,
 } from "../../../store/actions/whatsappCampaignActions";
 import {
-  convertCsvToJsonService,
+  uploadWhatsAppContactsService,
   downloadSampleCsvService,
 } from "../../../api/services/whatsappCampaignService";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
@@ -151,8 +151,6 @@ const WhatsappCampaign: React.FC = () => {
 
   console.log("Success:", success);
 
-  
-
   const integrationId = useSelector(
     (state: RootState) =>
       state?.crudIntegration?.crudIntegration?.data?.secretToken
@@ -162,6 +160,7 @@ const WhatsappCampaign: React.FC = () => {
   const handleSave = async () => {
     // Prepare the campaign payload
     interface CampaignPayload {
+      campaignId: string;
       campaignName: string;
       channel: string;
       phoneNumberId: number;
@@ -212,6 +211,7 @@ const WhatsappCampaign: React.FC = () => {
             }
         : null;
     const campaignPayload: CampaignPayload = {
+      campaignId: "0",
       campaignName,
       channel: "whatsapp",
       phoneNumberId: selectedPhoneNumberId ? Number(selectedPhoneNumberId) : 0,
@@ -228,12 +228,11 @@ const WhatsappCampaign: React.FC = () => {
     };
 
     try {
-      // Upload the CSV file to the /marketing/csv-to-json API
-      if (contactList) {
+      if (contactList && campaignPayload.campaignId) {
         const formData = new FormData();
         formData.append("file", contactList);
 
-        const data = await convertCsvToJsonService(formData);
+        const data = await uploadWhatsAppContactsService(campaignPayload.campaignId, formData);
 
         // Add the parsed contact list to the campaign payload
         campaignPayload.contactsData = data;

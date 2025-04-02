@@ -2,18 +2,26 @@
 import React, { useState, useEffect } from "react";
 import { WhatsApp, Upload } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
-import { convertCsvToJsonService, editWhatsAppCampaignService } from "../../../api/services/whatsappCampaignService";
+import {
+  uploadWhatsAppContactsService,
+  editWhatsAppCampaignService,
+} from "../../../api/services/whatsappCampaignService";
+import { DatePicker, TimePicker } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 const EditWhatsappCampaign: React.FC = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
   const navigate = useNavigate();
-  
+
   // State management
   const [campaignName, setCampaignName] = useState<string>("");
   const [contactList, setContactList] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
+  const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
 
   const handleCampaignNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCampaignName(e.target.value);
@@ -29,31 +37,30 @@ const EditWhatsappCampaign: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Create campaign data object
       const campaignData: any = {
-        campaignName
+        campaignName,
       };
-      
+
       // If a new contact list was uploaded, process it
-      if (contactList) {
+      if (contactList && campaignId) {
         const formData = new FormData();
         formData.append("file", contactList);
-        
-        // Convert CSV to JSON
-        const contactsData = await convertCsvToJsonService(formData);
+
+        // Upload contacts for the template/campaign
+        const contactsData = await uploadWhatsAppContactsService(campaignId, formData);
         campaignData.newContactsUrl = contactsData.fileUrl; // Assuming the API returns a fileUrl
       }
-      
+
       // Call the edit campaign service
       await editWhatsAppCampaignService(campaignId!, campaignData);
-      
+
       setSuccess(true);
       // Navigate back or show success message
       setTimeout(() => {
         navigate("/marketing/campaign");
       }, 2000);
-      
     } catch (err) {
       console.error("Failed to update campaign:", err);
       setError("Failed to update campaign. Please try again.");
@@ -69,11 +76,8 @@ const EditWhatsappCampaign: React.FC = () => {
       // For now, this is left as a placeholder
       try {
         setIsLoading(true);
-        // const response = await fetchCampaignByIdService(campaignId!);
-        // setCampaignName(response.campaignName);
-        
-        // Placeholder for now - replace with actual API call
-        setCampaignName("Campaign " + campaignId);
+
+        setCampaignName(campaignId);
       } catch (err) {
         console.error("Failed to fetch campaign:", err);
         setError("Failed to load campaign data");
@@ -81,7 +85,7 @@ const EditWhatsappCampaign: React.FC = () => {
         setIsLoading(false);
       }
     };
-    
+
     if (campaignId) {
       fetchCampaignData();
     }
@@ -124,6 +128,39 @@ const EditWhatsappCampaign: React.FC = () => {
                 className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
               />
             </div>
+            <div className="flex flex-col w-full mb-4">
+              <label className="text-slate-700">Schedule</label>
+              <p className="mt-2 mb-2 text-zinc-500">
+                When would you like to schedule your marketing campaign?
+              </p>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  value={scheduleDate}
+                  onChange={(newValue) => setScheduleDate(newValue)}
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      fullWidth: true,
+                    },
+                  }}
+                />
+                {/* Time Picker */}
+                <TimePicker
+                  value={scheduleTime}
+                  onChange={(newValue) => setScheduleTime(newValue)}
+                  slotProps={{
+                    textField: {
+                      variant: "outlined",
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </LocalizationProvider>
+              <p className="mt-4 text-zinc-600 text-sm">
+                <b>Note: </b> The campaign will remain active for one day, and
+                user responses during this period will be captured.
+              </p>
+            </div>
             <div className="flex flex-col w-full font-[number:var(--sds-typography-body-font-weight-regular)] text-[length:var(--sds-typography-body-size-medium)]">
               <div className="leading-snug text-[color:var(--sds-color-text-default-default)]">
                 Upload The Contact List *
@@ -162,7 +199,7 @@ const EditWhatsappCampaign: React.FC = () => {
                 onClick={handleSave}
                 disabled={isLoading}
                 className={`flex gap-2 w-full min-h-[50px] whitespace-nowrap justify-center items-center text-2xl font-medium text-gray-100 
-                ${isLoading ? 'bg-gray-400' : 'bg-[#65558F]'} rounded-3xl`}
+                ${isLoading ? "bg-gray-400" : "bg-[#65558F]"} rounded-3xl`}
               >
                 {isLoading ? "Saving..." : "Save"}
               </button>

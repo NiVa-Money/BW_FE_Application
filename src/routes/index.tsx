@@ -28,6 +28,7 @@ import CrudInstagramIntegration from "../pages/Integration/InstagramIntegration/
 import VoiceChatComponent from "../pages/VoiceModule";
 import EditMarketingDashboardForm from "../pages/Marketing/Dashboard/EditMarketingDashboardForm";
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
+import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -76,6 +77,11 @@ export const autRoutes: any[] = [
   },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
+  {
+    id: 6,
+     path: "/marketing/editcampaign/:campaignId",
+    component: <EditWhatsappCampaign />,
+  },
   { id: 5.3, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
 
   { id: 6, path: "/voiceagent", component: <VoiceChatComponent /> },

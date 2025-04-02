@@ -25,10 +25,10 @@ export const createWhatsAppCampaignService = async (campaignData: any) => {
 };
 
 /* Service to call the CSV-to-JSON conversion API */
-export const convertCsvToJsonService = async (formData: FormData) => {
+export const uploadWhatsAppContactsService = async (templateId: string, formData: FormData) => {
   try {
     const response = await axiosInstance.post(
-      "/marketing/csv-to-json",
+      `/whatsapp/upload-contacts/${templateId}`,
       formData,
       {
         headers: {
@@ -36,11 +36,11 @@ export const convertCsvToJsonService = async (formData: FormData) => {
         },
       }
     );
-    return response.data; // Assuming response contains the JSON conversion result
+    return response.data; // Returns the response data from the API
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(
-        "Error converting CSV to JSON:",
+        "Error uploading WhatsApp contacts:",
         error.response?.data || error.message
       );
     } else {

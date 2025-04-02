@@ -69,7 +69,7 @@ const AllChats = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-  const [channelNameVal, setChannelNameVal] = useState("website");
+  const [channelNameVal, setChannelNameVal] = useState("");
   const [botIdVal, setBotIdVal] = useState("");
   const botsDataLoader = useSelector(
     (state: RootState) => state.bot?.lists?.loader
