@@ -73,7 +73,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
       setAgentState("connecting");
       newSocket.emit("joinSession", {
         sessionId: selectedSessionId,
-        userId: userId,
+        userId: userId, 
+        botId : botId,
         userType: "AGENT",
       });
     });
@@ -151,9 +152,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
       const messageData = {
         sessionId: selectedSessionId,
         userId: userId,
+        botId : botId,
         message: newMessage,
         userType: "AGENT",
-        chatMode: "manual",
       };
 
       socket.emit("messageToServer", messageData);
@@ -161,7 +162,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
         ...prev,
         {
           text: newMessage,
-          sender: "agent",
+          userType: 'AGENT',
           timestamp: new Date().toISOString(),
         },
       ]);

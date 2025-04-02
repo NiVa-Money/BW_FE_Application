@@ -50,6 +50,9 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
 
   // Body state
   const [bodyText, setBodyText] = useState("");
+  const [variables, setVariables] = useState<{ id: number; example: string }[]>(
+    []
+  );
 
   // Footer state
   const [footerText, setFooterText] = useState("");
@@ -65,6 +68,32 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
     { id: string; url: string; name: string }[]
   >([]);
   const [selectedMediaUrl, setSelectedMediaUrl] = useState("");
+
+  const addVariable = () => {
+    // Find the next available number for the variable
+    const nextId = variables.length + 1;
+
+    // Add the variable to the body text
+    setBodyText((prev) => prev + ` {{${nextId}}}`);
+
+    // Store the variable with an empty example value
+    setVariables((prev) => [...prev, { id: nextId, example: "" }]);
+  };
+
+  const deleteVariable = (id: number) => {
+    setVariables((prev) => prev.filter((v) => v.id !== id));
+
+    // Remove the placeholder from body text
+    setBodyText((prev) =>
+      prev.replace(new RegExp(`\\{\\{${id}\\}\\}`, "g"), "")
+    );
+  };
+
+  const updateVariableExample = (id: number, newExample: string) => {
+    setVariables((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, example: newExample } : v))
+    );
+  };
 
   useEffect(() => {
     const fetchMedia = async () => {
@@ -100,53 +129,6 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
       fetchMedia();
     }
   }, [mediaSource, headerType, secretToken]);
-  /**
-   * Immediately upload the file when user selects an image, video, or document.
-   * The fileHandle is stored in state.
-   */
-  // const handleHeaderFileChange = async (
-  //   e: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   if (!secretToken) {
-  //     alert("Missing secret token. Cannot upload file.");
-  //     return;
-  //   }
-
-  //   if (e.target.files && e.target.files[0]) {
-  //     const file = e.target.files[0];
-
-  //     // Check file size limit (2 MB)
-  //     const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
-  //     if (file.size > MAX_FILE_SIZE) {
-  //       alert("File size exceeds 2 MB limit. Please upload a smaller file.");
-  //       return;
-  //     }
-
-  //     if (["image", "video", "document"].includes(headerType)) {
-  //       try {
-  //         const formData = new FormData();
-  //         formData.append("file", file);
-
-  //         const response = await uploadWhatsAppMediaService({
-  //           file: file,
-  //           integrationId: secretToken,
-  //         });
-
-  //         if (response?.fileHandle) {
-  //           setFileHandle(response.fileHandle);
-  //           console.log("File uploaded, got handle:", response.fileHandle);
-  //         } else {
-  //           throw new Error("File handle missing in response");
-  //         }
-  //       } catch (error) {
-  //         console.error("Header upload failed:", error);
-  //         alert("Failed to upload header media.");
-  //       }
-  //     }
-  //   }
-  // };
-
-  // Reset header-related states when the header type changes
 
   const handleHeaderFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>
@@ -250,6 +232,27 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
    * When the user clicks "Done", prepare the payload.
    * For headers: if type is "text", send headerText; otherwise, send the uploaded file handle.
    */
+  // const handleDone = () => {
+  //   let header: { type: string; content: string } | undefined;
+  //   if (headerType !== "none") {
+  //     if (headerType === "text") {
+  //       header = { type: "TEXT", content: headerText };
+  //     } else {
+  //       const content =
+  //         mediaSource === "upload" ? fileHandle : selectedMediaUrl;
+  //       header = { type: headerType.toUpperCase(), content };
+  //     }
+  //   }
+
+  //   onDone({
+  //     name,
+  //     header,
+  //     body: { text: bodyText },
+  //     footer: footerText ? { text: footerText } : undefined,
+  //     buttons,
+  //   });
+  // };
+
   const handleDone = () => {
     let header: { type: string; content: string } | undefined;
     if (headerType !== "none") {
@@ -262,10 +265,21 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
       }
     }
 
+    // Extract example values if variables exist
+    const bodyPayload: any = { text: bodyText };
+    if (variables.length > 0) {
+      bodyPayload.parameters = {
+        type: "positional",
+        example: {
+          positional: variables.map((v) => v.example),
+        },
+      };
+    }
+
     onDone({
       name,
       header,
-      body: { text: bodyText },
+      body: bodyPayload,
       footer: footerText ? { text: footerText } : undefined,
       buttons,
     });
@@ -277,7 +291,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
 
       {/* Modal Container */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 z-10 max-h-[80vh] overflow-y-auto">
+      <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full p-6 z-10 max-h-[80vh] overflow-y-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Create WhatsApp Template
         </h2>
@@ -458,6 +472,19 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
         </div>
 
         {/* Body Section */}
+        {/* <div className="mt-6">
+          <label className="block text-gray-700 font-medium mb-1">
+            Body Text
+          </label>
+          <textarea
+            value={bodyText}
+            onChange={(e) => setBodyText(e.target.value)}
+            placeholder="Enter the text content"
+            className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </div> */}
+
+        {/* Body Section */}
         <div className="mt-6">
           <label className="block text-gray-700 font-medium mb-1">
             Body Text
@@ -468,6 +495,44 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
             placeholder="Enter the text content"
             className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
+
+          {/* Add Variable Button */}
+          <button
+            onClick={addVariable}
+            className="mt-2 px-4 py-2 text-sm font-medium text-white bg-[#65558F] rounded-full hover:bg-purple-950"
+          >
+            + Add Variable
+          </button>
+
+          {/* Variables List */}
+          {variables.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold text-gray-600">Variables</h3>
+              {variables.map((variable) => (
+                <div key={variable.id} className="flex items-center gap-4 mt-2">
+                  <span className="text-gray-700 font-medium">
+                    {`{{${variable.id}}}`}
+                  </span>
+                  <input
+                    type="text"
+                    value={variable.example}
+                    onChange={(e) =>
+                      updateVariableExample(variable.id, e.target.value)
+                    }
+                    placeholder="Example value"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+                  />
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => deleteVariable(variable.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Footer Section */}

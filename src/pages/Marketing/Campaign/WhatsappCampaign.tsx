@@ -370,6 +370,7 @@ const WhatsappCampaign: React.FC = () => {
   // };
 
   const handleTemplateDone = async (data: {
+    id?: string;
     name: string;
     header?: { type: string; content: string };
     body: { text: string };
@@ -453,6 +454,7 @@ const WhatsappCampaign: React.FC = () => {
     dispatch(createWhatsAppTemplateAction(payload));
 
     setSelectedTemplate({
+      id: data.id, 
       name: data.name,
       header: headerContent,
       body: data.body.text,
@@ -629,7 +631,7 @@ const WhatsappCampaign: React.FC = () => {
               {/* Download Sample CSV Button */}
               <button
                 onClick={handleDownloadSample}
-                disabled={!selectedTemplate} // Use template presence instead of ID
+                disabled={!selectedTemplate} 
                 className={`p-3 rounded-3xl border ${
                   !selectedTemplate
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"

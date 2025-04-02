@@ -77,7 +77,7 @@ export const campaignImageService = async (formData: FormData) => {
 
 export const fetchCampaignService = async () => {
   try {
-    const response = await axiosInstance.get(`/marketing/Campaigns`);
+    const response = await axiosInstance.get(`/whatsapp/campaign`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -108,7 +108,7 @@ export const fetchWhatsAppTemplatesService = async (integrationId: string) => {
 export const createWhatsAppTemplateService = async (templateData: any) => {
   try {
     const response = await axiosInstance.post(
-      "https://ab4a3a5f-d56c-471a-9d3a-0fccbef46219.mock.pstmn.io/whatsapp/template",
+      "/whatsapp/template",
       templateData
     );
     return response.data;
@@ -121,7 +121,7 @@ export const createWhatsAppTemplateService = async (templateData: any) => {
 export const downloadSampleCsvService = async (templateId: string) => {
   try {
     const response = await axiosInstance.get(
-      `https://ab4a3a5f-d56c-471a-9d3a-0fccbef46219.mock.pstmn.io/whatsapp/campaign-csv/${templateId}`,
+      `/whatsapp/campaign-csv/${templateId}`,
       {
         responseType: 'blob', // Important for handling binary CSV data
       }
@@ -137,6 +137,44 @@ export const downloadSampleCsvService = async (templateId: string) => {
       console.error("Unexpected error:", error);
     }
     throw error;
+  }
+};
+
+export const pauseWhatsAppCampaignService = async (campaignId: string) => {
+  try {
+    const response = await axiosInstance.patch(
+      `/whatsapp/campaign/${campaignId}/pause`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error pausing WhatsApp campaign:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+export const resumeWhatsAppCampaignService = async (campaignId: string) => {
+  try {
+    const response = await axiosInstance.post(
+      `/whatsapp/${campaignId}/resume`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error pausing WhatsApp campaign:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error; // Re-throw the error to be handled by the caller
   }
 };
 
@@ -168,7 +206,7 @@ export const uploadWhatsAppMediaService = async (
   try {
     const response = await axiosInstance.post<UploadResponse>(
       // "/whatsapp/media/upload",.
-      "https://ab4a3a5f-d56c-471a-9d3a-0fccbef46219.mock.pstmn.io/whatsapp/media/upload",
+      "/whatsapp/media/upload",
       formData,
       {
         headers: {
