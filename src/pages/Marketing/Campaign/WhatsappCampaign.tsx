@@ -67,7 +67,7 @@ const WhatsappCampaign: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
 
-  const [templateId, setTemplateId] = useState<string | null>(null);
+  const [templateId, _setTemplateId] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
