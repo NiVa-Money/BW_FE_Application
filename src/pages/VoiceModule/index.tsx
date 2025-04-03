@@ -22,9 +22,7 @@ const languageOptions = [
 ];
 
 const VoiceChatComponent: React.FC = () => {
-  // --- State ---
   const [isConnected, setIsConnected] = useState(false);
-  const [shouldRestart, setShouldRestart] = useState(false); // <--- NEW
   const [agentStatus, setAgentStatus] = useState<
     "idle" | "connecting" | "listening" | "responding"
   >("idle");
@@ -46,12 +44,9 @@ const VoiceChatComponent: React.FC = () => {
 
   const agentId = import.meta.env.VITE_ELEVENLABS_ID;
   const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-
-  // --- Limits ---
   const MAX_FILE_SIZE = 20 * 1024 * 1024;
   const MAX_VOICE_SIZE = 100 * 1024 * 1024;
 
-  // --- Fetch Voices ---
   const fetchVoices = async () => {
     try {
       const res = await fetch("https://api.elevenlabs.io/v1/voices", {
@@ -69,7 +64,6 @@ const VoiceChatComponent: React.FC = () => {
     fetchVoices();
   }, [apiKey]);
 
-  // --- Conversation Hooks ---
   const conversation = useConversation({
     onConnect: () => {
       setIsConnected(true);
@@ -78,17 +72,6 @@ const VoiceChatComponent: React.FC = () => {
     onDisconnect: () => {
       setIsConnected(false);
       setAgentStatus("idle");
-
-      // If we flagged a restart, do it here after a short delay.
-      if (shouldRestart) {
-        setTimeout(() => {
-          conversation.startSession({
-            agentId,
-            overrides: { agent: { language } },
-          });
-          setShouldRestart(false);
-        }, 500);
-      }
     },
     onMessage: (message) => {
       if (message.source === "user") {
@@ -101,7 +84,6 @@ const VoiceChatComponent: React.FC = () => {
     onError: (error) => console.error("Error:", error),
   });
 
-  // --- Connect/Disconnect ---
   const handleConnect = async () => {
     setAgentStatus("connecting");
     try {
@@ -125,7 +107,6 @@ const VoiceChatComponent: React.FC = () => {
     setAgentStatus("idle");
   };
 
-  // --- Stop Voice Preview on Voice Change ---
   useEffect(() => {
     if (previewAudio) {
       previewAudio.pause();
@@ -133,7 +114,6 @@ const VoiceChatComponent: React.FC = () => {
     }
   }, [selectedVoice]);
 
-  // --- Preview Voice ---
   const handlePreviewVoice = async () => {
     if (!selectedVoice?.preview_url) return;
     try {
@@ -149,14 +129,11 @@ const VoiceChatComponent: React.FC = () => {
     }
   };
 
-  // --- Update Agent Parameters ---
   const updateAgentParameters = async () => {
     try {
       const getRes = await fetch(
         `https://api.elevenlabs.io/v1/convai/agents/${agentId}`,
-        {
-          headers: { "xi-api-key": apiKey },
-        }
+        { headers: { "xi-api-key": apiKey } }
       );
       if (!getRes.ok) throw new Error("Failed to get agent config");
       const agentConfig = await getRes.json();
@@ -165,19 +142,16 @@ const VoiceChatComponent: React.FC = () => {
         language === "en" ? "eleven_flash_v2" : "eleven_flash_v2_5";
       const existingTTS = agentConfig.conversation_config?.tts || {};
 
-      // Build updated TTS
       const updatedTTS = {
         ...existingTTS,
         model_id: chosenModel,
         voice_id: selectedVoice?.voice_id,
+        ...(selectedVoice?.category === "cloned" && {
+          similarity_boost: 0.85,
+          stability: 0.6,
+          style: 0.3,
+        }),
         speed: 1.0,
-        ...(selectedVoice?.category === "cloned"
-          ? {
-              similarity_boost: 0.85,
-              stability: 0.6,
-              style: 0.3,
-            }
-          : {}),
       };
 
       const updatePayload = {
@@ -205,23 +179,20 @@ const VoiceChatComponent: React.FC = () => {
         }
       );
 
-      if (!updateRes.ok) {
-        const errorText = await updateRes.text();
-        throw new Error(`API Error: ${errorText}`);
-      }
+      if (!updateRes.ok)
+        throw new Error(`API Error: ${await updateRes.text()}`);
       console.log("Agent parameters updated successfully.");
 
-      // If user is connected, we do a safe restart:
-      if (isConnected) {
-        setShouldRestart(true);
-        conversation.endSession();
-      }
+      await conversation.endSession();
+      await conversation.startSession({
+        agentId,
+        overrides: { agent: { language } },
+      });
     } catch (error) {
       console.error("Update agent parameters failed:", error);
     }
   };
 
-  // --- Voice Cloning ---
   const handleVoiceCloningUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -277,7 +248,6 @@ const VoiceChatComponent: React.FC = () => {
       setNewVoiceName("");
       event.target.value = "";
 
-      // Auto-select the new voice if it’s in the updated list:
       const newVoice = voiceOptions.find((v) => v.voice_id === data.voice_id);
       if (newVoice) setSelectedVoice(newVoice);
     } catch (error) {
@@ -289,16 +259,15 @@ const VoiceChatComponent: React.FC = () => {
     }
   };
 
-  // --- Recorded Voice Upload ---
   const handleRecordedVoiceUpload = async (recordedBlob: Blob) => {
     if (!newVoiceName.trim()) {
       setCloningStatus("error");
       setCloningMessage("Please enter a name for the recorded voice");
       return;
     }
-
     const formData = new FormData();
     formData.append("name", newVoiceName);
+    // Create a file from the blob
     const fileName = `${newVoiceName || "Recorded Voice"}.wav`;
     const file = new File([recordedBlob], fileName, { type: "audio/wav" });
     formData.append("files", file);
@@ -340,7 +309,7 @@ const VoiceChatComponent: React.FC = () => {
     }
   };
 
-  // --- Knowledge Base Updates ---
+  // 6) Knowledge base
   const updateAgentKnowledgeBase = async (
     newDocId: string,
     fileName: string
@@ -402,62 +371,64 @@ const VoiceChatComponent: React.FC = () => {
 
       setUploadMessage(`Knowledge base updated with file: ${fileName}`);
 
-      // If connected, do a safe restart:
-      if (isConnected) {
-        setShouldRestart(true);
-        conversation.endSession();
-      }
+      // Force session restart
+      await conversation.endSession();
+      await conversation.startSession({
+        agentId,
+        overrides: { agent: { language } },
+      });
     } catch (error) {
       console.error("Update failed:", error);
     }
   };
 
+  // 7) Upload new knowledge base
   const handleKnowledgeBaseUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > MAX_FILE_SIZE) {
-      console.error({
-        detail: {
-          status: "invalid_file_size",
-          message: "The file you uploaded is too large.",
-        },
-      });
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("name", file.name);
-
-    try {
-      const uploadResponse = await fetch(
-        "https://api.elevenlabs.io/v1/convai/knowledge-base",
-        {
-          method: "POST",
-          headers: { "xi-api-key": apiKey },
-          body: formData,
-        }
-      );
-      if (uploadResponse.ok) {
-        const data = await uploadResponse.json();
-        const newDocId = data.id;
-        console.log("Knowledge base document created:", newDocId);
-        await updateAgentKnowledgeBase(newDocId, file.name);
-      } else {
-        console.error(
-          "Failed to create knowledge base document:",
-          uploadResponse.statusText
-        );
+    if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        console.error({
+          detail: {
+            status: "invalid_file_size",
+            message: "The file you uploaded is too large.",
+          },
+        });
+        return;
       }
-    } catch (error) {
-      console.error("Error uploading knowledge base:", error);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("name", file.name);
+
+      try {
+        const uploadResponse = await fetch(
+          "https://api.elevenlabs.io/v1/convai/knowledge-base",
+          {
+            method: "POST",
+            headers: { "xi-api-key": apiKey },
+            body: formData,
+          }
+        );
+        if (uploadResponse.ok) {
+          const data = await uploadResponse.json();
+          const newDocId = data.id;
+          console.log("Knowledge base document created:", newDocId);
+          await updateAgentKnowledgeBase(newDocId, file.name);
+        } else {
+          console.error(
+            "Failed to create knowledge base document:",
+            uploadResponse.statusText
+          );
+        }
+      } catch (error) {
+        console.error("Error uploading knowledge base:", error);
+      }
     }
   };
 
-  // --- Display Logic ---
+  // 8) Display logic
   const statusMessages = {
     connecting: "Connecting to AI...",
     listening: "Listening...",
@@ -672,13 +643,13 @@ const VoiceChatComponent: React.FC = () => {
             <div className="relative w-40 h-40 md:w-60 md:h-60">
               <div
                 className={`
-                  absolute inset-0 rounded-full backdrop-blur-xl
-                  ${
-                    agentStatus === "responding"
-                      ? "animate-pulse-slow bg-gradient-to-br from-blue-500/20 to-purple-500/20"
-                      : "bg-blue-500/10"
-                  }
-                `}
+      absolute inset-0 rounded-full backdrop-blur-xl
+      ${
+        agentStatus === "responding"
+          ? "animate-pulse-slow bg-gradient-to-br from-blue-500/20 to-purple-500/20"
+          : "bg-blue-500/10"
+      }
+    `}
               />
               {agentStatus === "responding" && (
                 <>

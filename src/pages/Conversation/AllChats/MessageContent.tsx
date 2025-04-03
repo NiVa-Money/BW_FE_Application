@@ -4,17 +4,15 @@ import { useMessageStatus } from "../../../hooks/useMessageStatus";
 const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
   let messageContent;
   switch (msgType) {
-    case "text": { // For text messages, use a light background with dark text if user, otherwise dark background with white text.
+    case "text": {
       const textClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
       messageContent = (
         <div
-          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${textClasses}`}
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${textClasses}`}
         >
-          <span className="flex gap-2 items-center">
-            {content !== undefined ? content : ""}
-          </span>
+          <span className="flex gap-2 items-center">{content || ""}</span>
           {useMessageStatus({
             status: msg?.status,
             readTime: msg?.readTime,
@@ -27,31 +25,25 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       break;
     }
 
-    case "template": { // For template messages, change the bg if it's a user message.
+    case "template": {
       const templateClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-white text-black";
       messageContent = (
         <div
-          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${templateClasses}`}
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${templateClasses}`}
         >
           {msg.messageContent?.template?.header?.image && (
             <img
               src={msg.messageContent.template?.header?.image}
-              className="self-center w-full"
+              className="self-center w-full rounded-md"
               width={200}
               height={200}
               alt="Template Image"
             />
           )}
-          <strong>
-            {msg?.messageContent?.template?.header?.text
-              ? msg?.messageContent?.template?.header?.text
-              : ""}
-          </strong>
-          <span className="flex gap-2 items-center">
-            {content !== undefined ? content : ""}
-          </span>
+          <strong>{msg?.messageContent?.template?.header?.text || ""}</strong>
+          <span className="flex gap-2 items-center">{content || ""}</span>
           {useMessageStatus({
             status: msg?.status,
             readTime: msg?.readTime,
@@ -72,17 +64,15 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       break;
     }
 
-    case "button_reply": { // Similar handling for button reply messages.
+    case "button_reply": {
       const buttonReplyClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
       messageContent = (
         <div
-          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${buttonReplyClasses}`}
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${buttonReplyClasses}`}
         >
-          <span className="flex gap-2 items-center">
-            {content !== undefined ? content : ""}
-          </span>
+          <span className="flex gap-2 items-center">{content || ""}</span>
           {useMessageStatus({
             status: msg?.status,
             readTime: msg?.readTime,
@@ -95,13 +85,13 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       break;
     }
 
-    case "image": { // For images, apply the same bg conditional styles.
+    case "image": {
       const imageClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
       messageContent = (
         <div
-          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${imageClasses}`}
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${imageClasses}`}
         >
           <img
             src={msg?.messageContent?.image?.url}
@@ -110,9 +100,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           />
           {msg?.messageContent?.image?.caption && (
             <span className="mt-2 text-sm">
-              {msg.messageContent?.image?.caption
-                ? msg.messageContent.image.caption
-                : ""}
+              {msg.messageContent.image.caption}
             </span>
           )}
           {useMessageStatus({
@@ -127,13 +115,13 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       break;
     }
 
-    case "audio": { // For audio messages, use bg changes accordingly.
+    case "audio": {
       const audioClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-white text-black";
       messageContent = (
         <div
-          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${audioClasses}`}
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${audioClasses}`}
         >
           <audio controls>
             <source src={content} type="audio/ogg" />
@@ -150,14 +138,13 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       break;
     }
 
-    case "video": // For video messages, render a video element with controls.
-    {
+    case "video": {
       const videoClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-white text-black";
       messageContent = (
         <div
-          className={`px-3 flex flex-col py-2 rounded-lg max-w-xs ${videoClasses}`}
+          className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${videoClasses}`}
         >
           <video controls className="w-full rounded-md">
             <source
@@ -181,13 +168,15 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       );
       break;
     }
-    
+
     default: {
       const defaultClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
       messageContent = (
-        <div className={`px-3 py-2 rounded-lg max-w-xs ${defaultClasses}`}>
+        <div
+          className={`px-3 py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${defaultClasses}`}
+        >
           {content}
         </div>
       );
@@ -197,7 +186,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
 
   return (
     <div
-      className={`flex ${isUserQuery ? "justify-end" : "justify-start"} mb-2`}
+      className={`flex ${isUserQuery ? "justify-start" : "justify-end"} mb-2`}
     >
       {messageContent}
     </div>
