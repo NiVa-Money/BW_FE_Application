@@ -98,6 +98,8 @@ export function* createWhatsAppTemplateSaga(action: {
     // Call the service with the payload.
     const response = yield call(createWhatsAppTemplateService, action.payload);
 
+    console.log("createWhatsAppTemplateSaga response", response);
+
     // Dispatch success action with the response data.
     yield put({
       type: CREATE_WHATSAPP_TEMPLATE_SUCCESS,

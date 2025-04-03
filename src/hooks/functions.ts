@@ -50,3 +50,10 @@ export const camelCaseToWords = (camelCaseString) => {
 
   return formattedString.trim(); // Remove any leading/trailing spaces
 };
+
+export const formatText = (text: string) => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Format bold text
+    .replace(/###/g, "<br/><br/>###") // Ensure '###' starts on a new line
+    .replace(/-\s/g, "<br/>- "); 
+};
