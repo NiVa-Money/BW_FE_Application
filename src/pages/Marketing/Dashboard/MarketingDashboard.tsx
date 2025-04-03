@@ -72,7 +72,7 @@ const MarketingDashboard = () => {
   const navigate = useNavigate();
   const [insightsData, setInsightsData] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [currentNewsIndex, _setCurrentNewsIndex] = useState(0);
   const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
 
   const handleViewDashboard = () => {
