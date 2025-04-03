@@ -43,7 +43,7 @@ export default function whatsappCampaignReducer(
         success: false,
         error: action.payload,
       };
-      case FETCH_WHATSAPP_CAMPAIGNS: 
+    case FETCH_WHATSAPP_CAMPAIGNS:
       return {
         ...state,
         loading: true,
@@ -59,7 +59,7 @@ export default function whatsappCampaignReducer(
       return {
         ...state,
         loading: false,
-        error: action.payload
+        error: action.payload,
       };
     default:
       return state;
@@ -68,7 +68,7 @@ export default function whatsappCampaignReducer(
 
 export function whatsappTemplateReducer(
   state = initialState.whatsappTemplates,
-  action: { type: any; payload: any; }
+  action: { type: any; payload: any }
 ) {
   switch (action.type) {
     case FETCH_WHATSAPP_TEMPLATES:

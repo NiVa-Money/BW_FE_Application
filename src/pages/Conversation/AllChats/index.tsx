@@ -69,7 +69,7 @@ const AllChats = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-  const [channelNameVal, setChannelNameVal] = useState("website");
+  const [channelNameVal, setChannelNameVal] = useState("");
   const [botIdVal, setBotIdVal] = useState("");
   const botsDataLoader = useSelector(
     (state: RootState) => state.bot?.lists?.loader
@@ -480,72 +480,73 @@ const AllChats = () => {
     );
   };
 
- // Handle Block Contact
-const handleBlockContact = async () => {
-  if (!blockReason.trim()) {
-    setErrorMessage("Please provide a reason for blocking.");
-    return;
-  }
-
-  const selectedSession = getCurrentSession();
-  if (!selectedSession) {
-    setErrorMessage("No session selected.");
-    return;
-  }
-
-  try {
-    const response = await blockWhatsAppUserService({
-      adminPhoneNumberId: selectedSession.adminPhoneNumberId,
-      userPhoneId: selectedSession.userPhoneId,
-      reason: blockReason,
-    });
-
-    // Check for actual success message from BE
-    if (response?.message === "User blocked successfully") {
-      // Immediate UI update
-      setIsBlocked(true);
-      setShowBlockInput(false);
-      setBlockReason("");
-      notifySuccess("Contact blocked successfully!");
-      setErrorMessage(null); // Clear any existing errors
-    } else {
-      // Handle API business logic errors
-      setErrorMessage(response?.message || "Failed to block contact.");
+  // Handle Block Contact
+  const handleBlockContact = async () => {
+    if (!blockReason.trim()) {
+      setErrorMessage("Please provide a reason for blocking.");
+      return;
     }
-  } catch (err) {
-    // Handle network/HTTP errors
-    console.error("Block failed:", err);
-    setErrorMessage("Failed to block contact. Please try again.");
-  }
-};
 
-// Handle Unblock Contact
-const handleUnblockContact = async () => {
-  const selectedSession = getCurrentSession();
-  if (!selectedSession) {
-    setErrorMessage("No session selected.");
-    return;
-  }
-
-  try {
-    const response = await unblockWhatsAppUserService({
-      adminPhoneNumberId: selectedSession.adminPhoneNumberId,
-      userPhoneId: selectedSession.userPhoneId,
-    });
-
-    // Check for expected success indicator
-    if (response?.message?.includes("unblocked")) { // Adjust based on your actual success message
-      setIsBlocked(false);
-      notifySuccess("Contact unblocked successfully!");
-      setErrorMessage(null);
-    } else {
-      setErrorMessage(response?.message || "Failed to unblock contact.");
+    const selectedSession = getCurrentSession();
+    if (!selectedSession) {
+      setErrorMessage("No session selected.");
+      return;
     }
-  } catch (err) {
-    console.error("Unblock failed:", err);
-    setErrorMessage("Failed to unblock contact. Please try again.");
-  }
-};
+
+    try {
+      const response = await blockWhatsAppUserService({
+        adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+        userPhoneId: selectedSession.userPhoneId,
+        reason: blockReason,
+      });
+
+      // Check for actual success message from BE
+      if (response?.message === "User blocked successfully") {
+        // Immediate UI update
+        setIsBlocked(true);
+        setShowBlockInput(false);
+        setBlockReason("");
+        notifySuccess("Contact blocked successfully!");
+        setErrorMessage(null); // Clear any existing errors
+      } else {
+        // Handle API business logic errors
+        setErrorMessage(response?.message || "Failed to block contact.");
+      }
+    } catch (err) {
+      // Handle network/HTTP errors
+      console.error("Block failed:", err);
+      setErrorMessage("Failed to block contact. Please try again.");
+    }
+  };
+
+  // Handle Unblock Contact
+  const handleUnblockContact = async () => {
+    const selectedSession = getCurrentSession();
+    if (!selectedSession) {
+      setErrorMessage("No session selected.");
+      return;
+    }
+
+    try {
+      const response = await unblockWhatsAppUserService({
+        adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+        userPhoneId: selectedSession.userPhoneId,
+      });
+
+      // Check for expected success indicator
+      if (response?.message?.includes("unblocked")) {
+        // Adjust based on your actual success message
+        setIsBlocked(false);
+        notifySuccess("Contact unblocked successfully!");
+        setErrorMessage(null);
+      } else {
+        setErrorMessage(response?.message || "Failed to unblock contact.");
+      }
+    } catch (err) {
+      console.error("Unblock failed:", err);
+      setErrorMessage("Failed to unblock contact. Please try again.");
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!userMessage.trim() || !sessionId) return;
@@ -603,17 +604,17 @@ const handleUnblockContact = async () => {
     // setIsSearchActive(false);
     // setSearchValue("");
 
-    if (botId) {
-      dispatch(
-        getAllSession({
-          botId,
-          page: 1,
-          channelName: channelNameVal,
-          aiLevel,
-          humanLevel,
-        })
-      );
-    }
+    // if (botId) {
+    //   dispatch(
+    //     getAllSession({
+    //       botId,
+    //       page: 1,
+    //       channelName: channelNameVal,
+    //       aiLevel,
+    //       humanLevel,
+    //     })
+    //   );
+    // }
   };
 
   const getChannelNameHandler = (e: any) => {
