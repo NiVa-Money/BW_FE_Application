@@ -110,7 +110,7 @@ const SessionsList: React.FC<SessionsListProps> = ({
   };
 
   return (
-    <div className="w-80 pl-0 bg-white p-4 border-r overflow-y-scroll">
+    <div className="w-96 pl-0 bg-white p-4 border-r overflow-y-scroll">
       {sessionsData.length === 0 ? (
         <div className="text-center text-gray-500 p-4">No sessions found</div>
       ) : (

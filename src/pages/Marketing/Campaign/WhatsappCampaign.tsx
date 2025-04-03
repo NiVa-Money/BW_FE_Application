@@ -30,6 +30,28 @@ interface TemplateButton {
   phoneNumber?: string;
 }
 
+interface CampaignPayload {
+  campaignId: string;
+  campaignName: string;
+  channel: string;
+  phoneNumberId: number;
+  schedule: string;
+  endDate: string;
+  contactsUrl: string;
+  messageType: string;
+  messageContent: {
+    // text: string;
+    template: {
+      name: string;
+      language: string;
+      header: { image: string };
+      body: { text: string[] };
+    } | null;
+    // image: { url: string; caption: string } | null;
+  };
+  contactsData?: any;
+}
+
 const WhatsappCampaign: React.FC = () => {
   const [mode, setMode] = useState<"Template">("Template");
 
@@ -44,6 +66,8 @@ const WhatsappCampaign: React.FC = () => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
+
+  const [templateId, _setTemplateId] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -157,61 +181,124 @@ const WhatsappCampaign: React.FC = () => {
   );
   console.log("Secret Token:", integrationId);
 
+  // const handleSave = async () => {
+  //   // Prepare the campaign payload
+  //   interface CampaignPayload {
+  //     campaignId: string;
+  //     campaignName: string;
+  //     channel: string;
+  //     phoneNumberId: number;
+  //     schedule: string;
+  //     endDate: string;
+  //     contactsUrl: string;
+  //     messageType: string;
+  //     messageContent: {
+  //       // text: string;
+  //       template: {
+  //         name: string;
+  //         language: string;
+  //         header: { image: string };
+  //         body: { text: string[] };
+  //       } | null;
+  //       // image: { url: string; caption: string } | null;
+  //     };
+  //     contactsData?: any;
+  //   }
+
+  //   const templateContent =
+  //     mode === "Template"
+  //       ? selectedTemplate
+  //         ? {
+  //             name: selectedTemplate.name,
+  //             language: selectedTemplate.language || "en",
+  //             header: { image: selectedTemplate.header }, // header is a string (URL)
+
+  //             body: {
+  //               text:
+  //                 typeof selectedTemplate.body === "string"
+  //                   ? [selectedTemplate.body]
+  //                   : Array.isArray(selectedTemplate.body)
+  //                   ? selectedTemplate.body
+  //                   : [],
+  //             },
+  //           }
+  //         : {
+  //             name: "order_notification",
+  //             language: "en",
+  //             header: { image: "https://example.com/image.png" },
+  //             body: {
+  //               text: [
+  //                 "Your order has been shipped!",
+  //                 "Your package is on its way!",
+  //               ],
+  //             },
+  //           }
+  //       : null;
+  //   const campaignPayload: CampaignPayload = {
+  //     campaignId: "0",
+  //     campaignName,
+  //     channel: "whatsapp",
+  //     phoneNumberId: selectedPhoneNumberId ? Number(selectedPhoneNumberId) : 0,
+  //     schedule: scheduleDate ? scheduleDate.toISOString() : "",
+  //     endDate: scheduleDate
+  //       ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
+  //       : "",
+  //     // contactsUrl: contactList ? URL.createObjectURL(contactList) : "",
+  //     contactsUrl: "", // Initially empty, will be updated later
+  //     messageType: mode.toLowerCase(),
+  //     messageContent: {
+  //       template: mode === "Template" ? templateContent : null,
+  //     },
+  //   };
+
+  //   try {
+  //     if (contactList && campaignPayload.campaignId) {
+  //       const formData = new FormData();
+  //       formData.append("file", contactList);
+
+  //       const data = await uploadWhatsAppContactsService(
+  //         campaignPayload.campaignId,
+  //         formData
+  //       );
+
+  //       // Add the parsed contact list to the campaign payload
+  //       campaignPayload.contactsData = data;
+
+  //       const s3Url = data.s3Url;
+  //       campaignPayload.contactsUrl = s3Url;
+  //       // Dispatch the campaign creation action with the payload
+  //       dispatch(createWhatsAppCampaignAction(campaignPayload));
+  //     } else {
+  //       alert("Please upload a contact list");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error while creating campaign:", error);
+  //     alert("Failed to create campaign");
+  //   }
+  // };
+
+  // Find integration
+
   const handleSave = async () => {
-    // Prepare the campaign payload
-    interface CampaignPayload {
-      campaignId: string;
-      campaignName: string;
-      channel: string;
-      phoneNumberId: number;
-      schedule: string;
-      endDate: string;
-      contactsUrl: string;
-      messageType: string;
-      messageContent: {
-        // text: string;
-        template: {
-          name: string;
-          language: string;
-          header: { image: string };
-          body: { text: string[] };
-        } | null;
-        // image: { url: string; caption: string } | null;
-      };
-      contactsData?: any;
-    }
-
     const templateContent =
-      mode === "Template"
-        ? selectedTemplate
-          ? {
-              name: selectedTemplate.name,
-              language: selectedTemplate.language || "en",
-              header: { image: selectedTemplate.header }, // header is a string (URL)
-
-              body: {
-                text:
-                  typeof selectedTemplate.body === "string"
-                    ? [selectedTemplate.body]
-                    : Array.isArray(selectedTemplate.body)
-                    ? selectedTemplate.body
-                    : [],
-              },
-            }
-          : {
-              name: "order_notification",
-              language: "en",
-              header: { image: "https://example.com/image.png" },
-              body: {
-                text: [
-                  "Your order has been shipped!",
-                  "Your package is on its way!",
-                ],
-              },
-            }
+      mode === "Template" && selectedTemplate
+        ? {
+            name: selectedTemplate.name,
+            language: selectedTemplate.language || "en",
+            header: { image: selectedTemplate.header },
+            body: {
+              text:
+                typeof selectedTemplate.body === "string"
+                  ? [selectedTemplate.body]
+                  : Array.isArray(selectedTemplate.body)
+                  ? selectedTemplate.body
+                  : [],
+            },
+          }
         : null;
+
     const campaignPayload: CampaignPayload = {
-      campaignId: "0",
+      campaignId: "0", // This might need adjustment based on your backend logic
       campaignName,
       channel: "whatsapp",
       phoneNumberId: selectedPhoneNumberId ? Number(selectedPhoneNumberId) : 0,
@@ -219,30 +306,28 @@ const WhatsappCampaign: React.FC = () => {
       endDate: scheduleDate
         ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
         : "",
-      // contactsUrl: contactList ? URL.createObjectURL(contactList) : "",
-      contactsUrl: "", // Initially empty, will be updated later
+      contactsUrl: "",
       messageType: mode.toLowerCase(),
-      messageContent: {
-        template: mode === "Template" ? templateContent : null,
-      },
+      messageContent: { template: templateContent },
     };
 
     try {
-      if (contactList && campaignPayload.campaignId) {
+      if (contactList && templateId) {
+        // Use templateId instead of campaignId
         const formData = new FormData();
         formData.append("file", contactList);
 
-        const data = await uploadWhatsAppContactsService(campaignPayload.campaignId, formData);
-
-        // Add the parsed contact list to the campaign payload
-        campaignPayload.contactsData = data;
+        const data = await uploadWhatsAppContactsService(templateId, formData);
 
         const s3Url = data.s3Url;
         campaignPayload.contactsUrl = s3Url;
-        // Dispatch the campaign creation action with the payload
+        campaignPayload.contactsData = data;
+
         dispatch(createWhatsAppCampaignAction(campaignPayload));
       } else {
-        alert("Please upload a contact list");
+        alert(
+          "Please upload a contact list and ensure a template is selected."
+        );
       }
     } catch (error) {
       console.error("Error while creating campaign:", error);
@@ -250,7 +335,6 @@ const WhatsappCampaign: React.FC = () => {
     }
   };
 
-  // Find integration
   const selectedIntegration = integrationList.find(
     (integration) =>
       integration.phoneNumberId.toString() === selectedPhoneNumberId
@@ -347,10 +431,19 @@ const WhatsappCampaign: React.FC = () => {
     };
 
     // Dispatch the template creation action.
-    dispatch(createWhatsAppTemplateAction(payload));
+    // dispatch(createWhatsAppTemplateAction(payload));
+    const result = dispatch(createWhatsAppTemplateAction(payload));
+
+    const templateId = result?.payload?.data?.id;
+    console.log("template", templateId);
+
+    if (!templateId) {
+      alert("Failed to create template. Please try again.");
+      return;
+    }
 
     setSelectedTemplate({
-      id: data.id,
+      id: templateId,
       name: data.name,
       header: headerContent,
       body: data.body.text,
