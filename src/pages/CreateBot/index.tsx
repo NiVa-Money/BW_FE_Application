@@ -51,7 +51,6 @@ const CreateBot: React.FC = () => {
     botTone: "",
     botColor: "",
     botGreetingMessage: "Hello, how can I assist you?",
-    botIdentity: "",
     supportNumber: "",
     supportEmail: "",
     docName: "",
