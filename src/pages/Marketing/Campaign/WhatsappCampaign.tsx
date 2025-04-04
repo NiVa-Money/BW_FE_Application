@@ -2,8 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { WhatsApp, Upload } from "@mui/icons-material"; // Import MUI icons
-// import { ArrowDropDown } from "@mui/icons-material";
+import { WhatsApp, Upload } from "@mui/icons-material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -15,7 +14,10 @@ import {
   createWhatsAppCampaignAction,
   createWhatsAppTemplateAction,
 } from "../../../store/actions/whatsappCampaignActions";
-import { convertCsvToJsonService } from "../../../api/services/whatsappCampaignService";
+import {
+  uploadWhatsAppContactsService,
+  downloadSampleCsvService,
+} from "../../../api/services/whatsappCampaignService";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
 import CreateTemplateModal from "./CreateTemplate";
 
@@ -27,17 +29,35 @@ interface TemplateButton {
   phoneNumber?: string;
 }
 
+interface CampaignPayload {
+  templateId: string;
+  integrationId: string;
+  campaignName: string;
+  // channel: string;
+  // phoneNumberId: number;
+  startDate: string;
+  endDate: string;
+  contactsUrl: string;
+  // messageType: string;
+  // messageContent: {
+  //   template: {
+  //     name: string;
+  //     language: string;
+  //     header: { image: string };
+  //     body: { text: string[] };
+  //   } | null;
+  // };
+  // contactsData?: any;
+}
+
 const WhatsappCampaign: React.FC = () => {
   const [mode, setMode] = useState<"Template">("Template");
-
   const [campaignName, setCampaignName] = useState<string>("");
   const [contactList, setContactList] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
   const [_fileName, setFileName] = useState("");
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
-
-  // const [image, setImage] = useState<string | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
@@ -45,9 +65,51 @@ const WhatsappCampaign: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  // Get template data from Redux (populated after successful API call)
+  const whatsappTemplates = useSelector(
+    (state: RootState) => state.whatsappTemplates
+  );
+  const reduxTemplateId = whatsappTemplates?.templateData?.data?.id;
+
+  // When the Redux store is updated with a template id, update the selectedTemplate state.
+  useEffect(() => {
+    if (reduxTemplateId) {
+      setSelectedTemplate((prev: any) => ({
+        ...prev,
+        id: reduxTemplateId,
+      }));
+    }
+  }, [reduxTemplateId]);
+
+  // Template selection handler (for when user picks from CampaignTemplate)
   const handleSelectTemplate = (template: any) => {
+    if (!template?.id) {
+      console.error("Selected template has no ID:", template);
+      return;
+    }
     setSelectedTemplate(template);
     setShowTemplate(false);
+  };
+
+  const handleDownloadSample = async () => {
+    if (!selectedTemplate?.id) {
+      alert("Please select a template first");
+      return;
+    }
+    try {
+      const blob = await downloadSampleCsvService(selectedTemplate.id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `sample_${selectedTemplate.name}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert("Failed to download sample CSV. Please try again.");
+    }
   };
 
   const handleCampaignNameChange = (
@@ -56,19 +118,29 @@ const WhatsappCampaign: React.FC = () => {
     setCampaignName(event.target.value);
   };
 
-  const handleContactListUpload = (
+  const handleContactListUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (event.target.files) {
       const file = event.target.files[0];
-      const validFileTypes = ["text/csv"];
-
-      if (validFileTypes.includes(file.type)) {
-        setContactList(file);
-        setFileName(file.name);
-      } else {
-        alert("Please upload a valid CSV file.");
+      if (!file.type.includes("csv")) {
+        alert("Only CSV files are allowed");
+        return;
       }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csv = e.target?.result as string;
+        const headers = csv.split("\n")[0].split(",");
+        const requiredHeaders = ["number", "countrycode"];
+        const isValid = requiredHeaders.every((h) => headers.includes(h));
+        if (!isValid) {
+          console.log("should have numbers ");
+          return;
+        }
+      };
+      reader.readAsText(file);
+      setContactList(file);
+      setFileName(file.name);
     }
   };
 
@@ -76,6 +148,7 @@ const WhatsappCampaign: React.FC = () => {
     setMode(selectedMode);
     setShowTemplate(selectedMode === "Template");
   };
+
   const integrationsData = useSelector(
     (state: RootState) => state?.crudIntegration?.crudIntegration?.data
   );
@@ -83,14 +156,13 @@ const WhatsappCampaign: React.FC = () => {
   useEffect(() => {
     dispatch(getWhatsappRequest(""));
   }, [dispatch]);
-  // Convert integration data to an array (if it's not already)
+
   const integrationList = integrationsData
     ? Array.isArray(integrationsData)
       ? integrationsData
       : [integrationsData]
     : [];
 
-  // Optionally default the dropdown to the first available phoneNumberId
   useEffect(() => {
     if (integrationList.length > 0 && !selectedPhoneNumberId) {
       setSelectedPhoneNumberId(integrationList[0].phoneNumberId.toString());
@@ -98,7 +170,7 @@ const WhatsappCampaign: React.FC = () => {
   }, [integrationList, selectedPhoneNumberId]);
 
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
-  // const campaignId = useSelector((state: RootState) => state.whatsappCampaign?.campaignId);
+  console.log("Campaign creation success:", success);
 
   const integrationId = useSelector(
     (state: RootState) =>
@@ -106,223 +178,85 @@ const WhatsappCampaign: React.FC = () => {
   );
   console.log("Secret Token:", integrationId);
 
+  // Save handler now checks for a valid Redux template id (after the API call is complete)
   const handleSave = async () => {
-    // Prepare the campaign payload
-    interface CampaignPayload {
-      campaignName: string;
-      channel: string;
-      phoneNumberId: number;
-      schedule: string;
-      endDate: string;
-      contactsUrl: string;
-      messageType: string;
-      messageContent: {
-        // text: string;
-        template: {
-          name: string;
-          language: string;
-          header: { image: string };
-          body: { text: string[] };
-        } | null;
-        // image: { url: string; caption: string } | null;
-      };
-      contactsData?: any;
+    if (!contactList) {
+      alert("Please upload a contact list");
+      return;
+    }
+    if (!reduxTemplateId) {
+      // Inform user that template creation is still in progress.
+      alert(
+        "Template creation is in progress. Please wait for it to complete."
+      );
+      return;
     }
 
-    const templateContent =
-      mode === "Template"
-        ? selectedTemplate
-          ? {
-              name: selectedTemplate.name,
-              language: selectedTemplate.language || "en",
-              header: { image: selectedTemplate.header }, // header is a string (URL)
+    // const templateContent =
+    //   mode === "Template" && selectedTemplate
+    //     ? {
+    //         name: selectedTemplate.name,
+    //         language: selectedTemplate.language || "en",
+    //         header: { image: selectedTemplate.header },
+    //         body: {
+    //           text:
+    //             typeof selectedTemplate.body === "string"
+    //               ? [selectedTemplate.body]
+    //               : Array.isArray(selectedTemplate.body)
+    //               ? selectedTemplate.body
+    //               : [],
+    //         },
+    //       }
+    //     : null;
 
-              body: {
-                text:
-                  typeof selectedTemplate.body === "string"
-                    ? [selectedTemplate.body]
-                    : Array.isArray(selectedTemplate.body)
-                    ? selectedTemplate.body
-                    : [],
-              },
-            }
-          : {
-              name: "order_notification",
-              language: "en",
-              header: { image: "https://example.com/image.png" },
-              body: {
-                text: [
-                  "Your order has been shipped!",
-                  "Your package is on its way!",
-                ],
-              },
-            }
-        : null;
     const campaignPayload: CampaignPayload = {
       campaignName,
-      channel: "whatsapp",
-      phoneNumberId: selectedPhoneNumberId ? Number(selectedPhoneNumberId) : 0,
-      schedule: scheduleDate ? scheduleDate.toISOString() : "",
+      templateId: reduxTemplateId || "",
+      integrationId: integrationId || "",
+      startDate: scheduleDate ? scheduleDate.toISOString() : "",
       endDate: scheduleDate
         ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
         : "",
-      // contactsUrl: contactList ? URL.createObjectURL(contactList) : "",
-      contactsUrl: "", // Initially empty, will be updated later
-      messageType: mode.toLowerCase(),
-      messageContent: {
-        template: mode === "Template" ? templateContent : null,
-      },
+      contactsUrl: "",
     };
 
     try {
-      // Upload the CSV file to the /marketing/csv-to-json API
-      if (contactList) {
-        const formData = new FormData();
-        formData.append("file", contactList);
-
-        const data = await convertCsvToJsonService(formData);
-
-        // Add the parsed contact list to the campaign payload
-        campaignPayload.contactsData = data;
-
-        const s3Url = data.s3Url;
-        campaignPayload.contactsUrl = s3Url;
-        // Dispatch the campaign creation action with the payload
-        dispatch(createWhatsAppCampaignAction(campaignPayload));
-      } else {
-        alert("Please upload a contact list");
-      }
+      // Use the Redux template id here, now that the API call is complete.
+      const formData = new FormData();
+      formData.append("file", contactList);
+      const data = await uploadWhatsAppContactsService(
+        reduxTemplateId,
+        formData
+      );
+      const s3Url = data.s3Url;
+      campaignPayload.contactsUrl = s3Url;
+      dispatch(createWhatsAppCampaignAction(campaignPayload));
     } catch (error) {
       console.error("Error while creating campaign:", error);
       alert("Failed to create campaign");
     }
   };
 
-  // Find integration
   const selectedIntegration = integrationList.find(
     (integration) =>
       integration.phoneNumberId.toString() === selectedPhoneNumberId
   );
 
-  // const handleTemplateDone = async (data: {
-  //   name: string;
-  //   header?: { type: string; content: string };
-  //   body: { text: string };
-  //   footer?: { text: string };
-  //   buttons: TemplateButton[];
-  // }) => {
-  //   if (
-  //     !selectedIntegration ||
-  //     !selectedIntegration.secretToken ||
-  //     selectedIntegration.secretToken.length !== 24
-  //   ) {
-  //     alert(
-  //       "Invalid integration selected. Please check your integration configuration."
-  //     );
-  //     return;
-  //   }
-
-  //   // 1) Upload file if image/video/document
-  //   let fileHandle = "";
-  //   if (
-  //     data.header &&
-  //     ["IMAGE", "VIDEO", "DOCUMENT"].includes(data.header.type.toUpperCase())
-  //   ) {
-  //     try {
-  //       if (!data.header.content) {
-  //         throw new Error("No file provided for upload.");
-  //       }
-  //       const formData = new FormData();
-  //       formData.append("file", data.header.content as unknown as Blob); // Ensure it's a File object
-  //       const file = new File(
-  //         [data.header.content as unknown as Blob],
-  //         "uploaded_media"
-  //       );
-  //       const response = await uploadWhatsAppMediaService(
-  //         file,
-  //         selectedIntegration.secretToken
-  //       );
-
-  //       if (response?.fileHandle) {
-  //         fileHandle = response.fileHandle;
-  //       } else {
-  //         throw new Error("File handle missing in response");
-  //       }
-  //     } catch (error) {
-  //       console.error("Header upload failed:", error);
-  //       alert("Failed to upload header media.");
-  //       return;
-  //     }
-  //   }
-
-  //   // 2) Build the final header
-  //   let headerType = "NONE" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
-  //   let headerContent = "";
-
-  //   if (data.header) {
-  //     headerType = data.header.type.toUpperCase() as
-  //       | "TEXT"
-  //       | "IMAGE"
-  //       | "DOCUMENT"
-  //       | "VIDEO"
-  //       | "NONE";
-  //     headerContent =
-  //       ["IMAGE", "VIDEO", "DOCUMENT"].includes(headerType) && fileHandle
-  //         ? fileHandle
-  //         : data.header.content;
-  //   }
-
-  //   // 3) Convert buttons to the doc's ButtonDto
-  //   // ButtonDto.type can be "QUICK_REPLY", "URL", "PHONE_NUMBER"
-  //   const mappedButtons = data.buttons.map((btn) => {
-  //     if (btn.type === "quick_reply") {
-  //       return {
-  //         type: "QUICK_REPLY" as const,
-  //         text: btn.text,
-  //       };
-  //     } else {
-  //       return btn.ctaType === "url"
-  //         ? {
-  //             type: "URL" as const,
-  //             text: btn.text,
-  //             url: btn.url || "",
-  //           }
-  //         : {
-  //             type: "PHONE_NUMBER" as const,
-  //             text: btn.text,
-  //             phoneNumber: btn.phoneNumber || "",
-  //           };
-  //     }
-  //   });
-
-  //   // 4) Build final payload
-  //   const payload = {
-  //     integrationId: selectedIntegration.secretToken,
-  //     name: data.name,
-  //     language: "en_US",
-  //     category: "MARKETING",
-  //     header: {
-  //       type: headerType, // "TEXT", "IMAGE", "DOCUMENT", "VIDEO", or "NONE"
-  //       content: headerContent, // If text, user input; if file, fileHandle
-  //     },
-  //     body: {
-  //       text: data.body.text,
-  //     },
-  //     footer: {
-  //       text: data.footer ? data.footer.text : "",
-  //     },
-  //     buttons: mappedButtons,
-  //   };
-
-  //   // 5) Dispatch
-  //   dispatch(createWhatsAppTemplateAction(payload));
-  //   setCustomizeScreen(false);
-  // };
-
+  // When creating a new template, dispatch the template creation action
+  // and let Redux update with the templateId.
   const handleTemplateDone = async (data: {
+    id?: string;
     name: string;
     header?: { type: string; content: string };
-    body: { text: string };
+    body: {
+      text: string;
+      parameters?: {
+        type: "positional";
+        example: {
+          positional: string[];
+        };
+      };
+    };
     footer?: { text: string };
     buttons: TemplateButton[];
   }) => {
@@ -337,8 +271,6 @@ const WhatsappCampaign: React.FC = () => {
       return;
     }
 
-    // Use the header provided from CreateTemplateModal.
-    // For media headers, the fileHandle is expected to be in header.content.
     let headerType = "NONE" as "TEXT" | "IMAGE" | "DOCUMENT" | "VIDEO" | "NONE";
     let headerContent = "";
     if (data.header) {
@@ -358,7 +290,6 @@ const WhatsappCampaign: React.FC = () => {
       }
     }
 
-    // Map buttons to the expected ButtonDto format.
     const mappedButtons = data.buttons.map((btn) => {
       if (btn.type === "quick_reply") {
         return {
@@ -380,7 +311,6 @@ const WhatsappCampaign: React.FC = () => {
       }
     });
 
-    // Build the final payload.
     const payload = {
       integrationId: selectedIntegration.secretToken,
       name: data.name,
@@ -392,6 +322,7 @@ const WhatsappCampaign: React.FC = () => {
       },
       body: {
         text: data.body.text,
+        parameters: data.body.parameters,
       },
       footer: {
         text: data.footer ? data.footer.text : "",
@@ -410,12 +341,13 @@ const WhatsappCampaign: React.FC = () => {
       buttons: data.buttons,
     });
 
+    // Once the API call is successful, the Redux state will update with the template id.
     setCustomizeScreen(false);
   };
 
   console.log("Selected Template:", selectedTemplate);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (success) navigate("/marketing/dashboard");
   }, [success, navigate]);
 
@@ -480,9 +412,8 @@ const WhatsappCampaign: React.FC = () => {
                   </div>
                 ))}
               </div>
-
               <button
-                className="flex gap-2 w-full mt-4  whitespace-nowrap min-h-[45px] justify-center items-center text-base font-medium text-gray-100 bg-[#65558F] rounded-3xl"
+                className="flex gap-2 w-full mt-4 whitespace-nowrap min-h-[45px] justify-center items-center text-base font-medium text-gray-100 bg-[#65558F] rounded-3xl"
                 onClick={() => setCustomizeScreen(true)}
               >
                 Create Template
@@ -507,21 +438,14 @@ const WhatsappCampaign: React.FC = () => {
                   value={scheduleDate}
                   onChange={(newValue) => setScheduleDate(newValue)}
                   slotProps={{
-                    textField: {
-                      variant: "outlined",
-                      fullWidth: true,
-                    },
+                    textField: { variant: "outlined", fullWidth: true },
                   }}
                 />
-                {/* Time Picker */}
                 <TimePicker
                   value={scheduleTime}
                   onChange={(newValue) => setScheduleTime(newValue)}
                   slotProps={{
-                    textField: {
-                      variant: "outlined",
-                      fullWidth: true,
-                    },
+                    textField: { variant: "outlined", fullWidth: true },
                   }}
                 />
               </LocalizationProvider>
@@ -545,27 +469,17 @@ const WhatsappCampaign: React.FC = () => {
                 className="flex-1 px-4 py-3 bg-slate-500 bg-opacity-10 rounded-md"
               />
             </div>
-            <div className="flex flex-col w-full font-[number:var(--sds-typography-body-font-weight-regular)] text-[length:var(--sds-typography-body-size-medium)]">
-              <div className="leading-snug text-[color:var(--sds-color-text-default-default)]">
-                Upload The Contact List *
-              </div>
+            <div className="flex flex-col w-full text-sm">
+              <div className="leading-snug">Upload The Contact List *</div>
               <div className="mt-2 leading-6 text-zinc-500">
                 Upload the contact list you wish to target with your campaigns
                 on WhatsApp. The CSV file should only include the following
-                columns: name, number, and country code. <br />
+                columns: name, number, and country code.
+                <br />
                 <strong>Only CSV files are allowed.</strong>
               </div>
             </div>
             <div className="flex gap-2.5 items-start mt-2.5 w-full">
-              {/* <div className="flex flex-1 shrink justify-between items-center p-2.5 text-base leading-loose whitespace-nowrap rounded-xl basis-0 bg-slate-500 bg-opacity-10 min-w-[240px] text-zinc-400">
-                <div className="flex flex-1 shrink gap-6 items-center self-stretch my-auto w-full basis-0">
-                  <div className="flex-1 shrink self-stretch my-auto basis-0 rotate-[2.4492937051703357e-16rad]">
-                    Select
-                  </div>
-                  <ArrowDropDown className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square" />
-                </div>
-              </div> */}
-
               <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
                 <input
                   type="file"
@@ -579,49 +493,22 @@ const WhatsappCampaign: React.FC = () => {
                 >
                   <Upload sx={{ fontSize: 24 }} />
                   <span className="ml-2 text-zinc-400">
-                    {contactList ? contactList.name : "Upload CSV Contact List"}
+                    {contactList ? contactList.name : "Upload CSV"}
                   </span>
                 </label>
               </div>
-            </div>
-
-            {/* <div className="flex flex-col w-full font-[number:var(--sds-typography-body-font-weight-regular)] text-[length:var(--sds-typography-body-size-medium)]">
-              <div className="leading-snug mt-4 text-[color:var(--sds-color-text-default-default)]">
-                Bot Configuration
-              </div>
-              <div className="mt-2 leading-6 text-zinc-500">
-                Choose The Knowledge Base or Upload The Knowledge Base
-              </div>
-            </div>
-            <div className="flex gap-2.5 items-start mt-2.5 w-full">
-              {/* <div className="flex flex-1 shrink justify-between items-center p-2.5 text-base leading-loose whitespace-nowrap rounded-xl basis-0 bg-slate-500 bg-opacity-10 min-w-[240px] text-zinc-400">
-                <div className="flex flex-1 shrink gap-6 items-center self-stretch my-auto w-full basis-0">
-                  <div className="flex-1 shrink self-stretch my-auto basis-0 rotate-[2.4492937051703357e-16rad]">
-                    Select
-                  </div>
-                 <ArrowDropDown className="object-contain shrink-0 self-stretch my-auto w-6 aspect-square" />
-                </div>
-              </div> */}
-            {/* <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
-              <input
-                type="file"
-                onChange={handlePdfUpload}
-                className="hidden"
-                id="bot-config-upload"
-              />
-              <label
-                htmlFor="bot-config-upload"
-                className="flex gap-2 items-center cursor-pointer"
+              <button
+                onClick={handleDownloadSample}
+                disabled={!selectedTemplate}
+                className={`p-3 rounded-3xl border ${
+                  !selectedTemplate
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-[#65558F] text-white hover:bg-[#7a6b9d] cursor-pointer"
+                } transition-colors`}
               >
-                <FileUpload sx={{ fontSize: 24 }} />
-                <span className="ml-2 text-zinc-400">
-                  {botConfigFile
-                    ? botConfigFile.name
-                    : " Upload Bot Config PDF"}
-                </span>
-              </label>
-            </div> */}
-            {/* </div> */}
+                Download Sample CSV
+              </button>
+            </div>
 
             {/* AI Wizard */}
             <div
@@ -639,7 +526,6 @@ const WhatsappCampaign: React.FC = () => {
                 Allow our AI to assist you in creating the perfect content for
                 your campaign.
               </p>
-
               <button
                 onClick={handleGoWizard}
                 className="flex w-[200px] whitespace-nowrap justify-center mt-2 py-2 text-lg font-medium text-gray-100 bg-[#65558F] rounded-3xl"
@@ -667,17 +553,12 @@ const WhatsappCampaign: React.FC = () => {
           {/* WhatsApp Preview */}
           <div className="flex flex-col flex-1 mt-5 shrink basis-0 min-w-[240px]">
             <div className="relative w-[400px] h-[660px] border border-gray-300 rounded-md overflow-hidden">
-              {/* Header (Contact name, info, date) */}
               <div className="bg-[#075E54] text-white flex items-center justify-between px-4 py-2">
                 <div className="flex flex-col">
-                  <span className="font-bold text-base"> Campaign </span>
+                  <span className="font-bold text-base">Campaign</span>
                 </div>
               </div>
-
-              {/* Chat Area */}
-              {/* Chat Area (modified for overflow and button visibility) */}
               <div className="p-4 h-full bg-gray-100 overflow-y-auto">
-                {/* Message Bubble */}
                 <div className="w-fit max-w-[80%] mt-10 rounded-lg bg-white p-2 mb-3">
                   {selectedTemplate && (
                     <div className="mt-4 p-4 rounded-md">

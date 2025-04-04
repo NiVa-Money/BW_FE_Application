@@ -72,7 +72,7 @@ const MarketingDashboard = () => {
   const navigate = useNavigate();
   const [insightsData, setInsightsData] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [currentNewsIndex, _setCurrentNewsIndex] = useState(0);
   const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
 
   const handleViewDashboard = () => {
@@ -338,52 +338,15 @@ const MarketingDashboard = () => {
                       </ReactMarkdown> */}
                       {allNews[currentNewsIndex] ? (
                         <ReactMarkdown className="text-sm">
-                          {allNews[currentNewsIndex].insights}
+                          {allNews[currentNewsIndex].insights.join("\n\n")}
                         </ReactMarkdown>
                       ) : (
                         <div className="text-center py-8">
-                          Your data is getting processed, please wait
+                          Your data is getting processed, please wait.
                         </div>
                       )}
                     </div>
                   </div>
-                  {/* Pagination Controls */}
-                  {allNews.length > 1 && (
-                    <div className="flex justify-between absolute bottom-0 left-0 right-0 mt-4">
-                      <button
-                        onClick={() =>
-                          setCurrentNewsIndex((prev) =>
-                            prev === 0 ? allNews.length - 1 : prev - 1
-                          )
-                        }
-                        className="p-2 hover:bg-gray-100 rounded"
-                      >
-                        <ChevronLeft />
-                      </button>
-                      <div className="flex space-x-2">
-                        {allNews.map((_, index) => (
-                          <div
-                            key={index}
-                            className={`h-2 w-2 rounded-full ${
-                              index === currentNewsIndex
-                                ? "bg-blue-500"
-                                : "bg-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <button
-                        onClick={() =>
-                          setCurrentNewsIndex(
-                            (prev) => (prev + 1) % allNews.length
-                          )
-                        }
-                        className="p-2 hover:bg-gray-100 rounded"
-                      >
-                        <ChevronRight />
-                      </button>
-                    </div>
-                  )}
                 </>
               </div>
             </>

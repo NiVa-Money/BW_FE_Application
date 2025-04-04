@@ -25,7 +25,7 @@ const LiveSessionList: React.FC<LiveSessionListProps> = ({
     (state: RootState) => state?.userChat?.allSessionLive?.data
   );
 
-  console.log("session live" , sessionsDataRedux);
+  console.log("session live", sessionsDataRedux);
   const [sessionsData, setSessionsData] = useState<any[]>([]);
 
   const channelNameImages: Record<string, string> = {
