@@ -146,18 +146,22 @@ const MarketingDashboard = () => {
   }, [hasFetched, insightsData, navigate]);
 
   // Helper function to render a section: if data array is empty then show waiting message.
-  const renderSectionOrWaiting = (
-    dataArray: any[],
-    children: React.ReactNode
-  ) => {
-    if (!dataArray || dataArray.length === 0) {
+  const renderSectionOrWaiting = (data, content) => {
+    if (isFinal && (!data || data.length === 0)) {
       return (
-        <div className="text-center py-8">
-          Your data is getting processed, please wait
+        <div className="text-center text-sm text-red-600 py-4">
+          Data failed to process.
         </div>
       );
     }
-    return children;
+
+    return data && data.length > 0 ? (
+      content
+    ) : (
+      <div className="text-center text-sm text-gray-500 py-4">
+        Processing data...
+      </div>
+    );
   };
 
   if (insightsData?.status === "draft") {
