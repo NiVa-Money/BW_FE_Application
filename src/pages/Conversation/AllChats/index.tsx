@@ -55,7 +55,8 @@ const AllChats = () => {
     (state: RootState) => state?.userChat?.allSession?.data
   );
   const [aiLevel, setAiLevel] = useState(true);
-  const [humanLevel, setHumanLevel] = useState(true);
+  const [humanLevel] = useState(true);
+  // setHumanLevel
 
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
@@ -812,22 +813,37 @@ const AllChats = () => {
           <option value="Other">Other</option>
         </select>
 
-        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+        {/* <div className="flex items-center justify-between p-4 rounded-lg mb-2">
           <span className="text-gray-800 font-medium">AI Chats</span>
           <Switch
             checked={Boolean(aiLevel)}
             onChange={(e) => setAiLevel(e.target.checked)}
             color="primary"
           />
-        </div>
+        </div> */}
+
         <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+          <span className="text-gray-800 font-medium">AI Chats</span>
+          <div className="relative group">
+            <Switch
+              checked={Boolean(aiLevel)}
+              onChange={(e) => setAiLevel(e.target.checked)}
+              color="primary"
+            />
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+              Enable AI-powered chat responses
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="flex items-center justify-between p-4 rounded-lg mb-2">
           <span className="text-gray-800 font-medium">Human Chats</span>
           <Switch
             checked={Boolean(humanLevel)}
             onChange={(e) => setHumanLevel(e.target.checked)}
             color="primary"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Main Container */}
@@ -1151,7 +1167,7 @@ const AllChats = () => {
                       <div className="bg-red-50 border border-red-200 shadow-sm p-4 rounded-lg w-full max-w-md">
                         {/* Title */}
                         <h4 className="text-red-700 font-semibold text-center mb-4">
-                          System Weak Points Analysis
+                          Vulnerability Analysis
                         </h4>
 
                         {/* Existing Vulnerability List */}
