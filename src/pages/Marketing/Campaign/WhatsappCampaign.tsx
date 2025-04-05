@@ -61,6 +61,10 @@ const WhatsappCampaign: React.FC = () => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
+  const [secretToken, setSecretToken] = useState("");
+  const whatsappNumbers = useSelector(
+    (state: RootState) => state.crudIntegration?.crudIntegration?.data
+  );
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -170,13 +174,24 @@ const WhatsappCampaign: React.FC = () => {
   }, [integrationList, selectedPhoneNumberId]);
 
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
-  console.log("Campaign creation success:", success);
 
-  const integrationId = useSelector(
+  const integrations = useSelector(
     (state: RootState) =>
-      state?.crudIntegration?.crudIntegration?.data?.secretToken
+      state.crudIntegration?.crudIntegration?.data?.secretToken
   );
-  console.log("Secret Token:", integrationId);
+
+  console.log("Integrations:", integrations);
+
+  useEffect(() => {
+    if (setSelectedPhoneNumberId && whatsappNumbers?.length > 0) {
+      const selected = whatsappNumbers.find(
+        (num) => num.phoneNumberId.toString() === setSelectedPhoneNumberId
+      );
+      if (selected) {
+        setSecretToken(selected.secretToken);
+      }
+    }
+  }, [setSelectedPhoneNumberId, whatsappNumbers]);
 
   // Save handler now checks for a valid Redux template id (after the API call is complete)
   const handleSave = async () => {
@@ -192,27 +207,16 @@ const WhatsappCampaign: React.FC = () => {
       return;
     }
 
-    // const templateContent =
-    //   mode === "Template" && selectedTemplate
-    //     ? {
-    //         name: selectedTemplate.name,
-    //         language: selectedTemplate.language || "en",
-    //         header: { image: selectedTemplate.header },
-    //         body: {
-    //           text:
-    //             typeof selectedTemplate.body === "string"
-    //               ? [selectedTemplate.body]
-    //               : Array.isArray(selectedTemplate.body)
-    //               ? selectedTemplate.body
-    //               : [],
-    //         },
-    //       }
-    //     : null;
+    const selectedIntegration = whatsappNumbers.find(
+      (num) => num.phoneNumberId.toString() === selectedPhoneNumberId
+    );
+  
+    const integrationId = selectedIntegration?.secretToken || '';
 
     const campaignPayload: CampaignPayload = {
       campaignName,
       templateId: reduxTemplateId || "",
-      integrationId: integrationId || "",
+      integrationId: integrationId,
       startDate: scheduleDate ? scheduleDate.toISOString() : "",
       endDate: scheduleDate
         ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()

@@ -2,6 +2,13 @@
 import { useMessageStatus } from "../../../hooks/useMessageStatus";
 
 const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
+  // Helper function to safely extract text content
+  const getContent = () => {
+    if (typeof content === "string") return content;
+    if (content?.text) return content.text;
+    return "";
+  };
+
   let messageContent;
   switch (msgType) {
     case "text": {
@@ -12,7 +19,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
         <div
           className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${textClasses}`}
         >
-          <span className="flex gap-2 items-center">{content || ""}</span>
+          <span className="flex gap-2 items-center">{getContent()}</span>
           {useMessageStatus({
             status: msg?.status,
             readTime: msg?.readTime,
@@ -43,7 +50,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
             />
           )}
           <strong>{msg?.messageContent?.template?.header?.text || ""}</strong>
-          <span className="flex gap-2 items-center">{content || ""}</span>
+          <span className="flex gap-2 items-center">{getContent()}</span>
           {useMessageStatus({
             status: msg?.status,
             readTime: msg?.readTime,
@@ -51,14 +58,26 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
             deliveredTime: msg?.deliveredTime,
             createdAt: msg?.createdAt,
           })}
-          {msg.messageContent?.template?.buttons?.map((btn, btnIndex) => (
-            <span
-              key={btnIndex}
-              className="flex justify-center h-10 text-base text-center mb-4 bg-transparent font-medium text-[#005C4B] border border-purple-200 rounded-md hover:bg-gray-300"
-            >
-              <button>{btn.text}</button>
-            </span>
-          ))}
+
+          {/* Handle when buttons is an array */}
+          {Array.isArray(msg.messageContent?.template?.buttons) &&
+            msg.messageContent.template.buttons.map((btn, btnIndex) => (
+              <span
+                key={btnIndex}
+                className="flex justify-center h-10 text-base text-center mb-4 bg-transparent font-medium text-[#005C4B] border border-purple-200 rounded-md hover:bg-gray-300"
+              >
+                <button>{btn.text}</button>
+              </span>
+            ))}
+
+          {/* Handle when buttons is an object */}
+          {msg.messageContent?.template?.buttons &&
+            !Array.isArray(msg.messageContent?.template?.buttons) &&
+            typeof msg.messageContent?.template?.buttons === "object" && (
+              <span className="flex justify-center h-10 text-base text-center mb-4 bg-transparent font-medium text-[#005C4B] border border-purple-200 rounded-md hover:bg-gray-300">
+                <button>{msg.messageContent.template.buttons.text}</button>
+              </span>
+            )}
         </div>
       );
       break;
@@ -72,7 +91,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
         <div
           className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${buttonReplyClasses}`}
         >
-          <span className="flex gap-2 items-center">{content || ""}</span>
+          <span className="flex gap-2 items-center">{getContent()}</span>
           {useMessageStatus({
             status: msg?.status,
             readTime: msg?.readTime,
@@ -124,7 +143,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           className={`px-3 flex flex-col py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${audioClasses}`}
         >
           <audio controls>
-            <source src={content} type="audio/ogg" />
+            <source src={getContent()} type="audio/ogg" />
           </audio>
           {useMessageStatus({
             status: msg?.status,
@@ -148,7 +167,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
         >
           <video controls className="w-full rounded-md">
             <source
-              src={msg?.messageContent?.video?.url || content}
+              src={msg?.messageContent?.video?.url || getContent()}
               type="video/mp4"
             />
           </video>
@@ -177,7 +196,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
         <div
           className={`px-3 py-2 rounded-lg max-w-[75%] break-words overflow-wrap ${defaultClasses}`}
         >
-          {content}
+          {getContent()}
         </div>
       );
       break;

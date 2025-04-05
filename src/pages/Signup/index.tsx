@@ -59,14 +59,16 @@ const SignUp: React.FC = () => {
         return value.trim() === "" ? "First name is required" : "";
       case "lastName":
         return value.trim() === "" ? "Last name is required" : "";
-      case "email":
-        { const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      case "email": {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return !emailRegex.test(value)
           ? "Please enter a valid email address"
-          : ""; }
-      case "phone":
-        { const phoneRegex = /^[0-9]{10}$/;
-        return !phoneRegex.test(value) ? "Phone number must be 10 digits" : ""; }
+          : "";
+      }
+      case "phone": {
+        const phoneRegex = /^[0-9]{10}$/;
+        return !phoneRegex.test(value) ? "Phone number must be 10 digits" : "";
+      }
       case "password":
         return value.length < 8
           ? "Password must be at least 8 characters long"
@@ -210,11 +212,11 @@ const SignUp: React.FC = () => {
         <div className="flex flex-col w-[55%] max-md:ml-0 max-md:w-full">
           <img
             loading="lazy"
-            src="/assets/signup_banner.svg"
+            src="/assets/login.gif"
             width={500}
-            height={500}
-            alt="Main Banner"
-            className="object-contain grow w-full rounded-none aspect-[0.78] max-md:mt-10 max-md:max-w-full"
+            height={300}
+            alt="Animated GIF"
+            className="w-full rounded-3xl max-md:mt-10 max-md:max-w-full"
           />
         </div>
         {/* Right Content Section */}
