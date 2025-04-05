@@ -92,4 +92,7 @@ export const initialState: any = {
       loader: false,
     },
   },
+  subscription: {
+    plans: { loader: false, data: [] }
+  }
 };
