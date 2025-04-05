@@ -406,7 +406,11 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
         {chartItems.map((item) => (
           <div key={item.id} >
             <ChartContainer
-              extraSX={{ border: `1px solid ${COLORS.LAVENDERMIST}`, backgroundColor: item.id == 5 ? '#e7e0eb' : '' }}
+              extraSX={{
+                border: `1px solid ${COLORS.LAVENDERMIST}`, "&:hover": {
+                  backgroundColor: '#e7e0eb', // Replace with your desired hover color
+                },
+              }}
               title={item.title}
               component={item.component}
             />

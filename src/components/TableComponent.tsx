@@ -62,8 +62,7 @@ const CommonTable: React.FC<TableProps> = ({
               <TableRow>
                 <TableCell
                   colSpan={headers.length}
-                  align="center"
-                  sx={{ height: "62px" }}
+                  sx={{ height: "62px", textAlign: 'center' }}
                 >
                   No data available
                 </TableCell>
@@ -76,7 +75,7 @@ const CommonTable: React.FC<TableProps> = ({
                     {headers.map((header, colIndex) => (
                       <TableCell
                         key={colIndex}
-                        sx={{ borderBottom: "0px solid #E0E0E0" }}
+                        sx={{ borderBottom: "0px solid #E0E0E0", textAlign: 'center' }}
                       >
                         {row[header]}
                       </TableCell>
