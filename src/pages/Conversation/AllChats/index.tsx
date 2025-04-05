@@ -55,7 +55,8 @@ const AllChats = () => {
     (state: RootState) => state?.userChat?.allSession?.data
   );
   const [aiLevel, setAiLevel] = useState(true);
-  const [humanLevel, setHumanLevel] = useState(true);
+  const [humanLevel] = useState(true);
+  // setHumanLevel
 
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
@@ -69,7 +70,7 @@ const AllChats = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-  const [channelNameVal, setChannelNameVal] = useState("website");
+  const [channelNameVal, setChannelNameVal] = useState("");
   const [botIdVal, setBotIdVal] = useState("");
   const botsDataLoader = useSelector(
     (state: RootState) => state.bot?.lists?.loader
@@ -480,72 +481,73 @@ const AllChats = () => {
     );
   };
 
- // Handle Block Contact
-const handleBlockContact = async () => {
-  if (!blockReason.trim()) {
-    setErrorMessage("Please provide a reason for blocking.");
-    return;
-  }
-
-  const selectedSession = getCurrentSession();
-  if (!selectedSession) {
-    setErrorMessage("No session selected.");
-    return;
-  }
-
-  try {
-    const response = await blockWhatsAppUserService({
-      adminPhoneNumberId: selectedSession.adminPhoneNumberId,
-      userPhoneId: selectedSession.userPhoneId,
-      reason: blockReason,
-    });
-
-    // Check for actual success message from BE
-    if (response?.message === "User blocked successfully") {
-      // Immediate UI update
-      setIsBlocked(true);
-      setShowBlockInput(false);
-      setBlockReason("");
-      notifySuccess("Contact blocked successfully!");
-      setErrorMessage(null); // Clear any existing errors
-    } else {
-      // Handle API business logic errors
-      setErrorMessage(response?.message || "Failed to block contact.");
+  // Handle Block Contact
+  const handleBlockContact = async () => {
+    if (!blockReason.trim()) {
+      setErrorMessage("Please provide a reason for blocking.");
+      return;
     }
-  } catch (err) {
-    // Handle network/HTTP errors
-    console.error("Block failed:", err);
-    setErrorMessage("Failed to block contact. Please try again.");
-  }
-};
 
-// Handle Unblock Contact
-const handleUnblockContact = async () => {
-  const selectedSession = getCurrentSession();
-  if (!selectedSession) {
-    setErrorMessage("No session selected.");
-    return;
-  }
-
-  try {
-    const response = await unblockWhatsAppUserService({
-      adminPhoneNumberId: selectedSession.adminPhoneNumberId,
-      userPhoneId: selectedSession.userPhoneId,
-    });
-
-    // Check for expected success indicator
-    if (response?.message?.includes("unblocked")) { // Adjust based on your actual success message
-      setIsBlocked(false);
-      notifySuccess("Contact unblocked successfully!");
-      setErrorMessage(null);
-    } else {
-      setErrorMessage(response?.message || "Failed to unblock contact.");
+    const selectedSession = getCurrentSession();
+    if (!selectedSession) {
+      setErrorMessage("No session selected.");
+      return;
     }
-  } catch (err) {
-    console.error("Unblock failed:", err);
-    setErrorMessage("Failed to unblock contact. Please try again.");
-  }
-};
+
+    try {
+      const response = await blockWhatsAppUserService({
+        adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+        userPhoneId: selectedSession.userPhoneId,
+        reason: blockReason,
+      });
+
+      // Check for actual success message from BE
+      if (response?.message === "User blocked successfully") {
+        // Immediate UI update
+        setIsBlocked(true);
+        setShowBlockInput(false);
+        setBlockReason("");
+        notifySuccess("Contact blocked successfully!");
+        setErrorMessage(null); // Clear any existing errors
+      } else {
+        // Handle API business logic errors
+        setErrorMessage(response?.message || "Failed to block contact.");
+      }
+    } catch (err) {
+      // Handle network/HTTP errors
+      console.error("Block failed:", err);
+      setErrorMessage("Failed to block contact. Please try again.");
+    }
+  };
+
+  // Handle Unblock Contact
+  const handleUnblockContact = async () => {
+    const selectedSession = getCurrentSession();
+    if (!selectedSession) {
+      setErrorMessage("No session selected.");
+      return;
+    }
+
+    try {
+      const response = await unblockWhatsAppUserService({
+        adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+        userPhoneId: selectedSession.userPhoneId,
+      });
+
+      // Check for expected success indicator
+      if (response?.message?.includes("unblocked")) {
+        // Adjust based on your actual success message
+        setIsBlocked(false);
+        notifySuccess("Contact unblocked successfully!");
+        setErrorMessage(null);
+      } else {
+        setErrorMessage(response?.message || "Failed to unblock contact.");
+      }
+    } catch (err) {
+      console.error("Unblock failed:", err);
+      setErrorMessage("Failed to unblock contact. Please try again.");
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!userMessage.trim() || !sessionId) return;
@@ -603,17 +605,17 @@ const handleUnblockContact = async () => {
     // setIsSearchActive(false);
     // setSearchValue("");
 
-    if (botId) {
-      dispatch(
-        getAllSession({
-          botId,
-          page: 1,
-          channelName: channelNameVal,
-          aiLevel,
-          humanLevel,
-        })
-      );
-    }
+    // if (botId) {
+    //   dispatch(
+    //     getAllSession({
+    //       botId,
+    //       page: 1,
+    //       channelName: channelNameVal,
+    //       aiLevel,
+    //       humanLevel,
+    //     })
+    //   );
+    // }
   };
 
   const getChannelNameHandler = (e: any) => {
@@ -811,22 +813,37 @@ const handleUnblockContact = async () => {
           <option value="Other">Other</option>
         </select>
 
-        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+        {/* <div className="flex items-center justify-between p-4 rounded-lg mb-2">
           <span className="text-gray-800 font-medium">AI Chats</span>
           <Switch
             checked={Boolean(aiLevel)}
             onChange={(e) => setAiLevel(e.target.checked)}
             color="primary"
           />
-        </div>
+        </div> */}
+
         <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+          <span className="text-gray-800 font-medium">AI Chats</span>
+          <div className="relative group">
+            <Switch
+              checked={Boolean(aiLevel)}
+              onChange={(e) => setAiLevel(e.target.checked)}
+              color="primary"
+            />
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+              Enable AI-powered chat responses
+            </div>
+          </div>
+        </div>
+
+        {/* <div className="flex items-center justify-between p-4 rounded-lg mb-2">
           <span className="text-gray-800 font-medium">Human Chats</span>
           <Switch
             checked={Boolean(humanLevel)}
             onChange={(e) => setHumanLevel(e.target.checked)}
             color="primary"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Main Container */}
@@ -1150,7 +1167,7 @@ const handleUnblockContact = async () => {
                       <div className="bg-red-50 border border-red-200 shadow-sm p-4 rounded-lg w-full max-w-md">
                         {/* Title */}
                         <h4 className="text-red-700 font-semibold text-center mb-4">
-                          System Weak Points Analysis
+                          Vulnerability Analysis
                         </h4>
 
                         {/* Existing Vulnerability List */}

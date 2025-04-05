@@ -7,7 +7,7 @@ import axios from "axios";
 export const createWhatsAppCampaignService = async (campaignData: any) => {
   try {
     const response = await axiosInstance.post(
-      "/marketing/Campaigns/whatsapp",
+      "/whatsapp/campaign",
       campaignData
     );
     return response.data;
@@ -25,10 +25,13 @@ export const createWhatsAppCampaignService = async (campaignData: any) => {
 };
 
 /* Service to call the CSV-to-JSON conversion API */
-export const convertCsvToJsonService = async (formData: FormData) => {
+export const uploadWhatsAppContactsService = async (
+  templateId: string,
+  formData: FormData
+) => {
   try {
     const response = await axiosInstance.post(
-      "/marketing/csv-to-json",
+      `/whatsapp/upload-contacts/${templateId}`,
       formData,
       {
         headers: {
@@ -36,11 +39,11 @@ export const convertCsvToJsonService = async (formData: FormData) => {
         },
       }
     );
-    return response.data; // Assuming response contains the JSON conversion result
+    return response.data; // Returns the response data from the API
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(
-        "Error converting CSV to JSON:",
+        "Error uploading WhatsApp contacts:",
         error.response?.data || error.message
       );
     } else {
@@ -77,7 +80,7 @@ export const campaignImageService = async (formData: FormData) => {
 
 export const fetchCampaignService = async () => {
   try {
-    const response = await axiosInstance.get(`/marketing/Campaigns`);
+    const response = await axiosInstance.get(`/whatsapp/campaign`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -118,63 +121,128 @@ export const createWhatsAppTemplateService = async (templateData: any) => {
   }
 };
 
-// interface UploadResponse {
-//   fileHandle: any;
-//   url: string;
-// }
+export const downloadSampleCsvService = async (templateId: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `/whatsapp/sample-csv/${templateId}`,
+      {
+        responseType: "blob", // Important for handling binary CSV data
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error downloading sample CSV:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
 
-// export const uploadWhatsAppMediaService = async (
-//   formData: FormData,
-//   integrationId: string
-// ): Promise<UploadResponse> => {
-//   const response = await axiosInstance.post("/whatsapp/media/upload", formData, {
-//     params: { integrationId },
-//     headers: { "Content-Type": "multipart/form-data" },
-//   });
-//   // Now TS knows this function returns an object with shape { url: string }
-//   return response.data;
-// };
+export const pauseWhatsAppCampaignService = async (campaignId: string) => {
+  try {
+    const response = await axiosInstance.patch(
+      `/whatsapp/campaign/${campaignId}/pause`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error pausing WhatsApp campaign:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+export const resumeWhatsAppCampaignService = async (campaignId: string) => {
+  try {
+    const response = await axiosInstance.post(`/whatsapp/${campaignId}/resume`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error pausing WhatsApp campaign:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+export const editWhatsAppCampaignService = async (
+  campaignId: string,
+  campaignData: any
+) => {
+  try {
+    const response = await axiosInstance.patch(
+      `/whatsapp/campaign/${campaignId}`,
+      campaignData
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error editing WhatsApp campaign:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+interface UploadOptions {
+  file?: File;
+  integrationId: string;
+  mediaUrl?: string;
+}
 
 interface UploadResponse {
   fileHandle: string;
 }
 
 export const uploadWhatsAppMediaService = async (
-  file: File, // Ensure `file` is a valid File or Blob object
-  integrationId: string
+  options: UploadOptions
 ): Promise<UploadResponse> => {
   const formData = new FormData();
-  formData.append("file", file); // Append the file
-  formData.append("integrationId", integrationId); // Append the integrationId
 
-  // Log FormData for debugging
-  console.log("FormData contents:");
-  for (const [key, value] of formData.entries()) {
-    console.log(key, value);
+  formData.append("integrationId", options.integrationId);
+
+  if (options.file) {
+    formData.append("file", options.file);
+  }
+
+  if (options.mediaUrl) {
+    formData.append("mediaUrl", options.mediaUrl);
   }
 
   try {
     const response = await axiosInstance.post<UploadResponse>(
-      "/whatsapp/media/upload", // Ensure the full URL is correct
+      // "/whatsapp/media/upload",.
+      "/whatsapp/media/upload",
       formData,
       {
         headers: {
-          Authorization: `Bearer ${integrationId}`,
-          // Axios automatically sets `Content-Type: multipart/form-data` for FormData
+          Authorization: `Bearer ${options.integrationId}`,
         },
       }
     );
 
-    // Log the response for debugging
-    console.log("API Response:", response.data);
-
     return response.data;
   } catch (error) {
-    // Log the error for debugging
     if (axios.isAxiosError(error)) {
-      console.error("Axios error:", error.response?.data || error.message);
-    } else {
-      console.error("Unexpected error:", error);
+      console.error("Upload failed:", error.response?.data || error.message);
     }
     throw new Error("Failed to upload media");
   }

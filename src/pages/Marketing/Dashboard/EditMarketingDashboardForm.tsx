@@ -9,6 +9,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import {
+  fetchCompetitorsService,
   fetchMarketingInsightsService,
   getMarketingInsightsService,
   updateMarketingInsightsService,
@@ -353,6 +354,64 @@ const EditMarketingDashboardForm = () => {
     fetchExistingData();
   }, []);
 
+  const handleAIGenCompetitors = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const payload = {
+        company: {
+          name: companyData.company.name,
+          description: companyData.company.description,
+          industry: companyData.company.industry,
+          socialLinks: {
+            instagram: companyData.company.socialLinks.instagram,
+            twitter: companyData.company.socialLinks.twitter,
+            linkedin: companyData.company.socialLinks.linkedin,
+          },
+        },
+        country: companyData.country,
+      };
+
+      const response = await fetchCompetitorsService(payload);
+      console.log("API response for competitors:", response);
+
+      const fetchedCompetitors = response?.competitors?.competitors || [];
+      const mappedCompetitors = fetchedCompetitors.map((c) => ({
+        name: c.name || "",
+        description: c.description || "",
+        industry: c.industry || "",
+        socialLinks: {
+          instagram: c.socialLinks?.instagram || "",
+          twitter: c.socialLinks?.twitter || "",
+          linkedin: c.socialLinks?.linkedin || "",
+        },
+      }));
+
+      setCompetitorsData(mappedCompetitors);
+    } catch (err) {
+      setError("Failed to generate competitor data");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const addCompetitor = () => {
+    setCompetitorsData((prev) => [
+      ...prev,
+      {
+        name: "",
+        description: "",
+        industry: "",
+        socialLinks: {
+          instagram: "",
+          twitter: "",
+          linkedin: "",
+        },
+      },
+    ]);
+  };
+
   // ---------- SUBMISSION HANDLER ----------
   const handleSubmit = async () => {
     setError("");
@@ -534,6 +593,39 @@ const EditMarketingDashboardForm = () => {
             Competitor Details
           </Typography>
         </SectionHeader>
+        <Box
+          sx={{
+            p: 3,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Button
+            variant="outlined"
+            onClick={handleAIGenCompetitors}
+            disabled={isLoading}
+            sx={{
+              textTransform: "none",
+              color: "#6a11cb",
+              borderColor: "#6a11cb",
+            }}
+          >
+            Generate Via AI
+          </Button>
+          <Button
+            onClick={addCompetitor}
+            variant="contained"
+            sx={{
+              bgcolor: "#65558F",
+              color: "white",
+              borderRadius: "8px",
+              textTransform: "none",
+            }}
+          >
+            Add Competitor
+          </Button>
+        </Box>
         <FormContainer>
           {competitorsData.slice(0, 5).map((comp, index) => (
             <Box
@@ -675,3 +767,4 @@ const EditMarketingDashboardForm = () => {
 };
 
 export default EditMarketingDashboardForm;
+
