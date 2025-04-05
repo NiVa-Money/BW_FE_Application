@@ -66,6 +66,8 @@ const WhatsappCampaign: React.FC = () => {
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
 
+  console.log('secret' , secretToken)
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
