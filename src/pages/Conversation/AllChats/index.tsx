@@ -268,11 +268,11 @@ const AllChats = () => {
     const messagesData =
       channelNameVal !== "whatsapp"
         ? sessionsDataRedux?.sessions.filter(
-            (obj) => obj._id === selectedSessionId
-          )[0]?.sessions
+          (obj) => obj._id === selectedSessionId
+        )[0]?.sessions
         : sessionsDataRedux?.sessions.filter(
-            (obj) => obj.userPhoneId === selectedSessionId
-          )[0]?.sessions;
+          (obj) => obj.userPhoneId === selectedSessionId
+        )[0]?.sessions;
 
     const selectedSession = sessionsDataRedux?.sessions.find(
       (obj) =>
@@ -688,12 +688,12 @@ const AllChats = () => {
   const overallVulnerabilityScore =
     vulnerabilityData.length > 0
       ? Math.min(
-          Math.round(
-            vulnerabilityData.reduce((acc, curr) => acc + curr.value, 0) /
-              vulnerabilityData.length
-          ),
-          100
-        )
+        Math.round(
+          vulnerabilityData.reduce((acc, curr) => acc + curr.value, 0) /
+          vulnerabilityData.length
+        ),
+        100
+      )
       : 0;
 
   useEffect(() => {
@@ -1009,9 +1009,8 @@ const AllChats = () => {
                 >
                   <h3 className="font-medium">{section.title}</h3>
                   <ExpandMoreIcon
-                    className={`w-4 h-4 transform ${
-                      section.expanded ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
+                      }`}
                   />
                 </div>
 
