@@ -1,5 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import {
   Drawer,
   List,
@@ -11,16 +14,15 @@ import {
   Collapse,
   Toolbar,
   Box,
-  Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { NavLink } from "react-router-dom";
 import { sidebarNavLinks } from "../hooks/routeNavLinks";
 import { authProtectedRoutes, publicRoutes } from ".";
 import { COLORS } from "../constants";
 import CustomTooltip from "../components/CustomTooltip";
+import { Link } from "react-router-dom";
 
 interface AuthMiddlewareProps {
   children: React.ReactNode;
@@ -44,7 +46,7 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
   const handleToggle = () => {
     // To handle anything on click of sidaebar sub items
   };
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const toggleSidebar = () => setOpen(!open);
   const userData = localStorage.getItem("userData") || JSON.stringify({});
   const moduleMapping = JSON.parse(userData).moduleMap;
@@ -56,10 +58,6 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
   if (isProtected && !userId) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
-  const logOutHandler = () => {
-    navigate("/");
-    localStorage.clear();
-  };
 
   useEffect(() => {
     const data = sidebarNavLinks(moduleMapping);
@@ -70,6 +68,18 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
     const regex = new RegExp(`^${route.path.replace(/:\w+/g, "[^/]+")}$`);
     return regex.test(pathname);
   });
+
+  const Logo = () => {
+    return (
+      <Link to="/dashboard">
+        <img
+          className="w-8 h-8"
+          src="/assets/botwot_favicon.svg"
+          alt="Botwot"
+        />
+      </Link>
+    );
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -90,23 +100,25 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
           onMouseLeave={() => setOpen(false)}
         >
           {/* Fixed Header */}
-          <div className="flex justify-between gap-1 p-2 bg-white z-10">
+          <div
+            className={`flex justify-between items-center max-h-12 mt-2 ${
+              open ? "px-4" : "px-2"
+            }`}
+          >
             <CustomTooltip title={!open && "Expand"} show={true}>
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <IconButton onClick={toggleSidebar}>
-                  {open ? <KeyboardBackspaceIcon /> : <MenuIcon />}
-                </IconButton>
-                {open && (
-                  <button onClick={toggleSidebar}>
-                    <Typography variant="body1">Back</Typography>
-                  </button>
+                {open && <Logo />}
+                {!open && (
+                  <IconButton onClick={toggleSidebar}>
+                    <MenuIcon />
+                  </IconButton>
                 )}
               </Box>
             </CustomTooltip>
             {open && (
-              <button onClick={logOutHandler}>
-                <span className="border px-2 py-1 rounded-lg">Log Out</span>
-              </button>
+              <a href="https://botwot.io" onClick={() => localStorage.clear()}>
+                Log Out
+              </a>
             )}
           </div>
 

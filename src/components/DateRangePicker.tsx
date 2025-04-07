@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Menu,
@@ -11,6 +11,8 @@ import { subDays, format } from "date-fns";
 import { COLORS } from "../constants";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import CustomDatePicker from "./CustomDatePicker";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
 
 interface DateRangePickerProps {
   onToday: (value: boolean) => void;
@@ -33,7 +35,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [buttonRef, setButtonRef] = useState<HTMLElement | null>(null);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [selectedRange, setSelectedRange] = useState("Today");
+  const [selectedRange, setSelectedRange] = useState("Last 30 days");
   const [menuOpen, setMenuOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [isCustomRange, setIsCustomRange] = useState(false);
@@ -43,6 +45,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       ? format(start, "MMM dd, yyyy")
       : `${format(start, "MMM dd, yyyy")} - ${format(end, "MMM dd, yyyy")}`;
   };
+  const botsDataRedux = useSelector(
+    (state: RootState) => state.bot?.lists?.data
+  );
 
   const getDisplayText = () =>
     isCustomRange ? formatDateRange(startDate, endDate) : selectedRange;
@@ -90,6 +95,11 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       onDateRangeChange(startDate, date);
     }
   };
+  useEffect(() => {
+    botsDataRedux?.length && selectedRange === 'Last 30 days' ?
+      handleRangeSelect(selectedRange) : null
+  }, [botsDataRedux, selectedRange])
+
 
   return (
     <div className="relative">

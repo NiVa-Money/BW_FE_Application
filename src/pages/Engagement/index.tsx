@@ -66,7 +66,7 @@ const EngagementTab = () => {
 
   return (
     <div className="p-6 bg-white min-h-screen">
-      <h1 className="text-xl font-semibold mb-1">Engagement Tab</h1>
+      <h1 className="text-xl font-semibold mb-1">Engagement</h1>
       <p className="text-gray-600 text-sm mb-6">
         Sentiment across all active channels
       </p>

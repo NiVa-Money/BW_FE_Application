@@ -50,6 +50,7 @@ export const initialState: any = {
     templates: [],
     error: null,
     success: false,
+    templateData: null,
   },
 
   whatsappDashboard: {
@@ -94,5 +95,8 @@ export const initialState: any = {
   users: {
     lists: { data: [], loader: false },
     delete: { data: null, loader: false }
+  }
+  subscription: {
+    plans: { loader: false, data: [] }
   }
 };

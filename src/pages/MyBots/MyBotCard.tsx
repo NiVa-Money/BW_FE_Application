@@ -48,28 +48,28 @@ const MyBotCard: React.FC<CardProps> = ({
                     <div className='flex justify-between gap-[20px] ml-0'>
                         <button
                             onClick={onDelete}
-                            className="text-red-500 hover:text-red-700 flex items-center flex flex-col justify-end"
+                            className="text-red-500 hover:text-red-700 flex items-center flex-col justify-end"
                         >
                             <FaTrashAlt />
                             <span>Delete</span>
                         </button>
                         <button
                             onClick={onClick}
-                            className="text-green-500 hover:text-green-700 flex items-center flex flex-col justify-end"
+                            className="text-green-500 hover:text-green-700 flex items-center flex-col justify-end"
                         >
                             <EditIcon />
                             <span>Edit</span>
                         </button>
                         <button
                             onClick={onTest}
-                            className="text-grey-500 hover:text-grey-700 flex items-center flex flex-col justify-end"
+                            className="text-grey-500 hover:text-grey-700 items-center flex flex-col justify-end"
                         >
                             <SettingsSuggestIcon />
                             <span>Test</span>
                         </button>
                         <button
                             onClick={onExport}
-                            className="text-blue-500 hover:text-grey-700 flex items-center flex flex-col justify-end"
+                            className="text-blue-500 hover:text-grey-700 items-center flex flex-col justify-end"
                         >
                             <IosShareIcon />
                             <span>Export</span>

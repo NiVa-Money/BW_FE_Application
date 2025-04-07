@@ -13,6 +13,7 @@ import userChatReducers from "./reducers/conversationReducers";
 import { whatsappDashboardReducer } from "./reducers/whatsappDashboardReducers";
 import { shopifyDashboardReducer } from "./reducers/reportReducers";
 import usersReducers from "./reducers/usersReducers";
+import SubscriptionReducer from "./reducers/subscriptionReducer";
 const sagaMiddleware = createSagaMiddleware();
 
 const rootReducer = {
@@ -25,6 +26,7 @@ const rootReducer = {
   shopifyDashboard: shopifyDashboardReducer,
   userChat: userChatReducers,
   users: usersReducers,
+  subscription: SubscriptionReducer,
 };
 
 const store = configureStore({

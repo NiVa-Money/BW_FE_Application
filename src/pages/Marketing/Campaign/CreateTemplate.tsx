@@ -1,63 +1,223 @@
-// import React, { useState } from "react";
+// /* eslint-disable @typescript-eslint/no-explicit-any */
+// import React, { useEffect, useState } from "react";
+// // Import your upload function
+// import { uploadWhatsAppMediaService } from "../../../api/services/whatsappCampaignService";
+// import {
+//   fetchAllTextToImagesService,
+//   fetchAllTextToVideosService,
+// } from "../../../api/services/videoGenerateServices";
 
 // interface TemplateButton {
-//   // "quick_reply" or "call_to_action"
-//   type: string;
+//   type: "quick_reply" | "call_to_action";
 //   text: string;
-//   // For call-to-action: can be "url" or "phone"
-//   ctaType?: string;
+//   ctaType?: "url" | "phone";
 //   url?: string;
 //   phoneNumber?: string;
 // }
 
 // interface CreateTemplateModalProps {
 //   onClose: () => void;
+//   // Updated onDone payload structure:
 //   onDone: (data: {
 //     name: string;
-
-//     headerType: string;
-//     headerText?: string;
-//     headerFile?: File | null;
-//     bodyText: string;
-//     footerText?: string;
+//     header?: {
+//       type: string;
+//       content: string;
+//     };
+//     body: {
+//       text: string;
+//       parameters?: {
+//         type: "positional";
+//         example: {
+//           positional: string[];
+//         };
+//       };
+//     };
+//     footer?: {
+//       text: string;
+//     };
 //     buttons: TemplateButton[];
 //   }) => void;
+//   // secretToken is needed to call the media upload service
+//   secretToken: string;
 // }
 
 // const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
 //   onClose,
 //   onDone,
+//   secretToken,
 // }) => {
 //   const [name, setName] = useState("");
 
-//   // Header
+//   // Header states
 //   const [headerType, setHeaderType] = useState("none");
 //   const [headerText, setHeaderText] = useState("");
-//   const [headerFile, setHeaderFile] = useState<File | null>(null);
+//   const [fileHandle, setFileHandle] = useState<string>("");
 
-//   // Body
+//   // Body state
 //   const [bodyText, setBodyText] = useState("");
+//   const [variables, setVariables] = useState<{ id: number; example: string }[]>(
+//     []
+//   );
 
-//   // Footer
+//   // Footer state
 //   const [footerText, setFooterText] = useState("");
 
-//   // Buttons
+//   // Buttons state
 //   const [buttons, setButtons] = useState<TemplateButton[]>([]);
 
-//   // Handle header file upload
-//   const handleHeaderFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   //new
+//   const [mediaSource, setMediaSource] = useState<"upload" | "existing">(
+//     "upload"
+//   );
+//   const [existingMedias, setExistingMedias] = useState<
+//     { id: string; url: string; name: string }[]
+//   >([]);
+//   const [selectedMediaUrl, setSelectedMediaUrl] = useState("");
+
+//   const addVariable = () => {
+//     // Find the next available number for the variable
+//     const nextId = variables.length + 1;
+
+//     // Add the variable to the body text
+//     setBodyText((prev) => prev + ` {{${nextId}}}`);
+
+//     // Store the variable with an empty example value
+//     setVariables((prev) => [...prev, { id: nextId, example: "" }]);
+//   };
+
+//   const deleteVariable = (id: number) => {
+//     setVariables((prev) => prev.filter((v) => v.id !== id));
+//     setBodyText((prev) =>
+//       prev.replace(new RegExp(`\\{\\{${id}\\}\\}`, "g"), "")
+//     );
+//   };
+
+//   const updateVariableExample = (id: number, newExample: string) => {
+//     setVariables((prev) =>
+//       prev.map((v) => (v.id === id ? { ...v, example: newExample } : v))
+//     );
+//   };
+
+//   useEffect(() => {
+//     const fetchMedia = async () => {
+//       try {
+//         let response: { data: any[] };
+//         if (headerType === "image") {
+//           response = await fetchAllTextToImagesService();
+//           // Process image response with multiple images per entry
+//           const mediaItems = response.data.flatMap((item: any) =>
+//             item.images.map((img: string, index: number) => ({
+//               id: `${item._id}-${index}`,
+//               url: img,
+//               name: `${item.prompt} (${index + 1})`,
+//             }))
+//           );
+//           setExistingMedias(mediaItems);
+//         } else if (headerType === "video") {
+//           response = await fetchAllTextToVideosService();
+//           // Process video response
+//           const mediaItems = response.data.map((item: any) => ({
+//             id: item._id,
+//             url: item.videoUrl,
+//             name: item.prompt,
+//           }));
+//           setExistingMedias(mediaItems);
+//         }
+//       } catch {
+//         alert(`Failed to fetch ${headerType}s`);
+//       }
+//     };
+
+//     if (["image", "video"].includes(headerType) && mediaSource === "existing") {
+//       fetchMedia();
+//     }
+//   }, [mediaSource, headerType, secretToken]);
+
+//   const handleHeaderFileChange = async (
+//     e: React.ChangeEvent<HTMLInputElement>
+//   ) => {
+//     if (!secretToken) {
+//       alert("Missing secret token. Cannot upload file.");
+//       return;
+//     }
+
 //     if (e.target.files && e.target.files[0]) {
-//       setHeaderFile(e.target.files[0]);
+//       const file = e.target.files[0];
+
+//       // Check file size limit (2 MB)
+//       const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+//       if (file.size > MAX_FILE_SIZE) {
+//         alert("File size exceeds 2 MB limit. Please upload a smaller file.");
+//         return;
+//       }
+
+//       if (["image", "video", "document"].includes(headerType)) {
+//         try {
+//           const formData = new FormData();
+//           formData.append("file", file);
+
+//           // Upload the file
+//           const response = await uploadWhatsAppMediaService({
+//             file: file,
+//             integrationId: secretToken,
+//           });
+
+//           if (response?.fileHandle) {
+//             setFileHandle(response.fileHandle);
+//             console.log("File uploaded, got handle:", response.fileHandle);
+//           } else {
+//             throw new Error("File handle missing in response");
+//           }
+//         } catch (error) {
+//           console.error("Header upload failed:", error);
+//           alert("Failed to upload header media.");
+//         }
+//       }
 //     }
 //   };
 
-//   // Add a new button
+//   const handleExistingMediaSelection = async (mediaUrl: string) => {
+//     if (!secretToken) {
+//       alert("Missing secret token. Cannot upload file.");
+//       return;
+//     }
+
+//     // Handle uploading even for existing media
+//     try {
+//       const response = await uploadWhatsAppMediaService({
+//         mediaUrl, // Use the existing URL in the request
+//         integrationId: secretToken,
+//       });
+
+//       if (response?.fileHandle) {
+//         setFileHandle(response.fileHandle);
+//         console.log(
+//           "Existing media uploaded, got handle:",
+//           response.fileHandle
+//         );
+//       } else {
+//         throw new Error("File handle missing in response");
+//       }
+//     } catch (error) {
+//       console.error("Header upload failed:", error);
+//       alert("Failed to upload header media.");
+//     }
+//   };
+
+//   const handleHeaderTypeChange = (newType: string) => {
+//     setHeaderType(newType);
+//     setMediaSource("upload");
+//     setSelectedMediaUrl("");
+//     setFileHandle("");
+//   };
+
+//   // Add a new button (defaults to a quick reply button)
 //   const handleAddButton = () => {
-//     // Default to a quick-reply button with empty text
 //     setButtons((prev) => [...prev, { type: "quick_reply", text: "" }]);
 //   };
 
-//   // Update a button
+//   // Update a button's fields
 //   const updateButton = (
 //     index: number,
 //     updatedFields: Partial<TemplateButton>
@@ -72,42 +232,70 @@
 //     setButtons((prev) => prev.filter((_, i) => i !== index));
 //   };
 
-//   // When user clicks "Done"
 //   const handleDone = () => {
+//     let header: { type: string; content: string } | undefined;
+
+//     if (headerType !== "none") {
+//       if (headerType === "text") {
+//         header = { type: "TEXT", content: headerText };
+//       } else {
+//         header = { type: headerType.toUpperCase(), content: fileHandle };
+//       }
+//     }
+
+//     // Prepare the body payload with the text containing placeholders.
+//     const bodyPayload: any = {
+//       text: bodyText,
+//     };
+
+//     // Use regex to detect all variable placeholders like {{1}}, {{2}}, etc.
+//     const regex = /\{\{\s*(\d+)\s*\}\}/g;
+//     const matches = Array.from(bodyText.matchAll(regex));
+
+//     if (matches.length > 0) {
+//       // For each placeholder, extract the variable id and get the corresponding example value.
+//       const positionalExamples = matches.map((match) => {
+//         const id = parseInt(match[1]);
+//         const variable = variables.find((v) => v.id === id);
+//         return variable ? variable.example : "";
+//       });
+
+//       // Add parameters only, which includes the extracted example values.
+//       bodyPayload.parameters = {
+//         type: "positional",
+//         example: {
+//           positional: positionalExamples,
+//         },
+//       };
+//     }
+
+//     // If your backend expects button types to be uppercase, map them accordingly.
+//     const formattedButtons = buttons.map((btn) => ({
+//       ...btn,
+//       type: btn.type,
+//     }));
+
 //     onDone({
 //       name,
-//       headerType,
-//       headerText: headerType === "text" ? headerText : undefined,
-//       headerFile: ["image", "video", "document"].includes(headerType)
-//         ? headerFile
-//         : null,
-//       bodyText,
-//       footerText,
-//       buttons,
+//       header,
+//       body: bodyPayload,
+//       footer: footerText ? { text: footerText } : undefined,
+//       buttons: formattedButtons,
 //     });
 //   };
 
 //   return (
 //     <div className="fixed inset-0 flex items-center justify-center z-50">
 //       {/* Modal Backdrop */}
-//       <div
-//         className="absolute inset-0 bg-black opacity-50"
-//         onClick={onClose}
-//       ></div>
+//       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
 
 //       {/* Modal Container */}
-//       <div
-//         className="
-//     relative bg-white rounded-lg shadow-xl 
-//     max-w-2xl w-full p-6 z-10
-//     max-h-[80vh] overflow-y-auto
-//   "
-//       >
+//       <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 z-10 max-h-[80vh] overflow-y-auto">
 //         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
 //           Create WhatsApp Template
 //         </h2>
 
-//         {/* Template Name and Language */}
+//         {/* Template Name */}
 //         <div className="space-y-4">
 //           <div>
 //             <label className="block text-gray-700 font-medium mb-1">
@@ -133,12 +321,7 @@
 //           </label>
 //           <select
 //             value={headerType}
-//             onChange={(e) => {
-//               setHeaderType(e.target.value);
-//               // Reset relevant states
-//               setHeaderText("");
-//               setHeaderFile(null);
-//             }}
+//             onChange={(e) => handleHeaderTypeChange(e.target.value)}
 //             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
 //           >
 //             <option value="none">None</option>
@@ -146,7 +329,6 @@
 //             <option value="image">Image</option>
 //             <option value="video">Video</option>
 //             <option value="document">Document</option>
-//             {/* <option value="location">Location</option> */}
 //           </select>
 
 //           {headerType === "text" && (
@@ -161,8 +343,7 @@
 //             </div>
 //           )}
 
-//           {/* For image/video/document, show file upload */}
-//           {["image", "video", "document"].includes(headerType) && (
+//           {/* {["image", "video", "document"].includes(headerType) && (
 //             <div className="mt-2">
 //               <input
 //                 type="file"
@@ -183,18 +364,124 @@
 //                   file:bg-purple-50 file:text-purple-700
 //                   hover:file:bg-purple-100"
 //               />
+//               {fileHandle && (
+//                 <p className="mt-2 text-sm text-green-600">
+//                   File uploaded successfully!
+//                 </p>
+//               )}
 //             </div>
-//           )}
+//           )} */}
+//           {["image", "video", "document"].includes(headerType) && (
+//             <div className="mt-2">
+//               {/* Source Selection Radio Buttons */}
+//               <div className="flex gap-4 mb-4">
+//                 <label className="flex items-center gap-2">
+//                   <input
+//                     type="radio"
+//                     value="upload"
+//                     checked={mediaSource === "upload"}
+//                     onChange={() => setMediaSource("upload")}
+//                   />
+//                   Upload New
+//                 </label>
+//                 {headerType !== "document" && (
+//                   <label className="flex items-center gap-2">
+//                     <input
+//                       type="radio"
+//                       value="existing"
+//                       checked={mediaSource === "existing"}
+//                       onChange={() => setMediaSource("existing")}
+//                     />
+//                     Select from Omnigen Studio
+//                   </label>
+//                 )}
+//               </div>
 
-//           {/* For "location", you might add lat/long fields or address fields here */}
-//           {headerType === "location" && (
-//             <div className="mt-2 text-sm text-gray-500">
-//               {/* In a real app, you’d have location fields, 
-//                   or integrate a map picker, etc. */}
-//               <p>Location header not yet implemented.</p>
+//               {/* Media Input */}
+//               {mediaSource === "upload" ? (
+//                 <input
+//                   type="file"
+//                   accept={headerType === "image" ? "image/*" : "video/*"}
+//                   onChange={handleHeaderFileChange}
+//                   className="..." // Keep existing classes
+//                 />
+//               ) : (
+//                 <div className="grid grid-cols-3 gap-4">
+//                   {existingMedias.map((media) => (
+//                     <div
+//                       key={media.id}
+//                       onClick={() => {
+//                         setSelectedMediaUrl(media.url);
+//                         handleExistingMediaSelection(media.url); // This triggers the upload for selected media
+//                       }}
+//                       className={`cursor-pointer border-2 rounded-lg p-2 ${
+//                         selectedMediaUrl === media.url
+//                           ? "border-purple-500 bg-purple-50"
+//                           : "border-gray-200"
+//                       }`}
+//                     >
+//                       {headerType === "image" ? (
+//                         <img
+//                           src={media.url}
+//                           alt={media.name}
+//                           className="w-full h-32 object-cover rounded-md"
+//                         />
+//                       ) : (
+//                         <div className="relative h-32 bg-gray-100 rounded-md flex items-center justify-center">
+//                           <video className="absolute inset-0 w-full h-32 object-cover rounded-md">
+//                             <source src={media.url} type="video/mp4" />
+//                           </video>
+//                           <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md">
+//                             <svg
+//                               className="w-12 h-12 text-white"
+//                               fill="none"
+//                               stroke="currentColor"
+//                               viewBox="0 0 24 24"
+//                             >
+//                               <path
+//                                 strokeLinecap="round"
+//                                 strokeLinejoin="round"
+//                                 strokeWidth={2}
+//                                 d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+//                               />
+//                             </svg>
+//                           </div>
+//                         </div>
+//                       )}
+//                       <p className="mt-2 text-sm text-gray-700 truncate">
+//                         {media.name}
+//                       </p>
+//                     </div>
+//                   ))}
+//                   {existingMedias.length === 0 && (
+//                     <div className="text-gray-500 text-sm col-span-3 py-4 text-center">
+//                       No {headerType}s found
+//                     </div>
+//                   )}
+//                 </div>
+//               )}
+
+//               {mediaSource === "upload" && fileHandle && (
+//                 <p className="mt-2 text-sm text-green-600">
+//                   File uploaded successfully!
+//                 </p>
+//               )}
 //             </div>
 //           )}
 //         </div>
+
+//         {/* Body Section */}
+//         {/* <div className="mt-6">
+//           <label className="block text-gray-700 font-medium mb-1">
+//             Body Text
+//           </label>
+//           <textarea
+//             value={bodyText}
+//             onChange={(e) => setBodyText(e.target.value)}
+//             placeholder="Enter the text content"
+//             className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+//           />
+//         </div> */}
 
 //         {/* Body Section */}
 //         <div className="mt-6">
@@ -207,6 +494,44 @@
 //             placeholder="Enter the text content"
 //             className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
 //           />
+
+//           {/* Add Variable Button */}
+//           <button
+//             onClick={addVariable}
+//             className="mt-2 px-4 py-2 text-sm font-medium text-white bg-[#65558F] rounded-full hover:bg-purple-950"
+//           >
+//             + Add Variable
+//           </button>
+
+//           {/* Variables List */}
+//           {variables.length > 0 && (
+//             <div className="mt-4">
+//               <h3 className="text-sm font-semibold text-gray-600">Variables</h3>
+//               {variables.map((variable) => (
+//                 <div key={variable.id} className="flex items-center gap-4 mt-2">
+//                   <span className="text-gray-700 font-medium">
+//                     {`{{${variable.id}}}`}
+//                   </span>
+//                   <input
+//                     type="text"
+//                     value={variable.example}
+//                     onChange={(e) =>
+//                       updateVariableExample(variable.id, e.target.value)
+//                     }
+//                     placeholder="Example value"
+//                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+//                   />
+//                   {/* Delete Button */}
+//                   <button
+//                     onClick={() => deleteVariable(variable.id)}
+//                     className="text-red-500 hover:text-red-700"
+//                   >
+//                     🗑️
+//                   </button>
+//                 </div>
+//               ))}
+//             </div>
+//           )}
 //         </div>
 
 //         {/* Footer Section */}
@@ -325,7 +650,7 @@
 //                         onChange={(e) =>
 //                           updateButton(idx, { phoneNumber: e.target.value })
 //                         }
-//                         placeholder="Enter phone number"
+//                         placeholder="Enter phone number (include country code)"
 //                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
 //                       />
 //                     </div>
@@ -365,10 +690,13 @@
 
 // export default CreateTemplateModal;
 
-
-import React, { useState } from "react";
-// Make sure you import your upload function from wherever it's defined:
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from "react";
 import { uploadWhatsAppMediaService } from "../../../api/services/whatsappCampaignService";
+import {
+  fetchAllTextToImagesService,
+  fetchAllTextToVideosService,
+} from "../../../api/services/videoGenerateServices";
 
 interface TemplateButton {
   type: "quick_reply" | "call_to_action";
@@ -382,14 +710,24 @@ interface CreateTemplateModalProps {
   onClose: () => void;
   onDone: (data: {
     name: string;
-    headerType: string;
-    headerText?: string;
-    fileHandle?: string; // We'll store the uploaded file handle here
-    bodyText: string;
-    footerText?: string;
+    header?: {
+      type: string;
+      content: string;
+    };
+    body: {
+      text: string;
+      parameters?: {
+        type: "positional";
+        example: {
+          positional: string[];
+        };
+      };
+    };
+    footer?: {
+      text: string;
+    };
     buttons: TemplateButton[];
   }) => void;
-  // We need the secret token in order to call uploadWhatsAppMediaService
   secretToken: string;
 }
 
@@ -398,44 +736,111 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
   onDone,
   secretToken,
 }) => {
+  // Field states
   const [name, setName] = useState("");
-
-  // Header
   const [headerType, setHeaderType] = useState("none");
   const [headerText, setHeaderText] = useState("");
-  const [fileHandle, setFileHandle] = useState<string>(""); // store the API-uploaded file handle
-
-  // Body
+  const [fileHandle, setFileHandle] = useState<string>("");
   const [bodyText, setBodyText] = useState("");
-
-  // Footer
+  const [variables, setVariables] = useState<{ id: number; example: string }[]>(
+    []
+  );
   const [footerText, setFooterText] = useState("");
-
-  // Buttons
   const [buttons, setButtons] = useState<TemplateButton[]>([]);
+  const [mediaSource, setMediaSource] = useState<"upload" | "existing">(
+    "upload"
+  );
+  const [existingMedias, setExistingMedias] = useState<
+    { id: string; url: string; name: string }[]
+  >([]);
+  const [selectedMediaUrl, setSelectedMediaUrl] = useState("");
 
-  /**
-   * Immediately upload the file if user chooses an image/video/document.
-   * We'll store only the file handle in state.
-   */
+  // Error states (for inline error messages)
+  const [templateNameError, setTemplateNameError] = useState("");
+  const [headerError, setHeaderError] = useState("");
+  const [buttonErrors, setButtonErrors] = useState<{ [key: number]: string }>(
+    {}
+  );
+
+  const addVariable = () => {
+    const nextId = variables.length + 1;
+    setBodyText((prev) => prev + ` {{${nextId}}}`);
+    setVariables((prev) => [...prev, { id: nextId, example: "" }]);
+  };
+
+  const deleteVariable = (id: number) => {
+    setVariables((prev) => prev.filter((v) => v.id !== id));
+    setBodyText((prev) =>
+      prev.replace(new RegExp(`\\{\\{${id}\\}\\}`, "g"), "")
+    );
+  };
+
+  const updateVariableExample = (id: number, newExample: string) => {
+    setVariables((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, example: newExample } : v))
+    );
+  };
+
+  useEffect(() => {
+    const fetchMedia = async () => {
+      try {
+        let response: { data: any[] };
+        if (headerType === "image") {
+          response = await fetchAllTextToImagesService();
+          const mediaItems = response.data.flatMap((item: any) =>
+            item.images.map((img: string, index: number) => ({
+              id: `${item._id}-${index}`,
+              url: img,
+              name: `${item.prompt} (${index + 1})`,
+            }))
+          );
+          setExistingMedias(mediaItems);
+        } else if (headerType === "video") {
+          response = await fetchAllTextToVideosService();
+          const mediaItems = response.data.map((item: any) => ({
+            id: item._id,
+            url: item.videoUrl,
+            name: item.prompt,
+          }));
+          setExistingMedias(mediaItems);
+        }
+      } catch {
+        setHeaderError(`Failed to fetch ${headerType}s`);
+      }
+    };
+
+    if (["image", "video"].includes(headerType) && mediaSource === "existing") {
+      fetchMedia();
+    }
+  }, [mediaSource, headerType, secretToken]);
+
   const handleHeaderFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
+    setHeaderError("");
     if (!secretToken) {
-      alert("Missing secret token. Cannot upload file.");
+      setHeaderError("Missing secret token. Cannot upload file.");
       return;
     }
 
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Only upload if the headerType is image/video/document
+      const MAX_FILE_SIZE = 2 * 1024 * 1024;
+      if (file.size > MAX_FILE_SIZE) {
+        setHeaderError(
+          "File size exceeds 2 MB limit. Please upload a smaller file."
+        );
+        return;
+      }
+
       if (["image", "video", "document"].includes(headerType)) {
         try {
           const formData = new FormData();
           formData.append("file", file);
-
-          const response = await uploadWhatsAppMediaService(file, secretToken);
-
+          const response = await uploadWhatsAppMediaService({
+            file: file,
+            integrationId: secretToken,
+          });
           if (response?.fileHandle) {
             setFileHandle(response.fileHandle);
             console.log("File uploaded, got handle:", response.fileHandle);
@@ -444,51 +849,144 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
           }
         } catch (error) {
           console.error("Header upload failed:", error);
-          alert("Failed to upload header media.");
+          setHeaderError("Failed to upload header media.");
         }
       }
     }
   };
 
-  // If user changes header type from text to image (etc.), reset states
-  const handleHeaderTypeChange = (newType: string) => {
-    setHeaderType(newType);
-    setHeaderText("");
-    setFileHandle(""); // Clear out any old handle
+  const handleExistingMediaSelection = async (mediaUrl: string) => {
+    setHeaderError("");
+    if (!secretToken) {
+      setHeaderError("Missing secret token. Cannot upload file.");
+      return;
+    }
+
+    try {
+      const response = await uploadWhatsAppMediaService({
+        mediaUrl,
+        integrationId: secretToken,
+      });
+      if (response?.fileHandle) {
+        setFileHandle(response.fileHandle);
+        console.log(
+          "Existing media uploaded, got handle:",
+          response.fileHandle
+        );
+      } else {
+        throw new Error("File handle missing in response");
+      }
+    } catch (error) {
+      console.error("Header upload failed:", error);
+      setHeaderError("Failed to upload header media.");
+    }
   };
 
-  // Add a new button
+  const handleHeaderTypeChange = (newType: string) => {
+    setHeaderType(newType);
+    setMediaSource("upload");
+    setSelectedMediaUrl("");
+    setFileHandle("");
+    setHeaderError("");
+  };
+
   const handleAddButton = () => {
     setButtons((prev) => [...prev, { type: "quick_reply", text: "" }]);
   };
 
-  // Update a button
-  const updateButton = (index: number, updatedFields: Partial<TemplateButton>) => {
+  const updateButton = (
+    index: number,
+    updatedFields: Partial<TemplateButton>
+  ) => {
     setButtons((prev) =>
       prev.map((btn, i) => (i === index ? { ...btn, ...updatedFields } : btn))
     );
+    // Clear error for this button field on change
+    setButtonErrors((prev) => ({ ...prev, [index]: "" }));
   };
 
-  // Remove a button
   const handleRemoveButton = (index: number) => {
     setButtons((prev) => prev.filter((_, i) => i !== index));
+    // Remove any errors associated with this button
+    setButtonErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[index];
+      return copy;
+    });
   };
 
-  /**
-   * Called when user clicks "Done."
-   * We just pass the fileHandle (if any) up, no more upload calls here.
-   */
   const handleDone = () => {
+    let hasError = false;
+    // Clear previous errors
+    setTemplateNameError("");
+    setButtonErrors({});
+
+    // Validate template name
+    const templateNameRegex = /^[a-z0-9_]+$/;
+    if (!templateNameRegex.test(name)) {
+      setTemplateNameError(
+        "Template name must contain only lowercase letters, numbers, and underscores."
+      );
+      hasError = true;
+    }
+
+    // Validate call-to-action buttons with phone numbers
+    const newButtonErrors: { [key: number]: string } = {};
+    buttons.forEach((btn, i) => {
+      if (btn.type === "call_to_action" && btn.ctaType === "phone") {
+        if (!btn.phoneNumber) {
+          newButtonErrors[i] = "Phone number is required.";
+          hasError = true;
+        } else {
+          const phoneRegex = /^\+\d+$/;
+          if (!phoneRegex.test(btn.phoneNumber)) {
+            newButtonErrors[i] =
+              "Invalid phone number. Include country code (e.g., +123456789).";
+            hasError = true;
+          }
+        }
+      }
+    });
+    setButtonErrors(newButtonErrors);
+
+    if (hasError) return;
+
+    let header: { type: string; content: string } | undefined;
+    if (headerType !== "none") {
+      header =
+        headerType === "text"
+          ? { type: "TEXT", content: headerText }
+          : { type: headerType.toUpperCase(), content: fileHandle };
+    }
+
+    const bodyPayload: any = { text: bodyText };
+    const regex = /\{\{\s*(\d+)\s*\}\}/g;
+    const matches = Array.from(bodyText.matchAll(regex));
+    if (matches.length > 0) {
+      const positionalExamples = matches.map((match) => {
+        const id = parseInt(match[1]);
+        const variable = variables.find((v) => v.id === id);
+        return variable ? variable.example : "";
+      });
+      bodyPayload.parameters = {
+        type: "positional",
+        example: {
+          positional: positionalExamples,
+        },
+      };
+    }
+
+    const formattedButtons = buttons.map((btn) => ({
+      ...btn,
+      type: btn.type,
+    }));
+
     onDone({
       name,
-      headerType,
-      headerText: headerType === "text" ? headerText : undefined,
-      fileHandle: ["image", "video", "document"].includes(headerType)
-        ? fileHandle
-        : undefined,
-      bodyText,
-      footerText,
-      buttons,
+      header,
+      body: bodyPayload,
+      footer: footerText ? { text: footerText } : undefined,
+      buttons: formattedButtons,
     });
   };
 
@@ -496,15 +994,8 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
     <div className="fixed inset-0 flex items-center justify-center z-50">
       {/* Modal Backdrop */}
       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
-
       {/* Modal Container */}
-      <div
-        className="
-          relative bg-white rounded-lg shadow-xl 
-          max-w-2xl w-full p-6 z-10
-          max-h-[80vh] overflow-y-auto
-        "
-      >
+      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 z-10 max-h-[80vh] overflow-y-auto">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Create WhatsApp Template
         </h2>
@@ -515,9 +1006,6 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
             <label className="block text-gray-700 font-medium mb-1">
               Template Name
             </label>
-            <span className="text-zinc-400 ml-2 whitespace-nowrap">
-              It must contain only lowercase letters, numbers, and underscores
-            </span>
             <input
               type="text"
               value={name}
@@ -525,6 +1013,11 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
               placeholder="Enter your template name"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
+            {templateNameError && (
+              <div className="mt-1 text-xs text-red-600">
+                {templateNameError}
+              </div>
+            )}
           </div>
         </div>
 
@@ -557,30 +1050,102 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
             </div>
           )}
 
-          {/* For image/video/document, show file upload */}
           {["image", "video", "document"].includes(headerType) && (
             <div className="mt-2">
-              <input
-                type="file"
-                accept={
-                  headerType === "image"
-                    ? "image/*"
-                    : headerType === "video"
-                    ? "video/*"
-                    : headerType === "document"
-                    ? ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-                    : undefined
-                }
-                onChange={handleHeaderFileChange}
-                className="block w-full text-sm text-gray-700
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-full file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-purple-50 file:text-purple-700
-                  hover:file:bg-purple-100"
-              />
-              {/* If we have a fileHandle, show a small success message */}
-              {fileHandle && (
+              <div className="flex gap-4 mb-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    value="upload"
+                    checked={mediaSource === "upload"}
+                    onChange={() => setMediaSource("upload")}
+                  />
+                  Upload New
+                </label>
+                {headerType !== "document" && (
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      value="existing"
+                      checked={mediaSource === "existing"}
+                      onChange={() => setMediaSource("existing")}
+                    />
+                    Select from Omnigen Studio
+                  </label>
+                )}
+              </div>
+
+              {mediaSource === "upload" ? (
+                <>
+                  <input
+                    type="file"
+                    accept={headerType === "image" ? "image/*" : "video/*"}
+                    onChange={handleHeaderFileChange}
+                    className="..."
+                  />
+                  {headerError && (
+                    <div className="mt-1 text-xs text-red-600">
+                      {headerError}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="grid grid-cols-3 gap-4">
+                  {existingMedias.map((media) => (
+                    <div
+                      key={media.id}
+                      onClick={() => {
+                        setSelectedMediaUrl(media.url);
+                        handleExistingMediaSelection(media.url);
+                      }}
+                      className={`cursor-pointer border-2 rounded-lg p-2 ${
+                        selectedMediaUrl === media.url
+                          ? "border-purple-500 bg-purple-50"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      {headerType === "image" ? (
+                        <img
+                          src={media.url}
+                          alt={media.name}
+                          className="w-full h-32 object-cover rounded-md"
+                        />
+                      ) : (
+                        <div className="relative h-32 bg-gray-100 rounded-md flex items-center justify-center">
+                          <video className="absolute inset-0 w-full h-32 object-cover rounded-md">
+                            <source src={media.url} type="video/mp4" />
+                          </video>
+                          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md">
+                            <svg
+                              className="w-12 h-12 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                      <p className="mt-2 text-sm text-gray-700 truncate">
+                        {media.name}
+                      </p>
+                    </div>
+                  ))}
+                  {existingMedias.length === 0 && (
+                    <div className="text-gray-500 text-sm col-span-3 py-4 text-center">
+                      No {headerType}s found
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {mediaSource === "upload" && fileHandle && (
                 <p className="mt-2 text-sm text-green-600">
                   File uploaded successfully!
                 </p>
@@ -600,6 +1165,39 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
             placeholder="Enter the text content"
             className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
+
+          <button
+            onClick={addVariable}
+            className="mt-2 px-4 py-2 text-sm font-medium text-white bg-[#65558F] rounded-full hover:bg-purple-950"
+          >
+            + Add Variable
+          </button>
+
+          {variables.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold text-gray-600">Variables</h3>
+              {variables.map((variable) => (
+                <div key={variable.id} className="flex items-center gap-4 mt-2">
+                  <span className="text-gray-700 font-medium">{`{{${variable.id}}}`}</span>
+                  <input
+                    type="text"
+                    value={variable.example}
+                    onChange={(e) =>
+                      updateVariableExample(variable.id, e.target.value)
+                    }
+                    placeholder="Example value"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+                  />
+                  <button
+                    onClick={() => deleteVariable(variable.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Footer Section */}
@@ -718,9 +1316,14 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                         onChange={(e) =>
                           updateButton(idx, { phoneNumber: e.target.value })
                         }
-                        placeholder="Enter phone number"
+                        placeholder="Enter phone number (include country code)"
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
                       />
+                      {buttonErrors[idx] && (
+                        <div className="mt-1 text-xs text-red-600">
+                          {buttonErrors[idx]}
+                        </div>
+                      )}
                     </div>
                   )}
                 </>

@@ -57,7 +57,12 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       ],
     },
     { id: 3, text: "Agents", path: "/myagents", icon: <SmartToyIcon /> },
-    { id: 4, text: "Engagement Tab", path: "/engagementTab", icon: <GroupsIcon /> },
+    {
+      id: 4,
+      text: "Engagement",
+      path: "/engagement",
+      icon: <GroupsIcon />,
+    },
     {
       id: 5,
       text: "Marketing",
@@ -75,13 +80,19 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           path: "/marketing/campaign",
           icon: <CampaignIcon />,
         },
+        {
+          id: 5.3,
+          text: "Omnigen Content Studio",
+          path: "/marketing/omnigenStudio",
+          icon: <CampaignIcon />,
+        },
       ],
     },
     {
       id: 6,
-      text: "Agent",
+      text: "Voice Agent",
       icon: <SupportAgentIcon />,
-      path: "/agent",
+      path: "/voiceagent",
     },
     { id: 7, text: "Workflow", icon: <AccountTreeIcon />, path: "/workflow" },
     { id: 8, text: "Reports", icon: <AssessmentIcon />, path: "/reports" },
@@ -104,6 +115,14 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       text: "Settings",
       icon: <SettingsIcon />,
       path: "/settings",
+      // subItems: [
+      //   {
+      //     id: 12.1,
+      //     text: "Agent Guidelines",
+      //     path: "/settings/agent-guide",
+      //     icon: <DonutSmallIcon />,
+      //   },
+      // ],
     },
   ];
 
