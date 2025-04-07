@@ -27,6 +27,7 @@ import WhatsappDash from "../Whatsapp/WhatsappDashboard";
 
 // Import your API service functions
 import { getMarketingInsightsService } from "../../../api/services/marketingDashboardService";
+import { Link } from "react-router-dom";
 
 const COLORS = ["#639980", "#3F2181", "#FF8042", "#78C9F1", "#DBAEFF"];
 
@@ -71,8 +72,8 @@ const MarketingDashboard = () => {
   const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
   const navigate = useNavigate();
   const [insightsData, setInsightsData] = useState<any>(null);
+  const [allNewscurrentPage, setAllNewsCurrentPage] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [currentNewsIndex, _setCurrentNewsIndex] = useState(0);
   const [selectedMetric, setSelectedMetric] = useState("totalEngagements");
 
   const handleViewDashboard = () => {
@@ -186,10 +187,14 @@ const MarketingDashboard = () => {
   // -------------------------
 
   // Market News
-  const allNews = insightsData?.newsArticles?.insights
-    ? [{ insights: insightsData.newsArticles.insights }]
-    : [];
-
+  // const allNews = insightsData?.newsArticles?.insights
+  //   ? [{ insights: insightsData.newsArticles.insights }]
+  //   : [];
+  const allNews = insightsData?.newsArticles?.insights || [];
+  const allNewsPages = Array.from(
+    { length: Math.ceil(allNews.length) },
+    (_, i) => allNews.slice(i, i + 1)
+  );
   // Social Media Trends
   const actionableInsights =
     insightsData?.actionableSocialMediaInsights?.filter(
@@ -254,8 +259,8 @@ const MarketingDashboard = () => {
   const transformedTrendsData = insightsData?.trendsData?.interestOverTime
     ?.timeline_data
     ? transformTrendsChartData(
-        insightsData.trendsData.interestOverTime.timeline_data
-      )
+      insightsData.trendsData.interestOverTime.timeline_data
+    )
     : [];
 
   // Key Words Trends
@@ -290,27 +295,27 @@ const MarketingDashboard = () => {
 
   const competitorTrendsData = insightsData?.brand_engagement_metrics
     ? Object.keys(insightsData.brand_engagement_metrics).map((brand) => {
-        const brandData = insightsData.brand_engagement_metrics[brand];
-        let metricValue = 0;
-        if (selectedMetric.includes(".")) {
-          const nestedValue = getNestedValue(brandData, selectedMetric);
-          metricValue = nestedValue !== undefined ? nestedValue : 0;
-        } else if (brandData[selectedMetric] !== undefined) {
-          metricValue = brandData[selectedMetric];
-        } else if (brandData.platforms) {
-          metricValue = Object.keys(brandData.platforms).reduce(
-            (acc, platform) => {
-              const platformData = brandData.platforms[platform];
-              if (platformData[selectedMetric] !== undefined) {
-                return acc + platformData[selectedMetric];
-              }
-              return acc;
-            },
-            0
-          );
-        }
-        return { name: brand, value: metricValue };
-      })
+      const brandData = insightsData.brand_engagement_metrics[brand];
+      let metricValue = 0;
+      if (selectedMetric.includes(".")) {
+        const nestedValue = getNestedValue(brandData, selectedMetric);
+        metricValue = nestedValue !== undefined ? nestedValue : 0;
+      } else if (brandData[selectedMetric] !== undefined) {
+        metricValue = brandData[selectedMetric];
+      } else if (brandData.platforms) {
+        metricValue = Object.keys(brandData.platforms).reduce(
+          (acc, platform) => {
+            const platformData = brandData.platforms[platform];
+            if (platformData[selectedMetric] !== undefined) {
+              return acc + platformData[selectedMetric];
+            }
+            return acc;
+          },
+          0
+        );
+      }
+      return { name: brand, value: metricValue };
+    })
     : [];
 
   // -------------------------
@@ -331,29 +336,50 @@ const MarketingDashboard = () => {
           )}
           {renderSectionOrWaiting(
             allNews,
-            <>
-              <div className="relative h-[250px] overflow-auto">
-                <>
-                  {/* Slide Content */}
-                  <div className="space-y-4 mb-10">
-                    <div className="flex items-center space-x-2">
-                      {/* <ReactMarkdown className="text-sm">
-                        {allNews[currentNewsIndex].insights}
-                      </ReactMarkdown> */}
-                      {allNews[currentNewsIndex] ? (
-                        <ReactMarkdown className="text-sm">
-                          {allNews[currentNewsIndex].insights.join("\n\n")}
-                        </ReactMarkdown>
-                      ) : (
-                        <div className="text-center py-8">
-                          Your data is getting processed, please wait.
-                        </div>
-                      )}
+            <div className="relative ">
+              <div className="space-y-4 max-h-[355px] overflow-y-auto">
+                {allNewsPages[allNewscurrentPage]?.map(
+                  (item, index) => (
+                    <div key={index} className="flex items-start flex-col ">
+                      <ReactMarkdown className="text-sm">{item.summary}</ReactMarkdown>
+                      <Link to={item.source} target="_blank" className="text-blue-500">Read more</Link>
                     </div>
-                  </div>
-                </>
+                  )
+                )}
               </div>
-            </>
+
+              {allNewsPages.length > 1 && (
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={() =>
+                      setAllNewsCurrentPage((prev) =>
+                        prev === 0 ? allNewsPages.length - 1 : prev - 1
+                      )
+                    }
+                    className="p-2 hover:bg-gray-100 rounded"
+                  >
+                    <ChevronLeft />
+                  </button>
+                  <div className="flex space-x-2">
+                    {allNewsPages.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`h-2 w-2 rounded-full ${index === allNewscurrentPage ? "bg-blue-500" : "bg-gray-300"
+                          }`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() =>
+                      setAllNewsCurrentPage((prev) => (prev + 1) % insightPages.length)
+                    }
+                    className="p-2 hover:bg-gray-100 rounded"
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </DashboardCard>
         {/* Social Media Trends */}
@@ -455,9 +481,8 @@ const MarketingDashboard = () => {
                     {insightPages.map((_, index) => (
                       <div
                         key={index}
-                        className={`h-2 w-2 rounded-full ${
-                          index === currentPage ? "bg-blue-500" : "bg-gray-300"
-                        }`}
+                        className={`h-2 w-2 rounded-full ${index === currentPage ? "bg-blue-500" : "bg-gray-300"
+                          }`}
                       />
                     ))}
                   </div>

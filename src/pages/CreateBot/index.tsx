@@ -125,8 +125,24 @@ const CreateBot: React.FC = () => {
           supportEmail: Yup.string()
             .email("Invalid email")
             .required("EmailID is required"),
-          botTheme: Yup.string().required("Theme is required"),
-          botFont: Yup.string().required("Font is required"),
+          botTheme: Yup.string()
+            .oneOf(
+              [THEME.light, THEME.dark],
+              "Theme must be either Light or Dark"
+            )
+            .required("Theme is required"),
+          botFont: Yup.string()
+            .oneOf(
+              [
+                "Georgia",
+                "Helvetica, sans-serif",
+                "monospace",
+                "cursive",
+                "poppins",
+              ],
+              "Font must be one of the available options"
+            )
+            .required("Font is required"),
         })
       : Yup.object().shape({
           agentRole: Yup.string().required("Agent Role is required"),
@@ -497,6 +513,11 @@ const CreateBot: React.FC = () => {
                 { label: "Dark", value: THEME.dark, icon: <BedtimeIcon /> },
               ]}
             />
+            {formik.touched.botTheme && formik.errors.botTheme && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.botTheme}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
@@ -526,6 +547,11 @@ const CreateBot: React.FC = () => {
                 { label: "Poppins (default)", value: "poppins" },
               ]}
             />
+            {formik.touched.botFont && formik.errors.botFont && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.botFont}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
@@ -855,86 +881,69 @@ const CreateBot: React.FC = () => {
                     onClick={() => deleteGoal(index, formik)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-                    </svg>
+                    ×
                   </button>
                 )}
               </div>
             ))}
 
             {/* New Goal Input + Buttons for Manual Add or AI Generation */}
-            <div className="flex items-center">
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={formik.values.newGoalPrompt || ""}
                 onChange={(e) =>
                   formik.setFieldValue("newGoalPrompt", e.target.value)
                 }
-                className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
+                className="flex-grow rounded-lg border border-gray-200 px-4 py-2"
                 placeholder="Enter a new goal or AI prompt..."
               />
-
-              {/* Manual Add Button */}
-              <button
-                type="button"
-                className="bg-[#65558F] text-white h-[50px] px-4"
-                onClick={() => {
-                  const newGoal = formik.values.newGoalPrompt.trim();
-                  if (newGoal) {
-                    const updatedGoals = [
-                      ...formik.values.agentsGoals,
-                      newGoal,
-                    ];
-                    formik.setFieldValue("agentsGoals", updatedGoals);
-                    formik.setFieldValue("newGoalPrompt", "");
-                  }
-                }}
-              >
-                Add Manual Goal
-              </button>
-
-              {/* AI Generation Button */}
-              <button
-                type="button"
-                className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
-                onClick={async () => {
-                  const prompt = formik.values.newGoalPrompt.trim();
-                  if (!prompt) return;
-                  try {
-                    const response = await generatePromptService({
-                      initialPrompt: prompt,
-                      purpose: "agent goal",
-                    });
-
-                    // Split the response into individual lines
-                    const generatedGoals = response.prompt
-                      .split("\n")
-                      .map((line) => line.replace(/^- /, "").trim()) // Remove any bullet chars
-                      .filter((line) => line.length > 0);
-
-                    // Merge with existing goals, removing empty ones
-                    const updatedGoals = [
-                      ...formik.values.agentsGoals,
-                      ...generatedGoals,
-                    ].filter((goal) => goal.trim().length > 0);
-
-                    formik.setFieldValue("agentsGoals", updatedGoals);
-                    formik.setFieldValue("newGoalPrompt", "");
-                  } catch (error) {
-                    console.error("Goal generation failed:", error);
-                  }
-                }}
-              >
-                AI Gen
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="bg-[#65558F] text-white px-4 py-2 rounded-lg hover:bg-[#4D3C7F]"
+                  onClick={() => {
+                    const newGoal = formik.values.newGoalPrompt.trim();
+                    if (newGoal) {
+                      formik.setFieldValue("agentsGoals", [
+                        ...formik.values.agentsGoals,
+                        newGoal,
+                      ]);
+                      formik.setFieldValue("newGoalPrompt", "");
+                    }
+                  }}
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  className="bg-gradient-to-r from-[#65558F] to-[#4D3C7F] text-white px-4 py-2 rounded-lg"
+                  onClick={async () => {
+                    const prompt = formik.values.newGoalPrompt.trim();
+                    if (!prompt) return;
+                    try {
+                      const response = await generatePromptService({
+                        initialPrompt: prompt,
+                        purpose: "agent goal",
+                      });
+                      const generatedGoals = response.prompt
+                        .split("\n")
+                        .map((line) => line.replace(/^- /, "").trim())
+                        .filter((line) => line.length > 0);
+                      const updatedGoals = [
+                        ...formik.values.agentsGoals,
+                        ...generatedGoals,
+                      ].filter((goal) => goal.trim().length > 0);
+                      formik.setFieldValue("agentsGoals", updatedGoals);
+                      formik.setFieldValue("newGoalPrompt", "");
+                    } catch (error) {
+                      console.error("Goal generation failed:", error);
+                    }
+                  }}
+                >
+                  AI Gen
+                </button>
+              </div>
             </div>
           </div>
 
@@ -974,75 +983,60 @@ const CreateBot: React.FC = () => {
                     onClick={() => deleteGuideline(index, formik)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-                    </svg>
+                    ×
                   </button>
                 )}
               </div>
             ))}
 
             {/* New input field with AI Gen button */}
-            <div className="flex items-center">
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={formik.values.newGuidelinePrompt || ""}
                 onChange={(e) =>
                   formik.setFieldValue("newGuidelinePrompt", e.target.value)
                 }
-                className="h-[50px] flex-grow rounded-l-[12px] bg-[#F3F2F6] px-4"
+                className="flex-grow rounded-lg border border-gray-200 px-4 py-2"
                 placeholder="Enter a prompt for guideline generation..."
               />
-
-              <button
-                type="button"
-                className="bg-[#65558F] text-white h-[50px] px-4"
-                onClick={() => {
-                  const newGuideline = formik.values.newGuidelinePrompt.trim();
-                  if (newGuideline) {
-                    const updatedGuidelines = [
-                      ...formik.values.conversationGuidelines,
-                      newGuideline,
-                    ];
-                    formik.setFieldValue(
-                      "conversationGuidelines",
-                      updatedGuidelines
-                    );
-                    formik.setFieldValue("newGuidelinePrompt", "");
-                  }
-                }}
-              >
-                Add Manual Guideline
-              </button>
-
-              <button
-                type="button"
-                className="bg-[#65558F] text-white h-[50px] px-4 rounded-r-[12px]"
-                onClick={async () => {
-                  if (formik.values.newGuidelinePrompt) {
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="bg-[#65558F] text-white px-4 py-2 rounded-lg hover:bg-[#4D3C7F]"
+                  onClick={() => {
+                    const newGuideline =
+                      formik.values.newGuidelinePrompt.trim();
+                    if (newGuideline) {
+                      formik.setFieldValue("conversationGuidelines", [
+                        ...formik.values.conversationGuidelines,
+                        newGuideline,
+                      ]);
+                      formik.setFieldValue("newGuidelinePrompt", "");
+                    }
+                  }}
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  className="bg-gradient-to-r from-[#65558F] to-[#4D3C7F] text-white px-4 py-2 rounded-lg"
+                  onClick={async () => {
+                    const prompt = formik.values.newGuidelinePrompt.trim();
+                    if (!prompt) return;
                     try {
                       const response = await generatePromptService({
-                        initialPrompt: formik.values.newGuidelinePrompt,
+                        initialPrompt: prompt,
                         purpose: "conversation guidelines",
                       });
-
                       const generatedGuidelines = response.prompt
                         .split("\n")
                         .map((line) => line.replace(/^- /, "").trim())
                         .filter((line) => line.length > 0);
-
                       const updatedGuidelines = [
                         ...formik.values.conversationGuidelines,
                         ...generatedGuidelines,
                       ].filter((guideline) => guideline.trim().length > 0);
-
                       formik.setFieldValue(
                         "conversationGuidelines",
                         updatedGuidelines
@@ -1051,11 +1045,11 @@ const CreateBot: React.FC = () => {
                     } catch (error) {
                       console.error("Guideline generation failed:", error);
                     }
-                  }
-                }}
-              >
-                AI Gen
-              </button>
+                  }}
+                >
+                  AI Gen
+                </button>
+              </div>
             </div>
             {formik.touched.conversationGuidelines &&
               formik.errors.conversationGuidelines && (
@@ -1064,6 +1058,8 @@ const CreateBot: React.FC = () => {
                 </div>
               )}
           </div>
+
+          {/* limit */}
           <div className="flex flex-col w-full mb-3 text-black">
             <div className="flex items-center mb-2">
               <label className="text-lg font-medium">
