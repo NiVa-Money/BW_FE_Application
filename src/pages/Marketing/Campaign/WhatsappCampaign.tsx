@@ -49,7 +49,7 @@ const WhatsappCampaign: React.FC = () => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
-  const [secretToken, setSecretToken] = useState("");
+  const [_secretToken, setSecretToken] = useState("");
   const whatsappNumbers = useSelector(
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
