@@ -56,6 +56,8 @@ const EditBot: React.FC = () => {
     (state: RootState) => state.bot?.edit?.data
   );
 
+  console.log("botEditDataRedux", botEditDataRedux);
+
   const [botData, setBotData] = useState<any>(null);
 
   useEffect(() => {
@@ -75,6 +77,8 @@ const EditBot: React.FC = () => {
     }
   }, [botEditDataRedux, id]);
 
+  console.log("botData", botData);
+
   useEffect(() => {
     if (editBotDataRedux?.success) {
       setIsModalOpen(true);
@@ -83,11 +87,11 @@ const EditBot: React.FC = () => {
 
   const initialValues = {
     botName: botData?.botName || "",
+    docId: botData?._id || "",
     botTone: botData?.botTone || "",
     botColor: botData?.botColor || "",
     botGreetingMessage:
       botData?.botGreetingMessage || "Hello, how can I assist you?",
-    botIdentity: botData?.botIdentity || "",
     supportNumber: botData?.supportNumber || "",
     supportEmail: botData?.supportEmail || "",
     docName: botData?.docName || "",
@@ -218,22 +222,76 @@ const EditBot: React.FC = () => {
     );
   };
 
+  // const handleSubmit = async (values: any, { setSubmitting }: any) => {
+  //   setSubmitting(true);
+  //   try {
+  //     const formData = new FormData();
+  //     if (selectedFileImage) {
+  //       formData.append("customBotImage", selectedFileImage);
+  //     }
+  //     formData.append("botName", values.botName || "");
+  //     formData.append("botTone", values.botTone || "");
+  //     formData.append("botColor", chatColor || "");
+  //     formData.append("botGreetingMessage", values.botGreetingMessage || "");
+  //     formData.append("supportNumber", values.supportNumber || "");
+  //     formData.append("supportEmail", values.supportEmail || "");
+  //     formData.append("docName", filename || "");
+  //     formData.append("docType", filename ? "pdf" : "");
+  //     formData.append("file", values.knowledgeBaseFile || "");
+  //     formData.append(
+  //       "appointmentSchedulerLink",
+  //       values.appointmentSchedulerLink || ""
+  //     );
+  //     formData.append("botFont", values.botFont || "");
+  //     formData.append("botTheme", values.botTheme || "");
+  //     formData.append("agentsGoals", JSON.stringify(values.agentsGoals || []));
+  //     formData.append(
+  //       "conversationGuidelines",
+  //       JSON.stringify(values.conversationGuidelines || [])
+  //     );
+  //     formData.append("agentRole", values.agentRole || "");
+  //     formData.append(
+  //       "agentRoleDescription",
+  //       values.agentRoleDescription || ""
+  //     );
+  //     formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
+  //     formData.append("botId", id || "");
+
+  //     dispatch(editBotAction(formData));
+  //   } catch (error) {
+  //     console.error("Submission failed:", error);
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     setSubmitting(true);
     try {
       const formData = new FormData();
+      formData.append("botId", id || "");
+      formData.append("docId", values.docId || ""); // <-- Make sure you pass this in from botData
+
       if (selectedFileImage) {
         formData.append("customBotImage", selectedFileImage);
       }
+
       formData.append("botName", values.botName || "");
       formData.append("botTone", values.botTone || "");
       formData.append("botColor", chatColor || "");
       formData.append("botGreetingMessage", values.botGreetingMessage || "");
       formData.append("supportNumber", values.supportNumber || "");
       formData.append("supportEmail", values.supportEmail || "");
-      formData.append("docName", filename || "");
-      formData.append("docType", filename ? "pdf" : "");
-      formData.append("file", values.knowledgeBaseFile || "");
+      formData.append(
+        "botSmartness",
+        values.botSmartness?.toString() || "true"
+      );
+      formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
+
+      if (values.knowledgeBaseFile) {
+        formData.append("file", values.knowledgeBaseFile);
+      }
+
       formData.append(
         "appointmentSchedulerLink",
         values.appointmentSchedulerLink || ""
@@ -250,8 +308,6 @@ const EditBot: React.FC = () => {
         "agentRoleDescription",
         values.agentRoleDescription || ""
       );
-      formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
-      formData.append("botId", id || "");
 
       await dispatch(editBotAction(formData));
     } catch (error) {

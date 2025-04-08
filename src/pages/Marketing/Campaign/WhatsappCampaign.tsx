@@ -33,21 +33,9 @@ interface CampaignPayload {
   templateId: string;
   integrationId: string;
   campaignName: string;
-  // channel: string;
-  // phoneNumberId: number;
   startDate: string;
   endDate: string;
   contactsUrl: string;
-  // messageType: string;
-  // messageContent: {
-  //   template: {
-  //     name: string;
-  //     language: string;
-  //     header: { image: string };
-  //     body: { text: string[] };
-  //   } | null;
-  // };
-  // contactsData?: any;
 }
 
 const WhatsappCampaign: React.FC = () => {
@@ -61,23 +49,19 @@ const WhatsappCampaign: React.FC = () => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
-  const [secretToken, setSecretToken] = useState("");
+  const [_secretToken, setSecretToken] = useState("");
   const whatsappNumbers = useSelector(
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
 
-  console.log('secret' , secretToken)
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Get template data from Redux (populated after successful API call)
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates
   );
   const reduxTemplateId = whatsappTemplates?.templateData?.data?.id;
 
-  // When the Redux store is updated with a template id, update the selectedTemplate state.
   useEffect(() => {
     if (reduxTemplateId) {
       setSelectedTemplate((prev: any) => ({
@@ -87,7 +71,6 @@ const WhatsappCampaign: React.FC = () => {
     }
   }, [reduxTemplateId]);
 
-  // Template selection handler (for when user picks from CampaignTemplate)
   const handleSelectTemplate = (template: any) => {
     if (!template?.id) {
       console.error("Selected template has no ID:", template);
@@ -177,13 +160,6 @@ const WhatsappCampaign: React.FC = () => {
 
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
 
-  const integrations = useSelector(
-    (state: RootState) =>
-      state.crudIntegration?.crudIntegration?.data?.secretToken
-  );
-
-  console.log("Integrations:", integrations);
-
   useEffect(() => {
     if (setSelectedPhoneNumberId && whatsappNumbers?.length > 0) {
       const selected = whatsappNumbers.find(
@@ -195,14 +171,12 @@ const WhatsappCampaign: React.FC = () => {
     }
   }, [setSelectedPhoneNumberId, whatsappNumbers]);
 
-  // Save handler now checks for a valid Redux template id (after the API call is complete)
   const handleSave = async () => {
     if (!contactList) {
       alert("Please upload a contact list");
       return;
     }
     if (!reduxTemplateId) {
-      // Inform user that template creation is still in progress.
       alert(
         "Template creation is in progress. Please wait for it to complete."
       );
@@ -212,8 +186,8 @@ const WhatsappCampaign: React.FC = () => {
     const selectedIntegration = whatsappNumbers.find(
       (num) => num.phoneNumberId.toString() === selectedPhoneNumberId
     );
-  
-    const integrationId = selectedIntegration?.secretToken || '';
+
+    const integrationId = selectedIntegration?.secretToken || "";
 
     const campaignPayload: CampaignPayload = {
       campaignName,
@@ -227,7 +201,6 @@ const WhatsappCampaign: React.FC = () => {
     };
 
     try {
-      // Use the Redux template id here, now that the API call is complete.
       const formData = new FormData();
       formData.append("file", contactList);
       const data = await uploadWhatsAppContactsService(
@@ -248,8 +221,6 @@ const WhatsappCampaign: React.FC = () => {
       integration.phoneNumberId.toString() === selectedPhoneNumberId
   );
 
-  // When creating a new template, dispatch the template creation action
-  // and let Redux update with the templateId.
   const handleTemplateDone = async (data: {
     id?: string;
     name: string;
@@ -336,22 +307,20 @@ const WhatsappCampaign: React.FC = () => {
       buttons: mappedButtons,
     };
 
-    // Dispatch the template creation action.
     dispatch(createWhatsAppTemplateAction(payload));
 
+    // Updated to include headerType
     setSelectedTemplate({
       name: data.name,
       header: headerContent,
+      headerType: headerType,
       body: data.body.text,
       footer: data.footer ? data.footer.text : "",
       buttons: data.buttons,
     });
 
-    // Once the API call is successful, the Redux state will update with the template id.
     setCustomizeScreen(false);
   };
-
-  console.log("Selected Template:", selectedTemplate);
 
   useEffect(() => {
     if (success) navigate("/marketing/dashboard");
@@ -400,7 +369,6 @@ const WhatsappCampaign: React.FC = () => {
               </select>
             </div>
 
-            {/* Mode Selection */}
             <div className="flex flex-col w-full mb-4">
               <label className="text-slate-700">
                 Select or Customize Template*
@@ -433,7 +401,6 @@ const WhatsappCampaign: React.FC = () => {
               />
             )}
 
-            {/* Schedule Date */}
             <div className="flex flex-col w-full mb-4">
               <label className="text-slate-700">Schedule</label>
               <p className="mt-2 mb-2 text-zinc-500">
@@ -464,7 +431,6 @@ const WhatsappCampaign: React.FC = () => {
 
           {/* Right Section */}
           <div className="flex flex-col ml-5 flex-1 shrink basis-0 min-w-[240px]">
-            {/* Campaign Name */}
             <div className="flex flex-col w-full mb-4">
               <label className="text-slate-700">Campaign Name *</label>
               <input
@@ -516,7 +482,6 @@ const WhatsappCampaign: React.FC = () => {
               </button>
             </div>
 
-            {/* AI Wizard */}
             <div
               className="flex flex-col w-full mb-4 mt-5 rounded-3xl p-4 bg-white border-4"
               style={{
@@ -571,25 +536,55 @@ const WhatsappCampaign: React.FC = () => {
                       <h3 className="text-xl font-semibold">
                         {selectedTemplate.name}
                       </h3>
-                      <p>{selectedTemplate.body}</p>
-                      {selectedTemplate.header && (
+                      {/* Header Rendering */}
+                      {selectedTemplate.headerType === "TEXT" && (
+                        <p className="font-bold mt-2">
+                          {selectedTemplate.header}
+                        </p>
+                      )}
+                      {selectedTemplate.headerType === "IMAGE" && (
                         <img
                           src={selectedTemplate.header}
                           alt="Template Header"
                           className="w-full h-auto mt-2"
                         />
                       )}
+                      {selectedTemplate.headerType === "VIDEO" && (
+                        <video
+                          src={selectedTemplate.header}
+                          controls
+                          className="w-full h-auto mt-2"
+                        />
+                      )}
+                      {selectedTemplate.headerType === "DOCUMENT" && (
+                        <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg mt-2">
+                          <div className="text-center">
+                            <div className="text-gray-500 text-xl mb-2">📄</div>
+                            <div className="text-sm text-gray-700">
+                              Document
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <p className="mt-2">{selectedTemplate.body}</p>
+                      {selectedTemplate.footer && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          {selectedTemplate.footer}
+                        </p>
+                      )}
                       {selectedTemplate.buttons &&
                         selectedTemplate.buttons.length > 0 && (
                           <div className="mt-4 flex flex-wrap gap-2">
-                            {selectedTemplate.buttons.map((button, index) => (
-                              <button
-                                key={index}
-                                className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600"
-                              >
-                                {button.text}
-                              </button>
-                            ))}
+                            {selectedTemplate.buttons.map(
+                              (button: any, index: number) => (
+                                <button
+                                  key={index}
+                                  className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600"
+                                >
+                                  {button.text}
+                                </button>
+                              )
+                            )}
                           </div>
                         )}
                     </div>
