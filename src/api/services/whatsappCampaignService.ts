@@ -7,7 +7,7 @@ import axios from "axios";
 export const createWhatsAppCampaignService = async (campaignData: any) => {
   try {
     const response = await axiosInstance.post(
-      "/marketing/Campaigns/whatsapp",
+      "/whatsapp/campaign",
       campaignData
     );
     return response.data;
@@ -25,7 +25,10 @@ export const createWhatsAppCampaignService = async (campaignData: any) => {
 };
 
 /* Service to call the CSV-to-JSON conversion API */
-export const uploadWhatsAppContactsService = async (templateId: string, formData: FormData) => {
+export const uploadWhatsAppContactsService = async (
+  templateId: string,
+  formData: FormData
+) => {
   try {
     const response = await axiosInstance.post(
       `/whatsapp/upload-contacts/${templateId}`,

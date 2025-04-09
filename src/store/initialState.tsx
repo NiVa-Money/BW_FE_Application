@@ -50,6 +50,7 @@ export const initialState: any = {
     templates: [],
     error: null,
     success: false,
+    templateData: null,
   },
 
   whatsappDashboard: {
@@ -57,10 +58,10 @@ export const initialState: any = {
     error: null,
     dashboardData: [],
     messages: [],
-    campaignInsights : [],
+    campaignInsights: [],
   },
 
-  shopifyDashboard : {
+  shopifyDashboard: {
     loading: false,
     error: null,
     shopifyData: [],
@@ -91,4 +92,7 @@ export const initialState: any = {
       loader: false,
     },
   },
+  subscription: {
+    plans: { loader: false, data: [] }
+  }
 };

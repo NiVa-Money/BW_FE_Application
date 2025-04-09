@@ -100,6 +100,8 @@ export function whatsappTemplateReducer(
         ...state,
         loading: false,
         success: true,
+        templateData: action.payload,
+
       };
     case CREATE_WHATSAPP_TEMPLATE_FAILURE:
       return {
