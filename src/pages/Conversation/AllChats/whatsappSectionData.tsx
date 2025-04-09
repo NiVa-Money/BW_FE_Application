@@ -120,6 +120,8 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
             const content =
               msg?.messageType === "audio"
                 ? msg?.messageContent?.audio?.url || ""
+                : msg?.messageType === "flow_response"
+                ? msg?.messageContent?.flowResponse?.responseJson || ""
                 : isUserQuery
                 ? msg?.messageContent?.text || ""
                 : isAnswerCategory

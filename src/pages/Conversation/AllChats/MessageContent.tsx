@@ -2,6 +2,21 @@ import { useMessageStatus } from "../../../hooks/useMessageStatus";
 
 const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
   const getContent = () => {
+    if (
+      msg?.messageType === "flow_response" &&
+      msg?.messageContent?.flowResponse
+    ) {
+      const { responseJson } = msg.messageContent.flowResponse;
+      try {
+        const parsed = JSON.parse(responseJson);
+        return Object.entries(parsed)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join("\n");
+      } catch {
+        return responseJson;
+      }
+    }
+
     if (typeof content === "string") return content;
     if (content?.text) return content.text;
     if (content?.template?.body?.text) {
@@ -191,18 +206,47 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
 
     case "button_reply":
     case "flow_response": {
-      const classes = isUserQuery
+      const flowResponseClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
+
+      const parseFlowResponse = () => {
+        try {
+          const parsed = JSON.parse(
+            msg.messageContent.flowResponse.responseJson
+          );
+          return (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 pb-2 border-b border-white/20">
+                <span className="font-bold">Form Response</span>
+              </div>
+              {Object.entries(parsed).map(([key, value]) => (
+                <div key={key} className="grid grid-cols-3 text-base">
+                  <span className="col-span-1 w-[200px] opacity-80 capitalize">
+                    {key}:
+                  </span>
+                  <span className="col-span-2 font-medium">
+                    {String(value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          );
+        } catch {
+          return msg.messageContent.flowResponse.responseJson;
+        }
+      };
+
       messageContent = (
-        <div className={getClasses(classes)}>
-          <p className="whitespace-pre-wrap">{getContent()}</p>
+        <div
+          className={`${commonClasses} ${flowResponseClasses} min-w-[240px]`}
+        >
+          {parseFlowResponse()}
           {status}
         </div>
       );
       break;
     }
-
     case "image": {
       const classes = isUserQuery
         ? "bg-[#d8ede6] text-black"
