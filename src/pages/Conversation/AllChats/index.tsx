@@ -15,7 +15,7 @@ import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
 import { notifyError, notifySuccess } from "../../../components/Toast";
-// import ReactMarkdown from "react-markdown";
+import StarIcon from "@mui/icons-material/Star";
 import SendIcon from "@mui/icons-material/Send";
 import {
   XAxis,
@@ -33,8 +33,11 @@ import {
   getWhatsAppChatsService,
   sendWhatsAppManualReplyService,
   unblockWhatsAppUserService,
+  addToWhatsAppFavoritesService,
+  removeFromWhatsAppFavoritesService,
 } from "../../../api/services/conversationServices";
-import { Switch } from "@mui/material";
+import { Switch, Menu, MenuItem, IconButton } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 interface AnalysisSection {
   title: string;
@@ -85,6 +88,11 @@ const AllChats = () => {
   const [showBlockInput, setShowBlockInput] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isFavorited, setIsFavorited] = useState(false); // New state for favorite status
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For menu
+
+  const [filterBlocked, setFilterBlocked] = useState(false);
+  const [filterFavorites, setFilterFavorites] = useState(false);
 
   // New search handler function
   const handleSearch = async () => {
@@ -300,6 +308,8 @@ const AllChats = () => {
       )
     );
     setSessionId(selectedSessionId);
+    setIsBlocked(selectedSession?.isBlocked || false); // Update block status
+    setIsFavorited(selectedSession?.isFavorited || false); // Update favorite status
   };
 
   useEffect(() => {
@@ -327,12 +337,11 @@ const AllChats = () => {
               userPhoneNumberId: selectedSession.userPhoneId,
               aiLevel,
               humanLevel,
-
               ...(isSearchActive &&
                 searchType === "order" && { orderName: searchValue }),
               ...(isSearchActive &&
                 searchType === "phone" && { phoneNumber: searchValue }),
-              skipLoader: true
+              skipLoader: true,
             });
 
             if (chatsResponse?.success && isMounted) {
@@ -360,7 +369,7 @@ const AllChats = () => {
     channelNameVal,
     botIdVal,
     sessionsDataRedux?.sessions,
-    isSearchActive, // now used to disable polling during search
+    isSearchActive,
     searchType,
     searchValue,
     aiLevel,
@@ -481,6 +490,50 @@ const AllChats = () => {
     } catch (err) {
       console.error("Unblock failed:", err);
       setErrorMessage("Failed to unblock contact. Please try again.");
+    }
+  };
+
+  // Handle Favorite/Unfavorite
+  const handleToggleFavorite = async () => {
+    const selectedSession = getCurrentSession();
+    if (!selectedSession) {
+      setErrorMessage("No session selected.");
+      return;
+    }
+
+    try {
+      if (isFavorited) {
+        const response = await removeFromWhatsAppFavoritesService({
+          adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+          userPhoneNumber: selectedSession.userPhoneId,
+        });
+        if (
+          response?.message === "Profile removed from favorites successfully"
+        ) {
+          // Updated success message
+          setIsFavorited(false);
+          notifySuccess("User removed from favorites!");
+        } else {
+          setErrorMessage(
+            response?.message || "Failed to remove from favorites."
+          );
+        }
+      } else {
+        const response = await addToWhatsAppFavoritesService({
+          adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+          userPhoneNumber: selectedSession.userPhoneId,
+        });
+        if (response?.message === "Profile added to favorites successfully") {
+          // Updated success message
+          setIsFavorited(true);
+          notifySuccess("User added to favorites!");
+        } else {
+          setErrorMessage(response?.message || "Failed to add to favorites.");
+        }
+      }
+    } catch (err) {
+      console.error("Favorite toggle failed:", err);
+      setErrorMessage("Failed to toggle favorite status. Please try again.");
     }
   };
 
@@ -748,15 +801,6 @@ const AllChats = () => {
           <option value="Other">Other</option>
         </select>
 
-        {/* <div className="flex items-center justify-between p-4 rounded-lg mb-2">
-          <span className="text-gray-800 font-medium">AI Chats</span>
-          <Switch
-            checked={Boolean(aiLevel)}
-            onChange={(e) => setAiLevel(e.target.checked)}
-            color="primary"
-          />
-        </div> */}
-
         <div className="flex items-center justify-between p-4 rounded-lg mb-2">
           <span className="text-gray-800 font-medium">AI Chats</span>
           <div className="relative group">
@@ -771,14 +815,32 @@ const AllChats = () => {
           </div>
         </div>
 
-        {/* <div className="flex items-center justify-between p-4 rounded-lg mb-2">
-          <span className="text-gray-800 font-medium">Human Chats</span>
-          <Switch
-            checked={Boolean(humanLevel)}
-            onChange={(e) => setHumanLevel(e.target.checked)}
-            color="primary"
-          />
-        </div> */}
+        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+          <span className="text-gray-800 font-medium">Blocked</span>
+          <div className="relative group">
+            <Switch
+              checked={filterBlocked}
+              onChange={(e) => setFilterBlocked(e.target.checked)}
+              color="primary"
+            />
+           <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+              Show only blocked chats</div>
+          </div>
+        </div>
+
+        {/* Favorite Chats Filter */}
+        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
+          <span className="text-gray-800 font-medium">Favorites</span>
+          <div className="relative group">
+            <Switch
+              checked={filterFavorites}
+              onChange={(e) => setFilterFavorites(e.target.checked)}
+              color="primary"
+            />
+           <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+              Show only favorite chats</div>
+          </div>
+        </div>
       </div>
 
       {/* Main Container */}
@@ -795,12 +857,73 @@ const AllChats = () => {
           searchType={searchType}
           searchValue={isSearchActive ? searchValue : ""}
           isSearchActive={isSearchActive}
-          sessionsData={
-            isSearchActive ? searchResults : sessionsDataRedux?.sessions || []
-          }
+          // sessionsData={
+          //   isSearchActive ? searchResults : sessionsDataRedux?.sessions || []
+          // }
+          sessionsData={(isSearchActive
+            ? searchResults
+            : sessionsDataRedux?.sessions || []
+          ).filter((session) => {
+            if (filterBlocked && !session.isBlocked) return false;
+            if (filterFavorites && !session.isFavorite) return false;
+            return true;
+          })}
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Chat Header */}
+          {sessionId && channelNameVal === "whatsapp" && (
+            <div className="p-4 border-b flex justify-between items-center bg-gray-300">
+              <div className="flex items-center">
+                <h2 className="text-lg font-semibold">
+                  {getCurrentSession()?.userName || "Unknown User"}
+                </h2>
+                {isFavorited && (
+                  <span>
+                    <StarIcon className="ml-2 text-yellow-500" />
+                  </span>
+                )}
+              </div>
+              <div>
+                <IconButton
+                  onClick={(event) => setAnchorEl(event.currentTarget)}
+                  aria-label="more"
+                  aria-controls="chat-menu"
+                  aria-haspopup="true"
+                >
+                  <MoreVertIcon />
+                </IconButton>
+                <Menu
+                  id="chat-menu"
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={() => setAnchorEl(null)}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleToggleFavorite();
+                      setAnchorEl(null);
+                    }}
+                  >
+                    {isFavorited ? "Remove from Favorites" : "Add to Favorites"}
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      if (isBlocked) {
+                        handleUnblockContact();
+                      } else {
+                        setShowBlockInput(true);
+                      }
+                      setAnchorEl(null);
+                    }}
+                  >
+                    {isBlocked ? "Unblock Contact" : "Block Contact"}
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          )}
+
           <div className="flex-1 p-4 overflow-y-auto">
             {channelNameVal === "whatsapp" && sessionId ? (
               <WhatsappSectionData messages={messages} />
@@ -828,24 +951,6 @@ const AllChats = () => {
 
           {/* Block/Unblock Section */}
           <div className="p-4 border-t flex flex-col gap-2">
-            <div className="flex justify-between items-center">
-              {isBlocked ? (
-                <button
-                  onClick={handleUnblockContact}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition-colors"
-                >
-                  Unblock Contact
-                </button>
-              ) : (
-                <button
-                  onClick={() => setShowBlockInput((prev) => !prev)}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full transition-colors"
-                >
-                  Block Contact
-                </button>
-              )}
-            </div>
-
             {/* Block Reason Input */}
             {showBlockInput && !isBlocked && (
               <div className="flex flex-col gap-2">
@@ -952,26 +1057,6 @@ const AllChats = () => {
 
                 {section.expanded && (
                   <div className="mt-2 px-2">
-                    {/* {isSentiment && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          {typeof section.description === "object"
-                            ? JSON.stringify(section.description, null, 2)
-                            : section.description}
-                        </p>
-                        <ResponsiveContainer width="105%" height={300}>
-                          <BarChart data={sentimentData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="value" fill="#8884d8" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    )} */}
-
                     {isSentiment && (
                       <div className="mt-4 p-2 rounded-lg">
                         <h4 className="text-blue-600 font-semibold mb-4 text-center">
