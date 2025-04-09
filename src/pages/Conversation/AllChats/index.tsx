@@ -268,11 +268,11 @@ const AllChats = () => {
     const messagesData =
       channelNameVal !== "whatsapp"
         ? sessionsDataRedux?.sessions.filter(
-          (obj) => obj._id === selectedSessionId
-        )[0]?.sessions
+            (obj) => obj._id === selectedSessionId
+          )[0]?.sessions
         : sessionsDataRedux?.sessions.filter(
-          (obj) => obj.userPhoneId === selectedSessionId
-        )[0]?.sessions;
+            (obj) => obj.userPhoneId === selectedSessionId
+          )[0]?.sessions;
 
     const selectedSession = sessionsDataRedux?.sessions.find(
       (obj) =>
@@ -332,6 +332,7 @@ const AllChats = () => {
                 searchType === "order" && { orderName: searchValue }),
               ...(isSearchActive &&
                 searchType === "phone" && { phoneNumber: searchValue }),
+              skipLoader: true
             });
 
             if (chatsResponse?.success && isMounted) {
@@ -365,72 +366,6 @@ const AllChats = () => {
     aiLevel,
     humanLevel,
   ]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!botIdVal) return; // Don't poll if botId is missing
-
-  //     const data: any = {
-  //       botId: botIdVal,
-  //       page: 1,
-  //       channelName: channelNameVal,
-  //     };
-
-  //     // Apply search filter if active
-  //     console.log("?>>>>>>>>>", isSearchActive);
-  //     if (isSearchActive && searchValue.trim()) {
-  //       if (searchType === "order") {
-  //         data.orderName = searchValue.trim();
-  //       } else {
-  //         data.phoneNumber = searchValue.trim();
-  //       }
-  //     }
-  //     console.log("Polling with data:", data);
-  //     try {
-  //       const response = await dispatch(getAllSession(data));
-  //       console.log("Polling response received:", response);
-
-  //       if (response?.payload?.success) {
-  //         const newSessions = response.payload.data.sessions;
-  //         console.log("New sessions received:", newSessions.length);
-
-  //         if (isSearchActive) {
-  //           console.log("if search is active", isSearchActive);
-  //           if (newSessions.length > 0) {
-  //             // If search results exist, keep them
-  //             setSearchResults(newSessions);
-  //           } else {
-  //             // If no data found, reset search state
-  //             setIsSearchActive(true);
-  //             setSearchValue(""); // Clear the search box
-  //             setSearchResults(newSessions); // Show latest sessions
-  //           }
-  //         } else {
-  //           // Normal polling update when no search is active
-  //           setSearchResults(newSessions);
-  //         }
-
-  //         // Preserve the selected session if still valid
-  //         if (sessionId && newSessions.some((s: any) => s._id === sessionId)) {
-  //           return; // Keep current session if still available
-  //         } else if (newSessions.length > 0) {
-  //           // Auto-select first available session
-  //           const firstSessionId =
-  //             channelNameVal === "whatsapp"
-  //               ? newSessions[0].userPhoneId
-  //               : newSessions[0]._id;
-  //           setSessionId(firstSessionId);
-  //           handleSessionSelection(firstSessionId, newSessions);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Polling error:", error);
-  //     }
-  //   };
-
-  //   const interval = setInterval(fetchData, 5000); // Adjust polling interval as needed
-  //   return () => clearInterval(interval);
-  // }, [botIdVal, channelNameVal, isSearchActive, searchValue, sessionId]);
 
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
     if (!selectedSessionId) {
@@ -688,12 +623,12 @@ const AllChats = () => {
   const overallVulnerabilityScore =
     vulnerabilityData.length > 0
       ? Math.min(
-        Math.round(
-          vulnerabilityData.reduce((acc, curr) => acc + curr.value, 0) /
-          vulnerabilityData.length
-        ),
-        100
-      )
+          Math.round(
+            vulnerabilityData.reduce((acc, curr) => acc + curr.value, 0) /
+              vulnerabilityData.length
+          ),
+          100
+        )
       : 0;
 
   useEffect(() => {
@@ -1009,8 +944,9 @@ const AllChats = () => {
                 >
                   <h3 className="font-medium">{section.title}</h3>
                   <ExpandMoreIcon
-                    className={`w-4 h-4 transform ${section.expanded ? "rotate-180" : ""
-                      }`}
+                    className={`w-4 h-4 transform ${
+                      section.expanded ? "rotate-180" : ""
+                    }`}
                   />
                 </div>
 

@@ -75,12 +75,18 @@ export const getWhatsAppChatsService = async (payload: {
   botId: string;
   adminPhoneNumberId: string;
   userPhoneNumberId: string;
-  aiLevel;
-  humanLevel;
+  aiLevel: any;
+  humanLevel: any;
+  orderName?: string;
+  phoneNumber?: string;
+  skipLoader?: boolean;
 }) => {
+  const { ...params } = payload;
+
   try {
     const response = await axiosInstance.get(`/whatsapp/chats`, {
-      params: payload,
+      params,
+      skipLoader: true,
     });
     return response.data;
   } catch (error: any) {
@@ -94,6 +100,30 @@ export const getWhatsAppChatsService = async (payload: {
     }
   }
 };
+
+// export const getWhatsAppChatsService = async (payload: {
+//   botId: string;
+//   adminPhoneNumberId: string;
+//   userPhoneNumberId: string;
+//   aiLevel;
+//   humanLevel;
+// }) => {
+//   try {
+//     const response = await axiosInstance.get(`/whatsapp/chats`, {
+//       params: payload,
+//     });
+//     return response.data;
+//   } catch (error: any) {
+//     if (error.response?.data) {
+//       return error.response.data;
+//     } else {
+//       return {
+//         status: "error",
+//         message: error.message || "Error retrieving WhatsApp chats",
+//       };
+//     }
+//   }
+// };
 
 export const markWhatsAppMessageAsRead = async (
   userPhoneId: string,
