@@ -1,13 +1,16 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import AddUserModal from "./AddUserModal";
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteUserAction, getUsersAction } from "../../store/actions/userActions";
+import {
+  deleteUserAction,
+  getUsersAction,
+} from "../../store/actions/userActions";
 import { RootState } from "../../store";
+import { COLORS } from "../../constants";
 
 // Icons extracted as separate components for reusability
-
 
 // Reusable components
 const StatCard = ({ label, value, children }) => (
@@ -22,7 +25,9 @@ const StatCard = ({ label, value, children }) => (
 const UserCard = ({ user, onEdit, onDelete }) => (
   <div className="flex items-center justify-between p-4 border border-gray-100 rounded-md">
     <div className="w-1/3">
-      <h3 className="font-medium">{user.firstName} {user.lastName}</h3>
+      <h3 className="font-medium">
+        {user.firstName} {user.lastName}
+      </h3>
       <p className="text-sm text-gray-500">{user.emailId}</p>
     </div>
 
@@ -34,7 +39,6 @@ const UserCard = ({ user, onEdit, onDelete }) => (
         onClick={() => onEdit(user)}
         aria-label={`Edit ${user.firstName}`}
       >
-
         <EditIcon />
       </button>
 
@@ -50,12 +54,11 @@ const UserCard = ({ user, onEdit, onDelete }) => (
 );
 
 const UserManagement = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const usersListRedux = useSelector(
     (state: RootState) => state.users?.lists?.data
   );
   // Initial user data moved outside component to prevent recreation on render
-
 
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -84,9 +87,8 @@ const UserManagement = () => {
   }, []);
 
   const handleDeleteUser = (userToDelete) => {
-    console.log('userToDelete', userToDelete)
-    dispatch(deleteUserAction({ id: userToDelete, obj: { reason: '' } }))
-
+    console.log("userToDelete", userToDelete);
+    dispatch(deleteUserAction({ id: userToDelete, obj: { reason: "" } }));
   };
 
   const handleSaveUser = useCallback(
@@ -116,27 +118,27 @@ const UserManagement = () => {
   }, []);
   useEffect(() => {
     if (usersListRedux !== null || undefined) {
-      setUsers(usersListRedux)
+      setUsers(usersListRedux);
     }
-  }, [usersListRedux])
+  }, [usersListRedux]);
   useEffect(() => {
-    dispatch(getUsersAction())
-  }, [])
-
+    dispatch(getUsersAction());
+  }, []);
 
   return (
     <div className="bg-white p-6">
       <header className="mb-8">
-        <h1 className="text-2xl font-medium text-gray-800">
+        <h1
+          className="text-2xl font-medium"
+          style={{ color: COLORS.DARKVIOLET }}
+        >
           User & Role Management
         </h1>
-        <p className="text-gray-500 text-sm">
+        <p className="text-sm" style={{ color: COLORS.NEUTRALGRAY }}>
           Manage user accounts, roles, and permissions to streamline access
           control across your platform.
         </p>
       </header>
-
-
 
       <div className="flex justify-end mb-6">
         <button
