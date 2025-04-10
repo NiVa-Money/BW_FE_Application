@@ -204,7 +204,22 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       break;
     }
 
-    case "button_reply":
+    case "button_reply": {
+      // For button replies, we simply render the text provided.
+      const classesBasedOnOrigin = isUserQuery
+        ? "bg-[#d8ede6] text-black"
+        : "bg-[#005C4B] text-white";
+
+      messageContent = (
+        <div className={`${commonClasses} ${classesBasedOnOrigin} min-w-[240px]`}>
+          <p className="whitespace-pre-wrap">
+            {msg?.messageContent?.text || "No text provided."}
+          </p>
+          {status}
+        </div>
+      );
+      break;
+    }
     case "flow_response": {
       const flowResponseClasses = isUserQuery
         ? "bg-[#d8ede6] text-black"
@@ -233,7 +248,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
             </div>
           );
         } catch {
-          return msg.messageContent.flowResponse.responseJson;
+          return msg?.messageContent?.flowResponse?.responseJson;
         }
       };
 
