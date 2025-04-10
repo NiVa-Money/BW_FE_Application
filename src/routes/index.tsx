@@ -30,7 +30,8 @@ import VoiceChatComponent from "../pages/VoiceModule";
 import EditMarketingDashboardForm from "../pages/Marketing/Dashboard/EditMarketingDashboardForm";
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
-import Subscription from '../pages/Subscription/index';
+import Subscription from "../pages/Subscription/index";
+import Workflow from "../pages/Workflow/Workflow";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -90,7 +91,7 @@ export const autRoutes: any[] = [
   {
     id: 7,
     path: "/workflow",
-    component: <UserManagement />,
+    component: <Workflow />,
   },
   {
     id: 8,
@@ -135,6 +136,7 @@ export const autRoutes: any[] = [
   { id: 11, component: <HelpCenter />, path: "/help-center" },
 
   { id: 12, component: <Settings />, path: "/settings" },
+  { id: 12, component: <UserManagement />, path: "/user-management" },
 ];
 
 export const publicRoutes: any[] = [
