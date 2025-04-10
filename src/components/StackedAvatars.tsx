@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { COLORS } from "../constants";
 
 interface User {
@@ -20,10 +20,7 @@ export default function StackedAvatars({ userData }: StackedAvatarsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const visibleUsers: User[] = useMemo(() => {
-    // Slice the users array to get only first 4 items
-    const slicedUsers = userData.slice(0, 4);
-
-    return slicedUsers;
+    return userData.slice(0, 4);
   }, [userData]);
 
   const totalUsers = userData.length;
@@ -36,6 +33,20 @@ export default function StackedAvatars({ userData }: StackedAvatarsProps) {
   const handleClose = () => {
     setIsOpen(false);
   };
+
+  // Handle click outside to close popup
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClick = (e: MouseEvent) => {
+      if (!(e.target as Element).closest(".avatar-trigger, .avatar-popup")) {
+        handleClose();
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [isOpen]);
 
   return (
     <div className="relative">
@@ -58,7 +69,7 @@ export default function StackedAvatars({ userData }: StackedAvatarsProps) {
         {hiddenUsersCount > 0 && (
           <div className="relative">
             <div
-              className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-white bg-gray-300 text-gray-700 font-bold cursor-pointer hover:bg-gray-400 transition-colors duration-200 z-10 group"
+              className="avatar-trigger flex items-center justify-center w-10 h-10 rounded-full border-2 border-white bg-gray-300 text-gray-700 font-bold cursor-pointer hover:bg-gray-400 transition-colors duration-200 z-10 group"
               onClick={handleAvatarClick}
             >
               +{hiddenUsersCount}
@@ -69,11 +80,10 @@ export default function StackedAvatars({ userData }: StackedAvatarsProps) {
 
             {/* Popup positioned relative to the "+X" avatar */}
             {isOpen && (
-              <div className="absolute left-0 top-full mt-2">
+              <div className="avatar-popup absolute left-0 top-full mt-2">
                 <div
                   className="rounded-lg shadow-lg overflow-hidden w-72 max-h-96"
                   style={{ backgroundColor: COLORS.LIGHTVIOLET }}
-                  onClick={(e) => e.stopPropagation()}
                 >
                   <div className="p-4 border-b border-gray-200">
                     <h3 className="font-semibold text-lg">
@@ -84,7 +94,10 @@ export default function StackedAvatars({ userData }: StackedAvatarsProps) {
                     {userData.map((user) => (
                       <div
                         key={user.emailId}
-                        className="flex items-center p-3 hover:bg-gray-50"
+                        className="flex items-center p-3 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => {
+                          handleClose();
+                        }}
                       >
                         <div
                           className={`w-10 h-10 rounded-full mr-3 flex items-center justify-center text-white font-medium ${user.color}`}
