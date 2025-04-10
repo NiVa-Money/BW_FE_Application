@@ -88,7 +88,7 @@ const AllChats = () => {
   const [showBlockInput, setShowBlockInput] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isFavorited, setIsFavorited] = useState(false); // New state for favorite status
+  const [isFavorite, setIsFavorite] = useState(false); // New state for favorite status
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For menu
 
   const [filterBlocked, setFilterBlocked] = useState(false);
@@ -198,6 +198,8 @@ const AllChats = () => {
       humanLevel,
       channelName: channelNameVal,
       intentVal,
+      filterBlocked: filterBlocked ? true : undefined,
+      filterFavorites: filterFavorites ? true : undefined,
     };
 
     if (userPhoneId) {
@@ -220,7 +222,16 @@ const AllChats = () => {
 
   useEffect(() => {
     getChatHistory({});
-  }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
+  }, [
+    page,
+    aiLevel,
+    humanLevel,
+    isSearchActive,
+    searchType,
+    searchValue,
+    filterBlocked,
+    filterFavorites,
+  ]);
 
   const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -309,7 +320,7 @@ const AllChats = () => {
     );
     setSessionId(selectedSessionId);
     setIsBlocked(selectedSession?.isBlocked || false); // Update block status
-    setIsFavorited(selectedSession?.isFavorited || false); // Update favorite status
+    setIsFavorite(selectedSession?.isFavorite || false); // Update favorite status
   };
 
   useEffect(() => {
@@ -374,6 +385,8 @@ const AllChats = () => {
     searchValue,
     aiLevel,
     humanLevel,
+    filterBlocked,
+    filterFavorites,
   ]);
 
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
@@ -502,7 +515,7 @@ const AllChats = () => {
     }
 
     try {
-      if (isFavorited) {
+      if (isFavorite) {
         const response = await removeFromWhatsAppFavoritesService({
           adminPhoneNumberId: selectedSession.adminPhoneNumberId,
           userPhoneNumber: selectedSession.userPhoneId,
@@ -510,8 +523,8 @@ const AllChats = () => {
         if (
           response?.message === "Profile removed from favorites successfully"
         ) {
-          // Updated success message
-          setIsFavorited(false);
+          await getChatHistory({});
+          setIsFavorite(false);
           notifySuccess("User removed from favorites!");
         } else {
           setErrorMessage(
@@ -524,8 +537,8 @@ const AllChats = () => {
           userPhoneNumber: selectedSession.userPhoneId,
         });
         if (response?.message === "Profile added to favorites successfully") {
-          // Updated success message
-          setIsFavorited(true);
+          await getChatHistory({});
+          setIsFavorite(true);
           notifySuccess("User added to favorites!");
         } else {
           setErrorMessage(response?.message || "Failed to add to favorites.");
@@ -823,8 +836,9 @@ const AllChats = () => {
               onChange={(e) => setFilterBlocked(e.target.checked)}
               color="primary"
             />
-           <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-              Show only blocked chats</div>
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+              Show only blocked chats
+            </div>
           </div>
         </div>
 
@@ -837,8 +851,9 @@ const AllChats = () => {
               onChange={(e) => setFilterFavorites(e.target.checked)}
               color="primary"
             />
-           <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-              Show only favorite chats</div>
+            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+              Show only favorite chats
+            </div>
           </div>
         </div>
       </div>
@@ -864,9 +879,9 @@ const AllChats = () => {
             ? searchResults
             : sessionsDataRedux?.sessions || []
           ).filter((session) => {
-            if (filterBlocked && !session.isBlocked) return false;
-            if (filterFavorites && !session.isFavorite) return false;
-            return true;
+            const showBlocked = filterBlocked ? session.isBlocked : true;
+            const showFavorite = filterFavorites ? session.isFavorite : true;
+            return showBlocked && showFavorite;
           })}
         />
 
@@ -878,7 +893,7 @@ const AllChats = () => {
                 <h2 className="text-lg font-semibold">
                   {getCurrentSession()?.userName || "Unknown User"}
                 </h2>
-                {isFavorited && (
+                {isFavorite && (
                   <span>
                     <StarIcon className="ml-2 text-yellow-500" />
                   </span>
@@ -905,7 +920,7 @@ const AllChats = () => {
                       setAnchorEl(null);
                     }}
                   >
-                    {isFavorited ? "Remove from Favorites" : "Add to Favorites"}
+                    {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
