@@ -36,7 +36,7 @@ import {
   addToWhatsAppFavoritesService,
   removeFromWhatsAppFavoritesService,
 } from "../../../api/services/conversationServices";
-import { Switch, Menu, MenuItem, IconButton } from "@mui/material";
+import { Menu, MenuItem, IconButton } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 interface AnalysisSection {
@@ -57,9 +57,8 @@ const AllChats = () => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
-  const [aiLevel, setAiLevel] = useState(true);
+  const [aiLevel] = useState(true);
   const [humanLevel] = useState(true);
-  // setHumanLevel
 
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
@@ -91,8 +90,12 @@ const AllChats = () => {
   const [isFavorite, setIsFavorite] = useState(false); // New state for favorite status
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For menu
 
-  const [filterBlocked, setFilterBlocked] = useState(false);
-  const [filterFavorites, setFilterFavorites] = useState(false);
+  const [filterBlocked] = useState(false);
+  const [filterFavorites] = useState(false);
+
+  const [handledByFilter, setHandledByFilter] = useState("");
+  const [favoriteFilter, setFavoriteFilter] = useState("");
+  const [blockFilter, setBlockFilter] = useState("");
 
   // New search handler function
   const handleSearch = async () => {
@@ -198,8 +201,27 @@ const AllChats = () => {
       humanLevel,
       channelName: channelNameVal,
       intentVal,
-      filterBlocked: filterBlocked ? true : undefined,
-      filterFavorites: filterFavorites ? true : undefined,
+      // blockedUsers: filterBlocked ? true : undefined,
+      // favoriteUsers: filterFavorites ? true : undefined,
+
+      manualModeUsers:
+        handledByFilter === "AI"
+          ? false
+          : handledByFilter === "Human"
+          ? true
+          : undefined,
+      favoriteUsers:
+        favoriteFilter === "Fav"
+          ? true
+          : favoriteFilter === "Unfav"
+          ? false
+          : undefined,
+      blockedUsers:
+        blockFilter === "Block"
+          ? true
+          : blockFilter === "Unblock"
+          ? false
+          : undefined,
     };
 
     if (userPhoneId) {
@@ -229,8 +251,9 @@ const AllChats = () => {
     isSearchActive,
     searchType,
     searchValue,
-    filterBlocked,
-    filterFavorites,
+    handledByFilter,
+    favoriteFilter,
+    blockFilter,
   ]);
 
   const [sessionId, setSessionId] = useState("");
@@ -603,20 +626,6 @@ const AllChats = () => {
     setBotIdVal(botId);
     setSessionId("");
     setMessages([]);
-    // setIsSearchActive(false);
-    // setSearchValue("");
-
-    // if (botId) {
-    //   dispatch(
-    //     getAllSession({
-    //       botId,
-    //       page: 1,
-    //       channelName: channelNameVal,
-    //       aiLevel,
-    //       humanLevel,
-    //     })
-    //   );
-    // }
   };
 
   const getChannelNameHandler = (e: any) => {
@@ -814,48 +823,38 @@ const AllChats = () => {
           <option value="Other">Other</option>
         </select>
 
-        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
-          <span className="text-gray-800 font-medium">AI Chats</span>
-          <div className="relative group">
-            <Switch
-              checked={Boolean(aiLevel)}
-              onChange={(e) => setAiLevel(e.target.checked)}
-              color="primary"
-            />
-            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-              Enable AI-powered chat responses
-            </div>
-          </div>
-        </div>
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          value={handledByFilter}
+          onChange={(e) => setHandledByFilter(e.target.value)}
+        >
+          <option value="" disabled hidden>Handled By</option>
+          <option value="All">All</option> 
+          <option value="AI">AI</option>
+          <option value="Human">Human</option>
+        </select>
 
-        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
-          <span className="text-gray-800 font-medium">Blocked</span>
-          <div className="relative group">
-            <Switch
-              checked={filterBlocked}
-              onChange={(e) => setFilterBlocked(e.target.checked)}
-              color="primary"
-            />
-            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-              Show only blocked chats
-            </div>
-          </div>
-        </div>
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          value={favoriteFilter}
+          onChange={(e) => setFavoriteFilter(e.target.value)}
+        >
+          <option value="" disabled hidden>Favourite/Unfavourite</option>
+          <option value="All">All</option> 
+          <option value="Fav">Favourite</option>
+          <option value="Unfav">Unfavourite</option>
+        </select>
 
-        {/* Favorite Chats Filter */}
-        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
-          <span className="text-gray-800 font-medium">Favorites</span>
-          <div className="relative group">
-            <Switch
-              checked={filterFavorites}
-              onChange={(e) => setFilterFavorites(e.target.checked)}
-              color="primary"
-            />
-            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 text-sm text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
-              Show only favorite chats
-            </div>
-          </div>
-        </div>
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          value={blockFilter}
+          onChange={(e) => setBlockFilter(e.target.value)}
+        >
+          <option value="" disabled hidden>Block Status</option>
+          <option value="All">All</option> 
+          <option value="Block">Block</option>
+          <option value="Unblock">Unblock</option>
+        </select>
       </div>
 
       {/* Main Container */}
