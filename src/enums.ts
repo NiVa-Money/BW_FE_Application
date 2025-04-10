@@ -212,3 +212,29 @@ export enum CountryEnum {
   ZM = "ZM",
   ZW = "ZW",
 }
+
+export enum MODULE_MAPPING {
+  DASHBOARD = 1,
+  CONVERSATION = 2,
+  AGENTS = 3,
+  ENGAGEMENT = 4,
+  MARKETING = 5,
+  VOICE_AGENT = 6,
+  WORKFLOW = 7,
+  REPORTS = 8,
+  SUBSCRIPTION = 9,
+  INTEGRATIONS = 10,
+  HELP_CENTER = 11,
+  SETTINGS = 12,
+  ALL_CHATS = 2.1,
+  LIVE_CHATS = 2.2,
+  OMNIGEN_CONTENT_STUDIO = 5.3,
+  CAMPAIGN = 5.2,
+  USER_MANAGEMENT = 12.1,
+}
+
+export enum ROLES {
+  SUPERADMIN = "SUPERADMIN",
+  MANAGER = "MANAGER",
+  AGENT = "AGENT"
+}
