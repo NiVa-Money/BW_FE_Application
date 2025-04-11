@@ -36,7 +36,7 @@ import {
   addToWhatsAppFavoritesService,
   removeFromWhatsAppFavoritesService,
 } from "../../../api/services/conversationServices";
-import { Menu, MenuItem, IconButton } from "@mui/material";
+import { Menu, MenuItem, IconButton, Button } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 interface AnalysisSection {
@@ -730,7 +730,7 @@ const AllChats = () => {
   return (
     <div className="flex flex-col min-h-screen p-6">
       <div className="flex justify-between items-center h-[45px]">
-        <h1 className="text-xl font-semibold">All Chats</h1>
+        <h1 className="text-2xl font-semibold mb-1">All Chats</h1>
         {messages?.length ? (
           <button
             className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
@@ -746,7 +746,7 @@ const AllChats = () => {
         <select
           value={searchType}
           onChange={(e) => setSearchType(e.target.value as "order" | "phone")}
-          className="p-2 border border-gray-300 rounded"
+          className="p-2 border border-gray-300 rounded-xl w-[250px]"
         >
           <option value="order">Search by Order Name</option>
           <option value="phone">Search by Phone Number</option>
@@ -757,10 +757,10 @@ const AllChats = () => {
             placeholder="Enter Order ID"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="p-2 border border-gray-300 rounded flex-1 max-w-xs"
+            className="p-2 border border-gray-300 rounded-xl flex-1 max-w-xs"
           />
         ) : (
-          <div className="flex items-center flex-1 max-w-xs">
+          <div className="flex items-center flex-1 rounded-xl max-w-xs">
             <span className="mr-2">+91</span>
             <input
               type="text"
@@ -770,22 +770,40 @@ const AllChats = () => {
               onChange={(e) =>
                 setSearchValue(e.target.value.replace(/[^0-9]/g, ""))
               }
-              className="p-2 border border-gray-300 rounded flex-1"
+              className="p-2 border border-gray-300 rounded-xl flex-1"
             />
           </div>
         )}
-        <button
+        {/* <button
           onClick={handleSearch}
-          className="bg-blue-500 text-white p-2 rounded"
+            className="rounded-full bg-[#65558F] text-white px-6 py-3 font-medium hover:bg-[#65558F]/90 transition-colors"
         >
           Search
-        </button>
+        </button> */}
+
+        <Button
+          onClick={handleSearch}
+          variant="contained"
+          sx={{
+            borderRadius: "12px",
+            backgroundColor: "#65558F",
+            color: "#fff",
+            px: 3,
+            py: 1,
+            fontWeight: "500",
+            "&:hover": {
+              backgroundColor: "#56497A", // or `#65558FE6` for ~90% opacity
+            },
+          }}
+        >
+          Search
+        </Button>
       </div>
 
       {/* Bot and Channel Selection */}
       <div className="flex gap-2">
         <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
           onChange={(e) => getBotSession(e)}
           value={botIdVal}
         >
@@ -798,7 +816,7 @@ const AllChats = () => {
         </select>
 
         <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
           onChange={(e) => getChannelNameHandler(e)}
           value={channelNameVal}
         >
@@ -811,7 +829,7 @@ const AllChats = () => {
         </select>
 
         <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
           value={intentVal}
           onChange={(e) => handleIntentChange(e.target.value)}
         >
