@@ -1,6 +1,15 @@
-import React, { useState } from "react";
-import { MODULE_MAPPING } from "../../enums";
+import React, { useState, useEffect } from "react";
+import { MODULE_MAPPING, ROLES } from "../../enums";
 import { COLORS } from "../../constants";
+
+// Default role-modules mapping
+const ROLE_MODULEMAP_MAPPING = {
+  [ROLES.SUPERADMIN]: [
+    1, 2, 2.1, 2.2, 3, 4, 5, 5.1, 5.2, 5.3, 6, 7, 8, 9, 10, 11, 12,
+  ],
+  [ROLES.AGENT]: [1, 2, 2.1, 2.2, 4, 11],
+  [ROLES.MANAGER]: [1, 2, 2.1, 2.2, 4, 5, 5.1, 5.2, 5.3, 8, 9, 10, 11, 12],
+};
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -21,7 +30,16 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   const [employeeId, setEmployeeId] = useState("");
   const [userMobileNo, setUserMobileNo] = useState(null);
   const [selectedModules, setSelectedModules] = useState<number[]>([]);
-  const [role, setRole] = useState<string | null>("co-owner");
+  const [role, setRole] = useState<string>("SUPERADMIN");
+
+  // Update selected modules when role changes
+  useEffect(() => {
+    if (role && ROLE_MODULEMAP_MAPPING[role]) {
+      setSelectedModules(ROLE_MODULEMAP_MAPPING[role]);
+    } else {
+      setSelectedModules([]);
+    }
+  }, [role]);
 
   const handleModuleChange = (moduleValue: number) => {
     setSelectedModules((prev) =>
@@ -52,7 +70,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-xl  overflow-hidden">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-xl overflow-hidden">
         <div className="relative inline-block">
           <img
             className="w-full"
@@ -87,7 +105,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               value={userMobileNo}
               maxLength={10}
               onKeyDown={(e) => {
-                // Only allow numbers (0-9), backspace, tab, and arrow keys
                 if (!/[0-9]|Backspace|Tab|ArrowLeft|ArrowRight/.test(e.key)) {
                   e.preventDefault();
                 }
@@ -103,12 +120,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           <div className="mb-6">
             <h3 className="text-base font-medium text-gray-700 mb-2">Role</h3>
             <div className="flex flex-row gap-4">
-              {["manager", "super-admin", "agent"].map((roleOption) => (
+              {Object.values(ROLES).map((roleOption) => (
                 <label key={roleOption} className="flex items-center flex-1">
                   <input
                     type="radio"
                     name="user-role"
-                    className={`h-5 w-5 border-2 rounded-full appearance-none `}
+                    className="h-5 w-5 border-2 rounded-full appearance-none"
                     style={{
                       backgroundColor:
                         role === roleOption ? COLORS.VIOLET : "transparent",
@@ -121,12 +138,16 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                   />
                   <span className="ml-2 text-sm text-gray-700">
                     {roleOption.charAt(0).toUpperCase() +
-                      roleOption.slice(1).replace("-", " ")}
+                      roleOption
+                        .slice(1)
+                        .toLowerCase()
+                        .replace("admin", " Admin")}
                   </span>
                 </label>
               ))}
             </div>
           </div>
+
           {/* Access with 2-column grid */}
           <div className="mb-6 max-h-[20vh] overflow-y-scroll">
             <h3 className="text-base font-medium text-gray-700 mb-2">Access</h3>
