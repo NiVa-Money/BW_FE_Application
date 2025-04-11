@@ -9,21 +9,109 @@ import {
 } from "../../store/actions/userActions";
 import { RootState } from "../../store";
 import { COLORS } from "../../constants";
+import StackedAvatars from "../../components/StackedAvatars";
 
-// Icons extracted as separate components for reusability
+type User = {
+  firstName: string;
+  lastName: string;
+  emailId: string;
+  mobileNo: string;
+  status: "active" | "inactive" | "registered";
+  roleName: string;
+  module_mapS: number[];
+};
 
-// Reusable components
-const StatCard = ({ label, value, children }) => (
-  <div className="bg-[#65558F] bg-opacity-10 rounded-xl p-4 flex items-center">
-    {children}
+interface StatItem {
+  label: string;
+  value: string | number;
+  component?: React.ReactNode;
+}
+
+interface UserHeaderProps {
+  users: User[];
+}
+
+  // Color options for avatars
+  const colors = [
+    "bg-blue-500",
+    "bg-red-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-purple-500",
+    "bg-pink-500",
+    "bg-indigo-500",
+    "bg-teal-500",
+    "bg-orange-500",
+  ];
+
+const StatCard = ({ label, value, component }) => (
+  <div
+    className={`rounded-xl p-4 flex items-center max-w-full w-full ${
+      component ? "flex justify-between" : ""
+    }`}
+    style={{ backgroundColor: COLORS.LIGHTLAVENDER }}
+  >
     <div>
-      <p className="text-base text-black">{label}</p>
-      <p className="text-3xl font-bold text-indigo-900">{value}</p>
+      <p className="text-base" style={{ color: COLORS.NEUTRALGRAY }}>
+        {label}
+      </p>
+      <p className="text-2xl font-bold" style={{ color: COLORS.DARKVIOLET }}>
+        {value}
+      </p>
     </div>
+    {component && <div>{component}</div>}
   </div>
 );
+
+const userData = (users) => {
+  return users.map((user) => ({
+    ...user,
+    color: colors[Math.floor(Math.random() * colors.length)],
+  }));
+};
+
+const UserHeader: React.FC<UserHeaderProps> = ({ users }) => {
+  const processedStats: StatItem[] = users?.length
+    ? [
+        {
+          label: "Total Number Of Employees",
+          value: "100",
+        },
+        {
+          label: "Active Logs",
+          value: "5",
+          component: <StackedAvatars userData={userData(users)} />,
+        },
+        {
+          label: "Managers",
+          value: "9",
+        },
+        {
+          label: "Supervisions",
+          value: "8",
+        },
+      ]
+    : [];
+
+  return (
+    <div className="flex justify-between items-center mb-4 gap-4">
+      {processedStats.map((stat, index) => (
+        <StatCard
+          key={index}
+          label={stat.label}
+          value={stat.value}
+          component={stat.component}
+        />
+      ))}
+    </div>
+  );
+};
+
 const UserCard = ({ user, onEdit, onDelete }) => (
-  <div className="flex items-center justify-between p-4 border border-gray-100 rounded-md">
+  <div
+    className="flex items-center justify-between p-4 border border-gray-100 rounded-md"
+    style={{ backgroundColor: COLORS.LIGHTLAVENDER }}
+  >
     <div className="w-1/3">
       <h3 className="font-medium">
         {user.firstName} {user.lastName}
@@ -31,19 +119,23 @@ const UserCard = ({ user, onEdit, onDelete }) => (
       <p className="text-sm text-gray-500">{user.emailId}</p>
     </div>
 
-    <div className="w-1/3 font-medium text-center">Manager</div>
+    <div className="w-1/3 font-medium text-center">{user.roleName}</div>
 
     <div className="w-1/3 flex justify-end space-x-2">
       <button
-        className="bg-transparent text-black px-4 py-2 border border-gray-200 rounded-md"
+        className="bg-transparent px-4 py-2 rounded-full"
+        style={{
+          color: COLORS.VIOLET,
+          border: `1px solid ${COLORS.DARKGRAY}`,
+        }}
         onClick={() => onEdit(user)}
         aria-label={`Edit ${user.firstName}`}
       >
-        <EditIcon />
+        <EditIcon /> Edit
       </button>
 
       <button
-        className="p-2 rounded-md border border-gray-200 text-red-600"
+        className=" text-red-600"
         onClick={() => onDelete(user)}
         aria-label={`Delete ${user.firstName}`}
       >
@@ -64,16 +156,6 @@ const UserManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
-  // Memoized calculations
-  // const stats = useMemo(() => {
-  //   const managerCount = users?.filter((user) => user.role === "Manager").length;
-  //   return {
-  //     totalEmployees: users.length,
-  //     activeLogs: 5, // This would typically come from an API
-  //     managers: managerCount,
-  //     supervisions: 2, // This would typically come from an API
-  //   };
-  // }, [users]);
 
   // Event handlers as callbacks to prevent recreation on render
   const handleAddUser = useCallback(() => {
@@ -140,6 +222,8 @@ const UserManagement = () => {
         </p>
       </header>
 
+      <UserHeader users={users} />
+
       <div className="flex justify-end mb-6">
         <button
           className="bg-[#65558F] text-white px-4 py-2 rounded-full"
@@ -152,7 +236,7 @@ const UserManagement = () => {
       <section className="space-y-4">
         {users?.map((user) => (
           <UserCard
-            key={user._id}
+            key={user.emailId }
             user={user}
             onEdit={handleEditUser}
             onDelete={() => handleDeleteUser(user._id)}
