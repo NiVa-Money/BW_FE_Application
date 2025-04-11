@@ -80,7 +80,7 @@ const WhatsappCampaign: React.FC = () => {
     setSelectedTemplate(template);
     setShowTemplate(false);
   };
-  
+
   const handleDownloadSample = async () => {
     if (!selectedTemplate?.id) {
       // Use selectedTemplate.id
@@ -212,9 +212,12 @@ const WhatsappCampaign: React.FC = () => {
 
     try {
       const formData = new FormData();
-      formData.append("contacts", contactList); // Ensure correct field name
+
+      formData.append("file", contactList);
+      formData.append("templateId", selectedTemplate.id);
+
       const data = await uploadWhatsAppContactsService(
-        selectedTemplate.id, // Pass selectedTemplate.id
+        selectedTemplate.id,
         formData
       );
       campaignPayload.contactsUrl = data.s3Url;
