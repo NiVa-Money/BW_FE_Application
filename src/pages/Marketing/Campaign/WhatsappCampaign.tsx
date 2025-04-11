@@ -61,7 +61,7 @@ const WhatsappCampaign: React.FC = () => {
     (state: RootState) => state.whatsappTemplates
   );
   const reduxTemplateId = whatsappTemplates?.templateData?.data?.id;
-  console.log('reduxTemplateId', reduxTemplateId);
+  console.log("reduxTemplateId", reduxTemplateId);
 
   useEffect(() => {
     if (reduxTemplateId) {
@@ -74,15 +74,16 @@ const WhatsappCampaign: React.FC = () => {
 
   const handleSelectTemplate = (template: any) => {
     if (!template?.id) {
-      console.error("Selected template has no ID:", template);
+      console.error("Template ID missing");
       return;
     }
     setSelectedTemplate(template);
     setShowTemplate(false);
   };
-
+  
   const handleDownloadSample = async () => {
     if (!selectedTemplate?.id) {
+      // Use selectedTemplate.id
       alert("Please select a template first");
       return;
     }
@@ -177,10 +178,10 @@ const WhatsappCampaign: React.FC = () => {
       alert("Please upload a contact list");
       return;
     }
-    if (!reduxTemplateId) {
-      alert(
-        "Template creation is in progress. Please wait for it to complete."
-      );
+
+    // Use selectedTemplate.id instead of reduxTemplateId
+    if (!selectedTemplate?.id) {
+      alert("Please select a template first.");
       return;
     }
 
@@ -190,30 +191,37 @@ const WhatsappCampaign: React.FC = () => {
 
     const integrationId = selectedIntegration?.secretToken || "";
 
+    const combinedDate = new Date(
+      scheduleDate?.getFullYear() || new Date().getFullYear(),
+      scheduleDate?.getMonth() || new Date().getMonth(),
+      scheduleDate?.getDate() || new Date().getDate(),
+      scheduleTime?.getHours() || 0,
+      scheduleTime?.getMinutes() || 0
+    );
+
     const campaignPayload: CampaignPayload = {
       campaignName,
-      templateId: reduxTemplateId || "",
+      templateId: selectedTemplate.id, // Use selectedTemplate.id
       integrationId: integrationId,
-      startDate: scheduleDate ? scheduleDate.toISOString() : "",
-      endDate: scheduleDate
-        ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
-        : "",
+      startDate: combinedDate.toISOString(),
+      endDate: new Date(
+        combinedDate.getTime() + 24 * 60 * 60 * 1000
+      ).toISOString(),
       contactsUrl: "",
     };
 
     try {
       const formData = new FormData();
-      formData.append("file", contactList);
+      formData.append("contacts", contactList); // Ensure correct field name
       const data = await uploadWhatsAppContactsService(
-        reduxTemplateId,
+        selectedTemplate.id, // Pass selectedTemplate.id
         formData
       );
-      const s3Url = data.s3Url;
-      campaignPayload.contactsUrl = s3Url;
+      campaignPayload.contactsUrl = data.s3Url;
       dispatch(createWhatsAppCampaignAction(campaignPayload));
     } catch (error) {
-      console.error("Error while creating campaign:", error);
-      alert("Failed to create campaign");
+      console.error("Error uploading contacts:", error);
+      alert("Failed to upload contacts");
     }
   };
 
@@ -313,6 +321,7 @@ const WhatsappCampaign: React.FC = () => {
     // Updated to include headerType
     setSelectedTemplate({
       name: data.name,
+      id: data.id,
       header: headerContent,
       headerType: headerType,
       body: data.body.text,

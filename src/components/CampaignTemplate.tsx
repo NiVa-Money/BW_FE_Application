@@ -47,7 +47,7 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
       headerType: template.header?.type,
       footer: template.footer?.text || "",
       buttons: template.buttons || [],
-      id: template._id,
+      id: template.templateId,
     };
 
     console.log("Mapped template data:", mappedTemplate);
