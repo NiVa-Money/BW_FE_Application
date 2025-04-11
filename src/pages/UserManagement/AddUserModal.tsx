@@ -18,7 +18,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   onSave,
 }) => {
   const [employeeId, setEmployeeId] = useState("");
-  const [userPhoneNo, setUserPhoneNo] = useState(null);
+  const [userMobileNo, setUserMobileNo] = useState(null);
   const [selectedModules, setSelectedModules] = useState<number[]>([]);
   const [role, setRole] = useState<string | null>("co-owner");
 
@@ -76,16 +76,16 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           </div>
           <div className="mb-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone No
+              Mobile No
             </label>
             <input
               type="tel"
               className="w-full p-2 bg-gray-100 rounded-md"
               placeholder="9876543210"
               pattern="[0-9]{10}"
-              value={userPhoneNo}
+              value={userMobileNo}
               maxLength={10}
-              onChange={(e) => setUserPhoneNo(e.target.value)}
+              onChange={(e) => setUserMobileNo(e.target.value)}
             />
           </div>
 
