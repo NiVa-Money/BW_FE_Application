@@ -53,8 +53,17 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <Button
             onClick={closeBotHandler}
             variant="outlined"
-            color="primary"
-            className="rounded-full border-[#65558F] text-[#65558F] px-6 py-3 font-medium hover:bg-[#65558F]/10 transition-colors"
+            sx={{
+              borderRadius: "9999px",
+              borderColor: "#65558F",
+              color: "#65558F",
+              px: 3,
+              py: 1.5,
+              fontWeight: "500",
+              "&:hover": {
+                backgroundColor: "#65558F1A", // ~10% opacity
+              },
+            }}
           >
             View Agents
           </Button>
@@ -62,7 +71,17 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <Button
             onClick={onConfirm}
             variant="contained"
-            className="rounded-full bg-[#65558F] text-white px-6 py-3 font-medium hover:bg-[#65558F]/90 transition-colors"
+            sx={{
+              borderRadius: "9999px",
+              backgroundColor: "#65558F",
+              color: "#fff",
+              px: 3,
+              py: 1.5,
+              fontWeight: "500",
+              "&:hover": {
+                backgroundColor: "#56497A", // or `#65558FE6` for ~90% opacity
+              },
+            }}
           >
             Integrate
           </Button>
