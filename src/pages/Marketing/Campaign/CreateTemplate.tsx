@@ -1,6 +1,5 @@
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // import React, { useEffect, useState } from "react";
-// // Import your upload function
 // import { uploadWhatsAppMediaService } from "../../../api/services/whatsappCampaignService";
 // import {
 //   fetchAllTextToImagesService,
@@ -17,7 +16,6 @@
 
 // interface CreateTemplateModalProps {
 //   onClose: () => void;
-//   // Updated onDone payload structure:
 //   onDone: (data: {
 //     name: string;
 //     header?: {
@@ -38,7 +36,6 @@
 //     };
 //     buttons: TemplateButton[];
 //   }) => void;
-//   // secretToken is needed to call the media upload service
 //   secretToken: string;
 // }
 
@@ -47,26 +44,17 @@
 //   onDone,
 //   secretToken,
 // }) => {
+//   // Field states
 //   const [name, setName] = useState("");
-
-//   // Header states
 //   const [headerType, setHeaderType] = useState("none");
 //   const [headerText, setHeaderText] = useState("");
 //   const [fileHandle, setFileHandle] = useState<string>("");
-
-//   // Body state
 //   const [bodyText, setBodyText] = useState("");
 //   const [variables, setVariables] = useState<{ id: number; example: string }[]>(
 //     []
 //   );
-
-//   // Footer state
 //   const [footerText, setFooterText] = useState("");
-
-//   // Buttons state
 //   const [buttons, setButtons] = useState<TemplateButton[]>([]);
-
-//   //new
 //   const [mediaSource, setMediaSource] = useState<"upload" | "existing">(
 //     "upload"
 //   );
@@ -74,15 +62,18 @@
 //     { id: string; url: string; name: string }[]
 //   >([]);
 //   const [selectedMediaUrl, setSelectedMediaUrl] = useState("");
+//   const [mediaUrl, setMediaUrl] = useState<string>("");
+
+//   // Error states (for inline error messages)
+//   const [templateNameError, setTemplateNameError] = useState("");
+//   const [headerError, setHeaderError] = useState("");
+//   const [buttonErrors, setButtonErrors] = useState<{ [key: number]: string }>(
+//     {}
+//   );
 
 //   const addVariable = () => {
-//     // Find the next available number for the variable
 //     const nextId = variables.length + 1;
-
-//     // Add the variable to the body text
 //     setBodyText((prev) => prev + ` {{${nextId}}}`);
-
-//     // Store the variable with an empty example value
 //     setVariables((prev) => [...prev, { id: nextId, example: "" }]);
 //   };
 
@@ -105,7 +96,6 @@
 //         let response: { data: any[] };
 //         if (headerType === "image") {
 //           response = await fetchAllTextToImagesService();
-//           // Process image response with multiple images per entry
 //           const mediaItems = response.data.flatMap((item: any) =>
 //             item.images.map((img: string, index: number) => ({
 //               id: `${item._id}-${index}`,
@@ -116,7 +106,6 @@
 //           setExistingMedias(mediaItems);
 //         } else if (headerType === "video") {
 //           response = await fetchAllTextToVideosService();
-//           // Process video response
 //           const mediaItems = response.data.map((item: any) => ({
 //             id: item._id,
 //             url: item.videoUrl,
@@ -125,7 +114,7 @@
 //           setExistingMedias(mediaItems);
 //         }
 //       } catch {
-//         alert(`Failed to fetch ${headerType}s`);
+//         setHeaderError(`Failed to fetch ${headerType}s`);
 //       }
 //     };
 
@@ -137,18 +126,20 @@
 //   const handleHeaderFileChange = async (
 //     e: React.ChangeEvent<HTMLInputElement>
 //   ) => {
+//     setHeaderError("");
 //     if (!secretToken) {
-//       alert("Missing secret token. Cannot upload file.");
+//       setHeaderError("Missing secret token. Cannot upload file.");
 //       return;
 //     }
 
 //     if (e.target.files && e.target.files[0]) {
 //       const file = e.target.files[0];
-
-//       // Check file size limit (2 MB)
-//       const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+//       setMediaUrl(URL.createObjectURL(file));
+//       const MAX_FILE_SIZE = 2 * 1024 * 1024;
 //       if (file.size > MAX_FILE_SIZE) {
-//         alert("File size exceeds 2 MB limit. Please upload a smaller file.");
+//         setHeaderError(
+//           "File size exceeds 2 MB limit. Please upload a smaller file."
+//         );
 //         return;
 //       }
 
@@ -156,13 +147,10 @@
 //         try {
 //           const formData = new FormData();
 //           formData.append("file", file);
-
-//           // Upload the file
 //           const response = await uploadWhatsAppMediaService({
 //             file: file,
 //             integrationId: secretToken,
 //           });
-
 //           if (response?.fileHandle) {
 //             setFileHandle(response.fileHandle);
 //             console.log("File uploaded, got handle:", response.fileHandle);
@@ -171,27 +159,29 @@
 //           }
 //         } catch (error) {
 //           console.error("Header upload failed:", error);
-//           alert("Failed to upload header media.");
+//           setHeaderError("Failed to upload header media.");
 //         }
 //       }
 //     }
 //   };
 
 //   const handleExistingMediaSelection = async (mediaUrl: string) => {
+//     setSelectedMediaUrl(mediaUrl);
+//     setMediaUrl(mediaUrl);
+//     setHeaderError("");
 //     if (!secretToken) {
-//       alert("Missing secret token. Cannot upload file.");
+//       setHeaderError("Missing secret token. Cannot upload file.");
 //       return;
 //     }
 
-//     // Handle uploading even for existing media
 //     try {
 //       const response = await uploadWhatsAppMediaService({
-//         mediaUrl, // Use the existing URL in the request
+//         mediaUrl,
 //         integrationId: secretToken,
 //       });
-
 //       if (response?.fileHandle) {
 //         setFileHandle(response.fileHandle);
+//         setMediaUrl(URL.createObjectURL(file));
 //         console.log(
 //           "Existing media uploaded, got handle:",
 //           response.fileHandle
@@ -201,7 +191,7 @@
 //       }
 //     } catch (error) {
 //       console.error("Header upload failed:", error);
-//       alert("Failed to upload header media.");
+//       setHeaderError("Failed to upload header media.");
 //     }
 //   };
 
@@ -210,14 +200,14 @@
 //     setMediaSource("upload");
 //     setSelectedMediaUrl("");
 //     setFileHandle("");
+//     setMediaUrl("");
+//     setHeaderError("");
 //   };
 
-//   // Add a new button (defaults to a quick reply button)
 //   const handleAddButton = () => {
 //     setButtons((prev) => [...prev, { type: "quick_reply", text: "" }]);
 //   };
 
-//   // Update a button's fields
 //   const updateButton = (
 //     index: number,
 //     updatedFields: Partial<TemplateButton>
@@ -225,42 +215,73 @@
 //     setButtons((prev) =>
 //       prev.map((btn, i) => (i === index ? { ...btn, ...updatedFields } : btn))
 //     );
+//     // Clear error for this button field on change
+//     setButtonErrors((prev) => ({ ...prev, [index]: "" }));
 //   };
 
-//   // Remove a button
 //   const handleRemoveButton = (index: number) => {
 //     setButtons((prev) => prev.filter((_, i) => i !== index));
+//     // Remove any errors associated with this button
+//     setButtonErrors((prev) => {
+//       const copy = { ...prev };
+//       delete copy[index];
+//       return copy;
+//     });
 //   };
 
 //   const handleDone = () => {
-//     let header: { type: string; content: string } | undefined;
+//     let hasError = false;
+//     // Clear previous errors
+//     setTemplateNameError("");
+//     setButtonErrors({});
 
-//     if (headerType !== "none") {
-//       if (headerType === "text") {
-//         header = { type: "TEXT", content: headerText };
-//       } else {
-//         header = { type: headerType.toUpperCase(), content: fileHandle };
-//       }
+//     // Validate template name
+//     const templateNameRegex = /^[a-z0-9_]+$/;
+//     if (!templateNameRegex.test(name)) {
+//       setTemplateNameError(
+//         "Template name must contain only lowercase letters, numbers, and underscores."
+//       );
+//       hasError = true;
 //     }
 
-//     // Prepare the body payload with the text containing placeholders.
-//     const bodyPayload: any = {
-//       text: bodyText,
-//     };
+//     // Validate call-to-action buttons with phone numbers
+//     const newButtonErrors: { [key: number]: string } = {};
+//     buttons.forEach((btn, i) => {
+//       if (btn.type === "call_to_action" && btn.ctaType === "phone") {
+//         if (!btn.phoneNumber) {
+//           newButtonErrors[i] = "Phone number is required.";
+//           hasError = true;
+//         } else {
+//           const phoneRegex = /^\+\d+$/;
+//           if (!phoneRegex.test(btn.phoneNumber)) {
+//             newButtonErrors[i] =
+//               "Invalid phone number. Include country code (e.g., +123456789).";
+//             hasError = true;
+//           }
+//         }
+//       }
+//     });
+//     setButtonErrors(newButtonErrors);
 
-//     // Use regex to detect all variable placeholders like {{1}}, {{2}}, etc.
+//     if (hasError) return;
+
+//     let header: { type: string; content: string } | undefined;
+//     if (headerType !== "none") {
+//       header =
+//         headerType === "text"
+//           ? { type: "TEXT", content: headerText }
+//           : { type: headerType.toUpperCase(), content: fileHandle };
+//     }
+
+//     const bodyPayload: any = { text: bodyText };
 //     const regex = /\{\{\s*(\d+)\s*\}\}/g;
 //     const matches = Array.from(bodyText.matchAll(regex));
-
 //     if (matches.length > 0) {
-//       // For each placeholder, extract the variable id and get the corresponding example value.
 //       const positionalExamples = matches.map((match) => {
 //         const id = parseInt(match[1]);
 //         const variable = variables.find((v) => v.id === id);
 //         return variable ? variable.example : "";
 //       });
-
-//       // Add parameters only, which includes the extracted example values.
 //       bodyPayload.parameters = {
 //         type: "positional",
 //         example: {
@@ -269,7 +290,6 @@
 //       };
 //     }
 
-//     // If your backend expects button types to be uppercase, map them accordingly.
 //     const formattedButtons = buttons.map((btn) => ({
 //       ...btn,
 //       type: btn.type,
@@ -277,7 +297,10 @@
 
 //     onDone({
 //       name,
-//       header,
+//       header:
+//         headerType === "text"
+//           ? { type: "TEXT", content: headerText }
+//           : { type: headerType.toUpperCase(), content: fileHandle },
 //       body: bodyPayload,
 //       footer: footerText ? { text: footerText } : undefined,
 //       buttons: formattedButtons,
@@ -288,7 +311,6 @@
 //     <div className="fixed inset-0 flex items-center justify-center z-50">
 //       {/* Modal Backdrop */}
 //       <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
-
 //       {/* Modal Container */}
 //       <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 z-10 max-h-[80vh] overflow-y-auto">
 //         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -301,9 +323,6 @@
 //             <label className="block text-gray-700 font-medium mb-1">
 //               Template Name
 //             </label>
-//             <span className="text-zinc-400 ml-2 whitespace-nowrap">
-//               It must contain only lowercase letters, numbers, and underscores
-//             </span>
 //             <input
 //               type="text"
 //               value={name}
@@ -311,6 +330,11 @@
 //               placeholder="Enter your template name"
 //               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
 //             />
+//             {templateNameError && (
+//               <div className="mt-1 text-xs text-red-600">
+//                 {templateNameError}
+//               </div>
+//             )}
 //           </div>
 //         </div>
 
@@ -343,37 +367,8 @@
 //             </div>
 //           )}
 
-//           {/* {["image", "video", "document"].includes(headerType) && (
-//             <div className="mt-2">
-//               <input
-//                 type="file"
-//                 accept={
-//                   headerType === "image"
-//                     ? "image/*"
-//                     : headerType === "video"
-//                     ? "video/*"
-//                     : headerType === "document"
-//                     ? ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-//                     : undefined
-//                 }
-//                 onChange={handleHeaderFileChange}
-//                 className="block w-full text-sm text-gray-700
-//                   file:mr-4 file:py-2 file:px-4
-//                   file:rounded-full file:border-0
-//                   file:text-sm file:font-semibold
-//                   file:bg-purple-50 file:text-purple-700
-//                   hover:file:bg-purple-100"
-//               />
-//               {fileHandle && (
-//                 <p className="mt-2 text-sm text-green-600">
-//                   File uploaded successfully!
-//                 </p>
-//               )}
-//             </div>
-//           )} */}
 //           {["image", "video", "document"].includes(headerType) && (
 //             <div className="mt-2">
-//               {/* Source Selection Radio Buttons */}
 //               <div className="flex gap-4 mb-4">
 //                 <label className="flex items-center gap-2">
 //                   <input
@@ -397,14 +392,20 @@
 //                 )}
 //               </div>
 
-//               {/* Media Input */}
 //               {mediaSource === "upload" ? (
-//                 <input
-//                   type="file"
-//                   accept={headerType === "image" ? "image/*" : "video/*"}
-//                   onChange={handleHeaderFileChange}
-//                   className="..." // Keep existing classes
-//                 />
+//                 <>
+//                   <input
+//                     type="file"
+//                     accept={headerType === "image" ? "image/*" : "video/*"}
+//                     onChange={handleHeaderFileChange}
+//                     className="..."
+//                   />
+//                   {headerError && (
+//                     <div className="mt-1 text-xs text-red-600">
+//                       {headerError}
+//                     </div>
+//                   )}
+//                 </>
 //               ) : (
 //                 <div className="grid grid-cols-3 gap-4">
 //                   {existingMedias.map((media) => (
@@ -412,7 +413,7 @@
 //                       key={media.id}
 //                       onClick={() => {
 //                         setSelectedMediaUrl(media.url);
-//                         handleExistingMediaSelection(media.url); // This triggers the upload for selected media
+//                         handleExistingMediaSelection(media.url);
 //                       }}
 //                       className={`cursor-pointer border-2 rounded-lg p-2 ${
 //                         selectedMediaUrl === media.url
@@ -471,19 +472,6 @@
 //         </div>
 
 //         {/* Body Section */}
-//         {/* <div className="mt-6">
-//           <label className="block text-gray-700 font-medium mb-1">
-//             Body Text
-//           </label>
-//           <textarea
-//             value={bodyText}
-//             onChange={(e) => setBodyText(e.target.value)}
-//             placeholder="Enter the text content"
-//             className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-//           />
-//         </div> */}
-
-//         {/* Body Section */}
 //         <div className="mt-6">
 //           <label className="block text-gray-700 font-medium mb-1">
 //             Body Text
@@ -495,7 +483,6 @@
 //             className="w-full h-32 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
 //           />
 
-//           {/* Add Variable Button */}
 //           <button
 //             onClick={addVariable}
 //             className="mt-2 px-4 py-2 text-sm font-medium text-white bg-[#65558F] rounded-full hover:bg-purple-950"
@@ -503,15 +490,12 @@
 //             + Add Variable
 //           </button>
 
-//           {/* Variables List */}
 //           {variables.length > 0 && (
 //             <div className="mt-4">
 //               <h3 className="text-sm font-semibold text-gray-600">Variables</h3>
 //               {variables.map((variable) => (
 //                 <div key={variable.id} className="flex items-center gap-4 mt-2">
-//                   <span className="text-gray-700 font-medium">
-//                     {`{{${variable.id}}}`}
-//                   </span>
+//                   <span className="text-gray-700 font-medium">{`{{${variable.id}}}`}</span>
 //                   <input
 //                     type="text"
 //                     value={variable.example}
@@ -521,7 +505,6 @@
 //                     placeholder="Example value"
 //                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
 //                   />
-//                   {/* Delete Button */}
 //                   <button
 //                     onClick={() => deleteVariable(variable.id)}
 //                     className="text-red-500 hover:text-red-700"
@@ -653,6 +636,11 @@
 //                         placeholder="Enter phone number (include country code)"
 //                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
 //                       />
+//                       {buttonErrors[idx] && (
+//                         <div className="mt-1 text-xs text-red-600">
+//                           {buttonErrors[idx]}
+//                         </div>
+//                       )}
 //                     </div>
 //                   )}
 //                 </>
@@ -689,6 +677,7 @@
 // };
 
 // export default CreateTemplateModal;
+
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
@@ -747,9 +736,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
   );
   const [footerText, setFooterText] = useState("");
   const [buttons, setButtons] = useState<TemplateButton[]>([]);
-  const [mediaSource, setMediaSource] = useState<"upload" | "existing">(
-    "upload"
-  );
+  const [mediaSource, setMediaSource] = useState<"upload" | "existing">("upload");
   const [existingMedias, setExistingMedias] = useState<
     { id: string; url: string; name: string }[]
   >([]);
@@ -837,6 +824,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
         try {
           const formData = new FormData();
           formData.append("file", file);
+          // API call returns a fileHandle which is expected to be a complete URL.
           const response = await uploadWhatsAppMediaService({
             file: file,
             integrationId: secretToken,
@@ -869,10 +857,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
       });
       if (response?.fileHandle) {
         setFileHandle(response.fileHandle);
-        console.log(
-          "Existing media uploaded, got handle:",
-          response.fileHandle
-        );
+        console.log("Existing media uploaded, got handle:", response.fileHandle);
       } else {
         throw new Error("File handle missing in response");
       }
@@ -1220,10 +1205,7 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
             Buttons (Optional)
           </label>
           {buttons.map((button, idx) => (
-            <div
-              key={idx}
-              className="p-4 mb-2 border border-gray-200 rounded-md"
-            >
+            <div key={idx} className="p-4 mb-2 border border-gray-200 rounded-md">
               <div className="flex justify-between items-center">
                 <p className="font-medium text-gray-600">Button #{idx + 1}</p>
                 <button
