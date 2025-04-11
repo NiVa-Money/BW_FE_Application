@@ -110,7 +110,7 @@ const SessionsList: React.FC<SessionsListProps> = ({
   };
 
   return (
-    <div className="w-96 pl-0 bg-white p-4 border-r overflow-y-scroll">
+    <div className="w-80 pl-0 bg-white p-4 border-r overflow-y-scroll">
       {sessionsData.length === 0 ? (
         <div className="text-center text-gray-500 p-4">No sessions found</div>
       ) : (
@@ -150,7 +150,7 @@ const SessionsList: React.FC<SessionsListProps> = ({
 
               <div className="flex items-center gap-2">
                 {item.unreadCount > 0 && (
-                  <div className="bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  <div className="bg-[#005C4B] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                     {item.unreadCount}
                   </div>
                 )}

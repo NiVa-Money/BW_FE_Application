@@ -40,20 +40,6 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
   }, [integrationId, dispatch]);
 
   const handleTemplateSelect = (template: any) => {
-    // const headerUrl = template.header?.s3Url || "";
-    // const headerType = template.header?.type || "IMAGE";
-
-    // const finalTemplate = {
-    //   name: template.templateName,
-    //   body: template.body?.text || "",
-    //   header: headerUrl,
-    //   headerType: headerType,
-    //   footer: template.footer?.text || "",
-    //   buttons: template.buttons || [],
-    // };
-
-    // onSelectTemplate(finalTemplate);
-
     const mappedTemplate = {
       name: template.templateName,
       body: template.body?.text || "",
@@ -61,12 +47,11 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
       headerType: template.header?.type,
       footer: template.footer?.text || "",
       buttons: template.buttons || [],
-      id: template._id, // Make sure to include the template ID
+      id: template.templateId,
     };
 
     console.log("Mapped template data:", mappedTemplate);
 
-    // Pass the mapped template to parent and close the modal
     onSelectTemplate(mappedTemplate);
     onClose();
   };
@@ -115,7 +100,7 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-xl z-10"
         >
-          &times;
+          ×
         </button>
 
         <h1 className="text-2xl font-bold text-navy-900 mb-6">
@@ -128,9 +113,21 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
               key={template._id}
               className="bg-gradient-to-br from-purple-50 to-white p-6 rounded-lg shadow-sm"
             >
-              <h3 className="font-medium text-center text-lg mb-2">
-                {template.templateName}
-              </h3>
+              {/* Template Name and Status */}
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium text-lg">{template.templateName}</h3>
+                <span
+                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    template.status === "APPROVED"
+                      ? "bg-green-100 text-green-800"
+                      : template.status === "REJECTED"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
+                >
+                  {template.status}
+                </span>
+              </div>
 
               {renderHeaderMedia(template)}
 
