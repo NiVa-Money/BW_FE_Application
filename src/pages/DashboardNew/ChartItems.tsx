@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from "react";
 import {
   Bar,
@@ -16,7 +17,7 @@ import {
   Area,
   ComposedChart,
   Sector,
-  Label
+  Label,
 } from "recharts";
 import CommonTable from "../../components/TableComponent";
 import { COLORS } from "../../constants";
@@ -75,13 +76,14 @@ const renderActiveShape = (props: any) => {
     endAngle,
     fill,
     payload,
-    value, name
+    value,
+    name,
   } = props;
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
-  const sx = cx + (outerRadius) * cos;
+  const sx = cx + outerRadius * cos;
   const sy = cy + (outerRadius + 10) * sin;
-  const mx = cx + (outerRadius) * cos;
+  const mx = cx + outerRadius * cos;
   const my = cy + (outerRadius + 30) * sin;
   const ex = mx + (cos >= 0 ? 1 : -1) * 10;
   const ey = my;
@@ -122,7 +124,6 @@ const renderActiveShape = (props: any) => {
         textAnchor={textAnchor}
         fill="#333"
       >{`${name} ${value}%`}</text>
-
     </g>
   );
 };
@@ -140,8 +141,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
   );
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
     ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map(
-      (header) => header
-    )
+        (header) => header
+      )
     : [];
 
   const chartItems = [
@@ -150,14 +151,17 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       title: "Total Conversation",
       component: (
         <LineChart
-          width={500}
-          height={300}
+          width={400}
+          height={220}
           data={constructedChartsData.totalConversation}
         >
-          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
-            vertical={false} />
+          <CartesianGrid
+            stroke="#d3d3d3"
+            horizontal={true} // Shows horizontal grid lines
+            vertical={false}
+          />
           <XAxis dataKey="date" tickFormatter={formatDateWithOrdinal} />
-          <YAxis domain={[0, 'auto']} />
+          <YAxis domain={[0, "auto"]} />
           <Tooltip />
           <Line
             type="monotone"
@@ -187,12 +191,15 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       title: "Escalation Rate (%)",
       component: (
         <BarChart
-          width={500}
-          height={300}
+          width={400}
+          height={220}
           data={constructedChartsData.escalationMatrix}
         >
-          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
-            vertical={false} />
+          <CartesianGrid
+            stroke="#d3d3d3"
+            horizontal={true} // Shows horizontal grid lines
+            vertical={false}
+          />
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
@@ -206,14 +213,13 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       id: 3,
       title: "Customer Sentiment Analysis",
       component: (
-        <PieChart width={500} height={400}>
+        <PieChart width={400} height={220}>
           <Pie
             data={constructedChartsData.sentiments}
             dataKey="value"
             nameKey="name"
             cx="50%"
             cy="70%"
-
             endAngle={0}
             innerRadius={100}
             outerRadius={130}
@@ -224,7 +230,7 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
             {constructedChartsData.sentiments.map((_, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={['#b4a9fa', COLORS.GRAY, COLORS.BLUE][index % 3]}
+                fill={["#b4a9fa", COLORS.GRAY, COLORS.BLUE][index % 3]}
               />
             ))}
             <Label
@@ -236,30 +242,43 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
                   dy={0} // Adjust vertical alignment
                   textAnchor="middle" // Center the text horizontally
                   style={{
-                    fontSize: '24px',
-                    fontWeight: 'bold',
-                    fill: '#000',
+                    fontSize: "24px",
+                    fontWeight: "bold",
+                    fill: "#000",
                   }}
                 >
                   <tspan x="50%" dy="0">
-                    {((constructedChartsData.sentiments[0]?.value / (constructedChartsData.sentiments[0]?.value + constructedChartsData.sentiments[1]?.value + constructedChartsData.sentiments[2]?.value)) * 100).toFixed(2) + "%"}
+                    {(
+                      (constructedChartsData.sentiments[0]?.value /
+                        (constructedChartsData.sentiments[0]?.value +
+                          constructedChartsData.sentiments[1]?.value +
+                          constructedChartsData.sentiments[2]?.value)) *
+                      100
+                    ).toFixed(2) + "%"}
                   </tspan>
-                  <tspan style={{
-                    fontSize: '20px',
-                    fontWeight: '200',
-                    fill: '#000',
-                  }} x="50%" dy="1.2em"> {/* Move to the next line */}
+                  <tspan
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: "200",
+                      fill: "#000",
+                    }}
+                    x="50%"
+                    dy="1.2em"
+                  >
+                    {" "}
+                    {/* Move to the next line */}
                     Positive
                   </tspan>
                 </text>
               }
             />
-
-
           </Pie>
           <Tooltip />
-          <Legend iconType="square" content={CustomLegend}
-            wrapperStyle={{ paddingBottom: 10 }} />
+          <Legend
+            iconType="square"
+            content={CustomLegend}
+            wrapperStyle={{ paddingBottom: 10 }}
+          />
         </PieChart>
       ),
     },
@@ -267,12 +286,12 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       id: 4,
       title: "Net Promoter Score",
       component: (
-        <PieChart width={500} height={300}>
+        <PieChart width={400} height={220}>
           <Pie
             data={[
-              { name: 'Promoters', value: 62 },
-              { name: 'Detractors', value: 10 },
-              { name: 'Responses', value: 28 },
+              { name: "Promoters", value: 62 },
+              { name: "Detractors", value: 10 },
+              { name: "Responses", value: 28 },
               // Assuming detractors are the remaining percentage
             ]}
             activeIndex={activeIndex}
@@ -281,7 +300,6 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
             nameKey="name"
             cx="50%"
             cy="50%"
-
             innerRadius={60}
             outerRadius={90}
             onMouseEnter={onPieEnter}
@@ -291,13 +309,16 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
             {constructedChartsData.sentiments.map((_, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={['#fcebb0', '#ffacad', '#c4f8df'][index % 3]}
+                fill={["#fcebb0", "#ffacad", "#c4f8df"][index % 3]}
               />
             ))}
           </Pie>
           {/* <Tooltip /> */}
-          <Legend iconType="square" content={CustomLegend}
-            wrapperStyle={{ paddingBottom: 10 }} />
+          <Legend
+            iconType="square"
+            content={CustomLegend}
+            wrapperStyle={{ paddingBottom: 10 }}
+          />
         </PieChart>
       ),
     },
@@ -306,17 +327,30 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       title: "Resolved Chats",
       component: (
         <AreaChart
-          width={500}
-          height={300}
+          width={400}
+          height={220}
           style={{ backgroundColor: COLORS.LIGHTGRAY }}
           data={constructedChartsData.resolvedChats}
         >
           <XAxis dataKey="date" tickFormatter={formatDateWithOrdinal} />
-          <YAxis domain={[0, 'auto']} />
+          <YAxis domain={[0, "auto"]} />
           <Tooltip />
-          <Area type="monotone" dataKey="web" stackId="1" stroke={COLORS.GRAY} fill={COLORS.GRAY} dot={false} />
-          <Area type="monotone" dataKey="whatsapp" stackId="1" stroke="#8884d8" fill={COLORS.BLUE} dot={false} />
-
+          <Area
+            type="monotone"
+            dataKey="web"
+            stackId="1"
+            stroke={COLORS.GRAY}
+            fill={COLORS.GRAY}
+            dot={false}
+          />
+          <Area
+            type="monotone"
+            dataKey="whatsapp"
+            stackId="1"
+            stroke="#8884d8"
+            fill={COLORS.BLUE}
+            dot={false}
+          />
 
           <Legend
             verticalAlign="top"
@@ -356,28 +390,39 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
         //   <Bar dataKey="website" fill={COLORS.GRAY} />
         // </BarChart>
         <ComposedChart
-          width={600}
-          height={300}
+          width={450}
+          height={220}
           data={[
-            { name: '24th', website: 100, WhatsApp: 5, Instagram: 40 },
-            { name: '25th', website: 90, WhatsApp: 25, Instagram: 35 },
-            { name: '26th', website: 80, WhatsApp: 30, Instagram: 30 },
-            { name: '27th', website: 70, WhatsApp: 15, Instagram: 25 },
-            { name: '28th', website: 60, WhatsApp: 40, Instagram: 20 },
-            { name: '29th', website: 50, WhatsApp: 30, Instagram: 15 },
-            { name: '30th', website: 40, WhatsApp: 50, Instagram: 10 },
+            { name: "24th", website: 100, WhatsApp: 5, Instagram: 40 },
+            { name: "25th", website: 90, WhatsApp: 25, Instagram: 35 },
+            { name: "26th", website: 80, WhatsApp: 30, Instagram: 30 },
+            { name: "27th", website: 70, WhatsApp: 15, Instagram: 25 },
+            { name: "28th", website: 60, WhatsApp: 40, Instagram: 20 },
+            { name: "29th", website: 50, WhatsApp: 30, Instagram: 15 },
+            { name: "30th", website: 40, WhatsApp: 50, Instagram: 10 },
           ]}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
-            vertical={false} />
+          <CartesianGrid
+            stroke="#d3d3d3"
+            horizontal={true} // Shows horizontal grid lines
+            vertical={false}
+          />
           <XAxis dataKey="name" scale="band" />
           <YAxis />
           <Tooltip />
-          <Legend iconType="square" content={CustomLegend}
-            wrapperStyle={{ paddingBottom: 10 }} />          <Area type="monotone" dataKey="WhatsApp" fill={COLORS.BLUE} stroke="#8884d8" />
+          <Legend
+            iconType="square"
+            content={CustomLegend}
+            wrapperStyle={{ paddingBottom: 10 }}
+          />{" "}
+          <Area
+            type="monotone"
+            dataKey="WhatsApp"
+            fill={COLORS.BLUE}
+            stroke="#8884d8"
+          />
           <Bar dataKey="website" barSize={20} fill={COLORS.GRAY} />
-
         </ComposedChart>
       ),
     },
@@ -402,13 +447,14 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-5 mb-4">
+      <div className="grid grid-cols-3 gap-3 mb-3">
         {chartItems.map((item) => (
-          <div key={item.id} >
+          <div key={item.id}>
             <ChartContainer
               extraSX={{
-                border: `1px solid ${COLORS.LAVENDERMIST}`, "&:hover": {
-                  backgroundColor: '#e7e0eb', // Replace with your desired hover color
+                border: `1px solid ${COLORS.LAVENDERMIST}`,
+                "&:hover": {
+                  backgroundColor: "#e7e0eb", // Replace with your desired hover color
                 },
               }}
               title={item.title}
@@ -416,7 +462,7 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
             />
           </div>
         ))}
-      </div >
+      </div>
 
       <ChartContainer
         extraSX={{ backgroundColor: COLORS.LIGHTGRAY, textAlign: "center" }}

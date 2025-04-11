@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import {
   Paper,
@@ -32,10 +34,11 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
     <Paper
       className="flex-grow"
       sx={{
-        p: 1.25,
-        borderRadius: 2,
+        p: 1,
+        borderRadius: 1,
         backgroundColor: "#F7F2FA",
         display: "flex",
+        minWidth: '180px',
         flexDirection: "column",
       }}
     >

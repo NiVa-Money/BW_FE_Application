@@ -26,7 +26,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
           </Typography>
         </Box>
       )}
-      <Box sx={{ height: 300 }}>
+      <Box sx={{ height: 220 }}>
         <ResponsiveContainer width="100%" height="100%">
           {component as React.ReactElement}
         </ResponsiveContainer>
@@ -35,7 +35,7 @@ const ChartContainer: React.FC<ChartContainerProps> = ({
   );
 
   const renderMultipleCharts = () => (
-    <Paper sx={{ p: 3, ...extraSX }}>
+    <Paper sx={{ p: 2, ...extraSX }}>
       {Array.isArray(component) &&
         component.map((item) => (
           <Box key={item.id} sx={{ flex: 1 }} className="mb-3">
