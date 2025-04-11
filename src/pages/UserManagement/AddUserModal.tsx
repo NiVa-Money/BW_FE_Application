@@ -7,6 +7,7 @@ interface AddUserModalProps {
   onClose: () => void;
   onSave: (userData: {
     employeeId: string;
+    mobileNo: number;
     modules: number[];
     role: string | null;
   }) => void;
@@ -40,6 +41,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   const handleSave = () => {
     onSave({
       employeeId,
+      mobileNo: userMobileNo,
       modules: selectedModules,
       role,
     });
@@ -82,10 +84,18 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               type="tel"
               className="w-full p-2 bg-gray-100 rounded-md"
               placeholder="9876543210"
-              pattern="[0-9]{10}"
               value={userMobileNo}
               maxLength={10}
-              onChange={(e) => setUserMobileNo(e.target.value)}
+              onKeyDown={(e) => {
+                // Only allow numbers (0-9), backspace, tab, and arrow keys
+                if (!/[0-9]|Backspace|Tab|ArrowLeft|ArrowRight/.test(e.key)) {
+                  e.preventDefault();
+                }
+              }}
+              onChange={(e) => {
+                setUserMobileNo(e.target.value.replace(/\D/g, ""));
+              }}
+              inputMode="numeric"
             />
           </div>
 
