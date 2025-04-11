@@ -828,8 +828,10 @@ const AllChats = () => {
           value={handledByFilter}
           onChange={(e) => setHandledByFilter(e.target.value)}
         >
-          <option value="" disabled hidden>Handled By</option>
-          <option value="All">All</option> 
+          <option value="" disabled hidden>
+            Handled By
+          </option>
+          <option value="All">All</option>
           <option value="AI">AI</option>
           <option value="Human">Human</option>
         </select>
@@ -839,8 +841,10 @@ const AllChats = () => {
           value={favoriteFilter}
           onChange={(e) => setFavoriteFilter(e.target.value)}
         >
-          <option value="" disabled hidden>Favourite/Unfavourite</option>
-          <option value="All">All</option> 
+          <option value="" disabled hidden>
+            Favourite/Unfavourite
+          </option>
+          <option value="All">All</option>
           <option value="Fav">Favourite</option>
           <option value="Unfav">Unfavourite</option>
         </select>
@@ -850,8 +854,10 @@ const AllChats = () => {
           value={blockFilter}
           onChange={(e) => setBlockFilter(e.target.value)}
         >
-          <option value="" disabled hidden>Block Status</option>
-          <option value="All">All</option> 
+          <option value="" disabled hidden>
+            Block Status
+          </option>
+          <option value="All">All</option>
           <option value="Block">Block</option>
           <option value="Unblock">Unblock</option>
         </select>

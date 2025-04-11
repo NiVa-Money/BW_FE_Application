@@ -61,6 +61,7 @@ const WhatsappCampaign: React.FC = () => {
     (state: RootState) => state.whatsappTemplates
   );
   const reduxTemplateId = whatsappTemplates?.templateData?.data?.id;
+  console.log('reduxTemplateId', reduxTemplateId);
 
   useEffect(() => {
     if (reduxTemplateId) {
@@ -123,7 +124,7 @@ const WhatsappCampaign: React.FC = () => {
         const requiredHeaders = ["number", "countrycode"];
         const isValid = requiredHeaders.every((h) => headers.includes(h));
         if (!isValid) {
-          console.log("should have numbers ");
+          console.log("uploaded file headers", headers);
           return;
         }
       };
