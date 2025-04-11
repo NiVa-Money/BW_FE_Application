@@ -750,7 +750,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
     <div className="h-screen flex flex-col">
       {/* Header Section */}
       <div className="px-6 pt-4 flex-none">
-        <h1 className="text-xl font-semibold">Live Chat</h1>
+        <h1 className="text-2xl font-semibold">Live Chat</h1>
         <p className="text-gray-600 text-sm">Guide Your Customers to Success</p>
       </div>
 
