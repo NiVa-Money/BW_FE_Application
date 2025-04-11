@@ -32,12 +32,7 @@ export const uploadWhatsAppContactsService = async (
   try {
     const response = await axiosInstance.post(
       `/whatsapp/upload-contacts/${templateId}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data", // Important for file uploads
-        },
-      }
+      formData
     );
     return response.data; // Returns the response data from the API
   } catch (error) {
