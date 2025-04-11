@@ -61,8 +61,14 @@ import {
 } from "../actionTypes/conversationActionsTypes";
 import { FETCH_SHOPIFY_DASHBOARD_REQUEST } from "../actionTypes/reportActionTypes";
 import { fetchShopifyDashboardSaga } from "./reportSagas";
-import { GET_SUBSCRIPTION_DATA } from "../actionTypes/subscriptionActionTypes";
-import { getSubscriptionSaga } from "./subscriptionSaga";
+import {
+  CREATE_PAYMENT_REQUEST,
+  GET_SUBSCRIPTION_DATA,
+} from "../actionTypes/subscriptionActionTypes";
+import {
+  createSubscriptionSaga,
+  getSubscriptionSaga,
+} from "./subscriptionSaga";
 
 export default function* rootSaga() {
   yield takeEvery(CREATE_BOT, createBotSaga);
@@ -87,4 +93,5 @@ export default function* rootSaga() {
   yield takeEvery(ADVANCE_FEATURE, getAdvanceFeatureSaga);
   yield takeEvery(FETCH_SHOPIFY_DASHBOARD_REQUEST, fetchShopifyDashboardSaga);
   yield takeEvery(GET_SUBSCRIPTION_DATA, getSubscriptionSaga);
+  yield takeEvery(CREATE_PAYMENT_REQUEST, createSubscriptionSaga);
 }
