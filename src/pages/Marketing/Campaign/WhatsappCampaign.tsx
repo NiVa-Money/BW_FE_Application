@@ -205,7 +205,7 @@ const WhatsappCampaign: React.FC = () => {
       integrationId: integrationId,
       startDate: combinedDate.toISOString(),
       endDate: new Date(
-        combinedDate.getTime() + 24 * 60 * 60 * 1000
+        combinedDate.getTime() + 3 * 24 * 60 * 60 * 1000
       ).toISOString(),
       contactsUrl: "",
     };
@@ -436,7 +436,7 @@ const WhatsappCampaign: React.FC = () => {
                 />
               </LocalizationProvider>
               <p className="mt-4 text-zinc-600 text-sm">
-                <b>Note: </b> The campaign will remain active for one day, and
+                <b>Note: </b> The campaign will remain active for three day, and
                 user responses during this period will be captured.
               </p>
             </div>
