@@ -3,6 +3,9 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SchoolIcon from "@mui/icons-material/School";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+
 // import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 interface Category {
@@ -139,8 +142,81 @@ const basicTutorialsCards: TutorialCardProps[] = [
   },
 ];
 
+interface FAQ {
+  question: string;
+  answer: string; // Added answer field
+}
+
+interface FAQSection {
+  title: string;
+  questions: FAQ[];
+}
+
+const dummyAnswer =
+  "Shape your AI workforce to fit your business needs—no coding required. BotWot’s no-code platform lets you easily customize workflows, dialogue, and decision-making processes, empowering you to deliver tailored solutions with minimal effort.";
+
+const faqSections: FAQSection[] = [
+  {
+    title: "General Questions",
+    questions: [
+      { question: "What is Botwot?", answer: dummyAnswer },
+      { question: "Who can benefit from Botwot?", answer: dummyAnswer },
+      {
+        question: "Is there a coding requirement to use Botwot?",
+        answer: dummyAnswer,
+      },
+      { question: "How much does Botwot cost?", answer: dummyAnswer },
+    ],
+  },
+  {
+    title: "Building Your Chatbot",
+    questions: [
+      {
+        question: "What types of chatbots can I build with Botwot?",
+        answer: dummyAnswer,
+      },
+      { question: "What features does Botwot offer?", answer: dummyAnswer },
+      { question: "How do I customize my chatbot?", answer: dummyAnswer },
+      {
+        question: "Can I integrate Botwot with my CRM or helpdesk software?",
+        answer: dummyAnswer,
+      },
+    ],
+  },
+  {
+    title: "Using Your Chatbot",
+    questions: [
+      {
+        question:
+          "How do I train my chatbot to understand my customers' questions?",
+        answer: dummyAnswer,
+      },
+      {
+        question: "How do I track the performance of my chatbot?",
+        answer: dummyAnswer,
+      },
+      {
+        question:
+          "What happens if my chatbot encounters a question it can't answer?",
+        answer: dummyAnswer,
+      },
+    ],
+  },
+  {
+    title: "Security and Privacy",
+    questions: [
+      { question: "Is my data safe with Botwot?", answer: dummyAnswer },
+      {
+        question: "How does Botwot handle customer data privacy?",
+        answer: dummyAnswer,
+      },
+    ],
+  },
+];
+
 const HelpCenter: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>("Tutorials");
+  const [openQuestion, setOpenQuestion] = useState<string | null>(null);
 
   return (
     <div className="p-6 bg-white min-h-screen">
@@ -194,6 +270,48 @@ const HelpCenter: React.FC = () => {
                 </div>
               </div>
             </>
+          ) : activeCategory === "FAQs" ? (
+            <div className="flex flex-col gap-6 mt-4 text-black">
+              {faqSections.map((section, sectionIndex) => (
+                <div key={sectionIndex}>
+                  <h2 className="text-xl font-medium mb-6">{section.title}</h2>
+                  <ul className="pl-4 list-disc space-y-8">
+                    {section.questions.map((faq, questionIndex) => {
+                      const questionKey = `${sectionIndex}-${questionIndex}`;
+                      const isOpen = openQuestion === questionKey;
+
+                      return (
+                        <li
+                          key={questionIndex}
+                          className="text-base text-gray-700"
+                        >
+                          <div className="flex justify-between items-center pr-2">
+                            <span>{faq.question}</span>
+                            <button
+                              onClick={() =>
+                                setOpenQuestion(isOpen ? null : questionKey)
+                              }
+                            >
+                              {isOpen ? (
+                                <RemoveIcon className="text-gray-500 cursor-pointer" />
+                              ) : (
+                                <AddIcon className="text-gray-500 cursor-pointer" />
+                              )}
+                            </button>
+                          </div>
+                          {isOpen && (
+                            <div className="mt-2 ml-4 text-sm text-gray-600">
+                              {/* Replace with actual answer when available */}
+                              {faq.answer}
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="p-6 text-center text-xl text-gray-600">
               {activeCategory} content coming soon.
