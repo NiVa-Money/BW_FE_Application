@@ -271,7 +271,11 @@ const MyBots: React.FC = () => {
                       </span>
                       <br />
                       <span className="text-gray-600">
-                        {bot.docName || "No document"}
+                        {bot.docName
+                          ? bot.docName.length > 15
+                            ? bot.docName.slice(0, 15) + "..."
+                            : bot.docName
+                          : "No document"}
                       </span>
                     </p>
                   </div>
