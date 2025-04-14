@@ -12,7 +12,7 @@ import {
 import { RootState } from "../../store";
 import { formatDateString } from "../../hooks/functions";
 import { useNavigate } from "react-router-dom";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import ConfirmationModal from "../../components/ConfirmationModal";
 import ExportIntegrationModal from "../../components/exportIntegrationModal";
 import { notifyError } from "../../components/Toast";
 import TestBotModal from "../../components/TestBotModal";
@@ -244,10 +244,13 @@ const MyBots: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <DeleteConfirmationModal
+      <ConfirmationModal
+        description="If you delete this bot, it cannot be restored. You will need to create a new one. Please consider this carefully before proceeding."
+        confirmText="Delete"
+        image="/assets/delete_bot.svg"
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onDelete={handleDelete}
+        onConfirm={handleDelete}
       />
       <ExportIntegrationModal
         open={isExportModalOpen}
