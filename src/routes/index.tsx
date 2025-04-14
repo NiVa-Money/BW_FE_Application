@@ -9,7 +9,6 @@ import IntegrationsPage from "../pages/Integration";
 import EngagementTab from "../pages/Engagement";
 import MyBots from "../pages/MyBots/index";
 import EditBot from "../pages/EditBot";
-import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
 import LiveChat from "../pages/Conversation/LiveChat";
 import TestBot from "../pages/TestBot";
 import IntegrationList from "../pages/Integration/WhatsappIntegration/integrationsList";
@@ -30,6 +29,9 @@ import EditMarketingDashboardForm from "../pages/Marketing/Dashboard/EditMarketi
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
 import Subscription from '../pages/Subscription/index';
+import ComingSoon from "../components/ComingSoon";
+import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard';
+import WhatsApp from "../pages/Marketing/Whatsapp";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -42,6 +44,8 @@ export const autRoutes: any[] = [
   },
   { id: 2.1, path: "/conversations/all-chats", component: <AllChats /> },
   { id: 2.2, path: "/conversations/live-chats", component: <LiveChat /> },
+  { id: 2.2, path: "/conversations/live-calls", component: <ComingSoon /> },
+
   { id: 3, path: "/myagents", component: <MyBots /> },
   { id: 3, path: "/createbot", component: <CreateBot /> },
   { id: 3, path: "/editbot/:id", component: <EditBot /> },
@@ -84,6 +88,7 @@ export const autRoutes: any[] = [
     component: <EditWhatsappCampaign />,
   },
   { id: 5.3, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
+  { id: 5.4, path: "/marketing/omnigenStudio", component: <WhatsApp /> },
 
   { id: 6, path: "/voiceagent", component: <VoiceChatComponent /> },
   {

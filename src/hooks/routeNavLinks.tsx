@@ -15,13 +15,14 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import HelpIcon from "@mui/icons-material/Help";
 import SettingsIcon from "@mui/icons-material/Settings";
+import CallIcon from '@mui/icons-material/Call';
 const filterMenuItems = (items: any[], allowedIds: string | any[]) =>
   items?.reduce((acc: any[], item: { subItems: any[]; id: any }) => {
     // If the item has subItems, filter them
     const subItems = item.subItems
       ? item.subItems.filter((subItem: { id: any }) =>
-          allowedIds?.includes(subItem.id)
-        )
+        allowedIds?.includes(subItem.id)
+      )
       : null;
 
     // Include the item if its ID or any subItem's ID is in allowedIds
@@ -54,6 +55,12 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           path: "/conversations/live-chats",
           icon: <WifiTetheringIcon />,
         },
+        {
+          id: 2.2,
+          text: "Live Calls",
+          path: "/conversations/live-calls",
+          icon: <CallIcon />,
+        },
       ],
     },
     { id: 3, text: "Agents", path: "/myagents", icon: <SmartToyIcon /> },
@@ -84,6 +91,12 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           id: 5.3,
           text: "Omnigen Content Studio",
           path: "/marketing/omnigenStudio",
+          icon: <CampaignIcon />,
+        },
+        {
+          id: 5.4,
+          text: "WhatsApp Dashboard",
+          path: "/marketing/whatsappdashboard",
           icon: <CampaignIcon />,
         },
       ],
