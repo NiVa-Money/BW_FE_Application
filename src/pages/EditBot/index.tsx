@@ -202,7 +202,6 @@ const EditBot: React.FC = () => {
     }
   };
 
-
   const deleteGoal = (index: number, formik: any) => {
     const updatedGoals = [...formik.values.agentsGoals];
     updatedGoals.splice(index, 1);
@@ -764,25 +763,7 @@ const EditBot: React.FC = () => {
               </Tooltip>
             </div>
 
-            <div className="space-y-2 mb-4">
-              {formik.values.agentsGoals?.map((goal: string, index: number) => (
-                <div key={index} className="relative">
-                  <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-3 pr-10">
-                    <span className="text-gray-700">{goal}</span>
-                    {formik.values.agentsGoals.length > 1 && (
-                      <button
-                        onClick={() => deleteGoal(index, formik)}
-                        className="absolute right-3 text-gray-400 hover:text-red-500"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={formik.values.newGoalPrompt || ""}
@@ -838,6 +819,23 @@ const EditBot: React.FC = () => {
                   AI Gen
                 </button>
               </div>
+            </div>
+            <div className="space-y-2 mb-4">
+              {formik.values.agentsGoals?.map((goal: string, index: number) => (
+                <div key={index} className="relative">
+                  <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-3 pr-10">
+                    <span className="text-gray-700">{goal}</span>
+                    {formik.values.agentsGoals.length > 1 && (
+                      <button
+                        onClick={() => deleteGoal(index, formik)}
+                        className="absolute right-3 text-gray-400 hover:text-red-500"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
