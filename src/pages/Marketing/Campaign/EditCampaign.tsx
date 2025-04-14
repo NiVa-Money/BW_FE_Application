@@ -76,7 +76,7 @@ const EditWhatsappCampaign: React.FC = () => {
       // For now, this is left as a placeholder
       try {
         setIsLoading(true);
-
+        console.log("Campaign ID: ", campaignId)
         setCampaignName(campaignId);
       } catch (err) {
         console.error("Failed to fetch campaign:", err);
