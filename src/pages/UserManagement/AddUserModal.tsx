@@ -7,6 +7,7 @@ const ROLE_MODULEMAP_MAPPING = {
   [ROLES.SUPERADMIN]: [
     1, 2, 2.1, 2.2, 3, 4, 5, 5.1, 5.2, 5.3, 6, 7, 8, 9, 10, 11, 12,
   ],
+  [ROLES.ADMIN]: [1, 2, 2.1, 2.2, 4, 11],
   [ROLES.AGENT]: [1, 2, 2.1, 2.2, 4, 11],
   [ROLES.MANAGER]: [1, 2, 2.1, 2.2, 4, 5, 5.1, 5.2, 5.3, 8, 9, 10, 11, 12],
 };

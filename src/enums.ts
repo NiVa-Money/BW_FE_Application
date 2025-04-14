@@ -16,7 +16,6 @@ export enum MessageStatusType {
   FAILED = "failed",
 }
 
-
 export enum CountryEnum {
   CU = "CU",
   AF = "AF",
@@ -234,7 +233,8 @@ export enum MODULE_MAPPING {
 }
 
 export enum ROLES {
-  SUPERADMIN = "SUPERADMIN",
-  MANAGER = "MANAGER",
-  AGENT = "AGENT"
+  SUPERADMIN = "Super Admin",
+  ADMIN = "Admin",
+  AGENT = "Agent",
+  MANAGER = "Manager",
 }
