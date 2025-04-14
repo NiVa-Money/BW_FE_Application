@@ -32,6 +32,8 @@ import Subscription from '../pages/Subscription/index';
 import ComingSoon from "../components/ComingSoon";
 import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard';
 import WhatsApp from "../pages/Marketing/Whatsapp";
+import SubscriptionFailure from "../pages/SubscriptionFailure";
+import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -143,7 +145,11 @@ export const autRoutes: any[] = [
 
 export const publicRoutes: any[] = [
   { path: "/login", component: <Login /> },
-  { path: "/Signup", component: <SignUp /> },
+  { path: "/signup", component: <SignUp /> },
+  { path: "/subscription-success", component: <SubscriptionSuccess /> },
+  { path: "/subscription-failure", component: <SubscriptionFailure /> },
+
+
   { path: "/", component: <Login /> },
   { path: "*", component: <Login /> },
 ];
