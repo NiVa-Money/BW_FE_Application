@@ -6,12 +6,12 @@ import {
   Button,
   Card,
   styled,
+  MenuItem,
 } from "@mui/material";
 import {
   fetchCompetitorsService,
   fetchMarketingInsightsService,
 } from "../../../api/services/marketingDashboardService";
-import { useNavigate } from "react-router-dom";
 
 // ---------- STYLED COMPONENTS ----------
 const StyledCard = styled(Card)({
@@ -27,6 +27,203 @@ const HeaderBox = styled(Box)({
   position: "relative",
   padding: "24px",
 });
+
+const countryCodes = {
+  AFGHANISTAN: "AF",
+  ALBANIA: "AL",
+  ALGERIA: "DZ",
+  ANDORRA: "AD",
+  ANGOLA: "AO",
+  ANTIGUA_AND_BARBUDA: "AG",
+  ARGENTINA: "AR",
+  ARMENIA: "AM",
+  AUSTRALIA: "AU",
+  AUSTRIA: "AT",
+  AZERBAIJAN: "AZ",
+  BAHAMAS: "BS",
+  BAHRAIN: "BH",
+  BANGLADESH: "BD",
+  BARBADOS: "BB",
+  BELARUS: "BY",
+  BELGIUM: "BE",
+  BELIZE: "BZ",
+  BENIN: "BJ",
+  BHUTAN: "BT",
+  BOLIVIA: "BO",
+  BOSNIA_AND_HERZEGOVINA: "BA",
+  BOTSWANA: "BW",
+  BRAZIL: "BR",
+  BRUNEI: "BN",
+  BULGARIA: "BG",
+  BURKINA_FASO: "BF",
+  BURUNDI: "BI",
+  CAMBODIA: "KH",
+  CAMEROON: "CM",
+  CANADA: "CA",
+  CAPE_VERDE: "CV",
+  CENTRAL_AFRICAN_REPUBLIC: "CF",
+  CHAD: "TD",
+  CHILE: "CL",
+  CHINA: "CN",
+  COLOMBIA: "CO",
+  COMOROS: "KM",
+  CONGO_DEMOCRATIC_REPUBLIC: "CD",
+  CONGO_REPUBLIC: "CG",
+  COSTA_RICA: "CR",
+  CROATIA: "HR",
+  CUBA: "CU",
+  CYPRUS: "CY",
+  CZECH_REPUBLIC: "CZ",
+  DENMARK: "DK",
+  DJIBOUTI: "DJ",
+  DOMINICA: "DM",
+  DOMINICAN_REPUBLIC: "DO",
+  ECUADOR: "EC",
+  EGYPT: "EG",
+  EL_SALVADOR: "SV",
+  EQUATORIAL_GUINEA: "GQ",
+  ERITREA: "ER",
+  ESTONIA: "EE",
+  ESWATINI: "SZ",
+  ETHIOPIA: "ET",
+  FIJI: "FJ",
+  FINLAND: "FI",
+  FRANCE: "FR",
+  GABON: "GA",
+  GAMBIA: "GM",
+  GEORGIA: "GE",
+  GERMANY: "DE",
+  GHANA: "GH",
+  GREECE: "GR",
+  GRENADA: "GD",
+  GUATEMALA: "GT",
+  GUINEA: "GN",
+  GUINEA_BISSAU: "GW",
+  GUYANA: "GY",
+  HAITI: "HT",
+  HONDURAS: "HN",
+  HUNGARY: "HU",
+  ICELAND: "IS",
+  INDIA: "IN",
+  INDONESIA: "ID",
+  IRAN: "IR",
+  IRAQ: "IQ",
+  IRELAND: "IE",
+  ISRAEL: "IL",
+  ITALY: "IT",
+  JAMAICA: "JM",
+  JAPAN: "JP",
+  JORDAN: "JO",
+  KAZAKHSTAN: "KZ",
+  KENYA: "KE",
+  KIRIBATI: "KI",
+  NORTH_KOREA: "KP",
+  SOUTH_KOREA: "KR",
+  KUWAIT: "KW",
+  KYRGYZSTAN: "KG",
+  LAOS: "LA",
+  LATVIA: "LV",
+  LEBANON: "LB",
+  LESOTHO: "LS",
+  LIBERIA: "LR",
+  LIBYA: "LY",
+  LIECHTENSTEIN: "LI",
+  LITHUANIA: "LT",
+  LUXEMBOURG: "LU",
+  MADAGASCAR: "MG",
+  MALAWI: "MW",
+  MALAYSIA: "MY",
+  MALDIVES: "MV",
+  MALI: "ML",
+  MALTA: "MT",
+  MARSHALL_ISLANDS: "MH",
+  MAURITANIA: "MR",
+  MAURITIUS: "MU",
+  MEXICO: "MX",
+  MICRONESIA: "FM",
+  MOLDOVA: "MD",
+  MONACO: "MC",
+  MONGOLIA: "MN",
+  MONTENEGRO: "ME",
+  MOROCCO: "MA",
+  MOZAMBIQUE: "MZ",
+  MYANMAR: "MM",
+  NAMIBIA: "NA",
+  NAURU: "NR",
+  NEPAL: "NP",
+  NETHERLANDS: "NL",
+  NEW_ZEALAND: "NZ",
+  NICARAGUA: "NI",
+  NIGER: "NE",
+  NIGERIA: "NG",
+  NORTH_MACEDONIA: "MK",
+  NORWAY: "NO",
+  OMAN: "OM",
+  PAKISTAN: "PK",
+  PALAU: "PW",
+  PANAMA: "PA",
+  PAPUA_NEW_GUINEA: "PG",
+  PARAGUAY: "PY",
+  PERU: "PE",
+  PHILIPPINES: "PH",
+  POLAND: "PL",
+  PORTUGAL: "PT",
+  QATAR: "QA",
+  ROMANIA: "RO",
+  RUSSIA: "RU",
+  RWANDA: "RW",
+  SAINT_KITTS_AND_NEVIS: "KN",
+  SAINT_LUCIA: "LC",
+  SAINT_VINCENT_AND_THE_GRENADINES: "VC",
+  SAMOA: "WS",
+  SAN_MARINO: "SM",
+  SAO_TOME_AND_PRINCIPE: "ST",
+  SAUDI_ARABIA: "SA",
+  SENEGAL: "SN",
+  SERBIA: "RS",
+  SEYCHELLES: "SC",
+  SIERRA_LEONE: "SL",
+  SINGAPORE: "SG",
+  SLOVAKIA: "SK",
+  SLOVENIA: "SI",
+  SOLOMON_ISLANDS: "SB",
+  SOMALIA: "SO",
+  SOUTH_AFRICA: "ZA",
+  SOUTH_SUDAN: "SS",
+  SPAIN: "ES",
+  SRI_LANKA: "LK",
+  SUDAN: "SD",
+  SURINAME: "SR",
+  SWEDEN: "SE",
+  SWITZERLAND: "CH",
+  SYRIA: "SY",
+  TAIWAN: "TW",
+  TAJIKISTAN: "TJ",
+  TANZANIA: "TZ",
+  THAILAND: "TH",
+  TIMOR_LESTE: "TL",
+  TOGO: "TG",
+  TONGA: "TO",
+  TRINIDAD_AND_TOBAGO: "TT",
+  TUNISIA: "TN",
+  TURKEY: "TR",
+  TURKMENISTAN: "TM",
+  TUVALU: "TV",
+  UGANDA: "UG",
+  UKRAINE: "UA",
+  UNITED_ARAB_EMIRATES: "AE",
+  UNITED_KINGDOM: "GB",
+  UNITED_STATES: "US",
+  URUGUAY: "UY",
+  UZBEKISTAN: "UZ",
+  VANUATU: "VU",
+  VATICAN_CITY: "VA",
+  VENEZUELA: "VE",
+  VIETNAM: "VN",
+  YEMEN: "YE",
+  ZAMBIA: "ZM",
+  ZIMBABWE: "ZW",
+};
 
 // ---------- MAIN COMPONENT ----------
 const MarketingDashboardForm = () => {
@@ -46,7 +243,7 @@ const MarketingDashboardForm = () => {
       },
     },
     country: "",
-    nextUpdateInHours: "", // will be converted to a number when sending payload
+    nextUpdateInHours: "",
   });
 
   // COMPETITORS STATE: an array of objects
@@ -78,7 +275,6 @@ const MarketingDashboardForm = () => {
   };
 
   // ---------- COMPETITOR FIELD HANDLER ----------
-  // We pass an index so we can update the correct competitor in the array.
   const handleCompetitorChange = (index, fieldPath, value) => {
     setCompetitorsData((prev) => {
       const newCompetitors = [...prev];
@@ -91,113 +287,131 @@ const MarketingDashboardForm = () => {
     });
   };
 
-  const navigate = useNavigate();
-  // ---------- STEP HANDLER ----------
-  const handleNextStep = async () => {
+  // ---------- ADD COMPETITOR HANDLER ----------
+  const addCompetitor = () => {
+    setCompetitorsData((prev) => [
+      ...prev,
+      {
+        name: "",
+        description: "",
+        industry: "",
+        socialLinks: {
+          instagram: "",
+          twitter: "",
+          linkedin: "",
+        },
+      },
+    ]);
+  };
+
+  // ---------- DELETE COMPETITOR HANDLER ----------
+  const deleteCompetitor = (index) => {
+    setCompetitorsData((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // ---------- HANDLER FOR AI GENERATED COMPETITORS ----------
+  const handleAIGenCompetitors = async () => {
+    setIsLoading(true);
     setError(null);
-
-    if (step === 1) {
-      // STEP 1: Fetch competitor data from the API
-      setIsLoading(true);
-      try {
-        const payload = {
-          company: {
-            name: companyData.company.name,
-            description: companyData.company.description,
-            industry: companyData.company.industry,
-            socialLinks: {
-              instagram: companyData.company.socialLinks.instagram,
-              twitter: companyData.company.socialLinks.twitter,
-              linkedin: companyData.company.socialLinks.linkedin,
-            },
-          },
-          country: companyData.country,
-        };
-
-        const response = await fetchCompetitorsService(payload);
-        console.log("API response for competitors:", response);
-
-        // The array of competitors is located at: response.competitors.competitors
-        const fetchedCompetitors = response?.competitors?.competitors || [];
-
-        // Convert them into the shape you want in the UI
-        const mappedCompetitors = fetchedCompetitors.map((c) => ({
-          name: c.name || "",
-          description: c.description || "",
-          industry: c.industry || "",
+    try {
+      const payload = {
+        company: {
+          name: companyData.company.name,
+          description: companyData.company.description,
+          industry: companyData.company.industry,
           socialLinks: {
-            instagram: c.socialLinks?.instagram || "",
-            twitter: c.socialLinks?.twitter || "",
-            linkedin: c.socialLinks?.linkedin || "",
+            instagram: companyData.company.socialLinks.instagram,
+            twitter: companyData.company.socialLinks.twitter,
+            linkedin: companyData.company.socialLinks.linkedin,
           },
-        }));
+        },
+        country: companyData.country,
+      };
 
-        // Store them in state
-        setCompetitorsData(mappedCompetitors);
-        setStep(2);
-      } catch (err) {
-        setError("Failed to fetch competitor data");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
+      const response = await fetchCompetitorsService(payload);
+      console.log("API response for competitors:", response);
+
+      const fetchedCompetitors = response?.competitors?.competitors || [];
+      const mappedCompetitors = fetchedCompetitors.map((c) => ({
+        name: c.name || "",
+        description: c.description || "",
+        industry: c.industry || "",
+        socialLinks: {
+          instagram: c.socialLinks?.instagram || "",
+          twitter: c.socialLinks?.twitter || "",
+          linkedin: c.socialLinks?.linkedin || "",
+        },
+      }));
+
+      setCompetitorsData(mappedCompetitors);
+    } catch (err) {
+      setError("Failed to generate competitor data");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ---------- STEP HANDLER ----------
+  const handleNextStep = () => {
+    // Step 1 "Next" simply advances to Step 2
+    if (step === 1) {
+      setStep(2);
     } else if (step === 2) {
-      // STEP 2: Send the data to fetch Marketing Insights
-      setIsLoading(true);
-      try {
-        const payload = {
-          company: {
-            name: companyData.company.name,
-            description: companyData.company.description,
-            industry: companyData.company.industry,
-            socialLinks: {
-              instagram: companyData.company.socialLinks.instagram,
-              twitter: companyData.company.socialLinks.twitter,
-              linkedin: companyData.company.socialLinks.linkedin,
-            },
+      // STEP 2: Submit the data to fetch Marketing Insights
+      submitMarketingInsights();
+    }
+  };
+
+  const submitMarketingInsights = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const payload = {
+        company: {
+          name: companyData.company.name,
+          description: companyData.company.description,
+          industry: companyData.company.industry,
+          socialLinks: {
+            instagram: companyData.company.socialLinks.instagram,
+            twitter: companyData.company.socialLinks.twitter,
+            linkedin: companyData.company.socialLinks.linkedin,
           },
-          country: companyData.country,
-          // Only the first 5 competitors
-          competitors: competitorsData.slice(0, 5).map((comp) => ({
-            name: comp.name,
-            description: comp.description,
-            industry: comp.industry,
-            socialLinks: {
-              instagram: comp.socialLinks.instagram,
-              twitter: comp.socialLinks.twitter,
-              linkedin: comp.socialLinks.linkedin,
-            },
-          })),
-          nextUpdateInHours: Number(companyData.nextUpdateInHours),
-          // Single news/trends for the entire payload
-          newsKeywords: newsKeywords,
-          trendsKeywords: trendsKeywords
-            .split(",")
-            .map((k) => k.trim())
-            .filter((k) => k), // remove empty strings
-        };
+        },
+        country: companyData.country,
+        competitors: competitorsData.slice(0, 5).map((comp) => ({
+          name: comp.name,
+          description: comp.description,
+          industry: comp.industry,
+          socialLinks: {
+            instagram: comp.socialLinks.instagram,
+            twitter: comp.socialLinks.twitter,
+            linkedin: comp.socialLinks.linkedin,
+          },
+        })),
+        nextUpdateInHours: Number(companyData.nextUpdateInHours),
+        newsKeywords: newsKeywords,
+        trendsKeywords: trendsKeywords
+          .split(",")
+          .map((k) => k.trim())
+          .filter((k) => k),
+      };
 
-        const response = await fetchMarketingInsightsService(payload);
-        console.log("Insights response:", response);
-
-        navigate("/marketing/dashboard");
-      } catch (err) {
-        const serverError =
-          err?.response?.data?.error || err?.response?.data?.message || "";
-
-        // If it includes "E11000", we know it's the duplicate key error.
-        if (serverError.includes("E11000 duplicate key error")) {
-          // This means the user already has data, so go to the dashboard.
-          navigate("/marketing/dashboard");
-          return;
-        }
-
-        setError("Failed to fetch marketing insights");
-        navigate("/marketing/dashboard");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+      const response = await fetchMarketingInsightsService(payload);
+      console.log("Insights response:", response);
+      window.location.href = "/marketing/dashboard";
+    } catch (err) {
+      const serverError =
+        err?.response?.data?.error || err?.response?.data?.message || "";
+      if (serverError.includes("E11000 duplicate key error")) {
+        window.location.href = "/marketing/dashboard";
+        return;
       }
+      setError("Failed to fetch marketing insights");
+      window.location.href = "/marketing/dashboard";
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -306,13 +520,20 @@ const MarketingDashboardForm = () => {
                 }}
               >
                 <TextField
+                  select
                   fullWidth
                   label="Location of the company"
                   value={companyData.country}
                   onChange={(e) =>
                     handleCompanyChange("country", e.target.value)
                   }
-                />
+                >
+                  {Object.entries(countryCodes).map(([countryName, code]) => (
+                    <MenuItem key={code} value={code}>
+                      {countryName} ({code})
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <TextField
                   fullWidth
                   label="Next Updates Need In (Hours)"
@@ -344,13 +565,62 @@ const MarketingDashboardForm = () => {
               </Typography>
             </Box>
 
-            {/* Show only the first 5 competitors */}
+            {/* AI Gen & Add Competitor Buttons */}
+            <Box
+              sx={{
+                p: 3,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Button
+                variant="outlined"
+                onClick={handleAIGenCompetitors}
+                disabled={isLoading}
+                sx={{
+                  textTransform: "none",
+                  color: "#6a11cb",
+                  borderColor: "#6a11cb",
+                }}
+              >
+                Generate Via AI
+              </Button>
+              <Button
+                onClick={addCompetitor}
+                variant="contained"
+                sx={{
+                  bgcolor: "#65558F",
+                  color: "white",
+                  borderRadius: "8px",
+                  textTransform: "none",
+                }}
+              >
+                Add Competitor
+              </Button>
+            </Box>
+
+            {/* Competitor List */}
             {competitorsData.slice(0, 5).map((comp, index) => (
               <Box sx={{ p: 3, borderBottom: "1px solid #ccc" }} key={index}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  Competitor {index + 1}
-                </Typography>
-
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="h6">Competitor {index + 1}</Typography>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => deleteCompetitor(index)}
+                  >
+                    Delete
+                  </Button>
+                </Box>
                 <TextField
                   fullWidth
                   label="Name of the Competitor Company"
@@ -378,7 +648,6 @@ const MarketingDashboardForm = () => {
                   }
                   sx={{ mb: 2 }}
                 />
-
                 <Box
                   sx={{
                     display: "grid",
@@ -435,7 +704,7 @@ const MarketingDashboardForm = () => {
               </Box>
             ))}
 
-            {/* Single fields for News & Trends (not iterated) */}
+            {/* Single fields for News & Trends */}
             <Box sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Marketing Keywords

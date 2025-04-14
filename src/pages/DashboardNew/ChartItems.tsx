@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -14,10 +14,14 @@ import {
   Cell,
   AreaChart,
   Area,
+  ComposedChart,
+  Sector,
+  Label
 } from "recharts";
 import CommonTable from "../../components/TableComponent";
 import { COLORS } from "../../constants";
 import ChartContainer from "./ChartContainer";
+import { formatDateWithOrdinal } from "../../hooks/functions";
 
 interface ChartItemsProps {
   constructedChartsData: {
@@ -59,12 +63,81 @@ const CustomLegend = (props) => {
     </div>
   );
 };
+const renderActiveShape = (props: any) => {
+  const RADIAN = Math.PI / 180;
+  const {
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+    value, name
+  } = props;
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  const sx = cx + (outerRadius) * cos;
+  const sy = cy + (outerRadius + 10) * sin;
+  const mx = cx + (outerRadius) * cos;
+  const my = cy + (outerRadius + 30) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 10;
+  const ey = my;
+  const textAnchor = cos >= 0 ? "start" : "end";
+
+  return (
+    <g>
+      <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>
+        {payload.name}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={outerRadius + 4}
+        outerRadius={outerRadius + 6}
+        fill={fill}
+      />
+      <path
+        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
+        stroke={fill}
+        fill="none"
+      />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        y={ey}
+        textAnchor={textAnchor}
+        fill="#333"
+      >{`${name} ${value}%`}</text>
+
+    </g>
+  );
+};
 
 const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
   // const firstTableHeaders = constructedChartsData.chatTrafficOverview[0]
   //   ? Object.keys(constructedChartsData.chatTrafficOverview[0])
   //   : [];
-
+  const [activeIndex, setActiveIndex] = useState(0);
+  const onPieEnter = useCallback(
+    (_, index) => {
+      setActiveIndex(index);
+    },
+    [setActiveIndex]
+  );
   const aiAgentPerformanceHeaders = constructedChartsData.aiAgentPerformance[0]
     ? Object.keys(constructedChartsData.aiAgentPerformance[0]).map(
       (header) => header
@@ -81,20 +154,24 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           height={300}
           data={constructedChartsData.totalConversation}
         >
-          <XAxis dataKey="date" />
-          <YAxis />
+          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
+            vertical={false} />
+          <XAxis dataKey="date" tickFormatter={formatDateWithOrdinal} />
+          <YAxis domain={[0, 'auto']} />
           <Tooltip />
           <Line
-            type="linear"
+            type="monotone"
             dataKey="web"
             strokeWidth={2}
             stroke={COLORS.GRAY}
+            dot={false}
           />
           <Line
-            type="linear"
+            type="monotone"
             dataKey="whatsapp"
             strokeWidth={2}
             stroke={COLORS.BLUE}
+            dot={false}
           />
           <Legend
             verticalAlign="top"
@@ -114,7 +191,8 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           height={300}
           data={constructedChartsData.escalationMatrix}
         >
-          <CartesianGrid strokeDasharray="5 5" />
+          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
+            vertical={false} />
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
@@ -128,16 +206,17 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       id: 3,
       title: "Customer Sentiment Analysis",
       component: (
-        <PieChart width={500} height={300}>
+        <PieChart width={500} height={400}>
           <Pie
             data={constructedChartsData.sentiments}
             dataKey="value"
             nameKey="name"
             cx="50%"
-            cy="50%"
+            cy="70%"
+
             endAngle={0}
             innerRadius={100}
-            outerRadius={120}
+            outerRadius={130}
             startAngle={180}
             labelLine={false}
             fill="#8884d8"
@@ -148,6 +227,35 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
                 fill={['#b4a9fa', COLORS.GRAY, COLORS.BLUE][index % 3]}
               />
             ))}
+            <Label
+              position="center"
+              content={
+                <text
+                  x="50%"
+                  y="50%"
+                  dy={0} // Adjust vertical alignment
+                  textAnchor="middle" // Center the text horizontally
+                  style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    fill: '#000',
+                  }}
+                >
+                  <tspan x="50%" dy="0">
+                    {((constructedChartsData.sentiments[0]?.value / (constructedChartsData.sentiments[0]?.value + constructedChartsData.sentiments[1]?.value + constructedChartsData.sentiments[2]?.value)) * 100).toFixed(2) + "%"}
+                  </tspan>
+                  <tspan style={{
+                    fontSize: '20px',
+                    fontWeight: '200',
+                    fill: '#000',
+                  }} x="50%" dy="1.2em"> {/* Move to the next line */}
+                    Positive
+                  </tspan>
+                </text>
+              }
+            />
+
+
           </Pie>
           <Tooltip />
           <Legend iconType="square" content={CustomLegend}
@@ -161,26 +269,33 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       component: (
         <PieChart width={500} height={300}>
           <Pie
-            data={constructedChartsData.sentiments}
+            data={[
+              { name: 'Promoters', value: 62 },
+              { name: 'Detractors', value: 10 },
+              { name: 'Responses', value: 28 },
+              // Assuming detractors are the remaining percentage
+            ]}
+            activeIndex={activeIndex}
+            activeShape={renderActiveShape}
             dataKey="value"
             nameKey="name"
             cx="50%"
             cy="50%"
 
-            innerRadius={100}
-            outerRadius={120}
-
+            innerRadius={60}
+            outerRadius={90}
+            onMouseEnter={onPieEnter}
             labelLine={false}
             fill="#8884d8"
           >
             {constructedChartsData.sentiments.map((_, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={['#b4a9fa', COLORS.GRAY, COLORS.BLUE][index % 3]}
+                fill={['#fcebb0', '#ffacad', '#c4f8df'][index % 3]}
               />
             ))}
           </Pie>
-          <Tooltip />
+          {/* <Tooltip /> */}
           <Legend iconType="square" content={CustomLegend}
             wrapperStyle={{ paddingBottom: 10 }} />
         </PieChart>
@@ -196,24 +311,13 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
           style={{ backgroundColor: COLORS.LIGHTGRAY }}
           data={constructedChartsData.resolvedChats}
         >
-          <XAxis dataKey="date" />
-          <YAxis />
+          <XAxis dataKey="date" tickFormatter={formatDateWithOrdinal} />
+          <YAxis domain={[0, 'auto']} />
           <Tooltip />
-          <Area type="monotone" dataKey="web" stackId="1" stroke="#8884d8" fill={COLORS.GRAY} />
-          <Area type="monotone" dataKey="whatsapp" stackId="1" stroke="#8884d8" fill={COLORS.BLUE} />
+          <Area type="monotone" dataKey="web" stackId="1" stroke={COLORS.GRAY} fill={COLORS.GRAY} dot={false} />
+          <Area type="monotone" dataKey="whatsapp" stackId="1" stroke="#8884d8" fill={COLORS.BLUE} dot={false} />
 
-          {/* <Line
-            type="monotone"
-            dataKey="web"
-            strokeWidth={2}
-            stroke={COLORS.GRAY}
-          />
-          <Line
-            type="monotone"
-            dataKey="whatsapp"
-            strokeWidth={2}
-            stroke={COLORS.BLUE}
-          /> */}
+
           <Legend
             verticalAlign="top"
             iconType="rect"
@@ -237,24 +341,47 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
       id: 6,
       title: "Average Handling Time (secs)",
       component: (
-        <BarChart
-          width={500}
+        // <BarChart
+        //   width={500}
+        //   height={300}
+        //   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        //   data={constructedChartsData.averageHandlingTime}
+        // >
+        //   <CartesianGrid strokeDasharray="3 3" />
+        //   <XAxis dataKey="name" />
+        //   <YAxis />
+        //   <Tooltip />
+        //   <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: 10 }} />
+        //   <Bar dataKey="whatsapp" fill={COLORS.BLUE} />
+        //   <Bar dataKey="website" fill={COLORS.GRAY} />
+        // </BarChart>
+        <ComposedChart
+          width={600}
           height={300}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-          data={constructedChartsData.averageHandlingTime}
+          data={[
+            { name: '24th', website: 100, WhatsApp: 5, Instagram: 40 },
+            { name: '25th', website: 90, WhatsApp: 25, Instagram: 35 },
+            { name: '26th', website: 80, WhatsApp: 30, Instagram: 30 },
+            { name: '27th', website: 70, WhatsApp: 15, Instagram: 25 },
+            { name: '28th', website: 60, WhatsApp: 40, Instagram: 20 },
+            { name: '29th', website: 50, WhatsApp: 30, Instagram: 15 },
+            { name: '30th', website: 40, WhatsApp: 50, Instagram: 10 },
+          ]}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <CartesianGrid stroke="#d3d3d3" horizontal={true}  // Shows horizontal grid lines
+            vertical={false} />
+          <XAxis dataKey="name" scale="band" />
           <YAxis />
           <Tooltip />
-          <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: 10 }} />
-          <Bar dataKey="whatsapp" fill={COLORS.BLUE} />
-          <Bar dataKey="website" fill={COLORS.GRAY} />
-        </BarChart>
+          <Legend iconType="square" content={CustomLegend}
+            wrapperStyle={{ paddingBottom: 10 }} />          <Area type="monotone" dataKey="WhatsApp" fill={COLORS.BLUE} stroke="#8884d8" />
+          <Bar dataKey="website" barSize={20} fill={COLORS.GRAY} />
+
+        </ComposedChart>
       ),
     },
   ];
-
   const performanceBar = [
     {
       id: 1,
@@ -279,7 +406,11 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
         {chartItems.map((item) => (
           <div key={item.id} >
             <ChartContainer
-              extraSX={{ border: `1px solid ${COLORS.LAVENDERMIST}`, backgroundColor: item.id == 5 ? '#e7e0eb' : '' }}
+              extraSX={{
+                border: `1px solid ${COLORS.LAVENDERMIST}`, "&:hover": {
+                  backgroundColor: '#e7e0eb', // Replace with your desired hover color
+                },
+              }}
               title={item.title}
               component={item.component}
             />

@@ -21,6 +21,19 @@ export const fetchMarketingInsightsService = async (payload) => {
   }
 };
 
+export const updateMarketingInsightsService = async (id, payload) => {
+  try {
+    const response = await axiosInstance.put(
+      `/marketing/insights/${id}`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating marketing insights:", error);
+    throw error;
+  }
+};
+
 export const fetchCompetitorsService = async (company) => {
   try {
     const response = await axiosInstance.post(

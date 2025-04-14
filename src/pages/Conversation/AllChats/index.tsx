@@ -14,8 +14,8 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import SessionsList from "./SessionsList";
 import WebsiteSectionData from "./websiteSectionData";
 import WhatsappSectionData from "./whatsappSectionData";
-import { notifyError } from "../../../components/Toast";
-// import ReactMarkdown from "react-markdown";
+import { notifyError, notifySuccess } from "../../../components/Toast";
+import StarIcon from "@mui/icons-material/Star";
 import SendIcon from "@mui/icons-material/Send";
 import {
   XAxis,
@@ -28,11 +28,16 @@ import {
   Line,
 } from "recharts";
 import {
+  blockWhatsAppUserService,
   enableWhatsAppManualModeService,
   getWhatsAppChatsService,
   sendWhatsAppManualReplyService,
+  unblockWhatsAppUserService,
+  addToWhatsAppFavoritesService,
+  removeFromWhatsAppFavoritesService,
 } from "../../../api/services/conversationServices";
-import { Switch } from "@mui/material";
+import { Menu, MenuItem, IconButton, Button } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 interface AnalysisSection {
   title: string;
@@ -52,8 +57,8 @@ const AllChats = () => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
-  const [aiLevel, setAiLevel] = useState(true);
-  const [humanLevel, setHumanLevel] = useState(true);
+  const [aiLevel] = useState(true);
+  const [humanLevel] = useState(true);
 
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
@@ -67,7 +72,7 @@ const AllChats = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-  const [channelNameVal, setChannelNameVal] = useState("website");
+  const [channelNameVal, setChannelNameVal] = useState("");
   const [botIdVal, setBotIdVal] = useState("");
   const botsDataLoader = useSelector(
     (state: RootState) => state.bot?.lists?.loader
@@ -77,6 +82,20 @@ const AllChats = () => {
   const [userMessage, setUserMessage] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [intentVal, setIntentVal] = useState("");
+
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [showBlockInput, setShowBlockInput] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false); // New state for favorite status
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For menu
+
+  const [filterBlocked] = useState(false);
+  const [filterFavorites] = useState(false);
+
+  const [handledByFilter, setHandledByFilter] = useState("");
+  const [favoriteFilter, setFavoriteFilter] = useState("");
+  const [blockFilter, setBlockFilter] = useState("");
 
   // New search handler function
   const handleSearch = async () => {
@@ -182,6 +201,27 @@ const AllChats = () => {
       humanLevel,
       channelName: channelNameVal,
       intentVal,
+      // blockedUsers: filterBlocked ? true : undefined,
+      // favoriteUsers: filterFavorites ? true : undefined,
+
+      manualModeUsers:
+        handledByFilter === "AI"
+          ? false
+          : handledByFilter === "Human"
+          ? true
+          : undefined,
+      favoriteUsers:
+        favoriteFilter === "Fav"
+          ? true
+          : favoriteFilter === "Unfav"
+          ? false
+          : undefined,
+      blockedUsers:
+        blockFilter === "Block"
+          ? true
+          : blockFilter === "Unblock"
+          ? false
+          : undefined,
     };
 
     if (userPhoneId) {
@@ -204,7 +244,17 @@ const AllChats = () => {
 
   useEffect(() => {
     getChatHistory({});
-  }, [page, aiLevel, humanLevel, isSearchActive, searchType, searchValue]);
+  }, [
+    page,
+    aiLevel,
+    humanLevel,
+    isSearchActive,
+    searchType,
+    searchValue,
+    handledByFilter,
+    favoriteFilter,
+    blockFilter,
+  ]);
 
   const [sessionId, setSessionId] = useState("");
   const allSessions = useSelector(
@@ -292,6 +342,8 @@ const AllChats = () => {
       )
     );
     setSessionId(selectedSessionId);
+    setIsBlocked(selectedSession?.isBlocked || false); // Update block status
+    setIsFavorite(selectedSession?.isFavorite || false); // Update favorite status
   };
 
   useEffect(() => {
@@ -319,11 +371,11 @@ const AllChats = () => {
               userPhoneNumberId: selectedSession.userPhoneId,
               aiLevel,
               humanLevel,
-
               ...(isSearchActive &&
                 searchType === "order" && { orderName: searchValue }),
               ...(isSearchActive &&
                 searchType === "phone" && { phoneNumber: searchValue }),
+              skipLoader: true,
             });
 
             if (chatsResponse?.success && isMounted) {
@@ -351,78 +403,14 @@ const AllChats = () => {
     channelNameVal,
     botIdVal,
     sessionsDataRedux?.sessions,
-    isSearchActive, // now used to disable polling during search
+    isSearchActive,
     searchType,
     searchValue,
     aiLevel,
     humanLevel,
+    filterBlocked,
+    filterFavorites,
   ]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (!botIdVal) return; // Don't poll if botId is missing
-
-  //     const data: any = {
-  //       botId: botIdVal,
-  //       page: 1,
-  //       channelName: channelNameVal,
-  //     };
-
-  //     // Apply search filter if active
-  //     console.log("?>>>>>>>>>", isSearchActive);
-  //     if (isSearchActive && searchValue.trim()) {
-  //       if (searchType === "order") {
-  //         data.orderName = searchValue.trim();
-  //       } else {
-  //         data.phoneNumber = searchValue.trim();
-  //       }
-  //     }
-  //     console.log("Polling with data:", data);
-  //     try {
-  //       const response = await dispatch(getAllSession(data));
-  //       console.log("Polling response received:", response);
-
-  //       if (response?.payload?.success) {
-  //         const newSessions = response.payload.data.sessions;
-  //         console.log("New sessions received:", newSessions.length);
-
-  //         if (isSearchActive) {
-  //           console.log("if search is active", isSearchActive);
-  //           if (newSessions.length > 0) {
-  //             // If search results exist, keep them
-  //             setSearchResults(newSessions);
-  //           } else {
-  //             // If no data found, reset search state
-  //             setIsSearchActive(true);
-  //             setSearchValue(""); // Clear the search box
-  //             setSearchResults(newSessions); // Show latest sessions
-  //           }
-  //         } else {
-  //           // Normal polling update when no search is active
-  //           setSearchResults(newSessions);
-  //         }
-
-  //         // Preserve the selected session if still valid
-  //         if (sessionId && newSessions.some((s: any) => s._id === sessionId)) {
-  //           return; // Keep current session if still available
-  //         } else if (newSessions.length > 0) {
-  //           // Auto-select first available session
-  //           const firstSessionId =
-  //             channelNameVal === "whatsapp"
-  //               ? newSessions[0].userPhoneId
-  //               : newSessions[0]._id;
-  //           setSessionId(firstSessionId);
-  //           handleSessionSelection(firstSessionId, newSessions);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Polling error:", error);
-  //     }
-  //   };
-
-  //   const interval = setInterval(fetchData, 5000); // Adjust polling interval as needed
-  //   return () => clearInterval(interval);
-  // }, [botIdVal, channelNameVal, isSearchActive, searchValue, sessionId]);
 
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
     if (!selectedSessionId) {
@@ -460,6 +448,128 @@ const AllChats = () => {
       notifyError("Failed to toggle manual mode");
     } finally {
       setIsEnablingManualMode(false);
+    }
+  };
+
+  const getCurrentSession = () => {
+    // If there's no sessions array yet, return null
+    if (!sessionsDataRedux?.sessions) {
+      return null;
+    }
+    return sessionsDataRedux.sessions.find(
+      (obj: any) => obj._id === sessionId || obj.userPhoneId === sessionId
+    );
+  };
+
+  // Handle Block Contact
+  const handleBlockContact = async () => {
+    if (!blockReason.trim()) {
+      setErrorMessage("Please provide a reason for blocking.");
+      return;
+    }
+
+    const selectedSession = getCurrentSession();
+    if (!selectedSession) {
+      setErrorMessage("No session selected.");
+      return;
+    }
+
+    try {
+      const response = await blockWhatsAppUserService({
+        adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+        userPhoneId: selectedSession.userPhoneId,
+        reason: blockReason,
+      });
+
+      // Check for actual success message from BE
+      if (response?.message === "User blocked successfully") {
+        // Immediate UI update
+        setIsBlocked(true);
+        setShowBlockInput(false);
+        setBlockReason("");
+        notifySuccess("Contact blocked successfully!");
+        setErrorMessage(null); // Clear any existing errors
+      } else {
+        // Handle API business logic errors
+        setErrorMessage(response?.message || "Failed to block contact.");
+      }
+    } catch (err) {
+      // Handle network/HTTP errors
+      console.error("Block failed:", err);
+      setErrorMessage("Failed to block contact. Please try again.");
+    }
+  };
+
+  // Handle Unblock Contact
+  const handleUnblockContact = async () => {
+    const selectedSession = getCurrentSession();
+    if (!selectedSession) {
+      setErrorMessage("No session selected.");
+      return;
+    }
+
+    try {
+      const response = await unblockWhatsAppUserService({
+        adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+        userPhoneId: selectedSession.userPhoneId,
+      });
+
+      // Check for expected success indicator
+      if (response?.message?.includes("unblocked")) {
+        // Adjust based on your actual success message
+        setIsBlocked(false);
+        notifySuccess("Contact unblocked successfully!");
+        setErrorMessage(null);
+      } else {
+        setErrorMessage(response?.message || "Failed to unblock contact.");
+      }
+    } catch (err) {
+      console.error("Unblock failed:", err);
+      setErrorMessage("Failed to unblock contact. Please try again.");
+    }
+  };
+
+  // Handle Favorite/Unfavorite
+  const handleToggleFavorite = async () => {
+    const selectedSession = getCurrentSession();
+    if (!selectedSession) {
+      setErrorMessage("No session selected.");
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        const response = await removeFromWhatsAppFavoritesService({
+          adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+          userPhoneNumber: selectedSession.userPhoneId,
+        });
+        if (
+          response?.message === "Profile removed from favorites successfully"
+        ) {
+          await getChatHistory({});
+          setIsFavorite(false);
+          notifySuccess("User removed from favorites!");
+        } else {
+          setErrorMessage(
+            response?.message || "Failed to remove from favorites."
+          );
+        }
+      } else {
+        const response = await addToWhatsAppFavoritesService({
+          adminPhoneNumberId: selectedSession.adminPhoneNumberId,
+          userPhoneNumber: selectedSession.userPhoneId,
+        });
+        if (response?.message === "Profile added to favorites successfully") {
+          await getChatHistory({});
+          setIsFavorite(true);
+          notifySuccess("User added to favorites!");
+        } else {
+          setErrorMessage(response?.message || "Failed to add to favorites.");
+        }
+      }
+    } catch (err) {
+      console.error("Favorite toggle failed:", err);
+      setErrorMessage("Failed to toggle favorite status. Please try again.");
     }
   };
 
@@ -516,20 +626,6 @@ const AllChats = () => {
     setBotIdVal(botId);
     setSessionId("");
     setMessages([]);
-    // setIsSearchActive(false);
-    // setSearchValue("");
-
-    if (botId) {
-      dispatch(
-        getAllSession({
-          botId,
-          page: 1,
-          channelName: channelNameVal,
-          aiLevel,
-          humanLevel,
-        })
-      );
-    }
   };
 
   const getChannelNameHandler = (e: any) => {
@@ -634,7 +730,7 @@ const AllChats = () => {
   return (
     <div className="flex flex-col min-h-screen p-6">
       <div className="flex justify-between items-center h-[45px]">
-        <h1 className="text-xl font-semibold">All Chats</h1>
+        <h1 className="text-2xl font-semibold mb-1">All Chats</h1>
         {messages?.length ? (
           <button
             className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
@@ -650,7 +746,7 @@ const AllChats = () => {
         <select
           value={searchType}
           onChange={(e) => setSearchType(e.target.value as "order" | "phone")}
-          className="p-2 border border-gray-300 rounded"
+          className="p-2 border border-gray-300 rounded-xl w-[250px]"
         >
           <option value="order">Search by Order Name</option>
           <option value="phone">Search by Phone Number</option>
@@ -661,10 +757,10 @@ const AllChats = () => {
             placeholder="Enter Order ID"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            className="p-2 border border-gray-300 rounded flex-1 max-w-xs"
+            className="p-2 border border-gray-300 rounded-xl flex-1 max-w-xs"
           />
         ) : (
-          <div className="flex items-center flex-1 max-w-xs">
+          <div className="flex items-center flex-1 rounded-xl max-w-xs">
             <span className="mr-2">+91</span>
             <input
               type="text"
@@ -674,22 +770,40 @@ const AllChats = () => {
               onChange={(e) =>
                 setSearchValue(e.target.value.replace(/[^0-9]/g, ""))
               }
-              className="p-2 border border-gray-300 rounded flex-1"
+              className="p-2 border border-gray-300 rounded-xl flex-1"
             />
           </div>
         )}
-        <button
+        {/* <button
           onClick={handleSearch}
-          className="bg-blue-500 text-white p-2 rounded"
+            className="rounded-full bg-[#65558F] text-white px-6 py-3 font-medium hover:bg-[#65558F]/90 transition-colors"
         >
           Search
-        </button>
+        </button> */}
+
+        <Button
+          onClick={handleSearch}
+          variant="contained"
+          sx={{
+            borderRadius: "12px",
+            backgroundColor: "#65558F",
+            color: "#fff",
+            px: 3,
+            py: 1,
+            fontWeight: "500",
+            "&:hover": {
+              backgroundColor: "#56497A", // or `#65558FE6` for ~90% opacity
+            },
+          }}
+        >
+          Search
+        </Button>
       </div>
 
       {/* Bot and Channel Selection */}
       <div className="flex gap-2">
         <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
           onChange={(e) => getBotSession(e)}
           value={botIdVal}
         >
@@ -702,7 +816,7 @@ const AllChats = () => {
         </select>
 
         <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
           onChange={(e) => getChannelNameHandler(e)}
           value={channelNameVal}
         >
@@ -715,7 +829,7 @@ const AllChats = () => {
         </select>
 
         <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
           value={intentVal}
           onChange={(e) => handleIntentChange(e.target.value)}
         >
@@ -727,22 +841,44 @@ const AllChats = () => {
           <option value="Other">Other</option>
         </select>
 
-        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
-          <span className="text-gray-800 font-medium">AI Chats</span>
-          <Switch
-            checked={Boolean(aiLevel)}
-            onChange={(e) => setAiLevel(e.target.checked)}
-            color="primary"
-          />
-        </div>
-        <div className="flex items-center justify-between p-4 rounded-lg mb-2">
-          <span className="text-gray-800 font-medium">Human Chats</span>
-          <Switch
-            checked={Boolean(humanLevel)}
-            onChange={(e) => setHumanLevel(e.target.checked)}
-            color="primary"
-          />
-        </div>
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          value={handledByFilter}
+          onChange={(e) => setHandledByFilter(e.target.value)}
+        >
+          <option value="" disabled hidden>
+            Handled By
+          </option>
+          <option value="All">All</option>
+          <option value="AI">AI</option>
+          <option value="Human">Human</option>
+        </select>
+
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          value={favoriteFilter}
+          onChange={(e) => setFavoriteFilter(e.target.value)}
+        >
+          <option value="" disabled hidden>
+            Favourite/Unfavourite
+          </option>
+          <option value="All">All</option>
+          <option value="Fav">Favourite</option>
+          <option value="Unfav">Unfavourite</option>
+        </select>
+
+        <select
+          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+          value={blockFilter}
+          onChange={(e) => setBlockFilter(e.target.value)}
+        >
+          <option value="" disabled hidden>
+            Block Status
+          </option>
+          <option value="All">All</option>
+          <option value="Block">Block</option>
+          <option value="Unblock">Unblock</option>
+        </select>
       </div>
 
       {/* Main Container */}
@@ -759,12 +895,73 @@ const AllChats = () => {
           searchType={searchType}
           searchValue={isSearchActive ? searchValue : ""}
           isSearchActive={isSearchActive}
-          sessionsData={
-            isSearchActive ? searchResults : sessionsDataRedux?.sessions || []
-          }
+          // sessionsData={
+          //   isSearchActive ? searchResults : sessionsDataRedux?.sessions || []
+          // }
+          sessionsData={(isSearchActive
+            ? searchResults
+            : sessionsDataRedux?.sessions || []
+          ).filter((session) => {
+            const showBlocked = filterBlocked ? session.isBlocked : true;
+            const showFavorite = filterFavorites ? session.isFavorite : true;
+            return showBlocked && showFavorite;
+          })}
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Chat Header */}
+          {sessionId && channelNameVal === "whatsapp" && (
+            <div className="p-4 border-b flex justify-between items-center bg-gray-300">
+              <div className="flex items-center">
+                <h2 className="text-lg font-semibold">
+                  {getCurrentSession()?.userName || "Unknown User"}
+                </h2>
+                {isFavorite && (
+                  <span>
+                    <StarIcon className="ml-2 text-yellow-500" />
+                  </span>
+                )}
+              </div>
+              <div>
+                <IconButton
+                  onClick={(event) => setAnchorEl(event.currentTarget)}
+                  aria-label="more"
+                  aria-controls="chat-menu"
+                  aria-haspopup="true"
+                >
+                  <MoreVertIcon />
+                </IconButton>
+                <Menu
+                  id="chat-menu"
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={() => setAnchorEl(null)}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleToggleFavorite();
+                      setAnchorEl(null);
+                    }}
+                  >
+                    {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      if (isBlocked) {
+                        handleUnblockContact();
+                      } else {
+                        setShowBlockInput(true);
+                      }
+                      setAnchorEl(null);
+                    }}
+                  >
+                    {isBlocked ? "Unblock Contact" : "Block Contact"}
+                  </MenuItem>
+                </Menu>
+              </div>
+            </div>
+          )}
+
           <div className="flex-1 p-4 overflow-y-auto">
             {channelNameVal === "whatsapp" && sessionId ? (
               <WhatsappSectionData messages={messages} />
@@ -773,6 +970,53 @@ const AllChats = () => {
             ) : null}
           </div>
 
+          {/* Block / Unblock and Chat Input Section */}
+          {/* Add Error Popup Component */}
+          {errorMessage && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg max-w-md w-full">
+                <h3 className="text-xl font-bold text-red-600 mb-4">Error</h3>
+                <p className="text-gray-700">{errorMessage}</p>
+                <button
+                  onClick={() => setErrorMessage(null)}
+                  className="mt-4 bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Block/Unblock Section */}
+          <div className="p-4 border-t flex flex-col gap-2">
+            {/* Block Reason Input */}
+            {showBlockInput && !isBlocked && (
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter reason for blocking..."
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleBlockContact}
+                  className="bg-red-500 hover:bg-red-600 w-[200px] text-white px-4 py-2 rounded-full transition-colors"
+                >
+                  Confirm Block
+                </button>
+              </div>
+            )}
+
+            {/* Blocked Message */}
+            {isBlocked && (
+              <div className="text-sm text-gray-500 italic">
+                This contact is blocked. You cannot send messages.
+              </div>
+            )}
+          </div>
+
+          {/* Human Toggle */}
           <div className="flex items-end justify-end space-x-2 mb-4">
             <label className="inline-flex items-center mr-4 cursor-pointer">
               <input
@@ -851,26 +1095,6 @@ const AllChats = () => {
 
                 {section.expanded && (
                   <div className="mt-2 px-2">
-                    {/* {isSentiment && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          {typeof section.description === "object"
-                            ? JSON.stringify(section.description, null, 2)
-                            : section.description}
-                        </p>
-                        <ResponsiveContainer width="105%" height={300}>
-                          <BarChart data={sentimentData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="value" fill="#8884d8" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    )} */}
-
                     {isSentiment && (
                       <div className="mt-4 p-2 rounded-lg">
                         <h4 className="text-blue-600 font-semibold mb-4 text-center">
@@ -1001,7 +1225,7 @@ const AllChats = () => {
                       <div className="bg-red-50 border border-red-200 shadow-sm p-4 rounded-lg w-full max-w-md">
                         {/* Title */}
                         <h4 className="text-red-700 font-semibold text-center mb-4">
-                          System Weak Points Analysis
+                          Vulnerability Analysis
                         </h4>
 
                         {/* Existing Vulnerability List */}

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { formatDateString } from "../../../hooks/functions";
+import { markWhatsAppMessageAsRead } from "../../../api/services/conversationServices";
 
 interface SessionsListProps {
   onSessionSelect: (sessionId: string) => void;
@@ -44,12 +45,9 @@ const SessionsList: React.FC<SessionsListProps> = ({
 
   useEffect(() => {
     if (sessionsDataRedux?.success) {
-      // Start with all sessions from Redux
       let filteredSessions = sessionsDataRedux.sessions || [];
 
-      // Apply filters only if both aren't true or both aren't false
       if (aiLevel !== humanLevel) {
-        // Filter by AI or Human based on which one is true
         filteredSessions = filteredSessions.filter(
           (session: any) =>
             (aiLevel && session.handledBy === "AI") ||
@@ -57,7 +55,6 @@ const SessionsList: React.FC<SessionsListProps> = ({
         );
       }
 
-      // Apply search filters only when search is active
       if (isSearchActive && searchValue) {
         if (searchType === "order" && searchValue) {
           filteredSessions = filteredSessions.filter(
@@ -84,8 +81,36 @@ const SessionsList: React.FC<SessionsListProps> = ({
     isSearchActive,
   ]);
 
+  const handleSessionClick = async (item: any) => {
+    const sessionIdentifier =
+      channelNameVal === "whatsapp" ? item.userPhoneId : item._id;
+
+    onSessionSelect(sessionIdentifier);
+
+    if (channelNameVal === "whatsapp" && item.unreadCount > 0) {
+      try {
+        await markWhatsAppMessageAsRead(
+          item.userPhoneId,
+          item.adminPhoneNumberId
+        );
+
+        // Update local state to remove unread count
+        setSessionsData((prevSessions) =>
+          prevSessions.map((session) =>
+            session.userPhoneId === item.userPhoneId &&
+            session.adminPhoneNumberId === item.adminPhoneNumberId
+              ? { ...session, unreadCount: 0 }
+              : session
+          )
+        );
+      } catch (error) {
+        console.error("Error marking messages as read:", error);
+      }
+    }
+  };
+
   return (
-    <div className="w-64 pl-0 bg-white p-4 border-r overflow-y-scroll">
+    <div className="w-80 pl-0 bg-white p-4 border-r overflow-y-scroll">
       {sessionsData.length === 0 ? (
         <div className="text-center text-gray-500 p-4">No sessions found</div>
       ) : (
@@ -93,7 +118,7 @@ const SessionsList: React.FC<SessionsListProps> = ({
           {sessionsData.map((item, index) => (
             <div
               key={item._id || item.userPhoneId}
-              className="flex justify-between items-center p-[8px] rounded-[10px] cursor-pointer"
+              className="relative flex justify-between items-center p-[8px] rounded-[10px] cursor-pointer hover:bg-gray-100"
               style={{
                 backgroundColor: (
                   channelNameVal === "whatsapp"
@@ -103,31 +128,38 @@ const SessionsList: React.FC<SessionsListProps> = ({
                   ? "#413d4852"
                   : "#EADDFF29",
               }}
-              onClick={() =>
-                onSessionSelect(
-                  channelNameVal === "whatsapp" ? item.userPhoneId : item._id
-                )
-              }
+              onClick={() => handleSessionClick(item)}
             >
               <div className="flex flex-col">
                 {channelNameVal === "whatsapp" ? (
                   <>
-                    <span>{item.userName || "Unknown User"}</span>
-                    <span>{item.userPhoneId || "No Phone ID"}</span>
+                    <span className="font-medium">
+                      {item.userName || "Unknown User"}
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      {item.userPhoneId || "No Phone ID"}
+                    </span>
                   </>
                 ) : (
                   <span>Session {index + 1}</span>
                 )}
-                <span>
+                <span className="text-xs text-gray-500">
                   {item?.createdAt ? formatDateString(item.createdAt) : ""}
                 </span>
               </div>
-              <div>
+
+              <div className="flex items-center gap-2">
+                {item.unreadCount > 0 && (
+                  <div className="bg-[#005C4B] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                    {item.unreadCount}
+                  </div>
+                )}
                 <img
                   width={30}
                   height={30}
                   src={channelNameImages[channelNameVal]}
                   alt={channelNameVal}
+                  className="ml-2"
                 />
               </div>
             </div>
@@ -139,14 +171,14 @@ const SessionsList: React.FC<SessionsListProps> = ({
         <div className="flex justify-between mt-4">
           <button
             disabled={page === 1}
-            onClick={() => setPage && setPage(page - 1)}
+            onClick={() => setPage && setPage(page! - 1)}
             className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
           >
             Previous
           </button>
           <span className="mt-2">Page: {page}</span>
           <button
-            onClick={() => setPage && setPage(page + 1)}
+            onClick={() => setPage && setPage(page! + 1)}
             className="px-4 py-2 bg-gray-300 rounded"
           >
             Next

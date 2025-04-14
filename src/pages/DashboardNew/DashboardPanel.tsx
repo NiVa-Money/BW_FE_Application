@@ -122,6 +122,9 @@ const DashboardPanel = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
+  const botsDataLoader = useSelector(
+    (state: RootState) => state.bot?.lists?.loader
+  );
 
   // Fetch dashboard data
   const fetchData = async (
@@ -132,16 +135,14 @@ const DashboardPanel = () => {
     })(),
     endDate: Date | null | string = new Date()
   ) => {
-    if (!botId) return;
     try {
       setIsLoading(true);
       const formattedStartDate = startDate instanceof Date ? startDate.toISOString() : startDate;
       const formattedEndDate = endDate instanceof Date ? endDate.toISOString() : endDate;
-      console.log(typeof startDate)
       const response: DashboardResponse = await dashBoardDataService({
         startDate: formatDateString(formattedStartDate, true),
         endDate: formatDateString(formattedEndDate, true),
-        botIds: [botId],
+        botIds: [botId?.length ? botId : botsDataRedux[0]._id],
       });
       if (response?.success) {
         setStats(response);
@@ -207,15 +208,7 @@ const DashboardPanel = () => {
       escalationMatrix: stats.data.escalationRate,
       chatTrafficOverview: stats.data.chatTrafficOverview,
     };
-  }, [stats]);
-
-  // Handle date range change
-  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
-    setDateRange({ startDate, endDate });
-    if (!isTodayRef.current) {
-      fetchData(startDate, endDate);
-    }
-  };
+  }, [stats, botsDataLoader]);
 
   // Handle bot selection
   const handleBotSelection = (selectedBotId: string) => {
@@ -243,6 +236,17 @@ const DashboardPanel = () => {
       setBotName(botsDataRedux[0].botName);
     }
   }, [botsDataRedux]);
+
+  // Handle date range change
+  const handleDateRangeChange = (startDate: Date, endDate: Date) => {
+    setDateRange({ startDate, endDate });
+    if (!isTodayRef.current) {
+      fetchData(startDate, endDate);
+    }
+  };
+  // useEffect(() => {
+  //   botId?.length && handleDateRangeChange(dateRange.startDate, dateRange.endDate);
+  // }, [botId])
 
   // Fetch bots data
   useEffect(() => {
