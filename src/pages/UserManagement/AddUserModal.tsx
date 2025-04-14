@@ -13,6 +13,7 @@ const ROLE_MODULEMAP_MAPPING = {
 };
 
 interface AddUserModalProps {
+  editingUser: boolean;
   isOpen: boolean;
   onClose: () => void;
   onSave: (userData: {
@@ -24,6 +25,7 @@ interface AddUserModalProps {
 }
 
 const AddUserModal: React.FC<AddUserModalProps> = ({
+  editingUser,
   isOpen,
   onClose,
   onSave,
@@ -79,7 +81,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             alt="user management"
           />
           <h2 className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-semibold text-gray-800">
-            Add User
+            {editingUser ? "Edit" : "Add"} User
           </h2>
         </div>
         <div className="px-6 py-3 max-h-[30rem] overflow-y-auto">

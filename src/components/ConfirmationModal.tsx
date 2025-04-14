@@ -97,6 +97,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             sx={{
               "&.MuiButtonBase-root": {
                 backgroundColor: COLORS.VIOLET,
+                color: COLORS.WHITE,
                 borderRadius: 5,
               },
             }}

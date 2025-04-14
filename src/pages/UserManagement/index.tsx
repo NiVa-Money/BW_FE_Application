@@ -10,6 +10,7 @@ import {
 import { RootState } from "../../store";
 import { COLORS } from "../../constants";
 import StackedAvatars from "../../components/StackedAvatars";
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 type User = {
   firstName: string;
@@ -19,6 +20,7 @@ type User = {
   status: "active" | "inactive" | "registered";
   roleName: string;
   module_mapS: number[];
+  _id: string;
 };
 
 interface StatItem {
@@ -31,18 +33,17 @@ interface UserHeaderProps {
   users: User[];
 }
 
-  // Color options for avatars
-  const colors = [
-    "bg-blue-500",
-    "bg-red-500",
-    "bg-green-500",
-    "bg-yellow-500",
-    "bg-purple-500",
-    "bg-pink-500",
-    "bg-indigo-500",
-    "bg-teal-500",
-    "bg-orange-500",
-  ];
+const colors = [
+  "bg-blue-500",
+  "bg-red-500",
+  "bg-green-500",
+  "bg-yellow-500",
+  "bg-purple-500",
+  "bg-pink-500",
+  "bg-indigo-500",
+  "bg-teal-500",
+  "bg-orange-500",
+];
 
 const StatCard = ({ label, value, component }) => (
   <div
@@ -136,7 +137,7 @@ const UserCard = ({ user, onEdit, onDelete }) => (
 
       <button
         className=" text-red-600"
-        onClick={() => onDelete(user)}
+        onClick={() => onDelete(user._id)}
         aria-label={`Delete ${user.firstName}`}
       >
         <DeleteIcon />
@@ -150,14 +151,14 @@ const UserManagement = () => {
   const usersListRedux = useSelector(
     (state: RootState) => state.users?.lists?.data
   );
-  // Initial user data moved outside component to prevent recreation on render
 
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [deleteReason, setDeleteReason] = useState("");
 
-
-  // Event handlers as callbacks to prevent recreation on render
   const handleAddUser = useCallback(() => {
     setEditingUser(null);
     setIsModalOpen(true);
@@ -168,10 +169,20 @@ const UserManagement = () => {
     setIsModalOpen(true);
   }, []);
 
-  const handleDeleteUser = (userToDelete) => {
-    console.log("userToDelete", userToDelete);
-    dispatch(deleteUserAction({ id: userToDelete, obj: { reason: "" } }));
-  };
+  const handleDeleteClick = useCallback((userId) => {
+    setUserToDelete(userId);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (userToDelete) {
+      dispatch(
+        deleteUserAction({ id: userToDelete, obj: { reason: deleteReason } })
+      );
+    }
+    setIsDeleteModalOpen(false);
+    setDeleteReason("");
+  }, [userToDelete, deleteReason]);
 
   const handleSaveUser = useCallback(
     (userData) => {
@@ -198,11 +209,13 @@ const UserManagement = () => {
     setIsModalOpen(false);
     setEditingUser(null);
   }, []);
+
   useEffect(() => {
     if (usersListRedux !== null || undefined) {
       setUsers(usersListRedux);
     }
   }, [usersListRedux]);
+
   useEffect(() => {
     dispatch(getUsersAction());
   }, []);
@@ -236,18 +249,32 @@ const UserManagement = () => {
       <section className="space-y-4">
         {users?.map((user) => (
           <UserCard
-            key={user.emailId }
+            key={user._id}
             user={user}
             onEdit={handleEditUser}
-            onDelete={() => handleDeleteUser(user._id)}
+            onDelete={handleDeleteClick}
           />
         ))}
       </section>
+
+      <ConfirmationModal
+        open={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDeleteReason("");
+        }}
+        onConfirm={handleConfirmDelete}
+        confirmText="Delete"
+        showReason
+        reason={deleteReason}
+        onReasonChange={setDeleteReason}
+      />
 
       <AddUserModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveUser}
+        editingUser={editingUser}
       />
     </div>
   );
