@@ -232,7 +232,7 @@ const MyBots: React.FC = () => {
                       <img
                         src={bot.botURL}
                         alt="Bot Avatar"
-                        className="w-30 h-30 object-cover rounded-md mx-auto"
+                        className="w-32 h-32 object-cover rounded-md mx-auto"
                       />
                     </div>
                   )}
@@ -282,38 +282,6 @@ const MyBots: React.FC = () => {
                 {/* Button Row - Fixed alignment */}
                 <div className="px-6 pb-6">
                   <div className="grid grid-cols-2 gap-2">
-                    {/* <button
-                      className="bg-indigo-500 text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-indigo-600 transition-colors"
-                      onClick={() => handleEdit(bot._id)}
-                    >
-                      <EditIcon fontSize="small" /> Edit
-                    </button>
-
-                    <button
-                      className="bg-[#7398D9] text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-[#7398D9]/80 transition-colors"
-                      onClick={() => handleTest(bot._id)}
-                    >
-                      <PlayArrowIcon fontSize="small" /> Test
-                    </button> */}
-
-                    {/* <button
-                      className="bg-green-500 text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-green-600 transition-colors"
-                      onClick={() => handleExport(bot._id)}
-                    >
-                      <FileExportIcon fontSize="small" /> Export
-                    </button> */}
-
-                    {/* <button
-                      className="bg-[#7398D9] text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-[#7398D9]/80 transition-colors"
-                      onClick={() => handleTest(bot._id)}
-                    >
-                      <PlayArrowIcon fontSize="small" /> Test
-                    </button> */}
-
                     <Button
                       onClick={() => handleTest(bot._id)}
                       variant="outlined"
@@ -332,14 +300,6 @@ const MyBots: React.FC = () => {
                     >
                       Test
                     </Button>
-
-                    {/* <button
-                      className="bg-green-500 text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-green-600 transition-colors"
-                      onClick={() => handleExport(bot._id)}
-                    >
-                      <FileExportIcon fontSize="small" /> Export
-                    </button> */}
 
                     <Button
                       onClick={() => handleExport(bot._id)}
@@ -360,14 +320,6 @@ const MyBots: React.FC = () => {
                       <FileExportIcon fontSize="small" />
                       <span style={{ marginLeft: "8px" }}> Export </span>
                     </Button>
-
-                    {/* <button
-                      className="bg-red-500 text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-red-600 transition-colors"
-                      onClick={() => handleOpen(bot._id)}
-                    >
-                      <DeleteIcon fontSize="small" /> Delete
-                    </button> */}
                   </div>
                 </div>
               </div>

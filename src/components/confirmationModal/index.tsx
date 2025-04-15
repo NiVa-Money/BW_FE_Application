@@ -69,7 +69,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           </Button>
 
           <Button
-            onClick={onConfirm}
+            onClick={() => {
+              onConfirm();
+              navigate("/integrations");
+            }}
             variant="contained"
             sx={{
               borderRadius: "9999px",
