@@ -90,15 +90,33 @@ const LiveChat: React.FC = (): React.ReactElement => {
     });
 
     newSocket.on("messageToClient", (data: any) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          ...data,
-          timestamp: new Date().toISOString(),
-          sender: data.senderType === "AGENT" ? "agent" : "customer",
-          text: data.question || data.response,
-        },
-      ]);
+      console.log("Message received:", data);
+
+      if (data.senderType === "AGENT" && data.question) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            ...data,
+            timestamp: new Date().toISOString(),
+            sender: "agent",
+            text: data.question,
+            type: "bot-message",
+          },
+        ]);
+      }
+
+      if (data.response) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            ...data,
+            timestamp: new Date().toISOString(),
+            sender: data.senderType === "AGENT" ? "agent" : "customer",
+            text: data.response,
+            type: data.senderType === "AGENT" ? "bot-message" : "user-message",
+          },
+        ]);
+      }
     });
 
     newSocket.on("sessionClosed", handleSessionEnd);
