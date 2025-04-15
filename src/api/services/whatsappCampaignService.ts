@@ -180,7 +180,7 @@ export const editWhatsAppCampaignService = async (
 ) => {
   try {
     const response = await axiosInstance.patch(
-      `/whatsapp/campaign/${campaignId}`,
+      `/whatsapp/campaign/${campaignId}`, ///whatsapp/${campaignId}`
       campaignData
     );
     return response.data;
