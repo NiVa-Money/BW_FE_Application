@@ -10,7 +10,7 @@ import {
   resetBotAction,
 } from "../../store/actions/botActions";
 import { RootState } from "../../store";
-import { formatDateString } from "../../hooks/functions";
+// import { formatDateString } from "../../hooks/functions";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import ExportIntegrationModal from "../../components/exportIntegrationModal";
@@ -21,7 +21,12 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileExportIcon from "@mui/icons-material/FileUpload";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+// import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { Button } from "@mui/material";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import IconButton from "@mui/material/IconButton";
 
 const MyBots: React.FC = () => {
   const dispatch = useDispatch();
@@ -47,6 +52,27 @@ const MyBots: React.FC = () => {
   const [isTestOpen, setIsTestOpen] = useState(false);
 
   const [payloadDelete, setPayloadDelete] = useState({});
+
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedBotId, setSelectedBotId] = useState<string | null>(null);
+
+  const menuOpen = Boolean(menuAnchorEl);
+
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    botId: string
+  ) => {
+    console.log("Menu opened for bot:", botId);
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedBotId(botId);
+  };
+
+  const handleMenuClose = () => {
+    console.log("Menu close for bot:", botId);
+    setMenuAnchorEl(null);
+    setSelectedBotId(null);
+  };
+
   const navigate = useNavigate();
 
   // Loaders, etc.
@@ -135,6 +161,15 @@ const MyBots: React.FC = () => {
     }
   }, [userIdLocal]);
 
+  function formatDateString(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }); // Example output: 11 Apr 2025
+  }
+
   return (
     <div className="p-6 min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -157,8 +192,39 @@ const MyBots: React.FC = () => {
               <div
                 key={bot._id}
                 className="bg-white shadow-md rounded-lg border border-gray-200 
-                           flex flex-col"
+                           flex flex-col relative"
               >
+                {/* Ellipsis Menu */}
+                <div className="absolute top-2 right-2 z-10">
+                  <IconButton
+                    onClick={(event) => handleMenuOpen(event, bot._id)}
+                    size="small"
+                  >
+                    <MoreHorizIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={menuAnchorEl}
+                    open={menuOpen && selectedBotId === bot._id}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{
+                      vertical: "bottom", // Position relative to the anchor element
+                      horizontal: "right",
+                    }}
+                    transformOrigin={{
+                      vertical: "top", // Position relative to the menu itself
+                      horizontal: "right",
+                    }}
+                  >
+                    <MenuItem onClick={() => handleEdit(bot._id)}>
+                      <EditIcon fontSize="small" />
+                      <span style={{ marginLeft: "8px" }}>Edit</span>
+                    </MenuItem>
+                    <MenuItem onClick={() => handleOpen(bot._id)}>
+                      <DeleteIcon fontSize="small" />
+                      <span style={{ marginLeft: "8px" }}>Delete</span>
+                    </MenuItem>
+                  </Menu>
+                </div>
                 {/* Card Body */}
                 <div className="p-6 flex-grow">
                   {bot.botURL && (
@@ -166,73 +232,94 @@ const MyBots: React.FC = () => {
                       <img
                         src={bot.botURL}
                         alt="Bot Avatar"
-                        className="w-20 h-20 object-cover rounded-md"
+                        className="w-32 h-32 object-cover rounded-md mx-auto"
                       />
                     </div>
                   )}
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  <h3 className="text-xl font-semibold text-gray-800 mt-2 mb-2 text-center">
                     {bot.botName}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-1">
-                    <strong>Description:</strong>{" "}
-                    <span className="font-medium">
+
+                  <p className="text-sm text-gray-800 mb-3 text-left">
+                    <span className="font-black">Description</span>
+                    <br />
+                    <span className="text-gray-600">
                       {bot.botIdentity || "Sales"}
                     </span>
                   </p>
-                  <p className="text-sm text-gray-500 mb-1">
-                    <strong>Created:</strong>{" "}
-                    <span className="font-medium">
-                      {formatDateString(bot.createdAt)}
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-500 mb-1">
-                    <strong>Tone:</strong>{" "}
-                    <span className="font-medium">
-                      {bot.botTone || "casual"}
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-500 mb-1">
-                    <strong>Document:</strong>{" "}
-                    <span className="font-medium">
-                      {bot.docName || "No document"}
-                    </span>
-                  </p>
+
+                  <div className="flex justify-between text-sm text-gray-600 mb-1">
+                    <p>
+                      <span className="font-black text-gray-800">
+                        Created On
+                      </span>
+                      <br />
+                      <span className="text-gray-600">
+                        {formatDateString(bot.createdAt)}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-black text-gray-800">Tone</span>
+                      <br />
+                      <span className="text-gray-600">
+                        {bot.botTone || "casual"}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-black text-gray-800">
+                        Documents
+                      </span>
+                      <br />
+                      <span className="text-gray-600">
+                        {(bot.docName?.length ?? 0) > 15
+                          ? `${bot.docName.slice(0, 15)}...`
+                          : bot.docName || "No document"}
+                      </span>
+                    </p>
+                  </div>
                 </div>
 
                 {/* Button Row - Fixed alignment */}
                 <div className="px-6 pb-6">
                   <div className="grid grid-cols-2 gap-2">
-                    <button
-                      className="bg-indigo-500 text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-indigo-600 transition-colors"
-                      onClick={() => handleEdit(bot._id)}
-                    >
-                      <EditIcon fontSize="small" /> Edit
-                    </button>
-
-                    <button
-                      className="bg-[#7398D9] text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-[#7398D9]/80 transition-colors"
+                    <Button
                       onClick={() => handleTest(bot._id)}
+                      variant="outlined"
+                      sx={{
+                        borderRadius: "9999px",
+                        borderColor: "#65558F",
+                        color: "#65558F",
+                        px: 3,
+                        py: 1,
+                        fontWeight: "500",
+                        textTransform: "none",
+                        "&:hover": {
+                          backgroundColor: "#65558F1A", // ~10% opacity
+                        },
+                      }}
                     >
-                      <PlayArrowIcon fontSize="small" /> Test
-                    </button>
+                      Test
+                    </Button>
 
-                    <button
-                      className="bg-green-500 text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-green-600 transition-colors"
+                    <Button
                       onClick={() => handleExport(bot._id)}
+                      variant="contained"
+                      sx={{
+                        borderRadius: "9999px",
+                        backgroundColor: "#65558F",
+                        color: "#fff",
+                        px: 3,
+                        py: 1,
+                        fontWeight: "500",
+                        textTransform: "none",
+                        "&:hover": {
+                          backgroundColor: "#56497A", // or `#65558FE6` for ~90% opacity
+                        },
+                      }}
                     >
-                      <FileExportIcon fontSize="small" /> Export
-                    </button>
-
-                    <button
-                      className="bg-red-500 text-white px-4 py-2 rounded-md 
-           flex items-center justify-center gap-1 hover:bg-red-600 transition-colors"
-                      onClick={() => handleOpen(bot._id)}
-                    >
-                      <DeleteIcon fontSize="small" /> Delete
-                    </button>
+                      <FileExportIcon fontSize="small" />
+                      <span style={{ marginLeft: "8px" }}> Export </span>
+                    </Button>
                   </div>
                 </div>
               </div>
