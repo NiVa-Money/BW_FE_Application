@@ -10,6 +10,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import {
   pauseWhatsAppCampaignService,
   resumeWhatsAppCampaignService,
+  stopWhatsAppCampaignService,
 } from "../../../api/services/whatsappCampaignService";
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -21,6 +22,7 @@ interface Campaign {
   campaignId: string;
   campaignName: string;
   status: string;
+  isPaused: boolean;
   channel: string;
   startDate: string;
   endDate: string;
@@ -92,14 +94,26 @@ export default function CampaignManager() {
     try {
       setLoadingId(campaign.campaignId); // Show loading indicator
 
-      if (campaign.status === "active") {
+      if (!campaign?.isPaused) {
         await pauseWhatsAppCampaignService(campaign.campaignId);
-        campaign.status = "inactive"; // Update local UI state
-      } else {
+      } else if (campaign?.isPaused) {
         await resumeWhatsAppCampaignService(campaign.campaignId);
-        campaign.status = "active"; // Update local UI state
       }
 
+      dispatch(fetchCampaignsAction({ payload: {} }));
+
+      setLoadingId(null);
+    } catch (error) {
+      console.error("Failed to update campaign status:", error);
+      setLoadingId(null);
+    }
+  };
+
+  const stopCampaign = async (campaign: Campaign) => {
+    try {
+      setLoadingId(campaign?.campaignId); // Show loading indicator
+
+      await stopWhatsAppCampaignService(campaign.campaignId);
       setLoadingId(null);
     } catch (error) {
       console.error("Failed to update campaign status:", error);
@@ -229,11 +243,11 @@ export default function CampaignManager() {
                   </MenuItem>
                   <MenuItem
                     onClick={() => handlePauseResume(campaign)}
-                    disabled={loadingId === campaign.campaignId}
+                    disabled={loadingId === campaign?.campaignId}
                   >
                     {loadingId === campaign.campaignId ? (
                       "Processing..."
-                    ) : campaign.status === "active" ? (
+                    ) : !campaign?.isPaused ? (
                       <>
                         <PauseIcon className="mr-2" /> Pause
                       </>
@@ -246,7 +260,10 @@ export default function CampaignManager() {
                   <MenuItem>
                     <FileCopyIcon className="mr-2" /> Clone
                   </MenuItem>
-                  <MenuItem>
+                  <MenuItem
+                    onClick={() => stopCampaign(campaign)}
+                    disabled={loadingId === campaign?.campaignId}
+                  >
                     <StopIcon className="mr-2" /> Stop
                   </MenuItem>
                 </Menu>
