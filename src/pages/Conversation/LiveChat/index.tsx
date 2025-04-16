@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { SmartToy, Person, Send } from "@mui/icons-material";
 import Switch from "@mui/material/Switch";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import io, { Socket } from "socket.io-client";
+import io from "socket.io-client";
 import CloseIcon from "@mui/icons-material/Close";
 import { getAllSessionLive } from "../../../store/actions/conversationActions";
 import { getBotsAction } from "../../../store/actions/botActions";
@@ -13,13 +19,13 @@ import LiveSessionList from "./LiveSession";
 import { createSelector } from "reselect";
 
 const LiveChat: React.FC = (): React.ReactElement => {
+  const socket = useRef(null);
   const dispatch = useDispatch();
 
   // ---------- State ----------
   const [isAgentAssistOpen, setIsAgentAssistOpen] = useState(true);
   const [messages, setMessages] = useState<any[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string>("");
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [newMessage, setNewMessage] = useState<string>("");
   const [isChatEnabled, setIsChatEnabled] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -60,80 +66,81 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   // Socket initialization and management
   useEffect(() => {
-    if (!isChatEnabled || !selectedSessionId || !userId || !botId) return;
-
-    const newSocket = io(import.meta.env.VITE_FIREBASE_BASE_URL as string, {
-      query: {
-        userType: "AGENT",
-        sessionId: selectedSessionId,
-        userId: userId,
-      },
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
-
-    newSocket.on("connect", () => {
-      setAgentState("connecting");
-      newSocket.emit("joinSession", {
-        sessionId: selectedSessionId,
-        userId,
-        botId,
-        userType: "AGENT",
+    if (
+      !socket.current &&
+      isChatEnabled &&
+      selectedSessionId &&
+      userId &&
+      botId
+    ) {
+      socket.current = io(import.meta.env.VITE_FIREBASE_BASE_URL, {
+        query: {
+          userType: "AGENT",
+          sessionId: selectedSessionId,
+          userId,
+        },
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
       });
-    });
 
-    newSocket.on("agentConnected", (data: any) => {
-      setAgentState("connected");
-      setIsAgentConnected(true);
-      console.log("Agent connected:", data);
-    });
+      socket.current.on("connect", () => {
+        setAgentState("connecting");
+        socket.current.emit("joinSession", {
+          sessionId: selectedSessionId,
+          userId,
+          botId,
+          userType: "AGENT",
+        });
+      });
 
-    newSocket.on("messageToClient", (data: any) => {
-      console.log("Message received:", data);
+      socket.current.on("agentConnected", (data: any) => {
+        setAgentState("connected");
+        setIsAgentConnected(true);
+        console.log("Agent connected:", data);
+      });
 
-      if (data.senderType === "AGENT" && data.question) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            ...data,
-            timestamp: new Date().toISOString(),
-            sender: "agent",
-            text: data.question,
-            type: "bot-message",
-          },
-        ]);
-      }
+      socket.current.on("messageToClient", (data: any) => {
+        console.log("New message received:", data);
+        if (data.question || data.response) {
+          setMessages((prev) => {
+            const updatedMessages = [
+              ...prev,
+              {
+                ...data,
+                timestamp: data.timestamp || new Date().toISOString(),
+                sender: data.senderType === "AGENT" ? "agent" : "customer",
+                text: data.question || data.response,
+                type:
+                  data.senderType === "AGENT" ? "bot-message" : "user-message",
+              },
+            ];
+            playNotificationSound(); // Play sound for new message
+            return updatedMessages;
+          });
+        }
+      });
 
-      if (data.response) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            ...data,
-            timestamp: new Date().toISOString(),
-            sender: data.senderType === "AGENT" ? "agent" : "customer",
-            text: data.response,
-            type: data.senderType === "AGENT" ? "bot-message" : "user-message",
-          },
-        ]);
-      }
-    });
+      socket.current.on("sessionClosed", handleSessionEnd);
+      socket.current.on("sessionEndedByAdmin", handleSessionEnd);
+      socket.current.on("adminEndedSession", handleSessionEnd);
 
-    newSocket.on("sessionClosed", handleSessionEnd);
-    newSocket.on("sessionEndedByAdmin", handleSessionEnd);
-    newSocket.on("adminEndedSession", handleSessionEnd);
+      socket.current.on("connect_error", (error: any) => {
+        console.error("Connection error:", error);
+        setAgentState("disconnected");
+      });
 
-    newSocket.on("connect_error", (error: any) => {
-      console.error("Connection error:", error);
-      setAgentState("disconnected");
-    });
-
-    setSocket(newSocket);
+      socket.current.on("disconnect", () => {
+        console.log("Socket disconnected");
+        setIsAgentConnected(false);
+      });
+    }
 
     return () => {
-      newSocket.disconnect();
-      setSocket(null);
-      setAgentState("disconnected");
+      if (socket.current) {
+        socket.current.disconnect();
+        socket.current = null;
+      }
     };
   }, [isChatEnabled, selectedSessionId, userId, botId]);
 
@@ -146,8 +153,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
     setIsChatEnabled(false);
     setMessages([]);
     setSelectedSessionId("");
-    socket?.disconnect();
-  }, [socket]);
+    if (socket.current) socket.current.disconnect();
+  }, []);
 
   const getBotSession = useCallback(
     (botId: string) => {
@@ -170,7 +177,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const sendMessage = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (!newMessage.trim() || !socket || !selectedSessionId) return;
+      if (!newMessage.trim() || !socket.current || !selectedSessionId) return;
 
       const messageData = {
         sessionId: selectedSessionId,
@@ -180,7 +187,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
         userType: "AGENT",
       };
 
-      socket.emit("messageToServer", messageData);
+      socket.current.emit("messageToServer", messageData);
 
       setMessages((prev) => [
         ...prev,
@@ -188,13 +195,13 @@ const LiveChat: React.FC = (): React.ReactElement => {
           text: newMessage,
           sender: "agent",
           timestamp: new Date().toISOString(),
-          chatMode: "manual", // Add this to match the rendering condition
+          chatMode: "manual",
         },
       ]);
 
       setNewMessage("");
     },
-    [newMessage, socket, selectedSessionId, userId, botId]
+    [newMessage, selectedSessionId, userId, botId]
   );
 
   const sendMessageQuick = (text: string) => {
@@ -203,11 +210,10 @@ const LiveChat: React.FC = (): React.ReactElement => {
         chatMode: "manual",
         text,
         sessionId: selectedSessionId,
-        timestamp: new Date().toISOString(), // Add timestamp
-        sender: "agent", // Add sender
+        timestamp: new Date().toISOString(),
+        sender: "agent",
       };
-      socket?.emit("messageToServer", {
-        // Use consistent event name
+      socket.current?.emit("messageToServer", {
         sessionId: selectedSessionId,
         userId,
         botId,
@@ -218,26 +224,14 @@ const LiveChat: React.FC = (): React.ReactElement => {
     }
   };
 
-  // const sendMessageQuick = (text: string) => {
-  //   if (isAgentConnected && text) {
-  //     const msg = {
-  //       chatMode: "manual",
-  //       text,
-  //       sessionId: selectedSessionId,
-  //     };
-  //     socket?.emit("sendMessage", msg);
-  //     setMessages((prev) => [...prev, msg]);
-  //   }
-  // };
-
   const handleResolution = (resolution: any) => {
     setShowConfirmationModal(false);
     if (resolution === "Yes") {
       setIsChatEnabled(false);
-      socket?.emit("closeSession", {
+      socket.current?.emit("closeSession", {
         sessionId: selectedSessionId,
-        userId: userId,
-        botId: botId,
+        userId,
+        botId,
         userType: "AGENT",
       });
     }
@@ -252,15 +246,23 @@ const LiveChat: React.FC = (): React.ReactElement => {
   };
 
   const handleCloseSession = useCallback(() => {
-    if (!socket || !selectedSessionId) return;
-
-    socket.emit("closeSession", {
+    if (!socket.current || !selectedSessionId) return;
+    socket.current.emit("closeSession", {
       sessionId: selectedSessionId,
-      userId: userId,
+      userId,
       userType: "AGENT",
     });
     handleSessionEnd();
-  }, [socket, selectedSessionId, userId, handleSessionEnd]);
+  }, [selectedSessionId, userId, handleSessionEnd]);
+
+  // Notification Sound Function
+  // Notification Sound Function
+const playNotificationSound = () => {
+  const audio = new Audio("https://www.soundjay.com/buttons/beep-02.mp3"); // Changed to a calmer beep
+  audio.play().catch((error) => {
+    console.log("Audio play failed:", error);
+  });
+};
 
   return (
     <div className="h-screen flex flex-col">
@@ -399,12 +401,14 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     )}
 
                     {/* Timestamp */}
-                    <div className="text-xs text-gray-400 mt-1">
-                      {new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
+                    {msg.timestamp && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }) || ""}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {isAgentTyping && (
