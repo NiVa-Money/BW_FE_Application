@@ -16,6 +16,7 @@ import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstruct
 import HelpIcon from "@mui/icons-material/Help";
 import SettingsIcon from "@mui/icons-material/Settings";
 import CallIcon from '@mui/icons-material/Call';
+import MicIcon from '@mui/icons-material/Mic';
 const filterMenuItems = (items: any[], allowedIds: string | any[]) =>
   items?.reduce((acc: any[], item: { subItems: any[]; id: any }) => {
     // If the item has subItems, filter them
@@ -103,9 +104,22 @@ export const sidebarNavLinks = (moduleMapping: []) => {
     },
     {
       id: 6,
-      text: "Voice Agent",
+      text: "Voice",
       icon: <SupportAgentIcon />,
-      path: "/voiceagent",
+      subItems: [
+        {
+          id: 6.1,
+          text: "Agents",
+          path: "/voice/agents",
+          icon: <MicIcon />,
+        },
+        {
+          id: 6.2,
+          text: "Voice Dashboard",
+          path: "/voice/dashboard",
+          icon: <CampaignIcon />,
+        },
+      ]
     },
     { id: 7, text: "Workflow", icon: <AccountTreeIcon />, path: "/workflow" },
     { id: 8, text: "Reports", icon: <AssessmentIcon />, path: "/reports" },
