@@ -1372,7 +1372,7 @@ export default function CRMDashboard() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie data={pipelineData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
-                          {pipelineData.map((entry, index) => (
+                          {pipelineData.map((_entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
@@ -1456,7 +1456,7 @@ export default function CRMDashboard() {
                           dataKey="value"
                           label
                         >
-                          {sentimentData.map((entry, index) => (
+                          {sentimentData.map((_entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
