@@ -10,6 +10,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import {
   pauseWhatsAppCampaignService,
   resumeWhatsAppCampaignService,
+  stopWhatsAppCampaignService,
 } from "../../../api/services/whatsappCampaignService";
 
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -21,6 +22,7 @@ interface Campaign {
   campaignId: string;
   campaignName: string;
   status: string;
+  isPaused: boolean;
   channel: string;
   startDate: string;
   endDate: string;
@@ -92,14 +94,26 @@ export default function CampaignManager() {
     try {
       setLoadingId(campaign.campaignId); // Show loading indicator
 
-      if (campaign.status === "active") {
+      if (!campaign?.isPaused) {
         await pauseWhatsAppCampaignService(campaign.campaignId);
-        campaign.status = "inactive"; // Update local UI state
-      } else {
+      } else if (campaign?.isPaused) {
         await resumeWhatsAppCampaignService(campaign.campaignId);
-        campaign.status = "active"; // Update local UI state
       }
 
+      dispatch(fetchCampaignsAction({ payload: {} }));
+
+      setLoadingId(null);
+    } catch (error) {
+      console.error("Failed to update campaign status:", error);
+      setLoadingId(null);
+    }
+  };
+
+  const stopCampaign = async (campaign: Campaign) => {
+    try {
+      setLoadingId(campaign?.campaignId); // Show loading indicator
+
+      await stopWhatsAppCampaignService(campaign.campaignId);
       setLoadingId(null);
     } catch (error) {
       console.error("Failed to update campaign status:", error);
@@ -127,9 +141,55 @@ export default function CampaignManager() {
                 key={campaign.campaignId}
                 className="bg-white shadow-md rounded-lg p-6 border border-gray-200 w-full max-w-[400px] mx-auto"
               >
-                <h3 className="text-xl font-semibold text-gray-800">
-                  {campaign.campaignName}
-                </h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {campaign.campaignName}
+                  </h3>
+                  <IconButton
+                    className="absolute top-1"
+                    onClick={(e) => handleMenuOpen(e, campaign.campaignId)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                </div>
+                <Menu
+                  anchorEl={anchorEl[campaign.campaignId]}
+                  open={Boolean(anchorEl[campaign.campaignId])}
+                  onClose={() => handleMenuClose(campaign.campaignId)}
+                >
+                  <MenuItem
+                    onClick={() =>
+                      navigate(`/marketing/editcampaign/${campaign.campaignId}`)
+                    }
+                  >
+                    <EditIcon className="mr-2" /> Edit
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => handlePauseResume(campaign)}
+                    disabled={loadingId === campaign?.campaignId}
+                  >
+                    {loadingId === campaign.campaignId ? (
+                      "Processing..."
+                    ) : !campaign?.isPaused ? (
+                      <>
+                        <PauseIcon className="mr-2" /> Pause
+                      </>
+                    ) : (
+                      <>
+                        <PlayArrowIcon className="mr-2" /> Resume
+                      </>
+                    )}
+                  </MenuItem>
+                  <MenuItem>
+                    <FileCopyIcon className="mr-2" /> Clone
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => stopCampaign(campaign)}
+                    disabled={loadingId === campaign?.campaignId}
+                  >
+                    <StopIcon className="mr-2" /> Stop
+                  </MenuItem>
+                </Menu>
                 {campaign.template?.header?.s3Url && (
                   <div className="mt-2">
                     <img
@@ -185,71 +245,6 @@ export default function CampaignManager() {
                     {new Date(campaign.endDate).toLocaleString()}
                   </span>
                 </p>
-
-                {/* <div className="mt-4 flex gap-4 justify-end">
-                  <button
-                    className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-purple-400 transition-colors"
-                    onClick={() => handlePauseResume(campaign)}
-                    disabled={loadingId === campaign.campaignId}
-                  >
-                    {loadingId === campaign.campaignId ? (
-                      "Processing..."
-                    ) : campaign.status === "active" ? (
-                      <>
-                        <PauseIcon /> Pause
-                      </>
-                    ) : (
-                      <>
-                        <PlayArrowIcon /> Resume
-                      </>
-                    )}
-                  </button>
-                  <button className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-purple-400 transition-colors">
-                    <EditIcon /> Edit
-                  </button>
-                </div> */}
-                <IconButton
-                  className="absolute top-4 right-4"
-                  onClick={(e) => handleMenuOpen(e, campaign.campaignId)}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-
-                <Menu
-                  anchorEl={anchorEl[campaign.campaignId]}
-                  open={Boolean(anchorEl[campaign.campaignId])}
-                  onClose={() => handleMenuClose(campaign.campaignId)}
-                >
-                  <MenuItem
-                    onClick={() =>
-                      navigate(`/marketing/editcampaign/${campaign.campaignId}`)
-                    }
-                  >
-                    <EditIcon className="mr-2" /> Edit
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => handlePauseResume(campaign)}
-                    disabled={loadingId === campaign.campaignId}
-                  >
-                    {loadingId === campaign.campaignId ? (
-                      "Processing..."
-                    ) : campaign.status === "active" ? (
-                      <>
-                        <PauseIcon className="mr-2" /> Pause
-                      </>
-                    ) : (
-                      <>
-                        <PlayArrowIcon className="mr-2" /> Resume
-                      </>
-                    )}
-                  </MenuItem>
-                  <MenuItem>
-                    <FileCopyIcon className="mr-2" /> Clone
-                  </MenuItem>
-                  <MenuItem>
-                    <StopIcon className="mr-2" /> Stop
-                  </MenuItem>
-                </Menu>
               </div>
             ))}
           </div>

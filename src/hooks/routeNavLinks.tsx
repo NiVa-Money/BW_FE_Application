@@ -56,7 +56,7 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           icon: <WifiTetheringIcon />,
         },
         {
-          id: 2.2,
+          id: 2.3,
           text: "Live Calls",
           path: "/conversations/live-calls",
           icon: <CallIcon />,

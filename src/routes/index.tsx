@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Login from "../pages/login";
 import SignUp from "../pages/Signup";
-// import Dashboard from "../pages/Dashboard";
 import DashBoard from "../pages/DashboardNew";
-import AdminPanel from "../pages/AdminPanel";
 import CreateBot from "../pages/CreateBot";
 import IntegrationsPage from "../pages/Integration";
 import EngagementTab from "../pages/Engagement";
@@ -34,6 +32,7 @@ import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard';
 import WhatsApp from "../pages/Marketing/Whatsapp";
 import SubscriptionFailure from "../pages/SubscriptionFailure";
 import SubscriptionSuccess from "../pages/SubscriptionSuccess";
+import ContactsCRM from "../pages/Contacts";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -96,7 +95,7 @@ export const autRoutes: any[] = [
   {
     id: 7,
     path: "/workflow",
-    component: <AdminPanel />,
+    component: <ContactsCRM />,
   },
   {
     id: 8,

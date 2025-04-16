@@ -9,9 +9,19 @@ import {
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 const EditWhatsappCampaign: React.FC = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
+  const campaignData = useSelector(
+    (state: RootState) => state?.whatsappCampaign?.campaigns?.data
+  );
+  const selectedCampaign = campaignData?.find(
+    (campaign) => String(campaign?.campaignId) === String(campaignId)
+  );
+  console.log("campaignData", campaignData);
+  console.log("selectedCampaign", selectedCampaign);
   const navigate = useNavigate();
 
   // State management
@@ -49,7 +59,10 @@ const EditWhatsappCampaign: React.FC = () => {
         formData.append("file", contactList);
 
         // Upload contacts for the template/campaign
-        const contactsData = await uploadWhatsAppContactsService(campaignId, formData);
+        const contactsData = await uploadWhatsAppContactsService(
+          campaignId,
+          formData
+        );
         campaignData.newContactsUrl = contactsData.fileUrl; // Assuming the API returns a fileUrl
       }
 
@@ -77,7 +90,7 @@ const EditWhatsappCampaign: React.FC = () => {
       try {
         setIsLoading(true);
 
-        setCampaignName(campaignId);
+        setCampaignName(selectedCampaign?.campaignName || "");
       } catch (err) {
         console.error("Failed to fetch campaign:", err);
         setError("Failed to load campaign data");
