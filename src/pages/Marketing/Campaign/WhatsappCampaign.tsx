@@ -77,6 +77,7 @@ const WhatsappCampaign: React.FC = () => {
       console.error("Template ID missing");
       return;
     }
+    console.log("Selected template in WhatsappCampaign:", template);
     setSelectedTemplate(template);
     setShowTemplate(false);
   };
@@ -221,6 +222,7 @@ const WhatsappCampaign: React.FC = () => {
         formData
       );
       campaignPayload.contactsUrl = data.s3Url;
+      console.log("Contacts URL:", campaignPayload.contactsUrl);
       dispatch(createWhatsAppCampaignAction(campaignPayload));
     } catch (error) {
       console.error("Error uploading contacts:", error);
