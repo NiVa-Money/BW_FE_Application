@@ -51,7 +51,7 @@ export const deleteBotService = async (payload: any) => {
 
 export const exportBotProfileService = async (payload: any) => {
   try {
-    const response = await axiosInstance.post("/user/widget/export/", {
+    const response = await axiosInstance.post("/user/v2/widget/export/", {
       botId: payload.botId,
       userId: payload?.userId,
     });
