@@ -156,6 +156,7 @@ import React from "react";
 import SendIcon from "@mui/icons-material/Send";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { FormControlLabel, Switch } from "@mui/material";
+import PulsingGlowLogo from "./PulsingGlowLogo";
 
 interface CreateBotRightContainerProps {
   botName?: string;
@@ -164,6 +165,7 @@ interface CreateBotRightContainerProps {
   color: string;
   font: string;
   botSmartness: string;
+  showPulsingLogo: boolean;
   botSmartnessHandle: any;
   greetingMessage: string;
 }
@@ -174,6 +176,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
   font,
   color,
   botSmartness,
+  showPulsingLogo,
   botSmartnessHandle,
   greetingMessage,
 }) => {
@@ -215,7 +218,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
           />
         </div>
         <div
-          className="w-[350px] mt-10 ml-44 border border-black h-[600px] flex justify-center items-center rounded-[12px]"
+          className="w-[350px] mt-10 ml-44 border border-black h-[600px] flex justify-center items-center rounded-[12px] z-10"
           style={{ backgroundColor: theme === "dark" ? "#1D1B20" : "#E3E3E3" }}
         >
           <div className="h-[100%] w-[100%] flex flex-col">
@@ -304,6 +307,11 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
             </div>
           </div>
         </div>
+        {showPulsingLogo && (
+          <div className="flex justify-end items-center">
+            <PulsingGlowLogo />
+          </div>
+        )}
       </div>
     </div>
   );

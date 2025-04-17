@@ -94,6 +94,7 @@ export const initialState: any = {
   },
   users: {
     lists: { data: [], loader: false },
+    create: { data: null, loader: false },
     delete: { data: null, loader: false },
   },
   subscription: {

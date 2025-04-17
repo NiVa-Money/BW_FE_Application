@@ -64,6 +64,28 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             )}
 
             {showReason && (
+              // <TextField
+              //   // {...field}
+              //   // {...props}
+              //   // error={Boolean(errorText)}
+              //   // helperText={errorText}
+              //   variant="outlined"
+              //   sx={{
+              //     "& .MuiInputBase-root": {
+              //       backgroundColor: "#F3F2F6",
+              //     },
+              //     "& .MuiOutlinedInput-root": {
+              //       height: "35px",
+              //       "& .MuiOutlinedInput-input": {
+              //         height: "35px",
+              //       },
+              //       "& .MuiInputBase-input": {
+              //         padding: "0 10px",
+              //       },
+              //     },
+              //   }}
+              //   fullWidth
+              // />
               <TextField
                 fullWidth
                 margin="normal"
@@ -71,8 +93,15 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 value={reason}
                 onChange={(e) => onReasonChange?.(e.target.value)}
                 multiline
-                rows={3}
+                rows={2}
                 variant="outlined"
+                sx={{
+                  "& .MuiInputBase-inputMultiline": {
+                    "&:focus": {
+                      boxShadow: "none", // Remove focus outline
+                    },
+                  },
+                }}
               />
             )}
           </Box>

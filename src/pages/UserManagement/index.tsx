@@ -4,6 +4,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  createNewUser,
   deleteUserAction,
   getUsersAction,
 } from "../../store/actions/userActions";
@@ -184,26 +185,27 @@ const UserManagement = () => {
     setDeleteReason("");
   }, [userToDelete, deleteReason]);
 
-  const handleSaveUser = useCallback(
-    (userData) => {
-      if (editingUser) {
-        // Update existing user
-        setUsers((prevUsers) =>
-          prevUsers.map((user) =>
-            user.id === editingUser.id ? { ...user, ...userData } : user
-          )
-        );
-      } else {
-        // Add new user
-        setUsers((prevUsers) => [
-          ...prevUsers,
-          { ...userData, id: Math.max(...prevUsers.map((u) => u.id), 0) + 1 },
-        ]);
-      }
-      setIsModalOpen(false);
-    },
-    [editingUser]
-  );
+  const handleSaveUser = (userData) => {
+    debugger;
+    if (editingUser?.id) {
+      // Update existing user
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === editingUser.id ? { ...user, ...userData } : user
+        )
+      );
+    } else {
+      // Add new user
+      const payload = {
+        emailId: userData.employeeId,
+        mobileNo: userData.mobileNo,
+        role: userData.role,
+        modules: userData.modules,
+      };
+      dispatch(createNewUser(payload));
+    }
+    setIsModalOpen(false);
+  };
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
@@ -212,7 +214,23 @@ const UserManagement = () => {
 
   useEffect(() => {
     if (usersListRedux !== null || undefined) {
-      setUsers(usersListRedux);
+      const obj = [
+        {
+          firstName: "Sunny",
+          lastName: "Ramani",
+          emailId: "info@nitakitchenware.com",
+          mobileNo: "+91 8080648674",
+          status: "active",
+          roleName: "Super Admin",
+          module_maps: [
+            2, 2.1, 2.2, 3, 5, 5.1, 5.2, 8, 10, 1, 12, 12.1, 2.3, 5.4, 5.3,
+          ],
+          roleId: "679a63a83272691bfd8b7155",
+          _id: 122333,
+        },
+      ];
+      setUsers(obj);
+      // setUsers(usersListRedux);
     }
   }, [usersListRedux]);
 

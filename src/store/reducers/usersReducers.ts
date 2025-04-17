@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
+  CREATE_USER,
+  CREATE_USER_FAILURE,
+  CREATE_USER_SUCCESS,
   DELETE_USER,
   DELETE_USER_FAILURE,
   DELETE_USER_SUCCESS,
@@ -27,6 +30,21 @@ export default function usersReducers(state = initialState.users, action: any) {
         ...state,
         lists: { data: action.payload, loader: false },
       };
+    case CREATE_USER:
+      return {
+        ...state,
+        create: { data: action.payload, loader: true },
+      };
+    case CREATE_USER_SUCCESS:
+      return {
+        ...state,
+        create: { data: action.payload, loader: false },
+      };
+    case CREATE_USER_FAILURE:
+      return {
+        ...state,
+        create: { data: null, loader: false },
+      };
     case DELETE_USER:
       return {
         ...state,
@@ -40,7 +58,7 @@ export default function usersReducers(state = initialState.users, action: any) {
     case DELETE_USER_FAILURE:
       return {
         ...state,
-        delete: { data: action.payload, loader: false },
+        delete: { data: null, loader: false },
       };
 
     default:
