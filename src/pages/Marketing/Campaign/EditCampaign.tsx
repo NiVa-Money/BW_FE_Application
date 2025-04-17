@@ -501,12 +501,14 @@ const EditWhatsappCampaign: React.FC = () => {
                           src={selectedCampaign.template.header.s3Url || ""}
                           alt="Template Header"
                           className="w-full h-auto mt-2 rounded"
-                          onError={(e) => {
+                          onError={(
+                            e: React.SyntheticEvent<HTMLImageElement>
+                          ) => {
                             // Try base64 if s3Url fails
                             const content =
                               selectedCampaign.template.header.content;
                             if (content) {
-                              e.target.src = content.startsWith("data:")
+                              e.currentTarget.src = content.startsWith("data:")
                                 ? content
                                 : `data:image/jpeg;base64,${content}`;
                             }
@@ -525,10 +527,12 @@ const EditWhatsappCampaign: React.FC = () => {
                           src={selectedCampaign.template.header.s3Url || ""}
                           controls
                           className="w-full h-auto mt-2 rounded"
-                          onError={(e) => {
+                          onError={(
+                            e: React.SyntheticEvent<HTMLVideoElement>
+                          ) => {
                             // Try content URL if available
                             if (selectedCampaign.template.header.content) {
-                              e.target.src =
+                              e.currentTarget.src =
                                 selectedCampaign.template.header.content;
                             }
                           }}
