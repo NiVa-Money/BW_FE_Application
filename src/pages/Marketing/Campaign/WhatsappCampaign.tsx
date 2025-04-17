@@ -50,6 +50,7 @@ const WhatsappCampaign: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
   const [_secretToken, setSecretToken] = useState("");
+  const [whatsappName, setWhatsappName] = useState("");
   const whatsappNumbers = useSelector(
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
@@ -164,15 +165,16 @@ const WhatsappCampaign: React.FC = () => {
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
 
   useEffect(() => {
-    if (setSelectedPhoneNumberId && whatsappNumbers?.length > 0) {
+    if (selectedPhoneNumberId && whatsappNumbers?.length > 0) {
       const selected = whatsappNumbers.find(
-        (num) => num.phoneNumberId.toString() === setSelectedPhoneNumberId
+        (num) => num.phoneNumberId.toString() === selectedPhoneNumberId
       );
       if (selected) {
         setSecretToken(selected.secretToken);
+        setWhatsappName(selected.whatsappName);
       }
     }
-  }, [setSelectedPhoneNumberId, whatsappNumbers]);
+  }, [selectedPhoneNumberId, whatsappNumbers]);
 
   const handleSave = async () => {
     if (!contactList) {
@@ -370,7 +372,7 @@ const WhatsappCampaign: React.FC = () => {
               <select
                 value={selectedPhoneNumberId}
                 onChange={(e) => setSelectedPhoneNumberId(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-2"
               >
                 <option value="">Select a WhatsApp Number ID</option>
                 {integrationList.map((integration) => (
@@ -378,10 +380,25 @@ const WhatsappCampaign: React.FC = () => {
                     key={integration.phoneNumberId}
                     value={integration.phoneNumberId}
                   >
-                    {integration.phoneNumberId}
+                    {integration.phoneNumberId} -{" "}
+                    {integration.whatsappName || "Unknown Name"}
                   </option>
                 ))}
               </select>
+
+              {selectedPhoneNumberId && whatsappNumbers?.length > 0 && (
+                <div className="text-sm text-green-700 flex items-center mb-2">
+                  <WhatsApp
+                    className="mr-1 text-green-500"
+                    sx={{ fontSize: 16 }}
+                  />
+                  Selected:{" "}
+                  {whatsappNumbers.find(
+                    (num) =>
+                      num.phoneNumberId.toString() === selectedPhoneNumberId
+                  )?.whatsappName || "Unknown Account"}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col w-full mb-4">

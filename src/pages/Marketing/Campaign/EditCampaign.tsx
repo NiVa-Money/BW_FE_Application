@@ -50,9 +50,9 @@ const EditWhatsappCampaign: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
 
-  // const whatsappNumbers = useSelector(
-  //   (state: RootState) => state.crudIntegration?.crudIntegration?.data
-  // );
+  const whatsappNumbers = useSelector(
+    (state: RootState) => state.crudIntegration?.crudIntegration?.data
+  );
 
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates
@@ -322,7 +322,7 @@ const EditWhatsappCampaign: React.FC = () => {
               <select
                 value={selectedPhoneNumberId}
                 disabled={true}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4 bg-gray-100 text-gray-600 cursor-not-allowed"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-2 bg-gray-100 text-gray-600 cursor-not-allowed"
               >
                 <option value="">Select a WhatsApp Number ID</option>
                 {integrationList.map((integration) => (
@@ -330,10 +330,25 @@ const EditWhatsappCampaign: React.FC = () => {
                     key={integration.phoneNumberId}
                     value={integration.phoneNumberId}
                   >
-                    {integration.phoneNumberId}
+                    {integration.phoneNumberId} -{" "}
+                    {integration.whatsappName || "Unknown Name"}
                   </option>
                 ))}
               </select>
+
+              {/* {selectedPhoneNumberId && whatsappNumbers?.length > 0 && (
+                <div className="text-sm text-green-700 flex items-center mb-2">
+                  <WhatsApp
+                    className="mr-1 text-green-500"
+                    sx={{ fontSize: 16 }}
+                  />
+                  Selected:{" "}
+                  {whatsappNumbers.find(
+                    (num) =>
+                      num.phoneNumberId.toString() === selectedPhoneNumberId
+                  )?.whatsappName || "Unknown Account"}
+                </div>
+              )} */}
             </div>
 
             <div className="flex flex-col w-full mb-4">
