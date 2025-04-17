@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function PulsingGlowLogo() {
+export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
   const [pulse, setPulse] = useState(0);
 
   useEffect(() => {
@@ -20,12 +20,12 @@ export default function PulsingGlowLogo() {
       <div className="relative">
         {/* Outer glow layer */}
         <div
-          className="absolute rounded-full bg-purple-600 blur-xl"
+          className="absolute rounded-full bg-purple-500 blur-xl"
           style={{
             top: "50%",
             left: "50%",
-            width: "120px",
-            height: "120px",
+            width: "100px",
+            height: "100px",
             transform: `translate(-50%, -50%) scale(${pulseScale})`,
             opacity: pulseOpacity,
             zIndex: 0,
@@ -33,11 +33,11 @@ export default function PulsingGlowLogo() {
         />
 
         {/* Black circle container */}
-        <div className="relative bg-black rounded-full w-24 h-24 flex items-center justify-center z-10">
+        <div className="relative bg-black rounded-full w-20 h-20 flex items-center justify-center z-10 ">
           {/* Logo image */}
           <img
-            src="/api/placeholder/80/80"
-            alt="Growth Logo"
+            src={imageSrc}
+            alt="Agent Logo"
             className="w-20 h-20 rounded-full z-20"
           />
         </div>
