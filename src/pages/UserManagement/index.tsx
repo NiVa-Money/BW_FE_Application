@@ -186,7 +186,6 @@ const UserManagement = () => {
   }, [userToDelete, deleteReason]);
 
   const handleSaveUser = (userData) => {
-    debugger;
     if (editingUser?.id) {
       // Update existing user
       setUsers((prevUsers) =>
