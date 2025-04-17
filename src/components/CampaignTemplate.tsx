@@ -67,7 +67,7 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
           src={template.header.s3Url}
           controls
           playsInline
-          className="w-full h-48 object-cover rounded-lg mb-4"
+          className="w-full h-48 object-contain rounded-lg mb-4"
         />
       );
     } else if (headerType === "IMAGE") {
@@ -75,7 +75,7 @@ const CampaignTemplate: React.FC<CampaignTemplateProps> = ({
         <img
           src={template.header.s3Url}
           alt={`Template ${template.templateName} Header`}
-          className="w-full h-48 object-cover rounded-lg mb-4"
+          className="w-full h-48 object-contain rounded-lg mb-4"
         />
       );
     } else if (headerType === "DOCUMENT") {
