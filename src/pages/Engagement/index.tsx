@@ -459,11 +459,9 @@ const EngagementTab = () => {
     const fetchIntegrations = async () => {
       try {
         const response = await getInstagramData();
-        // Extract the `data` array from the response
         const integrations = Array.isArray(response?.data) ? response.data : [];
         setAvailableIntegrations(integrations);
         if (integrations.length > 0) {
-          // Use `_id` as the integration ID, as per the response structure
           setIntegrationId(integrations[0]._id);
         }
       } catch (error) {
@@ -488,7 +486,6 @@ const EngagementTab = () => {
     socket.on("connect", () => {
       console.log("Connected to WebSocket server");
       socket.emit("igFetchInitialData", integrationId);
-      console.log("integrationId", integrationId);
     });
 
     socket.on("initialData", (data) => {
@@ -582,7 +579,7 @@ const EngagementTab = () => {
       socket.emit("igSendMessageRequest", {
         integrationId,
         recipientId: selectedConversation.recipientId,
-        recipientUsername: selectedConversation.recipientUsername,
+        recipientUsername: selectedConversation?.username,
         message: inputText,
       });
     } else if (selectedConversation.type === "COMMENT") {
@@ -751,20 +748,16 @@ const EngagementTab = () => {
                 </span>
                 <div>
                   <p className="text-base">
-                    {conversation.recipientUsername || "Unknown"}
-                  </p>
-                  <p className="text-base text-gray-500">
-                    {conversation.message?.text?.substring(0, 20) ||
-                      "No message"}
+                    {conversation?.username || "Unknown"}
                   </p>
                   <p
                     className={`text-base ${
-                      conversation.sentiment >= 50
+                      conversation?.sentiment >= 50
                         ? "text-green-500"
                         : "text-red-500"
                     }`}
                   >
-                    {conversation.sentiment || 50}% Positive
+                    {conversation?.sentiment}% Positive
                   </p>
                 </div>
               </div>
