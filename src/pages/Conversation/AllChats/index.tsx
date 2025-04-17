@@ -884,14 +884,14 @@ const AllChats = () => {
       {/* Main Container */}
       <div className="flex bg-gray-100 h-[calc(100vh-120px)]">
         <SessionsList
-          botLists={botLists}
+          // botLists={botLists}
           onSessionSelect={handleSessionSelection}
           channelNameVal={channelNameVal}
           setPage={setPage}
           page={page}
           sessionId={sessionId}
-          aiLevel={aiLevel}
-          humanLevel={humanLevel}
+          // aiLevel={aiLevel}
+          // humanLevel={humanLevel}
           searchType={searchType}
           searchValue={isSearchActive ? searchValue : ""}
           isSearchActive={isSearchActive}

@@ -570,7 +570,7 @@ const EngagementTab = () => {
 
   const sendMessage = () => {
     if (!inputText || !selectedConversationId || !integrationId) return;
-    const selectedConversation = conversations.find(
+    const selectedConversation = conversations?.find(
       (conv) => conv.messageId === selectedConversationId
     );
     if (!selectedConversation) return;
@@ -578,7 +578,7 @@ const EngagementTab = () => {
     if (selectedConversation.type === "DM") {
       socket.emit("igSendMessageRequest", {
         integrationId,
-        recipientId: selectedConversation.recipientId,
+        recipientId: selectedConversation?.recipientId,
         recipientUsername: selectedConversation?.username,
         message: inputText,
       });
@@ -595,8 +595,12 @@ const EngagementTab = () => {
     setInputText("");
   };
 
+  const displayedConversations = selectedConversationId
+    ? conversations.filter((c) => c.messageId === selectedConversationId)
+    : conversations;
+
   const selectedConversation = conversations.find(
-    (conv) => conv.messageId === selectedConversationId
+    (c) => c.messageId === selectedConversationId
   );
 
   const socialPlatforms = [
@@ -643,19 +647,17 @@ const EngagementTab = () => {
       </div>
 
       <div className="mb-6">
-        <FormControl fullWidth>
-          <InputLabel id="integration-select-label">
-            Select Integration
-          </InputLabel>
+        <FormControl fullWidth className="mb-6">
+          <InputLabel id="select-int-label">Select Integration</InputLabel>
           <Select
-            labelId="integration-select-label"
+            labelId="select-int-label"
             value={integrationId}
             label="Select Integration"
             onChange={(e) => setIntegrationId(e.target.value)}
           >
-            {availableIntegrations?.map((integration) => (
-              <MenuItem key={integration.id} value={integration.id}>
-                {integration.name || integration.id}
+            {availableIntegrations.map((intg) => (
+              <MenuItem key={intg._id} value={intg._id}>
+                {intg.name || intg._id}
               </MenuItem>
             ))}
           </Select>
@@ -735,29 +737,23 @@ const EngagementTab = () => {
         {/* Left Column - Conversations */}
         <div className="col-span-3">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg">
-            {conversations.map((conversation, index) => (
+            {displayedConversations.map((c) => (
               <div
-                key={index}
+                key={c.messageId}
                 className="p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer"
-                onClick={() =>
-                  setSelectedConversationId(conversation.messageId)
-                }
+                onClick={() => setSelectedConversationId(c.messageId)}
               >
                 <span className="w-8 h-8">
                   <Instagram />
                 </span>
                 <div>
-                  <p className="text-base">
-                    {conversation?.username || "Unknown"}
-                  </p>
+                  <p className="text-base">{c?.username || "Unknown"}</p>
                   <p
                     className={`text-base ${
-                      conversation?.sentiment >= 50
-                        ? "text-green-500"
-                        : "text-red-500"
+                      c?.sentiment >= 50 ? "text-green-500" : "text-red-500"
                     }`}
                   >
-                    {conversation?.sentiment}% Positive
+                    {c?.sentiment}% Positive
                   </p>
                 </div>
               </div>
@@ -768,16 +764,13 @@ const EngagementTab = () => {
         {/* Middle Column - Chat */}
         <div className="col-span-5">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-lg p-4">
-            {selectedConversation && (
+            {selectedConversation ? (
               <>
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h2 className="text-md font-semibold">
                       {selectedConversation.recipientUsername || "Unknown"}
                     </h2>
-                    <p className="text-md text-gray-500">
-                      {selectedConversation.recipientId}@instagram.com
-                    </p>
                   </div>
                 </div>
 
@@ -909,6 +902,10 @@ const EngagementTab = () => {
                   </button>
                 </div>
               </>
+            ) : (
+              <div className="text-center text-gray-500 mt-10">
+                Select a conversation to start chatting
+              </div>
             )}
           </div>
         </div>
