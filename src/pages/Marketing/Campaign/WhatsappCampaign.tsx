@@ -50,7 +50,7 @@ const WhatsappCampaign: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
   const [_secretToken, setSecretToken] = useState("");
-  const [whatsappName, setWhatsappName] = useState("");
+  const [_whatsappName, setWhatsappName] = useState("");
   const whatsappNumbers = useSelector(
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );

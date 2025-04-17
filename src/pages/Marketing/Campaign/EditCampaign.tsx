@@ -54,6 +54,9 @@ const EditWhatsappCampaign: React.FC = () => {
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
 
+  // Add this line somewhere in your component to "use" the variable
+  console.log("WhatsApp numbers available:", whatsappNumbers?.length || 0);
+
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates
   );
