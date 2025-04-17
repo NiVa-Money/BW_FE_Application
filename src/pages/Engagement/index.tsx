@@ -458,13 +458,17 @@ const EngagementTab = () => {
   useEffect(() => {
     const fetchIntegrations = async () => {
       try {
-        const data = await getInstagramData();
-        setAvailableIntegrations(data || []);
-        if (data.length > 0) {
-          setIntegrationId(data[0].id);
+        const response = await getInstagramData();
+        // Extract the `data` array from the response
+        const integrations = Array.isArray(response?.data) ? response.data : [];
+        setAvailableIntegrations(integrations);
+        if (integrations.length > 0) {
+          // Use `_id` as the integration ID, as per the response structure
+          setIntegrationId(integrations[0]._id);
         }
       } catch (error) {
         console.error("Error fetching Instagram integrations:", error);
+        setAvailableIntegrations([]);
       }
     };
 
