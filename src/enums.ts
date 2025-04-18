@@ -233,7 +233,7 @@ export enum MODULE_MAPPING {
 }
 
 export enum ROLES {
-  SUPERADMIN = "Super Admin",
-  AGENT = "Agent",
-  MANAGER = "Manager",
+  SUPERADMIN = "SUPERADMIN",
+  AGENT = "AGENT",
+  MANAGER = "MANAGER",
 }
