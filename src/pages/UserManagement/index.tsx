@@ -11,7 +11,8 @@ import {
 import { RootState } from "../../store";
 import { COLORS } from "../../constants";
 import StackedAvatars from "../../components/StackedAvatars";
-import ConfirmationModal from "../../components/ConfirmationModal";
+import ConfirmationModal from "../../components/confirmationModal";
+
 
 type User = {
   firstName: string;
@@ -48,9 +49,8 @@ const colors = [
 
 const StatCard = ({ label, value, component }) => (
   <div
-    className={`rounded-xl p-4 flex items-center max-w-full w-full ${
-      component ? "flex justify-between" : ""
-    }`}
+    className={`rounded-xl p-4 flex items-center max-w-full w-full ${component ? "flex justify-between" : ""
+      }`}
     style={{ backgroundColor: COLORS.LIGHTLAVENDER }}
   >
     <div>
@@ -75,24 +75,24 @@ const userData = (users) => {
 const UserHeader: React.FC<UserHeaderProps> = ({ users }) => {
   const processedStats: StatItem[] = users?.length
     ? [
-        {
-          label: "Total Number Of Employees",
-          value: "100",
-        },
-        {
-          label: "Active Logs",
-          value: "5",
-          component: <StackedAvatars userData={userData(users)} />,
-        },
-        {
-          label: "Managers",
-          value: "9",
-        },
-        {
-          label: "Supervisions",
-          value: "8",
-        },
-      ]
+      {
+        label: "Total Number Of Employees",
+        value: "100",
+      },
+      {
+        label: "Active Logs",
+        value: "5",
+        component: <StackedAvatars userData={userData(users)} />,
+      },
+      {
+        label: "Managers",
+        value: "9",
+      },
+      {
+        label: "Supervisions",
+        value: "8",
+      },
+    ]
     : [];
 
   return (
@@ -150,7 +150,7 @@ const UserCard = ({ user, onEdit, onDelete }) => (
 const UserManagement = () => {
   const dispatch = useDispatch();
   const usersListRedux = useSelector(
-    (state: RootState) => state.users?.lists?.data
+    (state: RootState) => state.users?.lists?.data?.data?.users
   );
 
   const [users, setUsers] = useState([]);
@@ -214,23 +214,8 @@ const UserManagement = () => {
 
   useEffect(() => {
     if (usersListRedux !== null || undefined) {
-      const obj = [
-        {
-          firstName: "Sunny",
-          lastName: "Ramani",
-          emailId: "info@nitakitchenware.com",
-          mobileNo: "+91 8080648674",
-          status: "active",
-          roleName: "Super Admin",
-          module_maps: [
-            2, 2.1, 2.2, 3, 5, 5.1, 5.2, 8, 10, 1, 12, 12.1, 2.3, 5.4, 5.3,
-          ],
-          roleId: "679a63a83272691bfd8b7155",
-          _id: 122333,
-        },
-      ];
-      setUsers(obj);
-      // setUsers(usersListRedux);
+
+      setUsers(usersListRedux);
     }
   }, [usersListRedux]);
 
