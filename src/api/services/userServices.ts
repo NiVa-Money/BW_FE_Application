@@ -9,14 +9,14 @@ export const getUsersService = async () => {
   }
 };
 
-export const createUserService = async (payload)=>{
+export const createUserService = async (payload) => {
   try {
-    const response = await axiosInstance.post('/user/createUser', payload );
+    const response = await axiosInstance.post("/user/createUser", payload);
     return response.data;
   } catch {
     throw new Error("Error: Creating new user");
   }
-}
+};
 
 export const getDeleteUserService = async (payload) => {
   try {
@@ -29,4 +29,3 @@ export const getDeleteUserService = async (payload) => {
     throw new Error("Error: Getting user all session");
   }
 };
-``
