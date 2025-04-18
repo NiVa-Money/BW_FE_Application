@@ -146,7 +146,7 @@ const UserCard = ({ user, onEdit, onDelete }) => (
 
       <button
         className=" text-red-600"
-        onClick={() => onDelete(user._id)}
+        onClick={() => onDelete(user.id)}
         aria-label={`Delete ${user.firstName}`}
       >
         <DeleteIcon />
@@ -255,7 +255,7 @@ const UserManagement = () => {
       <section className="space-y-4">
         {usersData?.users?.map((user) => (
           <UserCard
-            key={user._id}
+            key={user.id}
             user={user}
             onEdit={handleEditUser}
             onDelete={handleDeleteClick}
