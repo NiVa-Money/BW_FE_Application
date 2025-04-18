@@ -11,7 +11,7 @@ import {
 import { RootState } from "../../store";
 import { COLORS } from "../../constants";
 import StackedAvatars from "../../components/StackedAvatars";
-import ConfirmationModal from "../../components/ConfirmationModal";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 type User = {
   firstName: string;
@@ -263,7 +263,7 @@ const UserManagement = () => {
         ))}
       </section>
 
-      <ConfirmationModal
+      <ConfirmationDialog
         open={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);

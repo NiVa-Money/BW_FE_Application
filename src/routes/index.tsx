@@ -3,7 +3,6 @@ import Login from "../pages/login";
 import SignUp from "../pages/Signup";
 // import Dashboard from "../pages/Dashboard";
 import DashBoard from "../pages/DashboardNew";
-import AdminPanel from "../pages/AdminPanel";
 import CreateBot from "../pages/CreateBot";
 import IntegrationsPage from "../pages/Integration";
 import EngagementTab from "../pages/Engagement";

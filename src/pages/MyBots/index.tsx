@@ -12,7 +12,6 @@ import {
 import { RootState } from "../../store";
 import { formatDateString } from "../../hooks/functions";
 import { useNavigate } from "react-router-dom";
-import ConfirmationModal from "../../components/ConfirmationModal";
 import ExportIntegrationModal from "../../components/exportIntegrationModal";
 import { notifyError } from "../../components/Toast";
 import TestBotModal from "../../components/TestBotModal";
@@ -22,6 +21,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileExportIcon from "@mui/icons-material/FileUpload";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 const MyBots: React.FC = () => {
   const dispatch = useDispatch();
@@ -244,7 +244,7 @@ const MyBots: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <ConfirmationModal
+      <ConfirmationDialog
         description="If you delete this bot, it cannot be restored. You will need to create a new one. Please consider this carefully before proceeding."
         confirmText="Delete"
         image="/assets/delete_bot.svg"

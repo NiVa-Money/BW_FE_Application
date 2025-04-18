@@ -165,7 +165,7 @@ interface CreateBotRightContainerProps {
   color: string;
   font: string;
   botSmartness: string;
-  showPulsingLogo: boolean;
+  showPulsingLogo?: boolean;
   botSmartnessHandle: any;
   greetingMessage: string;
 }

@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { COLORS } from "../constants";
 
-interface ConfirmationModalProps {
+interface ConfirmationDialogProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -25,7 +25,7 @@ interface ConfirmationModalProps {
   onReasonChange?: (reason: string) => void;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   open,
   onClose,
   onConfirm,
@@ -117,4 +117,4 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   );
 };
 
-export default ConfirmationModal;
+export default ConfirmationDialog;
