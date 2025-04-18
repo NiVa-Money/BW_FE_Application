@@ -11,8 +11,7 @@ import {
 import { RootState } from "../../store";
 import { COLORS } from "../../constants";
 import StackedAvatars from "../../components/StackedAvatars";
-import ConfirmationModal from "../../components/confirmationModal";
-
+import ConfirmationModal from "../../components/ConfirmationModal";
 
 type User = {
   firstName: string;
@@ -21,8 +20,9 @@ type User = {
   mobileNo: string;
   status: "active" | "inactive" | "registered";
   roleName: string;
-  module_mapS: number[];
-  _id: string;
+  module_maps: number[];
+  roleId: string;
+  id: string;
 };
 
 interface StatItem {
@@ -32,7 +32,14 @@ interface StatItem {
 }
 
 interface UserHeaderProps {
-  users: User[];
+  usersData: {
+    users: User[];
+    totalCount: number;
+    managersCount: number;
+    adminsCount: number;
+    agentsCount: number;
+    superAdminsCount: number;
+  };
 }
 
 const colors = [
@@ -49,8 +56,9 @@ const colors = [
 
 const StatCard = ({ label, value, component }) => (
   <div
-    className={`rounded-xl p-4 flex items-center max-w-full w-full ${component ? "flex justify-between" : ""
-      }`}
+    className={`rounded-xl p-4 flex items-center max-w-full w-full ${
+      component ? "flex justify-between" : ""
+    }`}
     style={{ backgroundColor: COLORS.LIGHTLAVENDER }}
   >
     <div>
@@ -72,28 +80,28 @@ const userData = (users) => {
   }));
 };
 
-const UserHeader: React.FC<UserHeaderProps> = ({ users }) => {
-  const processedStats: StatItem[] = users?.length
-    ? [
-      {
-        label: "Total Number Of Employees",
-        value: "100",
-      },
-      {
-        label: "Active Logs",
-        value: "5",
-        component: <StackedAvatars userData={userData(users)} />,
-      },
-      {
-        label: "Managers",
-        value: "9",
-      },
-      {
-        label: "Supervisions",
-        value: "8",
-      },
-    ]
-    : [];
+const UserHeader: React.FC<UserHeaderProps> = ({ usersData }) => {
+  const processedStats: StatItem[] = [
+    {
+      label: "Total Number Of Employees",
+      value: usersData?.totalCount || 0,
+    },
+    {
+      label: "Active Logs",
+      value:
+        usersData?.users?.filter((user) => user.status === "active").length ||
+        0,
+      component: <StackedAvatars userData={userData(usersData?.users || [])} />,
+    },
+    {
+      label: "Managers",
+      value: usersData?.managersCount || 0,
+    },
+    {
+      label: "Super Admins",
+      value: usersData?.superAdminsCount || 0,
+    },
+  ];
 
   return (
     <div className="flex justify-between items-center mb-4 gap-4">
@@ -149,11 +157,18 @@ const UserCard = ({ user, onEdit, onDelete }) => (
 
 const UserManagement = () => {
   const dispatch = useDispatch();
-  const usersListRedux = useSelector(
-    (state: RootState) => state.users?.lists?.data?.data?.users
+  const usersData = useSelector(
+    (state: RootState) =>
+      state.users?.lists?.data?.data || {
+        users: [],
+        totalCount: 0,
+        managersCount: 0,
+        adminsCount: 0,
+        agentsCount: 0,
+        superAdminsCount: 0,
+      }
   );
 
-  const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -186,13 +201,9 @@ const UserManagement = () => {
   }, [userToDelete, deleteReason]);
 
   const handleSaveUser = (userData) => {
-    if (editingUser?.id) {
+    if (editingUser?._id) {
       // Update existing user
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === editingUser.id ? { ...user, ...userData } : user
-        )
-      );
+      // You might want to dispatch an update action here instead
     } else {
       // Add new user
       const payload = {
@@ -210,13 +221,6 @@ const UserManagement = () => {
     setIsModalOpen(false);
     setEditingUser(null);
   }, []);
-
-  useEffect(() => {
-    if (usersListRedux !== null || undefined) {
-
-      setUsers(usersListRedux);
-    }
-  }, [usersListRedux]);
 
   useEffect(() => {
     dispatch(getUsersAction());
@@ -237,7 +241,7 @@ const UserManagement = () => {
         </p>
       </header>
 
-      <UserHeader users={users} />
+      <UserHeader usersData={usersData} />
 
       <div className="flex justify-end mb-6">
         <button
@@ -249,7 +253,7 @@ const UserManagement = () => {
       </div>
 
       <section className="space-y-4">
-        {users?.map((user) => (
+        {usersData?.users?.map((user) => (
           <UserCard
             key={user._id}
             user={user}
