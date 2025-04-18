@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { COLORS } from "../../constants";
 
 export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
   const [pulse, setPulse] = useState(0);
@@ -12,12 +13,9 @@ export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Calculate the pulsing effect using sine wave
-  const pulseScale = Math.sin(pulse * 0.06) * 0.15 + 1.1; // Oscillates between 0.95 and 1.25
-  const pulseOpacity = Math.sin(pulse * 0.06) * 0.3 + 0.7; // Oscillates between 0.4 and 1.0
-
-  // Add hover scale effect
-  const hoverScale = isHovered ? 1.03 : 1;
+  // pulsing effect
+  const pulseScale = Math.sin(pulse * 0.06) * 0.15 + 1.4; // Oscillates between 1.25 and 1.55
+  const pulseOpacity = Math.sin(pulse * 0.06) * 0.3 + 0.3; // Oscillates between 0 and 0.6
 
   return (
     <div className="flex items-center justify-center">
@@ -25,9 +23,23 @@ export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
         className="relative cursor-pointer transition-transform duration-300"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        style={{ transform: `scale(${hoverScale})` }}
+        style={{ transform: isHovered ? "scale(1.1)" : "scale(1)" }}
       >
-        {/* Outer glow layer */}
+        {/* Constant inner glow layer */}
+        <div
+          className="absolute rounded-full bg-purple-600 blur-md"
+          style={{
+            top: "50%",
+            left: "50%",
+            width: "80px",
+            height: "80px",
+            transform: "translate(-50%, -50%) scale(1.2)",
+            opacity: 0.8,
+            zIndex: 0,
+          }}
+        />
+
+        {/* Outer pulsing glow layer */}
         <div
           className="absolute rounded-full bg-purple-500 blur-xl"
           style={{
@@ -42,8 +54,13 @@ export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
         />
 
         {/* Black circle container */}
-        <div className="relative bg-black hover:bg-purple-950 rounded-full w-20 h-20 flex items-center justify-center z-10">
-          {/* Logo image */}
+        <div
+          className="relative rounded-full w-20 h-20 flex items-center justify-center z-10"
+          style={{
+            backgroundColor: isHovered ? COLORS.DARKVIOLET : COLORS.BLACK
+          }}
+        >
+          {/* Logo Logo */}
           <img
             src={imageSrc}
             alt="Agent Logo"

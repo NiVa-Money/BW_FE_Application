@@ -13,4 +13,5 @@ export const COLORS = {
   LAVENDERMIST: "#E7E0EC",
   BLUE: "#78c8f0",
   WHITE: "#FFFFFF",
+  BLACK: "#000000",
 } as const;
