@@ -130,7 +130,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
         setAgentState("disconnected");
       });
 
-      socket.current.on("disconnect", () => {
+      socket.current.on("closeSession", () => {
         console.log("Socket disconnected");
         setIsAgentConnected(false);
       });
