@@ -75,8 +75,7 @@ export const getWhatsAppChatsService = async (payload: {
   botId: string;
   adminPhoneNumberId: string;
   userPhoneNumberId: string;
-  aiLevel: any;
-  humanLevel: any;
+  aiLevel?: any;
   orderName?: string;
   phoneNumber?: string;
   skipLoader?: boolean;
