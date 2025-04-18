@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "../axiosConfig";
 
 export const getSubscriptionService = async () => {
