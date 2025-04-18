@@ -11,9 +11,6 @@ import {
 } from "../../../store/actions/conversationActions";
 import { RootState } from "../../../store";
 import { getBotsAction } from "../../../store/actions/botActions";
-import SessionsList from "./SessionsList";
-import WebsiteSectionData from "./websiteSectionData";
-import WhatsappSectionData from "./whatsappSectionData";
 import { notifyError, notifySuccess } from "../../../components/Toast";
 import StarIcon from "@mui/icons-material/Star";
 import SendIcon from "@mui/icons-material/Send";
@@ -36,8 +33,11 @@ import {
   addToWhatsAppFavoritesService,
   removeFromWhatsAppFavoritesService,
 } from "../../../api/services/conversationServices";
-import { Menu, MenuItem, IconButton, Button } from "@mui/material";
+import { Menu, MenuItem, IconButton, Button , Tooltip as MuiTooltip,  } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SessionsList from "./SessionsList";
+import WhatsappSectionData from "./whatsappSectionData";
+import WebsiteSectionData from "./websiteSectionData";
 
 interface AnalysisSection {
   title: string;
@@ -46,25 +46,17 @@ interface AnalysisSection {
 }
 
 const AllChats = () => {
-  // New state for search functionality
   const [searchType, setSearchType] = useState<"order" | "phone">("order");
   const [searchValue, setSearchValue] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
-
-  // Other states
   const [messages, setMessages] = useState<any>([]);
   const [page, setPage] = useState(1);
-  const sessionsDataRedux = useSelector(
-    (state: RootState) => state?.userChat?.allSession?.data
-  );
-  const [aiLevel] = useState(true);
-  const [humanLevel] = useState(true);
-
+  const [showAIOnly, setShowAIOnly] = useState(false);
   const dispatch = useDispatch();
   const advanceFeatureDataRedux = useSelector(
     (state: RootState) => state?.userChat?.advanceFeature?.data || {}
   );
-  const [botLists, setbotLists] = useState<any>([]);
+  const [botLists, setBotLists] = useState<any>([]);
   const [channelName] = useState([
     { name: "Whatsapp", value: "whatsapp" },
     { name: "Website", value: "website" },
@@ -81,23 +73,21 @@ const AllChats = () => {
   const [isEnablingManualMode, setIsEnablingManualMode] = useState(false);
   const [userMessage, setUserMessage] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [intentVal, setIntentVal] = useState("");
-
+  const [intent, setIntent] = useState(""); // Renamed from intentVal
   const [isBlocked, setIsBlocked] = useState(false);
   const [showBlockInput, setShowBlockInput] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isFavorite, setIsFavorite] = useState(false); // New state for favorite status
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // For menu
-
-  const [filterBlocked] = useState(false);
-  const [filterFavorites] = useState(false);
-
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [handledByFilter, setHandledByFilter] = useState("");
   const [favoriteFilter, setFavoriteFilter] = useState("");
   const [blockFilter, setBlockFilter] = useState("");
 
-  // New search handler function
+  const sessionsDataRedux = useSelector(
+    (state: RootState) => state?.userChat?.allSession?.data
+  );
+
   const handleSearch = async () => {
     if (!botIdVal) {
       notifyError("Please select a bot before searching");
@@ -121,7 +111,7 @@ const AllChats = () => {
       data.phoneNumber = searchValue.trim();
     }
     try {
-      const response = dispatch(getAllSession(data));
+      const response: any = await dispatch(getAllSession(data));
       if (response?.payload?.success) {
         const filteredSessions = response.payload.data.sessions;
         setSearchResults(filteredSessions);
@@ -139,27 +129,7 @@ const AllChats = () => {
         }
       }
     } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  const handleIntentChange = (selectedIntent: string) => {
-    setIntentVal(selectedIntent);
-    if (botIdVal) {
-      const payload: any = {
-        botId: botIdVal,
-        page: 1,
-        channelName: channelNameVal,
-        aiLevel,
-        humanLevel,
-      };
-
-      // Only add intent filter if an intent is selected
-      if (selectedIntent) {
-        payload.intent = selectedIntent;
-      }
-
-      dispatch(getAllSession(payload));
+      console.log(error);
     }
   };
 
@@ -173,7 +143,7 @@ const AllChats = () => {
         value: bot._id,
         name: bot.botName,
       }));
-      setbotLists(formattedBots);
+      setBotLists(formattedBots);
     }
   }, [botsDataRedux, botsDataLoader]);
 
@@ -184,6 +154,29 @@ const AllChats = () => {
       dispatch(getBotsAction(userId));
     }
   }, [userId]);
+
+  const handleIntentChange = (selectedIntent: string) => {
+    setIntent(selectedIntent);
+    if (botIdVal) {
+      const payload: any = {
+        botId: botIdVal,
+        page: 1,
+        channelName: channelNameVal,
+      };
+
+      // Only add aiLevel if showAIOnly is true
+      if (showAIOnly) {
+        payload.aiLevel = true;
+      }
+
+      // Only add intent if it's not "All" (empty string in this case)
+      if (selectedIntent && selectedIntent !== "") {
+        payload.intent = selectedIntent;
+      }
+
+      dispatch(getAllSession(payload));
+    }
+  };
 
   const getChatHistory = async ({
     userPhoneId,
@@ -197,38 +190,45 @@ const AllChats = () => {
     const data: any = {
       botId: botIdVal,
       page,
-      aiLevel,
-      humanLevel,
       channelName: channelNameVal,
-      intentVal,
-      // blockedUsers: filterBlocked ? true : undefined,
-      // favoriteUsers: filterFavorites ? true : undefined,
+    };
 
-      manualModeUsers:
+    // Only add filters if they are not "All"
+    if (intent && intent !== "") {
+      data.intent = intent;
+    }
+    if (handledByFilter && handledByFilter !== "All") {
+      data.manualModeUsers =
         handledByFilter === "AI"
           ? false
           : handledByFilter === "Human"
           ? true
-          : undefined,
-      favoriteUsers:
+          : undefined;
+    }
+    if (favoriteFilter && favoriteFilter !== "All") {
+      data.favoriteUsers =
         favoriteFilter === "Fav"
           ? true
           : favoriteFilter === "Unfav"
           ? false
-          : undefined,
-      blockedUsers:
+          : undefined;
+    }
+    if (blockFilter && blockFilter !== "All") {
+      data.blockedUsers =
         blockFilter === "Block"
           ? true
           : blockFilter === "Unblock"
           ? false
-          : undefined,
-    };
+          : undefined;
+    }
+    if (showAIOnly) {
+      data.aiLevel = true;
+    }
 
     if (userPhoneId) {
       data.userPhoneId = userPhoneId;
     }
 
-    // Include search parameters if search is active
     if (isSearchActive && searchValue) {
       if (searchType === "order") {
         data.orderName = searchValue.trim();
@@ -246,14 +246,14 @@ const AllChats = () => {
     getChatHistory({});
   }, [
     page,
-    aiLevel,
-    humanLevel,
+    showAIOnly,
     isSearchActive,
     searchType,
     searchValue,
     handledByFilter,
     favoriteFilter,
     blockFilter,
+    intent,
   ]);
 
   const [sessionId, setSessionId] = useState("");
@@ -261,12 +261,31 @@ const AllChats = () => {
     (state: RootState) => state?.userChat?.sessionChat?.sessions || []
   );
 
+  // Remove automatic session selection
   useEffect(() => {
-    if (allSessions?.length > 0 && !sessionId) {
+    // Only set sessionId if there's an active filter or search
+    if (
+      allSessions?.length > 0 &&
+      !sessionId &&
+      (isSearchActive ||
+        intent ||
+        showAIOnly ||
+        handledByFilter ||
+        favoriteFilter ||
+        blockFilter)
+    ) {
       const latestSessionId = allSessions[0]._id;
       setSessionId(latestSessionId);
     }
-  }, [allSessions]);
+  }, [
+    allSessions,
+    isSearchActive,
+    intent,
+    showAIOnly,
+    handledByFilter,
+    favoriteFilter,
+    blockFilter,
+  ]);
 
   const [analysisSections, setAnalysisSections] = useState<AnalysisSection[]>([
     {
@@ -306,6 +325,17 @@ const AllChats = () => {
     },
   ]);
 
+  const filterDescriptions = {
+    bot: "Select a specific bot to view its chat sessions.",
+    channel: "Choose the communication channel (e.g., WhatsApp, Website).",
+    intent:
+      "Filter chats based on the detected intent (e.g., Sales Lead, Inquiry).",
+    handledBy: "Filter by who is currently handling the chat (AI or Human).",
+    favorite: "Filter chats by favorite or unfavorite status.",
+    block: "Filter by whether contacts are blocked or unblocked.",
+    aiOnly: "Filter to show only AI-handled chats.",
+  };
+
   const handleSessionSelection = (selectedSessionId: string) => {
     const messagesData =
       channelNameVal !== "whatsapp"
@@ -321,7 +351,6 @@ const AllChats = () => {
         obj._id === selectedSessionId || obj.userPhoneId === selectedSessionId
     );
 
-    // 1. Check if the session is handled by a human
     if (selectedSession?.handledBy === "Human") {
       setTalkWithHuman(true);
     } else {
@@ -342,12 +371,11 @@ const AllChats = () => {
       )
     );
     setSessionId(selectedSessionId);
-    setIsBlocked(selectedSession?.isBlocked || false); // Update block status
-    setIsFavorite(selectedSession?.isFavorite || false); // Update favorite status
+    setIsBlocked(selectedSession?.isBlocked || false);
+    setIsFavorite(selectedSession?.isFavorite || false);
   };
 
   useEffect(() => {
-    // Stop polling if search is active.
     if (isSearchActive) return;
 
     if (
@@ -369,8 +397,7 @@ const AllChats = () => {
               botId: botIdVal,
               adminPhoneNumberId: selectedSession.adminPhoneNumberId,
               userPhoneNumberId: selectedSession.userPhoneId,
-              aiLevel,
-              humanLevel,
+              ...(showAIOnly && { aiLevel: true }),
               ...(isSearchActive &&
                 searchType === "order" && { orderName: searchValue }),
               ...(isSearchActive &&
@@ -386,10 +413,7 @@ const AllChats = () => {
           }
         };
 
-        // Initial fetch.
         fetchWhatsAppChats();
-
-        // Start polling.
         intervalId = setInterval(fetchWhatsAppChats, 5000);
       }
 
@@ -406,10 +430,7 @@ const AllChats = () => {
     isSearchActive,
     searchType,
     searchValue,
-    aiLevel,
-    humanLevel,
-    filterBlocked,
-    filterFavorites,
+    showAIOnly,
   ]);
 
   const handleTalkWithHumanToggle = async (selectedSessionId: string) => {
@@ -427,11 +448,9 @@ const AllChats = () => {
     const userPhoneNumberId = selectedSession?.userPhoneId;
     const action = talkWithHuman ? "remove" : "append";
 
-    // Set loading state immediately
     setIsEnablingManualMode(true);
 
     try {
-      // Make the API call first before changing the UI state
       await enableWhatsAppManualModeService({
         botId: botIdVal,
         adminPhoneNumberId,
@@ -439,9 +458,7 @@ const AllChats = () => {
         action,
       });
 
-      // Update UI state after successful API call
       setTalkWithHuman(!talkWithHuman);
-
       await getChatHistory({ userPhoneId: selectedSessionId });
     } catch (error) {
       console.error("API Error:", error);
@@ -452,7 +469,6 @@ const AllChats = () => {
   };
 
   const getCurrentSession = () => {
-    // If there's no sessions array yet, return null
     if (!sessionsDataRedux?.sessions) {
       return null;
     }
@@ -461,7 +477,6 @@ const AllChats = () => {
     );
   };
 
-  // Handle Block Contact
   const handleBlockContact = async () => {
     if (!blockReason.trim()) {
       setErrorMessage("Please provide a reason for blocking.");
@@ -481,26 +496,21 @@ const AllChats = () => {
         reason: blockReason,
       });
 
-      // Check for actual success message from BE
       if (response?.message === "User blocked successfully") {
-        // Immediate UI update
         setIsBlocked(true);
         setShowBlockInput(false);
         setBlockReason("");
         notifySuccess("Contact blocked successfully!");
-        setErrorMessage(null); // Clear any existing errors
+        setErrorMessage(null);
       } else {
-        // Handle API business logic errors
         setErrorMessage(response?.message || "Failed to block contact.");
       }
     } catch (err) {
-      // Handle network/HTTP errors
       console.error("Block failed:", err);
       setErrorMessage("Failed to block contact. Please try again.");
     }
   };
 
-  // Handle Unblock Contact
   const handleUnblockContact = async () => {
     const selectedSession = getCurrentSession();
     if (!selectedSession) {
@@ -514,9 +524,7 @@ const AllChats = () => {
         userPhoneId: selectedSession.userPhoneId,
       });
 
-      // Check for expected success indicator
       if (response?.message?.includes("unblocked")) {
-        // Adjust based on your actual success message
         setIsBlocked(false);
         notifySuccess("Contact unblocked successfully!");
         setErrorMessage(null);
@@ -529,7 +537,6 @@ const AllChats = () => {
     }
   };
 
-  // Handle Favorite/Unfavorite
   const handleToggleFavorite = async () => {
     const selectedSession = getCurrentSession();
     if (!selectedSession) {
@@ -576,7 +583,6 @@ const AllChats = () => {
   const handleSendMessage = async () => {
     if (!userMessage.trim() || !sessionId) return;
 
-    // Optimistically update UI
     setMessages((prev) => [...prev, { content: userMessage, sender: "agent" }]);
 
     const selectedSession = sessionsDataRedux?.sessions.find(
@@ -633,8 +639,6 @@ const AllChats = () => {
     setChannelNameVal(val);
     setSessionId("");
     setMessages([]);
-    // setIsSearchActive(false);
-    // setSearchValue("");
 
     if (botIdVal?.length) {
       dispatch(
@@ -642,8 +646,7 @@ const AllChats = () => {
           botId: botIdVal,
           page: 1,
           channelName: val,
-          aiLevel,
-          humanLevel,
+          ...(showAIOnly && { aiLevel: true }),
         })
       );
     } else {
@@ -651,21 +654,16 @@ const AllChats = () => {
     }
   };
 
-  // Transform sentiments data for chart
   const transformSentimentsData = (sentiments) => {
     if (!sentiments) return [];
-    // Since sentiments is an object with keys and percentage string values,
-    // convert each to a numeric value.
     return Object.entries(sentiments).map(([name, valueStr]) => ({
       name,
       value: parseInt(valueStr as string, 10),
     }));
   };
 
-  // Transform sales intelligence data for chart
   const transformSalesData = (salesIntelligence) => {
     if (!salesIntelligence) return [];
-    // Extract Lead Conversion Probability as a data point.
     const conversionProbability =
       salesIntelligence["Lead Conversion Probability"] || "0%";
     return [
@@ -677,7 +675,6 @@ const AllChats = () => {
     ];
   };
 
-  // Transform vulnerability data for chart
   const transformVulnerabilityData = (vulnerability) => {
     if (!vulnerability) return [];
     return Object.entries(vulnerability).map(([name, valueStr]) => ({
@@ -741,7 +738,6 @@ const AllChats = () => {
         ) : null}
       </div>
 
-      {/* New Search Section */}
       <div className="flex gap-4 items-center mb-4">
         <select
           value={searchType}
@@ -774,13 +770,6 @@ const AllChats = () => {
             />
           </div>
         )}
-        {/* <button
-          onClick={handleSearch}
-            className="rounded-full bg-[#65558F] text-white px-6 py-3 font-medium hover:bg-[#65558F]/90 transition-colors"
-        >
-          Search
-        </button> */}
-
         <Button
           onClick={handleSearch}
           variant="contained"
@@ -792,7 +781,7 @@ const AllChats = () => {
             py: 1,
             fontWeight: "500",
             "&:hover": {
-              backgroundColor: "#56497A", // or `#65558FE6` for ~90% opacity
+              backgroundColor: "#56497A",
             },
           }}
         >
@@ -800,116 +789,125 @@ const AllChats = () => {
         </Button>
       </div>
 
-      {/* Bot and Channel Selection */}
       <div className="flex gap-2">
-        <select
-          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
-          onChange={(e) => getBotSession(e)}
-          value={botIdVal}
-        >
-          <option value="">Select a bot</option>
-          {botLists.map((bot: { value: string; name: string }) => (
-            <option key={bot.value} value={bot.value}>
-              {bot.name}
+        <MuiTooltip  title={filterDescriptions.bot} placement="top" arrow>
+          <select
+            className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
+            onChange={(e) => getBotSession(e)}
+            value={botIdVal}
+          >
+            <option value="">Select a bot</option>
+            {botLists.map((bot) => (
+              <option key={bot.value} value={bot.value}>
+                {bot.name}
+              </option>
+            ))}
+          </select>
+        </MuiTooltip>
+
+        <MuiTooltip  title={filterDescriptions.channel} placement="top" arrow>
+          <select
+            className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
+            onChange={(e) => getChannelNameHandler(e)}
+            value={channelNameVal}
+          >
+            <option value="">Select a Channel</option>
+            {channelName?.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </MuiTooltip>
+
+        <MuiTooltip  title={filterDescriptions.intent} placement="top" arrow>
+          <select
+            className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
+            value={intent}
+            onChange={(e) => handleIntentChange(e.target.value)}
+          >
+            <option value="">Filter by intent</option>
+            <option value="Sales_Lead">Sales Lead</option>
+            <option value="Inquiry">Inquiry</option>
+            <option value="Complaint">Complaint</option>
+            <option value="Feedback">Feedback</option>
+            <option value="Other">Other</option>
+          </select>
+        </MuiTooltip>
+
+        <MuiTooltip  title={filterDescriptions.handledBy} placement="top" arrow>
+          <select
+            className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+            value={handledByFilter}
+            onChange={(e) => setHandledByFilter(e.target.value)}
+          >
+            <option value="" disabled hidden>
+              Currently Handled By
             </option>
-          ))}
-        </select>
+            <option value="All">All</option>
+            <option value="AI">AI</option>
+            <option value="Human">Human</option>
+          </select>
+        </MuiTooltip>
 
-        <select
-          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
-          onChange={(e) => getChannelNameHandler(e)}
-          value={channelNameVal}
-        >
-          <option value="">Select a Channel</option>
-          {channelName?.map((item: { value: string; name: string }) => (
-            <option key={item.value} value={item.value}>
-              {item.name}
+        <MuiTooltip  title={filterDescriptions.favorite} placement="top" arrow>
+          <select
+            className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+            value={favoriteFilter}
+            onChange={(e) => setFavoriteFilter(e.target.value)}
+          >
+            <option value="" disabled hidden>
+              Favourite/Unfavourite
             </option>
-          ))}
-        </select>
+            <option value="All">All</option>
+            <option value="Fav">Favourite</option>
+            <option value="Unfav">Unfavourite</option>
+          </select>
+        </MuiTooltip>
 
-        <select
-          className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
-          value={intentVal}
-          onChange={(e) => handleIntentChange(e.target.value)}
-        >
-          <option value="">Filter by intent</option>
-          <option value="Sales_Lead">Sales Lead</option>
-          <option value="Inquiry">Inquiry</option>
-          <option value="Complaint">Complaint</option>
-          <option value="Feedback">Feedback</option>
-          <option value="Other">Other</option>
-        </select>
+        <MuiTooltip  title={filterDescriptions.block} placement="top" arrow>
+          <select
+            className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+            value={blockFilter}
+            onChange={(e) => setBlockFilter(e.target.value)}
+          >
+            <option value="" disabled hidden>
+              Block Status
+            </option>
+            <option value="All">All</option>
+            <option value="Block">Block</option>
+            <option value="Unblock">Unblock</option>
+          </select>
+        </MuiTooltip>
 
-        <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
-          value={handledByFilter}
-          onChange={(e) => setHandledByFilter(e.target.value)}
-        >
-          <option value="" disabled hidden>
-            Handled By
-          </option>
-          <option value="All">All</option>
-          <option value="AI">AI</option>
-          <option value="Human">Human</option>
-        </select>
-
-        <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
-          value={favoriteFilter}
-          onChange={(e) => setFavoriteFilter(e.target.value)}
-        >
-          <option value="" disabled hidden>
-            Favourite/Unfavourite
-          </option>
-          <option value="All">All</option>
-          <option value="Fav">Favourite</option>
-          <option value="Unfav">Unfavourite</option>
-        </select>
-
-        <select
-          className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
-          value={blockFilter}
-          onChange={(e) => setBlockFilter(e.target.value)}
-        >
-          <option value="" disabled hidden>
-            Block Status
-          </option>
-          <option value="All">All</option>
-          <option value="Block">Block</option>
-          <option value="Unblock">Unblock</option>
-        </select>
+        <MuiTooltip  title={filterDescriptions.aiOnly} placement="top" arrow>
+          <select
+            className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
+            value={showAIOnly ? "AI" : "All"}
+            onChange={(e) => setShowAIOnly(e.target.value === "AI")}
+          >
+            <option value="All">All Chats</option>
+            <option value="AI">AI Chats Only</option>
+          </select>
+        </MuiTooltip>
       </div>
 
-      {/* Main Container */}
       <div className="flex bg-gray-100 h-[calc(100vh-120px)]">
         <SessionsList
-          // botLists={botLists}
           onSessionSelect={handleSessionSelection}
           channelNameVal={channelNameVal}
           setPage={setPage}
           page={page}
           sessionId={sessionId}
-          // aiLevel={aiLevel}
-          // humanLevel={humanLevel}
           searchType={searchType}
           searchValue={isSearchActive ? searchValue : ""}
           isSearchActive={isSearchActive}
-          // sessionsData={
-          //   isSearchActive ? searchResults : sessionsDataRedux?.sessions || []
-          // }
-          sessionsData={(isSearchActive
-            ? searchResults
-            : sessionsDataRedux?.sessions || []
-          ).filter((session) => {
-            const showBlocked = filterBlocked ? session.isBlocked : true;
-            const showFavorite = filterFavorites ? session.isFavorite : true;
-            return showBlocked && showFavorite;
-          })}
+          sessionsData={
+            isSearchActive ? searchResults : sessionsDataRedux?.sessions || []
+          }
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Chat Header */}
           {sessionId && channelNameVal === "whatsapp" && (
             <div className="p-4 border-b flex justify-between items-center bg-gray-300">
               <div className="flex items-center">
@@ -967,11 +965,13 @@ const AllChats = () => {
               <WhatsappSectionData messages={messages} />
             ) : sessionId ? (
               <WebsiteSectionData messages={messages} />
-            ) : null}
+            ) : (
+              <div className="text-center text-gray-500">
+                Select a session to view messages
+              </div>
+            )}
           </div>
 
-          {/* Block / Unblock and Chat Input Section */}
-          {/* Add Error Popup Component */}
           {errorMessage && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-6 rounded-lg max-w-md w-full">
@@ -987,9 +987,7 @@ const AllChats = () => {
             </div>
           )}
 
-          {/* Block/Unblock Section */}
           <div className="p-4 border-t flex flex-col gap-2">
-            {/* Block Reason Input */}
             {showBlockInput && !isBlocked && (
               <div className="flex flex-col gap-2">
                 <input
@@ -1008,7 +1006,6 @@ const AllChats = () => {
               </div>
             )}
 
-            {/* Blocked Message */}
             {isBlocked && (
               <div className="text-sm text-gray-500 italic">
                 This contact is blocked. You cannot send messages.
@@ -1016,14 +1013,12 @@ const AllChats = () => {
             )}
           </div>
 
-          {/* Human Toggle */}
           <div className="flex items-end justify-end space-x-2 mb-4">
             <label className="inline-flex items-center mr-4 cursor-pointer">
               <input
                 type="checkbox"
                 className="sr-only peer"
                 checked={talkWithHuman}
-                value={userMessage}
                 onChange={() => handleTalkWithHumanToggle(sessionId)}
                 disabled={isEnablingManualMode || !sessionId}
               />
@@ -1032,13 +1027,13 @@ const AllChats = () => {
               </span>
               <div
                 className="
-          relative w-12 h-6 ml-2
-          bg-gray-200 rounded-full
-          peer-checked:bg-[#65558F]
-          after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-          after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
-          peer-checked:after:translate-x-6
-        "
+                  relative w-12 h-6 ml-2
+                  bg-gray-200 rounded-full
+                  peer-checked:bg-[#65558F]
+                  after:content-[''] after:absolute after:top-[2px] after:left-[2px]
+                  after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
+                  peer-checked:after:translate-x-6
+                "
               ></div>
             </label>
           </div>
@@ -1046,11 +1041,10 @@ const AllChats = () => {
           {talkWithHuman && (
             <div className="mt-2 text-base ml-2 font-medium text-red-700">
               This chat is getting handled by a human. If you want AI to handle
-              the conversation , please disable the toggle.
+              the conversation, please disable the toggle.
             </div>
           )}
 
-          {/* Message Input */}
           {talkWithHuman && (
             <div className="p-4 border-t flex items-center space-x-2">
               <input
@@ -1223,23 +1217,18 @@ const AllChats = () => {
 
                     {isVulnerability && (
                       <div className="bg-red-50 border border-red-200 shadow-sm p-4 rounded-lg w-full max-w-md">
-                        {/* Title */}
                         <h4 className="text-red-700 font-semibold text-center mb-4">
                           Vulnerability Analysis
                         </h4>
-
-                        {/* Existing Vulnerability List */}
                         <div className="mt-6 space-y-4">
                           {vulnerabilityData.map((vuln, index) => (
                             <div
                               key={index}
                               className="flex items-center justify-between gap-2"
                             >
-                              {/* Vulnerability Name */}
                               <div className="w-2/5 text-sm font-medium text-black break-words whitespace-normal">
                                 {vuln.name}
                               </div>
-                              {/* Progress Meter */}
                               <div className="flex-1 ml-2">
                                 <div className="relative w-full">
                                   <div
@@ -1249,21 +1238,15 @@ const AllChats = () => {
                                   <div className="h-2 bg-gray-200 rounded-full" />
                                 </div>
                               </div>
-                              {/* Percentage */}
                               <div className="text-sm font-semibold text-red-700 w-12 text-right">
                                 {vuln.value}%
                               </div>
                             </div>
                           ))}
                         </div>
-
-                        {/* New Vulnerability Meter */}
                         <div className="mt-6">
                           <div className="relative h-16">
-                            {/* Meter Background */}
                             <div className="h-3 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full w-full" />
-
-                            {/* Indicator Line */}
                             <div
                               className="absolute top-0 -translate-x-1/2"
                               style={{ left: `${overallVulnerabilityScore}%` }}
@@ -1273,8 +1256,6 @@ const AllChats = () => {
                                 {overallVulnerabilityScore}%
                               </div>
                             </div>
-
-                            {/* Zone Labels */}
                             <div className="flex justify-between text-xs mt-2">
                               <span className="text-red-700">
                                 Do Not Proceed
@@ -1283,8 +1264,6 @@ const AllChats = () => {
                               <span className="text-green-700">Safe</span>
                             </div>
                           </div>
-
-                          {/* Legend */}
                           <div className="mt-4 text-sm text-gray-800">
                             <p>
                               Overall System Vulnerability Score:{" "}

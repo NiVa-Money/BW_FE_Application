@@ -191,10 +191,10 @@
 
 // export default SessionsList;
 
-
 // src/components/AllChats/SessionsList.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
+import { formatDateString } from "../../../hooks/functions";
 
 interface SessionsListProps {
   onSessionSelect: (sessionId: string) => void;
@@ -223,76 +223,86 @@ const SessionsList: React.FC<SessionsListProps> = ({
   };
 
   const handleSessionClick = (item: any) => {
-    const id =
-      channelNameVal === "whatsapp" ? item.userPhoneId : item._id;
+    const id = channelNameVal === "whatsapp" ? item.userPhoneId : item._id;
     onSessionSelect(id);
   };
 
   return (
-    <div className="w-80 bg-white p-4 border-r overflow-y-auto">
+    <div className="w-80 pl-0 bg-white p-4 border-r overflow-y-scroll">
       {sessionsData.length === 0 ? (
-        <div className="text-center text-gray-500 p-4">
-          No sessions found
-        </div>
+        <div className="text-center text-gray-500 p-4">No sessions found</div>
       ) : (
-        sessionsData.map((item) => {
-          const key = item._id || item.userPhoneId;
-          const isActive =
-            channelNameVal === "whatsapp"
-              ? sessionId === item.userPhoneId
-              : sessionId === item._id;
-          return (
+        <div className="flex flex-col gap-1">
+          {sessionsData.map((item, index) => (
             <div
-              key={key}
-              className={`flex justify-between items-center p-2 rounded cursor-pointer hover:bg-gray-100 ${
-                isActive ? "bg-purple-100" : ""
-              }`}
+              key={item._id || item.userPhoneId}
+              className="relative flex justify-between items-center p-[8px] rounded-[10px] cursor-pointer hover:bg-gray-100"
+              style={{
+                backgroundColor: (
+                  channelNameVal === "whatsapp"
+                    ? sessionId === item?.userPhoneId || sessionId === item?._id
+                    : sessionId === item?._id
+                )
+                  ? "#413d4852"
+                  : "#EADDFF29",
+              }}
               onClick={() => handleSessionClick(item)}
             >
-              <div>
-                <div className="font-medium">
-                  {item.userName || "Unknown User"}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {new Date(item.createdAt).toLocaleString()}
-                </div>
+              <div className="flex flex-col">
+                {channelNameVal === "whatsapp" ? (
+                  <>
+                    <span className="font-medium">
+                      {item.userName || "Unknown User"}
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      {item.userPhoneId || "No Phone ID"}
+                    </span>
+                  </>
+                ) : (
+                  <span>Session {index + 1}</span>
+                )}
+                <span className="text-xs text-gray-500">
+                  {item?.createdAt ? formatDateString(item.createdAt) : ""}
+                </span>
               </div>
+
               <div className="flex items-center gap-2">
                 {item.unreadCount > 0 && (
-                  <div className="bg-green-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  <div className="bg-[#005C4B] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                     {item.unreadCount}
                   </div>
                 )}
                 <img
+                  width={30}
+                  height={30}
                   src={channelNameImages[channelNameVal]}
                   alt={channelNameVal}
-                  width={24}
-                  height={24}
+                  className="ml-2"
                 />
               </div>
             </div>
-          );
-        })
+          ))}
+        </div>
       )}
 
-      {sessionsData.length >= 20 && setPage && (
+      {sessionsData?.length > 0 && sessionsData?.length >= 20 ? (
         <div className="flex justify-between mt-4">
           <button
             disabled={page === 1}
-            onClick={() => setPage(page! - 1)}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            onClick={() => setPage && setPage(page! - 1)}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
           >
             Previous
           </button>
-          <span>Page: {page}</span>
+          <span className="mt-2">Page: {page}</span>
           <button
-            onClick={() => setPage(page! + 1)}
-            className="px-3 py-1 bg-gray-200 rounded"
+            onClick={() => setPage && setPage(page! + 1)}
+            className="px-4 py-2 bg-gray-300 rounded"
           >
             Next
           </button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
