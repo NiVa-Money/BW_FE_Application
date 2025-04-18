@@ -10,12 +10,14 @@ import {
   generateTextToImageService,
 } from "../../../api/services/videoGenerateServices";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ComingSoon from "../../../components/ComingSoon";
 
 const OmnigenUI = () => {
   const [prompt, setPrompt] = useState("");
   const [mode, setMode] = useState<"text" | "image" | "video">("text");
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedImage] = useState<File | null>(null); 
+  // setUploadedImage
+  // const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,13 +60,13 @@ const OmnigenUI = () => {
     if (mode === "text" || mode === "image") loadContent();
   }, [mode]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setUploadedImage(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     setUploadedImage(file);
+  //     setPreviewUrl(URL.createObjectURL(file));
+  //   }
+  // };
 
   const handleEnhancePrompt = async () => {
     let requestType = "";
@@ -211,51 +213,52 @@ const OmnigenUI = () => {
 
             {/* For Image-to-Video */}
             {mode === "video" ? (
-              <div className="mb-6">
-                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-white hover:border-[#65558F] transition-colors group">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <div className="w-12 h-12 mb-4 bg-[#65558F]/10 group-hover:bg-[#65558F]/20 rounded-full flex items-center justify-center transition-colors">
-                      <svg
-                        className="w-6 h-6 text-[#65558F]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                    <p className="mb-2 text-sm text-gray-600">
-                      <span className="font-semibold text-[#65558F]">
-                        Click to upload
-                      </span>{" "}
-                      or drag and drop
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      PNG, JPG, or WEBP (MAX. 5MB)
-                    </p>
-                  </div>
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                  />
-                </label>
-                {previewUrl && (
-                  <div className="mt-4">
-                    <img
-                      src={previewUrl}
-                      alt="Upload preview"
-                      className="max-h-48 rounded-xl mx-auto shadow-md"
-                    />
-                  </div>
-                )}
-              </div>
+               <ComingSoon />
+              // <div className="mb-6">
+              //   <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-white hover:border-[#65558F] transition-colors group">
+              //     <div className="flex flex-col items-center justify-center pt-5 pb-6">
+              //       <div className="w-12 h-12 mb-4 bg-[#65558F]/10 group-hover:bg-[#65558F]/20 rounded-full flex items-center justify-center transition-colors">
+              //         <svg
+              //           className="w-6 h-6 text-[#65558F]"
+              //           fill="none"
+              //           stroke="currentColor"
+              //           viewBox="0 0 24 24"
+              //         >
+              //           <path
+              //             strokeLinecap="round"
+              //             strokeLinejoin="round"
+              //             strokeWidth="2"
+              //             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              //           />
+              //         </svg>
+              //       </div>
+              //       <p className="mb-2 text-sm text-gray-600">
+              //         <span className="font-semibold text-[#65558F]">
+              //           Click to upload
+              //         </span>{" "}
+              //         or drag and drop
+              //       </p>
+              //       <p className="text-xs text-gray-400">
+              //         PNG, JPG, or WEBP (MAX. 5MB)
+              //       </p>
+              //     </div>
+              //     <input
+              //       type="file"
+              //       className="hidden"
+              //       accept="image/*"
+              //       onChange={handleFileChange}
+              //     />
+              //   </label>
+              //   {previewUrl && (
+              //     <div className="mt-4">
+              //       <img
+              //         src={previewUrl}
+              //         alt="Upload preview"
+              //         className="max-h-48 rounded-xl mx-auto shadow-md"
+              //       />
+              //     </div>
+              //   )}
+              // </div>
             ) : (
               /* For Text-to-Video or Text-to-Image */
               <div className="relative mb-6">
