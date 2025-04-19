@@ -61,7 +61,7 @@ export default function PulsingGlowLogo({
           }}
         />
 
-        {/* Black circle container */}
+        {/* Circle container */}
         <div
           className="relative rounded-full w-20 h-20 flex items-center justify-center z-10"
           style={{
