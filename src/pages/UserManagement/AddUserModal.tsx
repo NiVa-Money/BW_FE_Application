@@ -247,7 +247,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           <div className="mb-6">
             <h3 className="text-base font-medium text-gray-700 mb-2">Access</h3>
             <div
-              className="grid grid-cols-2 gap-x-4 gap-y-3 pr-3"
+              className="grid grid-cols-2 gap-x-4 gap-y-3 p-1"
               style={{
                 maxHeight: "20vh",
                 overflowY: "auto",
