@@ -97,6 +97,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         role: values.role,
         id: values.id,
       });
+      formik.resetForm();
       onClose();
     },
     enableReinitialize: true, // This allows the form to reinitialize when props change
