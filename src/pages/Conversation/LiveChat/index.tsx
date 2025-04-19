@@ -1,10 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { SmartToy, Person, Send } from "@mui/icons-material";
 import Switch from "@mui/material/Switch";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import io, { Socket } from "socket.io-client";
+import io from "socket.io-client";
 import CloseIcon from "@mui/icons-material/Close";
 import { getAllSessionLive } from "../../../store/actions/conversationActions";
 import { getBotsAction } from "../../../store/actions/botActions";
@@ -12,18 +19,20 @@ import LiveSessionList from "./LiveSession";
 import { createSelector } from "reselect";
 
 const LiveChat: React.FC = (): React.ReactElement => {
+  const socket = useRef(null);
   const dispatch = useDispatch();
 
   // ---------- State ----------
   const [isAgentAssistOpen, setIsAgentAssistOpen] = useState(true);
   const [messages, setMessages] = useState<any[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState<string>("");
-  const [socket, setSocket] = useState<Socket | null>(null);
   const [newMessage, setNewMessage] = useState<string>("");
   const [isChatEnabled, setIsChatEnabled] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [agentState, setAgentState] = useState<string>("disconnected");
+  const [, setAgentState] = useState<string>("disconnected");
   const [isAIEnabled, setIsAIEnabled] = useState(false);
+  const [isAgentConnected, setIsAgentConnected] = useState(false);
+  const [isAgentTyping, setIsAgentTyping] = useState(false);
 
   // ---------- Memoized Selectors ----------
   const selectUserChat = (state: RootState) => state.userChat;
@@ -40,6 +49,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   // ---------- Derived Values ----------
   const userId = localStorage.getItem("user_id");
+  const botId = botsDataRedux?.[0]?._id;
   const botLists = useMemo(
     () =>
       (botsDataRedux || []).map((bot: any) => ({
@@ -56,62 +66,83 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   // Socket initialization and management
   useEffect(() => {
-    if (!selectedSessionId || !userId) return;
-
-    const newSocket = io(import.meta.env.VITE_FIREBASE_BASE_URL as string, {
-      query: {
-        userType: "AGENT",
-        sessionId: selectedSessionId,
-        userId: userId,
-      },
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
-
-    newSocket.on("connect", () => {
-      setAgentState("connecting");
-      newSocket.emit("joinSession", {
-        sessionId: selectedSessionId,
-        userId: userId, 
-        botId : botId,
-        userType: "AGENT",
-      });
-    });
-
-    newSocket.on("agentConnected", (data: any) => {
-      setAgentState("connected");
-      console.log("Agent connected:", data);
-    });
-
-    newSocket.on("messageToClient", (data: any) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          ...data,
-          timestamp: new Date().toISOString(),
-          sender: data.question ? "customer" : "agent",
+    if (
+      !socket.current &&
+      isChatEnabled &&
+      selectedSessionId &&
+      userId &&
+      botId
+    ) {
+      socket.current = io(import.meta.env.VITE_FIREBASE_BASE_URL, {
+        query: {
+          userType: "AGENT",
+          sessionId: selectedSessionId,
+          userId,
         },
-      ]);
-    });
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+      });
 
-    newSocket.on("sessionClosed", handleSessionEnd);
-    newSocket.on("sessionEndedByAdmin", handleSessionEnd);
-    newSocket.on("adminEndedSession", handleSessionEnd);
+      socket.current.on("connect", () => {
+        setAgentState("connecting");
+        socket.current.emit("joinSession", {
+          sessionId: selectedSessionId,
+          userId,
+          botId,
+          userType: "AGENT",
+        });
+      });
 
-    newSocket.on("connect_error", (error: any) => {
-      console.error("Connection error:", error);
-      setAgentState("disconnected");
-    });
+      socket.current.on("agentConnected", (data: any) => {
+        setAgentState("connected");
+        setIsAgentConnected(true);
+        console.log("Agent connected:", data);
+      });
 
-    setSocket(newSocket);
+      socket.current.on("messageToClient", (data: any) => {
+        console.log("New message received:", data);
+        if (data.question || data.response) {
+          setMessages((prev) => {
+            const updatedMessages = [
+              ...prev,
+              {
+                ...data,
+                timestamp: data.timestamp || new Date().toISOString(),
+                sender: data.senderType === "AGENT" ? "agent" : "customer",
+                text: data.question || data.response,
+                type:
+                  data.senderType === "AGENT" ? "bot-message" : "user-message",
+              },
+            ];
+            playNotificationSound(); // Play sound for new message
+            return updatedMessages;
+          });
+        }
+      });
+
+      socket.current.on("sessionClosed", handleSessionEnd);
+      socket.current.on("sessionEndedByAdmin", handleSessionEnd);
+      socket.current.on("adminEndedSession", handleSessionEnd);
+
+      socket.current.on("connect_error", (error: any) => {
+        console.error("Connection error:", error);
+        setAgentState("disconnected");
+      });
+
+      socket.current.on("closeSession", () => {
+        console.log("Socket disconnected");
+        setIsAgentConnected(false);
+      });
+    }
 
     return () => {
-      newSocket.disconnect();
-      setSocket(null);
-      setAgentState("disconnected");
+      if (socket.current) {
+        socket.current.disconnect();
+        socket.current = null;
+      }
     };
-  }, [selectedSessionId, userId]);
+  }, [isChatEnabled, selectedSessionId, userId, botId]);
 
   const handleToggle = (event: { target: { checked: boolean } }) => {
     setIsAIEnabled(event.target.checked);
@@ -122,8 +153,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
     setIsChatEnabled(false);
     setMessages([]);
     setSelectedSessionId("");
-    socket?.disconnect();
-  }, [socket]);
+    if (socket.current) socket.current.disconnect();
+  }, []);
 
   const getBotSession = useCallback(
     (botId: string) => {
@@ -138,7 +169,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
       if (session) {
         setSelectedSessionId(sessionId);
         setMessages(session.sessions || []);
-        setIsChatEnabled(true);
       }
     },
     [sessionsDataRedux]
@@ -147,40 +177,61 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const sendMessage = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (!newMessage.trim() || !socket || !selectedSessionId) return;
+      if (!newMessage.trim() || !socket.current || !selectedSessionId) return;
 
       const messageData = {
         sessionId: selectedSessionId,
-        userId: userId,
-        botId : botId,
+        userId,
+        botId,
         message: newMessage,
         userType: "AGENT",
       };
 
-      socket.emit("messageToServer", messageData);
+      socket.current.emit("messageToServer", messageData);
+
       setMessages((prev) => [
         ...prev,
         {
           text: newMessage,
-          userType: 'AGENT',
+          sender: "agent",
           timestamp: new Date().toISOString(),
+          chatMode: "manual",
         },
       ]);
+
       setNewMessage("");
     },
-    [newMessage, socket, selectedSessionId, userId]
+    [newMessage, selectedSessionId, userId, botId]
   );
 
-  const botId = botsDataRedux?.[0]?._id;
+  const sendMessageQuick = (text: string) => {
+    if (isAgentConnected && text) {
+      const msg = {
+        chatMode: "manual",
+        text,
+        sessionId: selectedSessionId,
+        timestamp: new Date().toISOString(),
+        sender: "agent",
+      };
+      socket.current?.emit("messageToServer", {
+        sessionId: selectedSessionId,
+        userId,
+        botId,
+        message: text,
+        userType: "AGENT",
+      });
+      setMessages((prev) => [...prev, msg]);
+    }
+  };
 
   const handleResolution = (resolution: any) => {
     setShowConfirmationModal(false);
     if (resolution === "Yes") {
       setIsChatEnabled(false);
-      socket?.emit("closeSession", {
+      socket.current?.emit("closeSession", {
         sessionId: selectedSessionId,
-        userId: userId,
-        botId: botId,
+        userId,
+        botId,
         userType: "AGENT",
       });
     }
@@ -195,22 +246,29 @@ const LiveChat: React.FC = (): React.ReactElement => {
   };
 
   const handleCloseSession = useCallback(() => {
-    if (!socket || !selectedSessionId) return;
-
-    socket.emit("closeSession", {
+    if (!socket.current || !selectedSessionId) return;
+    socket.current.emit("closeSession", {
       sessionId: selectedSessionId,
-      userId: userId,
+      userId,
       userType: "AGENT",
     });
     handleSessionEnd();
-  }, [socket, selectedSessionId, userId, handleSessionEnd]);
+  }, [selectedSessionId, userId, handleSessionEnd]);
 
-  // ---------- Render ----------
+  // Notification Sound Function
+  // Notification Sound Function
+const playNotificationSound = () => {
+  const audio = new Audio("https://www.soundjay.com/buttons/beep-02.mp3"); // Changed to a calmer beep
+  audio.play().catch((error) => {
+    console.log("Audio play failed:", error);
+  });
+};
+
   return (
     <div className="h-screen flex flex-col">
       {/* Header Section */}
       <div className="px-6 pt-4 flex-none">
-        <h1 className="text-xl font-semibold">Live Chat</h1>
+        <h1 className="text-2xl font-semibold">Live Chat</h1>
         <p className="text-gray-600 text-sm">Guide Your Customers to Success</p>
       </div>
 
@@ -287,14 +345,19 @@ const LiveChat: React.FC = (): React.ReactElement => {
           <div className="overflow-y-auto">
             <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4">
               <div className="flex justify-between items-start mb-4">
-                {messages?.length ? (
+                {messages?.length > 0 && (
                   <button
                     className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
                     onClick={() => setMessages([])}
                   >
                     Close Chat <CloseIcon className="ml-1 w-4 h-4" />
                   </button>
-                ) : null}
+                )}
+                {!isAgentConnected && (
+                  <div className="text-red-500 text-sm">
+                    Connecting to user session...
+                  </div>
+                )}
               </div>
 
               {/* Chat Messages */}
@@ -336,8 +399,23 @@ const LiveChat: React.FC = (): React.ReactElement => {
                         </div>
                       </div>
                     )}
+
+                    {/* Timestamp */}
+                    {msg.timestamp && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }) || ""}
+                      </div>
+                    )}
                   </div>
                 ))}
+                {isAgentTyping && (
+                  <div className="text-sm text-gray-500 mt-2">
+                    Agent is typing...
+                  </div>
+                )}
               </div>
 
               {/* Quick Replies */}
@@ -348,6 +426,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       <button
                         key={index}
                         className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100"
+                        onClick={() => sendMessageQuick(text)}
                       >
                         {text}
                       </button>
@@ -402,8 +481,11 @@ const LiveChat: React.FC = (): React.ReactElement => {
                         className="flex-1 bg-transparent outline-none"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        disabled={agentState !== "connected"}
+                        onFocus={() => setIsAgentTyping(true)}
+                        onBlur={() => setIsAgentTyping(false)}
+                        disabled={!isAgentConnected}
                       />
+
                       <button type="submit" className="text-[#65558F]">
                         <Send />
                       </button>
@@ -514,163 +596,163 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
           </div>
         </div>
-      </div>
 
-      {showConfirmationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg">
-            <h2 className="text-lg font-bold mb-4">End this session?</h2>
-            <div className="flex gap-4">
-              <button
-                onClick={() => {
-                  handleCloseSession();
-                  setShowConfirmationModal(false);
-                }}
-                className="px-4 py-2 bg-red-500 text-white rounded"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => setShowConfirmationModal(false)}
-                className="px-4 py-2 bg-gray-200 rounded"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Agent Assist Overlay */}
-      <div
-        className={`fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-          isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="p-6 h-full overflow-y-auto">
-          <div className="space-y-4">
-            <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
-              <div className="grid grid-cols-2 gap-6 items-start">
-                <div>
-                  <h2 className="font-medium">Add to workflow</h2>
-                  <p className="text-base text-gray-500">
-                    Integrate this customer interaction into your workflow for
-                    seamless tracking and management.
-                  </p>
-                  <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                    Add to workflow
-                  </button>
-                </div>
-                <div>
-                  <h3 className="font-medium">Summary and Next Steps</h3>
-                  <div className="space-y-1 mt-2">
-                    <div className="flex justify-between ">
-                      <span className="text-gray-600 text-base">
-                        Resolution Likelihood
-                      </span>
-                      <span className="font-medium">High</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 text-base">
-                        Retention <br /> Probability
-                      </span>
-                      <span className="font-medium">95%</span>
-                    </div>
-                  </div>
-                  <button className="mt-5 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                    View Detailed Steps
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
-              <h2 className="font-medium">
-                Vulnerability Analysis and Sales Intelligence
-              </h2>
-              <div className="space-y-1 mt-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Potential Risk</span>
-                  <span>Low</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Sales Opportunity</span>
-                  <span>High</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Upcoming Trends</span>
-                  <span>Increased AI Adoption</span>
-                </div>
-              </div>
-              <button className="mt-5 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                Explore Insights
-              </button>
-            </div>
-
-            <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-red-500 font-medium">20%</span>
-                <span>Customer Satisfaction (CSAT)</span>
-              </div>
-              <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
-                <div className="h-full w-1/5 bg-gradient-to-r from-green-400 via-yellow-400 to-red-400"></div>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-gray-600 text-sm">Chat Cue</span>
-                    <p>Customer is anxious</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 text-sm">Reason</span>
-                    <p>Order mix up</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 text-sm">Next Step</span>
-                    <p>Confirm order details</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 text-sm">Predictive AI</span>
-                    <p>High resolution</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-gray-600 text-sm">Emotion</span>
-                    <p>Neutral</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 text-sm">Intent</span>
-                    <p>Inquiry</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 text-sm">Sentiment</span>
-                    <p>Positive</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2 mt-4">
-                <button className="flex-1  text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                  Schedule Follow up
+        {showConfirmationModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg">
+              <h2 className="text-lg font-bold mb-4">End this session?</h2>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    handleCloseSession();
+                    setShowConfirmationModal(false);
+                  }}
+                  className="px-4 py-2 bg-red-500 text-white rounded"
+                >
+                  Confirm
                 </button>
-                <button className="flex-1 bg-[#65558F] text-white px-4 py-2 rounded-full">
-                  Escalate to Manager
+                <button
+                  onClick={() => setShowConfirmationModal(false)}
+                  className="px-4 py-2 bg-gray-200 rounded"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* Toggle Button (fixed at bottom-right) */}
-      <button
-        onClick={() => setIsAgentAssistOpen(!isAgentAssistOpen)}
-        className="fixed bottom-4 right-4 z-50 bg-[#A5FFD6] text-black
-                   px-4 py-2 rounded-full shadow-lg
-                   transition-all duration-300 hover:scale-105"
-      >
-        {isAgentAssistOpen ? "Close Agent Assist" : "Open Agent Assist"}
-      </button>
+        {/* Agent Assist Overlay */}
+        <div
+          className={`fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+            isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="p-6 h-full overflow-y-auto">
+            <div className="space-y-4">
+              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
+                <div className="grid grid-cols-2 gap-6 items-start">
+                  <div>
+                    <h2 className="font-medium">Add to workflow</h2>
+                    <p className="text-base text-gray-500">
+                      Integrate this customer interaction into your workflow for
+                      seamless tracking and management.
+                    </p>
+                    <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                      Add to workflow
+                    </button>
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Summary and Next Steps</h3>
+                    <div className="space-y-1 mt-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 text-base">
+                          Resolution Likelihood
+                        </span>
+                        <span className="font-medium">High</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 text-base">
+                          Retention <br /> Probability
+                        </span>
+                        <span className="font-medium">95%</span>
+                      </div>
+                    </div>
+                    <button className="mt-5 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                      View Detailed Steps
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
+                <h2 className="font-medium">
+                  Vulnerability Analysis and Sales Intelligence
+                </h2>
+                <div className="space-y-1 mt-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Potential Risk</span>
+                    <span>Low</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Sales Opportunity</span>
+                    <span>High</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Upcoming Trends</span>
+                    <span>Increased AI Adoption</span>
+                  </div>
+                </div>
+                <button className="mt-5 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                  Explore Insights
+                </button>
+              </div>
+
+              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-red-500 font-medium">20%</span>
+                  <span>Customer Satisfaction (CSAT)</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
+                  <div className="h-full w-1/5 bg-gradient-to-r from-green-400 via-yellow-400 to-red-400"></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <div>
+                      <span className="text-gray-600 text-sm">Chat Cue</span>
+                      <p>Customer is anxious</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 text-sm">Reason</span>
+                      <p>Order mix up</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 text-sm">Next Step</span>
+                      <p>Confirm order details</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 text-sm">
+                        Predictive AI
+                      </span>
+                      <p>High resolution</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <span className="text-gray-600 text-sm">Emotion</span>
+                      <p>Neutral</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 text-sm">Intent</span>
+                      <p>Inquiry</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 text-sm">Sentiment</span>
+                      <p>Positive</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <button className="flex-1 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                    Schedule Follow up
+                  </button>
+                  <button className="flex-1 bg-[#65558F] text-white px-4 py-2 rounded-full">
+                    Escalate to Manager
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Toggle Button (fixed at bottom-right) */}
+        <button
+          onClick={() => setIsAgentAssistOpen(!isAgentAssistOpen)}
+          className="fixed bottom-4 right-4 z-50 bg-[#A5FFD6] text-black px-4 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105"
+        >
+          {isAgentAssistOpen ? "Close Agent Assist" : "Open Agent Assist"}
+        </button>
+      </div>
     </div>
   );
 };

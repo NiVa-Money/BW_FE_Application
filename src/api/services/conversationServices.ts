@@ -4,7 +4,7 @@ import axiosInstance from "../axiosConfig";
 
 export const getUserAllSessionService = async (payload: any) => {
   try {
-    const response = await axiosInstance.post(`/user/getSession`, payload);
+    const response = await axiosInstance.post(`/user/getSession/v2`, payload);
     return response.data;
   } catch {
     throw new Error("Error: Getting user all session");
@@ -75,12 +75,17 @@ export const getWhatsAppChatsService = async (payload: {
   botId: string;
   adminPhoneNumberId: string;
   userPhoneNumberId: string;
-  aiLevel;
-  humanLevel;
+  aiLevel?: any;
+  orderName?: string;
+  phoneNumber?: string;
+  skipLoader?: boolean;
 }) => {
+  const { ...params } = payload;
+
   try {
     const response = await axiosInstance.get(`/whatsapp/chats`, {
-      params: payload,
+      params,
+      skipLoader: true,
     });
     return response.data;
   } catch (error: any) {
@@ -198,5 +203,44 @@ export const unblockWhatsAppUserService = async (payload: {
       console.error("Unexpected error unblocking user on WhatsApp:", error);
     }
     throw error;
+  }
+};
+
+
+export const addToWhatsAppFavoritesService = async (payload: {
+  adminPhoneNumberId: string;
+  userPhoneNumber: string;
+}) => {
+  try {
+    const response = await axiosInstance.post(`/whatsapp/favorite`, payload);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      return error.response.data;
+    } else {
+      return {
+        status: "error",
+        message: error.message || "Unknown error adding to WhatsApp favorites",
+      };
+    }
+  }
+};
+
+export const removeFromWhatsAppFavoritesService = async (payload: {
+  adminPhoneNumberId: string;
+  userPhoneNumber: string;
+}) => {
+  try {
+    const response = await axiosInstance.post(`/whatsapp/unfavorite`, payload);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.data) {
+      return error.response.data;
+    } else {
+      return {
+        status: "error",
+        message: error.message || "Unknown error removing from WhatsApp favorites",
+      };
+    }
   }
 };

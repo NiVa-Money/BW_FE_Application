@@ -33,21 +33,9 @@ interface CampaignPayload {
   templateId: string;
   integrationId: string;
   campaignName: string;
-  // channel: string;
-  // phoneNumberId: number;
   startDate: string;
   endDate: string;
   contactsUrl: string;
-  // messageType: string;
-  // messageContent: {
-  //   template: {
-  //     name: string;
-  //     language: string;
-  //     header: { image: string };
-  //     body: { text: string[] };
-  //   } | null;
-  // };
-  // contactsData?: any;
 }
 
 const WhatsappCampaign: React.FC = () => {
@@ -61,23 +49,21 @@ const WhatsappCampaign: React.FC = () => {
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
-  const [secretToken, setSecretToken] = useState("");
+  const [_secretToken, setSecretToken] = useState("");
+  const [_whatsappName, setWhatsappName] = useState("");
   const whatsappNumbers = useSelector(
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
 
-  console.log('secret' , secretToken)
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Get template data from Redux (populated after successful API call)
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates
   );
   const reduxTemplateId = whatsappTemplates?.templateData?.data?.id;
+  console.log("reduxTemplateId", reduxTemplateId);
 
-  // When the Redux store is updated with a template id, update the selectedTemplate state.
   useEffect(() => {
     if (reduxTemplateId) {
       setSelectedTemplate((prev: any) => ({
@@ -87,18 +73,19 @@ const WhatsappCampaign: React.FC = () => {
     }
   }, [reduxTemplateId]);
 
-  // Template selection handler (for when user picks from CampaignTemplate)
   const handleSelectTemplate = (template: any) => {
     if (!template?.id) {
-      console.error("Selected template has no ID:", template);
+      console.error("Template ID missing");
       return;
     }
+    console.log("Selected template in WhatsappCampaign:", template);
     setSelectedTemplate(template);
     setShowTemplate(false);
   };
 
   const handleDownloadSample = async () => {
     if (!selectedTemplate?.id) {
+      // Use selectedTemplate.id
       alert("Please select a template first");
       return;
     }
@@ -140,7 +127,7 @@ const WhatsappCampaign: React.FC = () => {
         const requiredHeaders = ["number", "countrycode"];
         const isValid = requiredHeaders.every((h) => headers.includes(h));
         if (!isValid) {
-          console.log("should have numbers ");
+          console.log("uploaded file headers", headers);
           return;
         }
       };
@@ -177,69 +164,71 @@ const WhatsappCampaign: React.FC = () => {
 
   const { success } = useSelector((state: RootState) => state.whatsappCampaign);
 
-  const integrations = useSelector(
-    (state: RootState) =>
-      state.crudIntegration?.crudIntegration?.data?.secretToken
-  );
-
-  console.log("Integrations:", integrations);
-
   useEffect(() => {
-    if (setSelectedPhoneNumberId && whatsappNumbers?.length > 0) {
+    if (selectedPhoneNumberId && whatsappNumbers?.length > 0) {
       const selected = whatsappNumbers.find(
-        (num) => num.phoneNumberId.toString() === setSelectedPhoneNumberId
+        (num) => num.phoneNumberId.toString() === selectedPhoneNumberId
       );
       if (selected) {
         setSecretToken(selected.secretToken);
+        setWhatsappName(selected.whatsappName);
       }
     }
-  }, [setSelectedPhoneNumberId, whatsappNumbers]);
+  }, [selectedPhoneNumberId, whatsappNumbers]);
 
-  // Save handler now checks for a valid Redux template id (after the API call is complete)
   const handleSave = async () => {
     if (!contactList) {
       alert("Please upload a contact list");
       return;
     }
-    if (!reduxTemplateId) {
-      // Inform user that template creation is still in progress.
-      alert(
-        "Template creation is in progress. Please wait for it to complete."
-      );
+
+    // Use selectedTemplate.id instead of reduxTemplateId
+    if (!selectedTemplate?.id) {
+      alert("Please select a template first.");
       return;
     }
 
     const selectedIntegration = whatsappNumbers.find(
       (num) => num.phoneNumberId.toString() === selectedPhoneNumberId
     );
-  
-    const integrationId = selectedIntegration?.secretToken || '';
+
+    const integrationId = selectedIntegration?.secretToken || "";
+
+    const combinedDate = new Date(
+      scheduleDate?.getFullYear() || new Date().getFullYear(),
+      scheduleDate?.getMonth() || new Date().getMonth(),
+      scheduleDate?.getDate() || new Date().getDate(),
+      scheduleTime?.getHours() || 0,
+      scheduleTime?.getMinutes() || 0
+    );
 
     const campaignPayload: CampaignPayload = {
       campaignName,
-      templateId: reduxTemplateId || "",
+      templateId: selectedTemplate.id, // Use selectedTemplate.id
       integrationId: integrationId,
-      startDate: scheduleDate ? scheduleDate.toISOString() : "",
-      endDate: scheduleDate
-        ? new Date(scheduleDate.getTime() + 24 * 60 * 60 * 1000).toISOString()
-        : "",
+      startDate: combinedDate.toISOString(),
+      endDate: new Date(
+        combinedDate.getTime() + 3 * 24 * 60 * 60 * 1000
+      ).toISOString(),
       contactsUrl: "",
     };
 
     try {
-      // Use the Redux template id here, now that the API call is complete.
       const formData = new FormData();
+
       formData.append("file", contactList);
+      formData.append("templateId", selectedTemplate.id);
+
       const data = await uploadWhatsAppContactsService(
-        reduxTemplateId,
+        selectedTemplate.id,
         formData
       );
-      const s3Url = data.s3Url;
-      campaignPayload.contactsUrl = s3Url;
+      campaignPayload.contactsUrl = data.s3Url;
+      console.log("Contacts URL:", campaignPayload.contactsUrl);
       dispatch(createWhatsAppCampaignAction(campaignPayload));
     } catch (error) {
-      console.error("Error while creating campaign:", error);
-      alert("Failed to create campaign");
+      console.error("Error uploading contacts:", error);
+      alert("Failed to upload contacts");
     }
   };
 
@@ -248,8 +237,6 @@ const WhatsappCampaign: React.FC = () => {
       integration.phoneNumberId.toString() === selectedPhoneNumberId
   );
 
-  // When creating a new template, dispatch the template creation action
-  // and let Redux update with the templateId.
   const handleTemplateDone = async (data: {
     id?: string;
     name: string;
@@ -336,22 +323,21 @@ const WhatsappCampaign: React.FC = () => {
       buttons: mappedButtons,
     };
 
-    // Dispatch the template creation action.
     dispatch(createWhatsAppTemplateAction(payload));
 
+    // Updated to include headerType
     setSelectedTemplate({
       name: data.name,
+      id: data.id,
       header: headerContent,
+      headerType: headerType,
       body: data.body.text,
       footer: data.footer ? data.footer.text : "",
       buttons: data.buttons,
     });
 
-    // Once the API call is successful, the Redux state will update with the template id.
     setCustomizeScreen(false);
   };
-
-  console.log("Selected Template:", selectedTemplate);
 
   useEffect(() => {
     if (success) navigate("/marketing/dashboard");
@@ -386,7 +372,7 @@ const WhatsappCampaign: React.FC = () => {
               <select
                 value={selectedPhoneNumberId}
                 onChange={(e) => setSelectedPhoneNumberId(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                className="w-full p-3 border border-gray-300 rounded-lg mb-2"
               >
                 <option value="">Select a WhatsApp Number ID</option>
                 {integrationList.map((integration) => (
@@ -394,13 +380,27 @@ const WhatsappCampaign: React.FC = () => {
                     key={integration.phoneNumberId}
                     value={integration.phoneNumberId}
                   >
-                    {integration.phoneNumberId}
+                    {integration.phoneNumberId} -{" "}
+                    {integration.whatsappName || "Unknown Name"}
                   </option>
                 ))}
               </select>
+
+              {selectedPhoneNumberId && whatsappNumbers?.length > 0 && (
+                <div className="text-sm text-green-700 flex items-center mb-2">
+                  <WhatsApp
+                    className="mr-1 text-green-500"
+                    sx={{ fontSize: 16 }}
+                  />
+                  Selected:{" "}
+                  {whatsappNumbers.find(
+                    (num) =>
+                      num.phoneNumberId.toString() === selectedPhoneNumberId
+                  )?.whatsappName || "Unknown Account"}
+                </div>
+              )}
             </div>
 
-            {/* Mode Selection */}
             <div className="flex flex-col w-full mb-4">
               <label className="text-slate-700">
                 Select or Customize Template*
@@ -433,7 +433,6 @@ const WhatsappCampaign: React.FC = () => {
               />
             )}
 
-            {/* Schedule Date */}
             <div className="flex flex-col w-full mb-4">
               <label className="text-slate-700">Schedule</label>
               <p className="mt-2 mb-2 text-zinc-500">
@@ -456,7 +455,7 @@ const WhatsappCampaign: React.FC = () => {
                 />
               </LocalizationProvider>
               <p className="mt-4 text-zinc-600 text-sm">
-                <b>Note: </b> The campaign will remain active for one day, and
+                <b>Note: </b> The campaign will remain active for three day, and
                 user responses during this period will be captured.
               </p>
             </div>
@@ -464,7 +463,6 @@ const WhatsappCampaign: React.FC = () => {
 
           {/* Right Section */}
           <div className="flex flex-col ml-5 flex-1 shrink basis-0 min-w-[240px]">
-            {/* Campaign Name */}
             <div className="flex flex-col w-full mb-4">
               <label className="text-slate-700">Campaign Name *</label>
               <input
@@ -516,7 +514,6 @@ const WhatsappCampaign: React.FC = () => {
               </button>
             </div>
 
-            {/* AI Wizard */}
             <div
               className="flex flex-col w-full mb-4 mt-5 rounded-3xl p-4 bg-white border-4"
               style={{
@@ -571,25 +568,55 @@ const WhatsappCampaign: React.FC = () => {
                       <h3 className="text-xl font-semibold">
                         {selectedTemplate.name}
                       </h3>
-                      <p>{selectedTemplate.body}</p>
-                      {selectedTemplate.header && (
+                      {/* Header Rendering */}
+                      {selectedTemplate.headerType === "TEXT" && (
+                        <p className="font-bold mt-2">
+                          {selectedTemplate.header}
+                        </p>
+                      )}
+                      {selectedTemplate.headerType === "IMAGE" && (
                         <img
                           src={selectedTemplate.header}
                           alt="Template Header"
                           className="w-full h-auto mt-2"
                         />
                       )}
+                      {selectedTemplate.headerType === "VIDEO" && (
+                        <video
+                          src={selectedTemplate.header}
+                          controls
+                          className="w-full h-auto mt-2"
+                        />
+                      )}
+                      {selectedTemplate.headerType === "DOCUMENT" && (
+                        <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg mt-2">
+                          <div className="text-center">
+                            <div className="text-gray-500 text-xl mb-2">📄</div>
+                            <div className="text-sm text-gray-700">
+                              Document
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <p className="mt-2">{selectedTemplate.body}</p>
+                      {selectedTemplate.footer && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          {selectedTemplate.footer}
+                        </p>
+                      )}
                       {selectedTemplate.buttons &&
                         selectedTemplate.buttons.length > 0 && (
                           <div className="mt-4 flex flex-wrap gap-2">
-                            {selectedTemplate.buttons.map((button, index) => (
-                              <button
-                                key={index}
-                                className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600"
-                              >
-                                {button.text}
-                              </button>
-                            ))}
+                            {selectedTemplate.buttons.map(
+                              (button: any, index: number) => (
+                                <button
+                                  key={index}
+                                  className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600"
+                                >
+                                  {button.text}
+                                </button>
+                              )
+                            )}
                           </div>
                         )}
                     </div>

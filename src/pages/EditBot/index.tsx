@@ -56,6 +56,8 @@ const EditBot: React.FC = () => {
     (state: RootState) => state.bot?.edit?.data
   );
 
+  console.log("botEditDataRedux", botEditDataRedux);
+
   const [botData, setBotData] = useState<any>(null);
 
   useEffect(() => {
@@ -75,6 +77,8 @@ const EditBot: React.FC = () => {
     }
   }, [botEditDataRedux, id]);
 
+  console.log("botData", botData);
+
   useEffect(() => {
     if (editBotDataRedux?.success) {
       setIsModalOpen(true);
@@ -83,11 +87,11 @@ const EditBot: React.FC = () => {
 
   const initialValues = {
     botName: botData?.botName || "",
+    docId: botData?._id || "",
     botTone: botData?.botTone || "",
     botColor: botData?.botColor || "",
     botGreetingMessage:
       botData?.botGreetingMessage || "Hello, how can I assist you?",
-    botIdentity: botData?.botIdentity || "",
     supportNumber: botData?.supportNumber || "",
     supportEmail: botData?.supportEmail || "",
     docName: botData?.docName || "",
@@ -198,7 +202,6 @@ const EditBot: React.FC = () => {
     }
   };
 
-
   const deleteGoal = (index: number, formik: any) => {
     const updatedGoals = [...formik.values.agentsGoals];
     updatedGoals.splice(index, 1);
@@ -218,22 +221,76 @@ const EditBot: React.FC = () => {
     );
   };
 
+  // const handleSubmit = async (values: any, { setSubmitting }: any) => {
+  //   setSubmitting(true);
+  //   try {
+  //     const formData = new FormData();
+  //     if (selectedFileImage) {
+  //       formData.append("customBotImage", selectedFileImage);
+  //     }
+  //     formData.append("botName", values.botName || "");
+  //     formData.append("botTone", values.botTone || "");
+  //     formData.append("botColor", chatColor || "");
+  //     formData.append("botGreetingMessage", values.botGreetingMessage || "");
+  //     formData.append("supportNumber", values.supportNumber || "");
+  //     formData.append("supportEmail", values.supportEmail || "");
+  //     formData.append("docName", filename || "");
+  //     formData.append("docType", filename ? "pdf" : "");
+  //     formData.append("file", values.knowledgeBaseFile || "");
+  //     formData.append(
+  //       "appointmentSchedulerLink",
+  //       values.appointmentSchedulerLink || ""
+  //     );
+  //     formData.append("botFont", values.botFont || "");
+  //     formData.append("botTheme", values.botTheme || "");
+  //     formData.append("agentsGoals", JSON.stringify(values.agentsGoals || []));
+  //     formData.append(
+  //       "conversationGuidelines",
+  //       JSON.stringify(values.conversationGuidelines || [])
+  //     );
+  //     formData.append("agentRole", values.agentRole || "");
+  //     formData.append(
+  //       "agentRoleDescription",
+  //       values.agentRoleDescription || ""
+  //     );
+  //     formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
+  //     formData.append("botId", id || "");
+
+  //     dispatch(editBotAction(formData));
+  //   } catch (error) {
+  //     console.error("Submission failed:", error);
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
     setSubmitting(true);
     try {
       const formData = new FormData();
+      formData.append("botId", id || "");
+      formData.append("docId", values.docId || ""); // <-- Make sure you pass this in from botData
+
       if (selectedFileImage) {
         formData.append("customBotImage", selectedFileImage);
       }
+
       formData.append("botName", values.botName || "");
       formData.append("botTone", values.botTone || "");
       formData.append("botColor", chatColor || "");
       formData.append("botGreetingMessage", values.botGreetingMessage || "");
       formData.append("supportNumber", values.supportNumber || "");
       formData.append("supportEmail", values.supportEmail || "");
-      formData.append("docName", filename || "");
-      formData.append("docType", filename ? "pdf" : "");
-      formData.append("file", values.knowledgeBaseFile || "");
+      formData.append(
+        "botSmartness",
+        values.botSmartness?.toString() || "true"
+      );
+      formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
+
+      if (values.knowledgeBaseFile) {
+        formData.append("file", values.knowledgeBaseFile);
+      }
+
       formData.append(
         "appointmentSchedulerLink",
         values.appointmentSchedulerLink || ""
@@ -250,8 +307,6 @@ const EditBot: React.FC = () => {
         "agentRoleDescription",
         values.agentRoleDescription || ""
       );
-      formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
-      formData.append("botId", id || "");
 
       await dispatch(editBotAction(formData));
     } catch (error) {
@@ -708,25 +763,7 @@ const EditBot: React.FC = () => {
               </Tooltip>
             </div>
 
-            <div className="space-y-2 mb-4">
-              {formik.values.agentsGoals?.map((goal: string, index: number) => (
-                <div key={index} className="relative">
-                  <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-3 pr-10">
-                    <span className="text-gray-700">{goal}</span>
-                    {formik.values.agentsGoals.length > 1 && (
-                      <button
-                        onClick={() => deleteGoal(index, formik)}
-                        className="absolute right-3 text-gray-400 hover:text-red-500"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={formik.values.newGoalPrompt || ""}
@@ -782,6 +819,23 @@ const EditBot: React.FC = () => {
                   AI Gen
                 </button>
               </div>
+            </div>
+            <div className="space-y-2 mb-4">
+              {formik.values.agentsGoals?.map((goal: string, index: number) => (
+                <div key={index} className="relative">
+                  <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-3 pr-10">
+                    <span className="text-gray-700">{goal}</span>
+                    {formik.values.agentsGoals.length > 1 && (
+                      <button
+                        onClick={() => deleteGoal(index, formik)}
+                        className="absolute right-3 text-gray-400 hover:text-red-500"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

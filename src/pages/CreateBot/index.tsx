@@ -51,7 +51,6 @@ const CreateBot: React.FC = () => {
     botTone: "",
     botColor: "",
     botGreetingMessage: "Hello, how can I assist you?",
-    botIdentity: "",
     supportNumber: "",
     supportEmail: "",
     docName: "",
@@ -862,33 +861,8 @@ const CreateBot: React.FC = () => {
               </Tooltip>
             </div>
 
-            {/* Render Existing Goals */}
-            {formik.values.agentsGoals?.map((goal, index) => (
-              <div key={index} className="relative mb-3">
-                <input
-                  type="text"
-                  value={goal}
-                  onChange={(e) =>
-                    handleGoalChange(index, e.target.value, formik)
-                  }
-                  className="h-[50px] w-full rounded-[12px] bg-[#F3F2F6] px-4 pr-10"
-                  placeholder="Your main goal is to assist customers in their shopping journey."
-                />
-
-                {formik.values.agentsGoals?.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => deleteGoal(index, formik)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            ))}
-
             {/* New Goal Input + Buttons for Manual Add or AI Generation */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={formik.values.newGoalPrompt || ""}
@@ -945,6 +919,31 @@ const CreateBot: React.FC = () => {
                 </button>
               </div>
             </div>
+
+            {/* Render Existing Goals */}
+            {formik.values.agentsGoals?.map((goal, index) => (
+              <div key={index} className="relative mb-3">
+                <input
+                  type="text"
+                  value={goal}
+                  onChange={(e) =>
+                    handleGoalChange(index, e.target.value, formik)
+                  }
+                  className="h-[50px] w-full rounded-[12px] bg-[#F3F2F6] px-4 pr-10"
+                  placeholder="Your main goal is to assist customers in their shopping journey."
+                />
+
+                {formik.values.agentsGoals?.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => deleteGoal(index, formik)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
 
           {/* Conversation Guidelines */}
@@ -966,31 +965,9 @@ const CreateBot: React.FC = () => {
             <p className="text-sm text-gray-500 mb-2">
               Set clear rules for how your agent should respond in chat channels
             </p>
-            {formik.values.conversationGuidelines.map((guideline, index) => (
-              <div key={index} className="relative mb-3">
-                <input
-                  type="text"
-                  value={guideline}
-                  onChange={(e) =>
-                    handleGuidelineChange(index, e.target.value, formik)
-                  }
-                  className="h-[50px] w-full rounded-[12px] bg-[#F3F2F6] px-4 pr-10"
-                  placeholder="Always be helpful and accurate."
-                />
-                {formik.values.conversationGuidelines.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => deleteGuideline(index, formik)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            ))}
 
             {/* New input field with AI Gen button */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={formik.values.newGuidelinePrompt || ""}
@@ -1051,6 +1028,29 @@ const CreateBot: React.FC = () => {
                 </button>
               </div>
             </div>
+            {formik.values.conversationGuidelines.map((guideline, index) => (
+              <div key={index} className="relative mb-3">
+                <input
+                  type="text"
+                  value={guideline}
+                  onChange={(e) =>
+                    handleGuidelineChange(index, e.target.value, formik)
+                  }
+                  className="h-[50px] w-full rounded-[12px] bg-[#F3F2F6] px-4 pr-10"
+                  placeholder="Always be helpful and accurate."
+                />
+                {formik.values.conversationGuidelines.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => deleteGuideline(index, formik)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+
             {formik.touched.conversationGuidelines &&
               formik.errors.conversationGuidelines && (
                 <div className="text-red-500 text-sm mt-1">

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Login from "../pages/login";
 import SignUp from "../pages/Signup";
-// import Dashboard from "../pages/Dashboard";
 import DashBoard from "../pages/DashboardNew";
 import CreateBot from "../pages/CreateBot";
 import IntegrationsPage from "../pages/Integration";
@@ -29,8 +28,8 @@ import VoiceChatComponent from "../pages/VoiceModule";
 import EditMarketingDashboardForm from "../pages/Marketing/Dashboard/EditMarketingDashboardForm";
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
-import Subscription from "../pages/Subscription/index";
-import Workflow from "../pages/Workflow/Workflow";
+import Subscription from '../pages/Subscription/index';
+import ContactsCRM from "../pages/Contacts";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -90,7 +89,7 @@ export const autRoutes: any[] = [
   {
     id: 7,
     path: "/workflow",
-    component: <Workflow />,
+    component: <ContactsCRM />,
   },
   {
     id: 8,
