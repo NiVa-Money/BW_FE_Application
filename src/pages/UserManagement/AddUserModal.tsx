@@ -3,6 +3,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { MODULE_MAPPING, ROLES } from "../../enums";
 import { COLORS } from "../../constants";
+import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
 
 interface UserDetails {
   id?: string;
@@ -159,60 +160,44 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Employee ID
             </label>
-            <input
-              type="text"
-              name="employeeId"
-              className={`w-full p-2 bg-gray-100 rounded-md ${
-                formik.touched.employeeId && formik.errors.employeeId
-                  ? "border border-red-500"
-                  : ""
-              }`}
+            <FormikFieldInputComponent
+              field={{
+                name: "employeeId",
+                value: formik.values.employeeId,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
               placeholder="example@gmail.com"
-              value={formik.values.employeeId}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              disabled={!!userDetails} // Disable for edit mode
+              type="email"
             />
-            {formik.touched.employeeId && formik.errors.employeeId && (
-              <div className="text-red-500 text-xs mt-1">
-                {formik.errors.employeeId}
-              </div>
-            )}
           </div>
           <div className="mb-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Mobile No
             </label>
-            <input
-              type="tel"
-              name="mobileNo"
-              className={`w-full p-2 bg-gray-100 rounded-md ${
-                formik.touched.mobileNo && formik.errors.mobileNo
-                  ? "border border-red-500"
-                  : ""
-              }`}
+            <FormikFieldInputComponent
+              field={{
+                name: "mobileNo",
+                value: formik.values.mobileNo,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                  formik.setFieldValue(
+                    "mobileNo",
+                    e.target.value.replace(/\D/g, "")
+                  );
+                },
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
               placeholder="9876543210"
-              value={formik.values.mobileNo}
-              maxLength={10}
-              onKeyDown={(e) => {
+              inputProps={{ maxLength: 10 }}
+              onKeyDown={(e: React.KeyboardEvent) => {
                 if (!/[0-9]|Backspace|Tab|ArrowLeft|ArrowRight/.test(e.key)) {
                   e.preventDefault();
                 }
               }}
-              onChange={(e) => {
-                formik.setFieldValue(
-                  "mobileNo",
-                  e.target.value.replace(/\D/g, "")
-                );
-              }}
-              onBlur={formik.handleBlur}
               inputMode="numeric"
             />
-            {formik.touched.mobileNo && formik.errors.mobileNo && (
-              <div className="text-red-500 text-xs mt-1">
-                {formik.errors.mobileNo}
-              </div>
-            )}
           </div>
 
           {/* Roles in flex row */}
