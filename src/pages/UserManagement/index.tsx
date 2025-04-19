@@ -202,19 +202,14 @@ const UserManagement = () => {
   }, [userToDelete, deleteReason]);
 
   const handleSaveUser = (userData) => {
-    if (editingUser?._id) {
-      // Update existing user
-      // TODO: Will Handle with EDIT Integration
-    } else {
-      // Add new user
-      const payload = {
-        emailId: userData.employeeId,
-        mobileNo: userData.mobileNo,
-        role: userData.role,
-        modules: userData.modules,
-      };
-      dispatch(createNewUser(payload));
-    }
+    // Add new user
+    const payload = {
+      emailId: userData.employeeId,
+      mobileNo: userData.mobileNo,
+      role: userData.role,
+      modules: userData.modules,
+    };
+    dispatch(createNewUser(payload));
     setIsModalOpen(false);
   };
 
