@@ -176,20 +176,20 @@ const UserManagement = () => {
   const [userToDelete, setUserToDelete] = useState(null);
   const [deleteReason, setDeleteReason] = useState("");
 
-  const handleAddUser = useCallback(() => {
+  const handleAddUser = () => {
     setUserDetails(null);
     setIsModalOpen(true);
-  }, []);
+  };
 
-  const handleEditUser = useCallback((user) => {
+  const handleEditUser = (user) => {
     setUserDetails(user);
     setIsModalOpen(true);
-  }, []);
+  };
 
-  const handleDeleteClick = useCallback((userId) => {
+  const handleDeleteClick = (userId) => {
     setUserToDelete(userId);
     setIsDeleteModalOpen(true);
-  }, []);
+  };
 
   const handleConfirmDelete = useCallback(() => {
     if (userToDelete) {
