@@ -36,19 +36,28 @@ export function* createUserSaga({
   payload: any;
 }): Generator<any> {
   try {
+    // Step 1: User creation
     const createUserResponse = yield call(createUserService, payload);
 
     yield put({
       type: CREATE_USER_SUCCESS,
       payload: createUserResponse,
     });
-  } catch {
-    yield put({
-      type: CREATE_USER_FAILURE,
-    });
+
+    // Step 2: Refresh users list
+    try {
+      const userChat = yield call(getUsersService);
+      yield put({
+        type: GET_USERS_SUCCESS,
+        payload: userChat,
+      });
+    } catch (getUsersError) {
+      yield put({ type: GET_USERS_FAILURE });
+    }
+  } catch (createUserError) {
+    yield put({ type: CREATE_USER_FAILURE });
   }
 }
-
 export function* deleteUserSaga({
   payload,
 }: {
@@ -56,11 +65,23 @@ export function* deleteUserSaga({
   payload: any;
 }): Generator<any> {
   try {
+    // Step 1: Delete User
     const deleteUserSuccess = yield call(getDeleteUserService, payload);
     yield put({
       type: DELETE_USER_SUCCESS,
       payload: deleteUserSuccess,
     });
+
+    // Step 2: Refresh users list
+    try {
+      const userChat = yield call(getUsersService);
+      yield put({
+        type: GET_USERS_SUCCESS,
+        payload: userChat,
+      });
+    } catch (getUsersError) {
+      yield put({ type: GET_USERS_FAILURE });
+    }
   } catch {
     yield put({
       type: DELETE_USER_FAILURE,
