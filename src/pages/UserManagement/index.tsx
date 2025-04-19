@@ -157,16 +157,17 @@ const UserCard = ({ user, onEdit, onDelete }) => (
 
 const UserManagement = () => {
   const dispatch = useDispatch();
+  const DEFAULT_USERS_DATA = {
+    users: [],
+    totalCount: 0,
+    managersCount: 0,
+    adminsCount: 0,
+    agentsCount: 0,
+    superAdminsCount: 0,
+  };
+
   const usersData = useSelector(
-    (state: RootState) =>
-      state.users?.lists?.data?.data || {
-        users: [],
-        totalCount: 0,
-        managersCount: 0,
-        adminsCount: 0,
-        agentsCount: 0,
-        superAdminsCount: 0,
-      }
+    (state: RootState) => state.users?.lists?.data?.data || DEFAULT_USERS_DATA
   );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
