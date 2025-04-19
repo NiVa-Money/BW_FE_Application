@@ -6,7 +6,7 @@ interface User {
   lastName: string;
   emailId: string;
   mobileNo: string;
-  status: "active" | "inactive" | "registered";
+  status: "active" | "inactive" | "registered" | "pending";
   roleName: string;
   module_mapS: number[];
   color?: string;

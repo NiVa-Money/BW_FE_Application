@@ -171,18 +171,18 @@ const UserManagement = () => {
   );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+  const [userDetails, setUserDetails] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [deleteReason, setDeleteReason] = useState("");
 
   const handleAddUser = useCallback(() => {
-    setEditingUser(null);
+    setUserDetails(null);
     setIsModalOpen(true);
   }, []);
 
   const handleEditUser = useCallback((user) => {
-    setEditingUser(user);
+    setUserDetails(user);
     setIsModalOpen(true);
   }, []);
 
@@ -215,7 +215,7 @@ const UserManagement = () => {
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
-    setEditingUser(null);
+    setUserDetails(null);
   }, []);
 
   useEffect(() => {
@@ -276,7 +276,7 @@ const UserManagement = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveUser}
-        editingUser={editingUser}
+        userDetails={userDetails}
       />
     </div>
   );

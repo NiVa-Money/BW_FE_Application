@@ -4,6 +4,18 @@ import * as Yup from "yup";
 import { MODULE_MAPPING, ROLES } from "../../enums";
 import { COLORS } from "../../constants";
 
+interface UserDetails {
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  emailId?: string;
+  mobileNo?: string;
+  status?: string;
+  roleName?: string;
+  module_maps?: number[];
+  roleId?: string;
+}
+
 // Default role-modules mapping
 const ROLE_MODULEMAP_MAPPING = {
   [ROLES.SUPERADMIN]: [
@@ -14,7 +26,7 @@ const ROLE_MODULEMAP_MAPPING = {
 };
 
 interface AddUserModalProps {
-  editingUser: boolean;
+  userDetails: UserDetails | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (userData: {
@@ -22,6 +34,7 @@ interface AddUserModalProps {
     mobileNo: string;
     modules: number[];
     role: string;
+    id?: string;
   }) => void;
 }
 
@@ -37,18 +50,40 @@ const validationSchema = Yup.object().shape({
   modules: Yup.array().min(1, "At least one module must be selected"),
 });
 
+// Helper to convert display role names to enum values
+const mapRoleNameToEnum = (roleName: string = ""): string => {
+  const roleMap: Record<string, string> = {
+    "super admin": ROLES.SUPERADMIN,
+    agent: ROLES.AGENT,
+    manager: ROLES.MANAGER,
+  };
+  return roleMap[roleName.toLowerCase()] || ROLES.SUPERADMIN;
+};
+// Helper to format enum values for display
+const formatRoleForDisplay = (role: string): string => {
+  const displayMap: Record<string, string> = {
+    [ROLES.SUPERADMIN]: "Super Admin",
+    [ROLES.AGENT]: "Agent",
+    [ROLES.MANAGER]: "Manager",
+  };
+  return displayMap[role] || role;
+};
+
 const AddUserModal: React.FC<AddUserModalProps> = ({
-  editingUser,
+  userDetails,
   isOpen,
   onClose,
   onSave,
 }) => {
   const formik = useFormik({
     initialValues: {
-      employeeId: "",
-      mobileNo: "",
-      modules: [] as number[],
-      role: "SUPERADMIN",
+      employeeId: userDetails?.emailId || "",
+      mobileNo: userDetails?.mobileNo || "",
+      modules: userDetails?.module_maps || [],
+      role: userDetails?.roleName
+        ? mapRoleNameToEnum(userDetails.roleName)
+        : ROLES.SUPERADMIN,
+      id: userDetails?.id,
     },
     validationSchema,
     onSubmit: (values) => {
@@ -57,9 +92,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         mobileNo: values.mobileNo,
         modules: values.modules,
         role: values.role,
+        id: values.id,
       });
       onClose();
     },
+    enableReinitialize: true, // This allows the form to reinitialize when props change
   });
 
   // Update selected modules when role changes
@@ -76,7 +113,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
   useEffect(() => {
     if (formik.values.modules.length > 0) {
-      formik.setFieldTouched("modules", true);
+      formik.setFieldTouched("modules", true, false);
     }
   }, [formik.values.modules]);
 
@@ -86,13 +123,14 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       ? currentModules.filter((v) => v !== moduleValue)
       : [...currentModules, moduleValue];
     formik.setFieldValue("modules", newModules);
+    formik.setFieldTouched("modules", true, false);
   };
 
   const moduleOptions = Object.entries(MODULE_MAPPING)
     .filter(([key]) => isNaN(Number(key)))
     .map(([name, value]) => ({
       name: name.replace(/_/g, " "),
-      value,
+      value: value as number,
     }));
 
   if (!isOpen) return null;
@@ -107,7 +145,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             alt="user management"
           />
           <h2 className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-semibold text-gray-800">
-            {editingUser ? "Edit" : "Add"} User
+            {userDetails ? "Edit User" : "Add User"}
           </h2>
         </div>
         <form
@@ -130,6 +168,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               value={formik.values.employeeId}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              disabled={!!userDetails} // Disable for edit mode
             />
             {formik.touched.employeeId && formik.errors.employeeId && (
               <div className="text-red-500 text-xs mt-1">
@@ -198,11 +237,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     value={roleOption}
                   />
                   <span className="ml-2 text-sm text-gray-700">
-                    {roleOption.charAt(0).toUpperCase() +
-                      roleOption
-                        .slice(1)
-                        .toLowerCase()
-                        .replace("admin", " Admin")}
+                    {formatRoleForDisplay(roleOption)}
                   </span>
                 </label>
               ))}
@@ -267,7 +302,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               className="px-4 py-2 text-white rounded-md"
               style={{ backgroundColor: COLORS.VIOLET }}
             >
-              Done
+              {userDetails ? "Update" : "Done"}
             </button>
           </div>
         </form>
