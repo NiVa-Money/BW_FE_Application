@@ -148,6 +148,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             {userDetails ? "Edit User" : "Add User"}
           </h2>
         </div>
+        {/* TODO: Convert in FORMIK FORM usinf FormikFieldInputComponent */}
         <form
           onSubmit={formik.handleSubmit}
           className="px-6 py-3 max-h-[30rem] overflow-y-auto"
