@@ -180,7 +180,13 @@ export default function CampaignManager() {
                       </>
                     )}
                   </MenuItem>
-                  <MenuItem>
+                  <MenuItem
+                    onClick={() =>
+                      navigate(
+                        `/marketing/clonecampaign/${campaign.campaignId}`
+                      )
+                    }
+                  >
                     <FileCopyIcon className="mr-2" /> Clone
                   </MenuItem>
                   <MenuItem

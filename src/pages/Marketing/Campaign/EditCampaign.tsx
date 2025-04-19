@@ -45,7 +45,7 @@ const EditWhatsappCampaign: React.FC = () => {
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
-  const [_fileName, setFileName] = useState("");
+  const [fileName, setFileName] = useState("");
   // const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
@@ -56,6 +56,7 @@ const EditWhatsappCampaign: React.FC = () => {
 
   // Add this line somewhere in your component to "use" the variable
   console.log("WhatsApp numbers available:", whatsappNumbers?.length || 0);
+  console.log("File name:", fileName);
 
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates
@@ -98,6 +99,7 @@ const EditWhatsappCampaign: React.FC = () => {
       document.body.removeChild(a);
     } catch (err) {
       alert("Failed to download sample CSV. Please try again.");
+      console.error(err);
     }
   };
 
