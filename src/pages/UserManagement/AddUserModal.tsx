@@ -103,6 +103,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     enableReinitialize: true, // This allows the form to reinitialize when props change
   });
 
+  const clearForm = () => {
+    formik.resetForm();
+    onClose();
+  };
+
   // Update selected modules when role changes
   useEffect(() => {
     if (formik.values.role && ROLE_MODULEMAP_MAPPING[formik.values.role]) {
@@ -281,7 +286,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           <div className="flex justify-end space-x-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={clearForm}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               Cancel
