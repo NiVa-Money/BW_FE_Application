@@ -215,18 +215,24 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           </div>
 
           {/* Access with 2-column grid */}
-          <div className="mb-6 max-h-[20vh] overflow-y-scroll">
+          <div className="mb-6">
             <h3 className="text-base font-medium text-gray-700 mb-2">Access</h3>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3 justify-between">
+            <div
+              className="grid grid-cols-2 gap-x-4 gap-y-3 pr-3"
+              style={{
+                maxHeight: "20vh",
+                overflowY: "auto",
+              }}
+            >
               {moduleOptions.map((module) => (
                 <label
                   key={module.value}
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-start"
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center min-w-0">
                     <input
                       type="checkbox"
-                      className="h-5 w-5 text-[#65558F] border-2 border-gray-300 rounded"
+                      className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 border-gray-300 rounded mr-2"
                       checked={formik.values.modules.includes(
                         module.value as number
                       )}
@@ -234,9 +240,9 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                         handleModuleChange(module.value as number)
                       }
                     />
-                    <span className="ml-2 text-sm text-gray-700">
+                    <span className="text-sm text-gray-700 truncate">
                       {module.name}
-                    </span> 
+                    </span>
                   </div>
                 </label>
               ))}
