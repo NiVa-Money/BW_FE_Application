@@ -309,7 +309,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
         </div>
         {showPulsingLogo && (
           <div className="flex justify-end items-center">
-            <PulsingGlowLogo imageSrc={imageSrc} />
+            <PulsingGlowLogo theme={theme} imageSrc={imageSrc} />
           </div>
         )}
       </div>

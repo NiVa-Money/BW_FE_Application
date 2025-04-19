@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { COLORS } from "../../constants";
 
-export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
+export default function PulsingGlowLogo({
+  theme,
+  imageSrc,
+}: {
+  theme: string;
+  imageSrc: string;
+}) {
   const [pulse, setPulse] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -27,12 +33,13 @@ export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
       >
         {/* Constant inner glow layer */}
         <div
-          className="absolute rounded-full bg-purple-600 blur-md"
+          className="absolute rounded-full blur-md"
           style={{
             top: "50%",
             left: "50%",
             width: "80px",
             height: "80px",
+            backgroundColor: COLORS.LIGHTGREEN,
             transform: "translate(-50%, -50%) scale(1.2)",
             opacity: 0.8,
             zIndex: 0,
@@ -41,12 +48,13 @@ export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
 
         {/* Outer pulsing glow layer */}
         <div
-          className="absolute rounded-full bg-purple-500 blur-xl"
+          className="absolute rounded-full blur-xl"
           style={{
             top: "50%",
             left: "50%",
             width: "80px",
             height: "80px",
+            backgroundColor: COLORS.LIGHTGREEN,
             transform: `translate(-50%, -50%) scale(${pulseScale})`,
             opacity: pulseOpacity,
             zIndex: 0,
@@ -57,7 +65,8 @@ export default function PulsingGlowLogo({ imageSrc }: { imageSrc: string }) {
         <div
           className="relative rounded-full w-20 h-20 flex items-center justify-center z-10"
           style={{
-            backgroundColor: isHovered ? COLORS.DARKVIOLET : COLORS.BLACK
+            backgroundColor: theme === "dark" ? COLORS.BLACK : COLORS.WHITE,
+            opacity: isHovered ? 0.9 : 1,
           }}
         >
           {/* Logo Logo */}
