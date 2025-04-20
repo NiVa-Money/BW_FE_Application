@@ -159,18 +159,39 @@ export const pauseWhatsAppCampaignService = async (campaignId: string) => {
 
 export const resumeWhatsAppCampaignService = async (campaignId: string) => {
   try {
-    const response = await axiosInstance.post(`/whatsapp/${campaignId}/resume`);
+    const response = await axiosInstance.post(
+      `/whatsapp/campaign/${campaignId}/resume`
+    );
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(
-        "Error pausing WhatsApp campaign:",
+        "Error resuming WhatsApp campaign:",
         error.response?.data || error.message
       );
     } else {
       console.error("Unexpected error:", error);
     }
     throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+export const stopWhatsAppCampaignService = async (campaignId: string) => {
+  try {
+    const response = await axiosInstance.post(
+      `/whatsapp/campaign/${campaignId}/stop`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error stopping WhatsApp campaign:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
   }
 };
 

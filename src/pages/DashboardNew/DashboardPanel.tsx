@@ -46,7 +46,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, content, iconSrc }) => {
           </div>
         )}
         <div>
-          <Typography variant="body1" color="#ADAAB5">
+          <Typography variant="body1" color={COLORS.NEUTRALGRAY}>
             {title}
           </Typography>
           <Typography variant="body1" color={COLORS.DARKVIOLET}>
