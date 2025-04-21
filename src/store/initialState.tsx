@@ -100,5 +100,6 @@ export const initialState: any = {
   },
   subscription: {
     plans: { loader: false, data: [] },
+    create: { loader: false, data: null },
   },
 };

@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { WhatsApp, Upload } from "@mui/icons-material";
@@ -50,12 +52,9 @@ const EditWhatsappCampaign: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
 
-  const whatsappNumbers = useSelector(
-    (state: RootState) => state.crudIntegration?.crudIntegration?.data
-  );
-
-  // Add this line somewhere in your component to "use" the variable
-  console.log("WhatsApp numbers available:", whatsappNumbers?.length || 0);
+  // const whatsappNumbers = useSelector(
+  //   (state: RootState) => state.crudIntegration?.crudIntegration?.data
+  // );
 
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates
@@ -98,6 +97,7 @@ const EditWhatsappCampaign: React.FC = () => {
       document.body.removeChild(a);
     } catch (err) {
       alert("Failed to download sample CSV. Please try again.");
+      console.error(err);
     }
   };
 
