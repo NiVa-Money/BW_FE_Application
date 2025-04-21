@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { WhatsApp, Upload } from "@mui/icons-material";
@@ -53,10 +55,6 @@ const EditWhatsappCampaign: React.FC = () => {
   const whatsappNumbers = useSelector(
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
-
-  // Add this line somewhere in your component to "use" the variable
-  console.log("WhatsApp numbers available:", whatsappNumbers?.length || 0);
-  console.log("File name:", fileName);
 
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates

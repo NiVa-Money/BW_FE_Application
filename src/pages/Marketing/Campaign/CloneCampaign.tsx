@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from "react";
 import { WhatsApp, Upload } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
@@ -43,9 +46,9 @@ const CloneCampaign: React.FC = () => {
     (campaign) => String(campaign?.campaignId) === String(campaignId)
   );
 
-  const whatsappNumbers = useSelector(
-    (state: RootState) => state.crudIntegration?.crudIntegration?.data
-  );
+  // const whatsappNumbers = useSelector(
+  //   (state: RootState) => state.crudIntegration?.crudIntegration?.data
+  // );
 
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates
@@ -211,8 +214,9 @@ const CloneCampaign: React.FC = () => {
       setError("Campaign name is required");
       return;
     }
+
     setIsSubmitting(true);
-    // Make sure we have a template ID from somewhere
+
     const templateId =
       selectedTemplate?.id ||
       selectedCampaign?.template?.id ||
@@ -220,11 +224,21 @@ const CloneCampaign: React.FC = () => {
 
     if (!templateId) {
       setError("Template ID is required");
+      setIsSubmitting(false);
       return;
     }
 
     if (!selectedPhoneNumberId) {
       setError("WhatsApp Number ID is required");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Ensure a new contact list is uploaded
+    if (!contactList) {
+      setError("A new contact list file is required");
+      setIsLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
@@ -232,14 +246,11 @@ const CloneCampaign: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      const selectedIntegration = whatsappNumbers.find(
-        (num) => num.phoneNumberId.toString() === selectedPhoneNumberId
-      );
-
-      const integrationId = selectedIntegration?.secretToken || "";
+      const integrationId = selectedCampaign?.integrationId || "";
       if (!integrationId) {
-        setError("Integration ID (secret token) is required");
+        setError("Integration ID is required");
         setIsLoading(false);
+        setIsSubmitting(false);
         return;
       }
 
@@ -261,7 +272,7 @@ const CloneCampaign: React.FC = () => {
         endDate: new Date(
           combinedDate.getTime() + 3 * 24 * 60 * 60 * 1000
         ).toISOString(),
-        contactsUrl: "",
+        contactsUrl: "", // This will be updated after uploading the contact list
       };
 
       console.log(
@@ -269,30 +280,21 @@ const CloneCampaign: React.FC = () => {
         campaignPayload
       );
 
-      // If a new contact list was uploaded, process it
-      if (contactList) {
-        const formData = new FormData();
-        formData.append("file", contactList);
-        formData.append("templateId", templateId);
+      // Process the new contact list file
+      const formData = new FormData();
+      formData.append("file", contactList);
+      formData.append("templateId", templateId);
 
-        // Upload contacts for the template
-        const contactsData = await uploadWhatsAppContactsService(
-          templateId,
-          formData
-        );
+      // Upload contacts for the template
+      const contactsData = await uploadWhatsAppContactsService(
+        templateId,
+        formData
+      );
 
-        if (contactsData && contactsData.s3Url) {
-          campaignPayload.contactsUrl = contactsData.s3Url;
-        } else {
-          throw new Error("Failed to upload contacts: No S3 URL returned");
-        }
-      } else if (selectedCampaign && selectedCampaign.contactsUrl) {
-        // Use existing contacts URL if no new file is uploaded
-        campaignPayload.contactsUrl = selectedCampaign.contactsUrl;
+      if (contactsData && contactsData.s3Url) {
+        campaignPayload.contactsUrl = contactsData.s3Url;
       } else {
-        setError("Contact list is required");
-        setIsLoading(false);
-        return;
+        throw new Error("Failed to upload contacts: No S3 URL returned");
       }
 
       console.log("Final campaign payload:", campaignPayload);
