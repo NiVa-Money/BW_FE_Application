@@ -611,13 +611,22 @@ const EngagementTab = () => {
     setInputText("");
   };
 
-  const displayedConversations = selectedConversationId
-    ? conversations.filter((c) => c.messageId === selectedConversationId)
-    : conversations;
+  // const displayedConversations = selectedConversationId
+  //   ? conversations.filter((c) => c.messageId === selectedConversationId)
+  //   : conversations;
+
+  const displayedConversations = conversations; // Always display the full list of conversations
 
   const selectedConversation = conversations.find(
-    (c) => c.messageId === selectedConversationId
+    (c) => c.userId === selectedConversationId // Use userId instead of id
   );
+
+  // console.log("Selected Conversation ID:", selectedConversationId);
+  // console.log("Conversations:", conversations);
+  // console.log("Selected Conversation:", selectedConversation);
+  useEffect(() => {
+    console.log("Updated Selected Conversation ID:", selectedConversationId);
+  }, [selectedConversationId]);
 
   const openPostModal = (post) => {
     setCurrentPost(post);
@@ -654,9 +663,12 @@ const EngagementTab = () => {
       </p>
 
       {/* Social Platform Metrics */}
-      <div className="flex gap-8 mb-8">
+      <div className="grid grid-cols-5 gap-4 mb-8">
         {socialPlatforms.map((platform, index) => (
-          <div key={index} className="flex items-center gap-2">
+          <div
+            key={index}
+            className="bg-[#65558F] bg-opacity-[0.04] rounded-lg shadow-lg p-4 flex items-center gap-2"
+          >
             <span className="text-gray-700">{platform.icon}</span>
             <div className="w-24 h-1 bg-red-100 rounded-full overflow-hidden">
               <div
@@ -787,9 +799,13 @@ const EngagementTab = () => {
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg">
             {displayedConversations.map((c) => (
               <div
-                key={c.messageId}
-                className="p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer"
-                onClick={() => setSelectedConversationId(c.messageId)}
+                key={c.userId} // Use userId as the unique identifier
+                className={`p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer ${
+                  selectedConversationId === c.userId ? "bg-gray-200" : ""
+                }`}
+                onClick={() => {
+                  setSelectedConversationId(c.userId); // Set userId as the selectedConversationId
+                }}
               >
                 <span className="w-8 h-8">
                   <Instagram />
@@ -810,7 +826,7 @@ const EngagementTab = () => {
         </div>
 
         {/* Middle Column - Chat */}
-        <div className="col-span-5">
+        <div key={selectedConversationId} className="col-span-5">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-lg p-4">
             {selectedConversation ? (
               <>
@@ -823,7 +839,7 @@ const EngagementTab = () => {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="min-h-[200px] mb-4">
+                <div className="h-[400px] overflow-y-auto mb-4">
                   {(selectedConversation.messages || []).map(
                     (message, index) => (
                       <div
