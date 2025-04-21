@@ -37,7 +37,7 @@ interface AddUserModalProps {
     mobileNo: string;
     modules: number[];
     role: string;
-    id?: string;
+    userId?: string;
   }) => void;
 }
 
@@ -86,7 +86,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
       role: userDetails?.roleName
         ? mapRoleNameToEnum(userDetails.roleName)
         : ROLES.SUPERADMIN,
-      id: userDetails?.id,
+      userId: userDetails?.id,
     },
     validationSchema,
     onSubmit: (values) => {
@@ -95,7 +95,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         mobileNo: values.mobileNo,
         modules: values.modules,
         role: values.role,
-        id: values.id,
+        userId: values.userId,
       });
       formik.resetForm();
       onClose();

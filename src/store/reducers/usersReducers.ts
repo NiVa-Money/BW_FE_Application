@@ -7,6 +7,9 @@ import {
   DELETE_USER,
   DELETE_USER_FAILURE,
   DELETE_USER_SUCCESS,
+  EDIT_USER,
+  EDIT_USER_FAILURE,
+  EDIT_USER_SUCCESS,
   GET_USERS,
   GET_USERS_FAILURE,
   GET_USERS_SUCCESS,
@@ -44,6 +47,21 @@ export default function usersReducers(state = initialState.users, action: any) {
       return {
         ...state,
         create: { data: null, loader: false },
+      };
+    case EDIT_USER:
+      return {
+        ...state,
+        edit: { data: action.payload, loader: true },
+      };
+    case EDIT_USER_SUCCESS:
+      return {
+        ...state,
+        edit: { data: action.payload, loader: false },
+      };
+    case EDIT_USER_FAILURE:
+      return {
+        ...state,
+        edit: { data: null, loader: false },
       };
     case DELETE_USER:
       return {
