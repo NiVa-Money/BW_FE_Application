@@ -18,6 +18,15 @@ export const createUserService = async (payload) => {
   }
 };
 
+export const editUserService = async (payload) => {
+  try {
+    const response = await axiosInstance.post("/user/updateUser", payload);
+    return response.data;
+  } catch {
+    throw new Error("Error: Updating user");
+  }
+};
+
 export const getDeleteUserService = async (payload) => {
   try {
     const response = await axiosInstance.post(
