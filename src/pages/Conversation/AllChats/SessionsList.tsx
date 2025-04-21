@@ -81,33 +81,33 @@
 //     isSearchActive,
 //   ]);
 
-//   const handleSessionClick = async (item: any) => {
-//     const sessionIdentifier =
-//       channelNameVal === "whatsapp" ? item.userPhoneId : item._id;
+// const handleSessionClick = async (item: any) => {
+//   const sessionIdentifier =
+//     channelNameVal === "whatsapp" ? item.userPhoneId : item._id;
 
-//     onSessionSelect(sessionIdentifier);
+//   onSessionSelect(sessionIdentifier);
 
-//     if (channelNameVal === "whatsapp" && item.unreadCount > 0) {
-//       try {
-//         await markWhatsAppMessageAsRead(
-//           item.userPhoneId,
-//           item.adminPhoneNumberId
-//         );
+//   if (channelNameVal === "whatsapp" && item.unreadCount > 0) {
+//     try {
+//       await markWhatsAppMessageAsRead(
+//         item.userPhoneId,
+//         item.adminPhoneNumberId
+//       );
 
-//         // Update local state to remove unread count
-//         setSessionsData((prevSessions) =>
-//           prevSessions.map((session) =>
-//             session.userPhoneId === item.userPhoneId &&
-//             session.adminPhoneNumberId === item.adminPhoneNumberId
-//               ? { ...session, unreadCount: 0 }
-//               : session
-//           )
-//         );
-//       } catch (error) {
-//         console.error("Error marking messages as read:", error);
-//       }
+//       // Update local state to remove unread count
+//       setSessionsData((prevSessions) =>
+//         prevSessions.map((session) =>
+//           session.userPhoneId === item.userPhoneId &&
+//           session.adminPhoneNumberId === item.adminPhoneNumberId
+//             ? { ...session, unreadCount: 0 }
+//             : session
+//         )
+//       );
+//     } catch (error) {
+//       console.error("Error marking messages as read:", error);
 //     }
-//   };
+//   }
+// };
 
 //   return (
 //     <div className="w-80 pl-0 bg-white p-4 border-r overflow-y-scroll">
@@ -167,7 +167,7 @@
 //         </div>
 //       )}
 
-//       {sessionsData?.length > 0 && sessionsData?.length >= 20 ? (
+//       {sessionsData?.length > 0 && sessionsDataState?.length >= 20 ? (
 //         <div className="flex justify-between mt-4">
 //           <button
 //             disabled={page === 1}
@@ -191,10 +191,10 @@
 
 // export default SessionsList;
 
-// src/components/AllChats/SessionsList.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { formatDateString } from "../../../hooks/functions";
+import { markWhatsAppMessageAsRead } from "../../../api/services/conversationServices";
 
 interface SessionsListProps {
   onSessionSelect: (sessionId: string) => void;
@@ -222,29 +222,56 @@ const SessionsList: React.FC<SessionsListProps> = ({
     website: "/assets/website.png",
   };
 
-  const handleSessionClick = (item: any) => {
+  const [sessionsDataState, setSessionsDataState] = useState(sessionsData);
+
+  useEffect(() => {
+    setSessionsDataState(sessionsData);
+  }, [sessionsData]);
+
+  const handleSessionClick = async (item: any) => {
     const id = channelNameVal === "whatsapp" ? item.userPhoneId : item._id;
+
+    if (channelNameVal === "whatsapp" && item.unreadCount > 0) {
+      try {
+        await markWhatsAppMessageAsRead(
+          item.userPhoneId,
+          item.adminPhoneNumberId
+        );
+
+        // Update unread count in state
+        const updatedSessions = sessionsDataState.map((session) =>
+          session.userPhoneId === item.userPhoneId
+            ? { ...session, unreadCount: 0 }
+            : session
+        );
+        setSessionsDataState(updatedSessions);
+      } catch (error) {
+        console.error("Error marking message as read:", error);
+      }
+    }
+
     onSessionSelect(id);
   };
 
   return (
     <div className="w-80 pl-0 bg-white p-4 border-r overflow-y-scroll">
-      {sessionsData.length === 0 ? (
+      {sessionsDataState.length === 0 ? (
         <div className="text-center text-gray-500 p-4">No sessions found</div>
       ) : (
         <div className="flex flex-col gap-1">
-          {sessionsData.map((item, index) => (
+          {sessionsDataState.map((item, index) => (
             <div
               key={item._id || item.userPhoneId}
               className="relative flex justify-between items-center p-[8px] rounded-[10px] cursor-pointer hover:bg-gray-100"
               style={{
-                backgroundColor: (
+                backgroundColor:
                   channelNameVal === "whatsapp"
                     ? sessionId === item?.userPhoneId || sessionId === item?._id
+                      ? "#413d4852"
+                      : "#EADDFF29"
                     : sessionId === item?._id
-                )
-                  ? "#413d4852"
-                  : "#EADDFF29",
+                    ? "#413d4852"
+                    : "#EADDFF29",
               }}
               onClick={() => handleSessionClick(item)}
             >
@@ -285,7 +312,7 @@ const SessionsList: React.FC<SessionsListProps> = ({
         </div>
       )}
 
-      {sessionsData?.length > 0 && sessionsData?.length >= 20 ? (
+      {sessionsDataState?.length > 0 && sessionsDataState?.length >= 20 ? (
         <div className="flex justify-between mt-4">
           <button
             disabled={page === 1}

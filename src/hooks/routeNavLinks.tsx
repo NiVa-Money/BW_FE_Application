@@ -11,6 +11,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import MarkChatReadIcon from "@mui/icons-material/MarkChatRead";
 import WifiTetheringIcon from "@mui/icons-material/WifiTethering";
 import DonutSmallIcon from "@mui/icons-material/DonutSmall";
+import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import HelpIcon from "@mui/icons-material/Help";
@@ -115,14 +116,14 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       text: "Settings",
       icon: <SettingsIcon />,
       path: "/settings",
-      // subItems: [
-      //   {
-      //     id: 12.1,
-      //     text: "Agent Guidelines",
-      //     path: "/settings/agent-guide",
-      //     icon: <DonutSmallIcon />,
-      //   },
-      // ],
+      subItems: [
+        {
+          id: 12,
+          text: "User Management",
+          path: "/user-management",
+          icon: <ManageAccountsOutlinedIcon />,
+        },
+      ],
     },
   ];
 

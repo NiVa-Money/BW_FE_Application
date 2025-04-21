@@ -637,7 +637,6 @@ const CreateBot: React.FC = () => {
               </label>
             </div>
           </div>
-
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label>Appointment Link</label>
@@ -1270,6 +1269,7 @@ const CreateBot: React.FC = () => {
                   theme={formik.values.botTheme}
                   color={chatColor}
                   greetingMessage={formik.values.botGreetingMessage}
+                  showPulsingLogo={formik.values.pulsing}
                   botSmartnessHandle={(val) =>
                     formik.setFieldValue("botSmartness", val)
                   }

@@ -17,6 +17,7 @@ import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
 import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
 import UtilityDash from "../pages/Reports/UtilityDash";
+import UserManagement from "../pages/UserManagement";
 import HelpCenter from "../pages/HelpCenter";
 import Settings from "../pages/Settings";
 import MarketingDashboardForm from "../pages/Marketing/Dashboard/MarketingDashboardForm";
@@ -139,6 +140,7 @@ export const autRoutes: any[] = [
   { id: 11, component: <HelpCenter />, path: "/help-center" },
 
   { id: 12, component: <Settings />, path: "/settings" },
+  { id: 12, component: <UserManagement />, path: "/user-management" },
 ];
 
 export const publicRoutes: any[] = [
