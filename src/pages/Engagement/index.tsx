@@ -426,6 +426,7 @@ import {
   Image,
   SmartToy,
   Person,
+  ChevronRight,
 } from "@mui/icons-material";
 import {
   XAxis,
@@ -443,12 +444,24 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Typography,
 } from "@mui/material";
 import { getInstagramData } from "../../api/services/integrationServices";
 
 const EngagementTab = () => {
   const [conversations, setConversations] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [selectedConversationId, setSelectedConversationId] = useState(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPost, setCurrentPost] = useState(null);
+
   const [inputText, setInputText] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [availableIntegrations, setAvailableIntegrations] = useState([]);
@@ -489,8 +502,11 @@ const EngagementTab = () => {
     });
 
     socket.on("initialData", (data) => {
-      console.log("Received initial data:", data);
+      console.log("Received initial data (conversation):", data.conversations);
+      console.log("Received initial data (posts):", data.posts);
+
       setConversations(data.conversations || []);
+      setPosts(data.posts || []);
     });
 
     socket.on("igMessageSendSuccess", (response) => {
@@ -595,13 +611,28 @@ const EngagementTab = () => {
     setInputText("");
   };
 
-  const displayedConversations = selectedConversationId
-    ? conversations.filter((c) => c.messageId === selectedConversationId)
-    : conversations;
+  // const displayedConversations = selectedConversationId
+  //   ? conversations.filter((c) => c.messageId === selectedConversationId)
+  //   : conversations;
+
+  const displayedConversations = conversations; // Always display the full list of conversations
 
   const selectedConversation = conversations.find(
-    (c) => c.messageId === selectedConversationId
+    (c) => c.userId === selectedConversationId // Use userId instead of id
   );
+
+  // console.log("Selected Conversation ID:", selectedConversationId);
+  // console.log("Conversations:", conversations);
+  // console.log("Selected Conversation:", selectedConversation);
+  useEffect(() => {
+    console.log("Updated Selected Conversation ID:", selectedConversationId);
+  }, [selectedConversationId]);
+
+  const openPostModal = (post) => {
+    setCurrentPost(post);
+    setIsModalOpen(true);
+  };
+  const closeModal = () => setIsModalOpen(false);
 
   const socialPlatforms = [
     { icon: <Instagram />, sentiment: 60 },
@@ -621,6 +652,9 @@ const EngagementTab = () => {
     { month: "Jul", value: 55 },
   ];
 
+  // Extract Instagram posts from conversations
+  const instagramPosts = posts;
+
   return (
     <div className="p-6 bg-white min-h-screen">
       <h1 className="text-2xl font-semibold mb-1">Engagement</h1>
@@ -629,9 +663,12 @@ const EngagementTab = () => {
       </p>
 
       {/* Social Platform Metrics */}
-      <div className="flex gap-8 mb-8">
+      <div className="grid grid-cols-5 gap-4 mb-8">
         {socialPlatforms.map((platform, index) => (
-          <div key={index} className="flex items-center gap-2">
+          <div
+            key={index}
+            className="bg-[#65558F] bg-opacity-[0.04] rounded-lg shadow-lg p-4 flex items-center gap-2"
+          >
             <span className="text-gray-700">{platform.icon}</span>
             <div className="w-24 h-1 bg-red-100 rounded-full overflow-hidden">
               <div
@@ -646,11 +683,11 @@ const EngagementTab = () => {
         ))}
       </div>
 
-      <div className="mb-6">
-        <FormControl fullWidth className="mb-6">
-          <InputLabel id="select-int-label">Select Integration</InputLabel>
+      {/* Selection Controls */}
+      <div className="flex gap-4 mb-6">
+        <FormControl className="w-1/2">
+          <InputLabel>Select Integration</InputLabel>
           <Select
-            labelId="select-int-label"
             value={integrationId}
             label="Select Integration"
             onChange={(e) => setIntegrationId(e.target.value)}
@@ -662,47 +699,70 @@ const EngagementTab = () => {
             ))}
           </Select>
         </FormControl>
+
+        <FormControl className="w-1/2">
+          <InputLabel>Select Platform</InputLabel>
+          <Select
+            value={"all-platforms"}
+            label="Select Platform"
+            onChange={() => {
+              /* Add platform filter handler */
+            }}
+          >
+            <MenuItem value="all-platforms">All Platforms</MenuItem>
+            <MenuItem value="instagram">Instagram</MenuItem>
+            <MenuItem value="facebook">Facebook</MenuItem>
+            <MenuItem value="linkedin">LinkedIn</MenuItem>
+            <MenuItem value="twitter">Twitter</MenuItem>
+          </Select>
+        </FormControl>
       </div>
 
       {/* Ticket Section */}
       <div className="grid grid-cols-4 gap-4 mb-4">
+        {/* Recent Posts Carousel */}
         <div className="flex space-x-4 col-span-2">
-          {[1, 2].map((item) => (
-            <div
-              key={item}
-              className="relative bg-gray-50 rounded-lg p-4 border border-gray-300 w-[400px] h-[130px] shadow-md overflow-hidden"
-            >
-              <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300"></div>
-              <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300"></div>
-              <div className="border-b border-dashed border-gray-300 pb-2 mb-2 flex justify-between text-xs">
-                <div>
-                  <p className="text-gray-700 font-semibold">Status</p>
-                  <p className="text-sm font-medium">Open/closed</p>
+          <h2 className="text-lg font-semibold mb-2">Recent Posts</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {instagramPosts.length > 0 ? (
+              instagramPosts.map((post) => (
+                <div
+                  key={post?.postId}
+                  className="min-w-[200px] bg-gray-50 rounded-lg shadow p-4 cursor-pointer"
+                  // onClick={() => openInstagramPost(post)}
+                  onClick={() => openPostModal(post)}
+                >
+                  <div className="relative mb-2">
+                    <img
+                      src={post?.mediaUrl}
+                      alt="Post not available"
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                    <span className="absolute top-2 left-2 bg-white rounded-full p-1">
+                      <Instagram fontSize="small" />
+                    </span>
+                  </div>
+                  <p className="text-sm mb-2 overflow-hidden overflow-ellipsis line-clamp-3">
+                    {post?.caption}
+                  </p>
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>
+                      {new Date(post?.timestamp).toLocaleTimeString()}
+                    </span>
+                    <span>{post.comments?.length || 0} comments</span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-700 font-semibold">Date and Time</p>
-                  <p className="text-sm font-medium">01/05/2023</p>
-                </div>
-              </div>
-              <div className="flex justify-between text-xs">
-                <div>
-                  <p className="text-red-500 font-semibold">Complaint</p>
-                  <p className="text-gray-600">Order misplaced</p>
-                </div>
-                <div>
-                  <p className="text-gray-700 font-semibold">Issue Raised by</p>
-                  <p className="text-sm font-medium">SJ</p>
-                </div>
-                <div>
-                  <p className="text-gray-700 font-semibold">Platform</p>
-                  <p className="text-sm font-medium">Instagram</p>
-                </div>
-              </div>
-            </div>
-          ))}
+              ))
+            ) : (
+              <p>No posts available</p>
+            )}
+            <button className="min-w-[220px] flex items-center justify-center bg-purple-100 rounded-lg">
+              View More <ChevronRight className="ml-1" />
+            </button>
+          </div>
         </div>
 
-        {/* Agent Details */}
+        {/* Agent Details Card */}
         <div className="bg-gray-50 ml-6 rounded-lg p-4 w-[300px] shadow-md">
           <h2 className="text-sm font-semibold mb-3">Agent Details</h2>
           <div className="space-y-2">
@@ -717,7 +777,7 @@ const EngagementTab = () => {
           </div>
         </div>
 
-        {/* Customer Details */}
+        {/* Customer Details Card */}
         <div className="bg-gray-50 rounded-lg p-4 w-[300px] shadow-md">
           <h2 className="text-sm font-semibold mb-3">Customer Details</h2>
           <div className="space-y-2">
@@ -739,9 +799,13 @@ const EngagementTab = () => {
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg">
             {displayedConversations.map((c) => (
               <div
-                key={c.messageId}
-                className="p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer"
-                onClick={() => setSelectedConversationId(c.messageId)}
+                key={c.userId} // Use userId as the unique identifier
+                className={`p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer ${
+                  selectedConversationId === c.userId ? "bg-gray-200" : ""
+                }`}
+                onClick={() => {
+                  setSelectedConversationId(c.userId); // Set userId as the selectedConversationId
+                }}
               >
                 <span className="w-8 h-8">
                   <Instagram />
@@ -762,7 +826,7 @@ const EngagementTab = () => {
         </div>
 
         {/* Middle Column - Chat */}
-        <div className="col-span-5">
+        <div key={selectedConversationId} className="col-span-5">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-lg p-4">
             {selectedConversation ? (
               <>
@@ -775,7 +839,7 @@ const EngagementTab = () => {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="min-h-[200px] mb-4">
+                <div className="h-[400px] overflow-y-auto mb-4">
                   {(selectedConversation.messages || []).map(
                     (message, index) => (
                       <div
@@ -993,8 +1057,52 @@ const EngagementTab = () => {
           </div>
         </div>
       </div>
+
+      {currentPost && (
+        <Dialog open={isModalOpen} onClose={closeModal} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            Post by {currentPost.username || "botwot.io"}
+          </DialogTitle>
+          <DialogContent dividers>
+            <img
+              src={currentPost.carouselMedia[0]?.url}
+              alt="Post detail"
+              className="w-full rounded mb-4"
+            />
+            <Typography>{currentPost.caption}</Typography>
+            <Divider className="my-2" />
+            <Typography variant="subtitle1">Comments</Typography>
+            {currentPost.comments?.map((c) => (
+              <div key={c.commentId} className="mb-3">
+                <Typography variant="subtitle2">{c.username}</Typography>
+                <Typography variant="body2">{c.text}</Typography>
+                <Typography variant="caption" className="text-gray-500">
+                  {new Date(c.timestamp).toLocaleTimeString()}
+                </Typography>
+              </div>
+            ))}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeModal}>Close</Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
+};
+
+// Custom method to get relative time (polyfill if needed)
+Date.prototype.toLocaleTimeString = function () {
+  const now = new Date();
+  const diffMs = now.getTime() - (this as Date).getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+  if (diffDays > 0) return `${diffDays} day(s) ago`;
+  if (diffHours > 0) return `${diffHours} hour(s) ago`;
+  if (diffMinutes > 0) return `${diffMinutes} minute(s) ago`;
+  return "just now";
 };
 
 export default EngagementTab;
