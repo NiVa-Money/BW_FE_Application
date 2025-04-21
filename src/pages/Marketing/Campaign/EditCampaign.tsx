@@ -47,14 +47,14 @@ const EditWhatsappCampaign: React.FC = () => {
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
-  const [fileName, setFileName] = useState("");
+  const [_fileName, setFileName] = useState("");
   // const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
 
-  const whatsappNumbers = useSelector(
-    (state: RootState) => state.crudIntegration?.crudIntegration?.data
-  );
+  // const whatsappNumbers = useSelector(
+  //   (state: RootState) => state.crudIntegration?.crudIntegration?.data
+  // );
 
   const whatsappTemplates = useSelector(
     (state: RootState) => state.whatsappTemplates
