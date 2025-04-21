@@ -265,10 +265,12 @@ const EditBot: React.FC = () => {
   // };
 
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
+    console.log("Form submitted with values:", values); // Log the form values
     setSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append("botId", id || "");
+      const cleanedBotId = id?.replace(":", "") || "";
+      formData.append("botId", cleanedBotId); // Use cleaned botId
       formData.append("docId", values.docId || ""); // <-- Make sure you pass this in from botData
 
       if (selectedFileImage) {
@@ -307,6 +309,10 @@ const EditBot: React.FC = () => {
         "agentRoleDescription",
         values.agentRoleDescription || ""
       );
+      console.log("FormData being sent:");
+      for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value); // Log each key-value pair in FormData
+      }
 
       await dispatch(editBotAction(formData));
     } catch (error) {
