@@ -29,7 +29,7 @@ import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard"
 import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
 import Subscription from "../pages/Subscription/index";
 import ComingSoon from "../components/ComingSoon";
-import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard';
+import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard1';
 import WhatsApp from "../pages/Marketing/Whatsapp";
 import SubscriptionFailure from "../pages/SubscriptionFailure"; import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 import ContactsCRM from "../pages/Contacts";

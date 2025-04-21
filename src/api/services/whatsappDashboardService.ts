@@ -9,7 +9,7 @@ export const whatsAppDashboardService = async (
 ): Promise<any> => {
   // Replace `any` with your expected response type if available
   try {
-    const response = await axiosInstance.post("/marketing/whatsapp/dashboard", {
+    const response = await axiosInstance.post("/marketing/whatsapp/dashboard/v2", {
       campaignId,
       startDate,
       endDate,
