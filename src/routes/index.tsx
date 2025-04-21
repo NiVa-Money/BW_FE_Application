@@ -34,6 +34,7 @@ import WhatsApp from "../pages/Marketing/Whatsapp";
 import SubscriptionFailure from "../pages/SubscriptionFailure"; import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 import ContactsCRM from "../pages/Contacts";
 import CloneCampaign from "../pages/Marketing/Campaign/CloneCampaign";
+import VoiceDashboard from "../pages/VoiceModule/VoiceDashboard";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -98,7 +99,7 @@ export const autRoutes: any[] = [
   { id: 5.4, path: "/marketing/omnigenStudio", component: <WhatsApp /> },
 
   { id: 6.1, path: "/voice/agents", component: <VoiceChatComponent /> },
-  { id: 6.2, path: "/voice/dashboard", component: <ComingSoon /> },
+  { id: 6.2, path: "/voice/dashboard", component: <VoiceDashboard /> },
 
   {
     id: 7,
