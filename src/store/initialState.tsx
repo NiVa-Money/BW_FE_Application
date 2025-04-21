@@ -92,8 +92,13 @@ export const initialState: any = {
       loader: false,
     },
   },
+  users: {
+    lists: { data: [], loader: false },
+    create: { data: null, loader: false },
+    delete: { data: null, loader: false },
+  },
   subscription: {
     plans: { loader: false, data: [] },
-    create: { loader: false, data: null }
-  }
+    create: { loader: false, data: null },
+  },
 };

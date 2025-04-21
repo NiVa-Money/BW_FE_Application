@@ -150,8 +150,12 @@ const MarketingDashboard = () => {
   const renderSectionOrWaiting = (data, content) => {
     if (isFinal && (!data || data.length === 0)) {
       return (
-        <div className="text-center text-sm text-red-600 py-4">
-          Data failed to process.
+        <div className="flex items-center justify-center mt-44">
+          <div className="text-center text-sm text-red-600">
+            We're sorry, but we couldn't process your data this time.
+            <br />
+            Please try again.
+          </div>
         </div>
       );
     }
@@ -198,6 +202,16 @@ const MarketingDashboard = () => {
   // Social Media Trends
   const actionableInsights =
     insightsData?.actionableSocialMediaInsights?.filter(
+      (insight) => insight !== "[" && insight !== "]"
+    ) || [];
+
+  const aiInsights =
+    insightsData?.insights?.filter(
+      (insight) => insight !== "[" && insight !== "]"
+    ) || [];
+
+  const aiActions =
+    insightsData?.actions?.filter(
       (insight) => insight !== "[" && insight !== "]"
     ) || [];
 
@@ -259,8 +273,8 @@ const MarketingDashboard = () => {
   const transformedTrendsData = insightsData?.trendsData?.interestOverTime
     ?.timeline_data
     ? transformTrendsChartData(
-      insightsData.trendsData.interestOverTime.timeline_data
-    )
+        insightsData.trendsData.interestOverTime.timeline_data
+      )
     : [];
 
   // Key Words Trends
@@ -295,27 +309,27 @@ const MarketingDashboard = () => {
 
   const competitorTrendsData = insightsData?.brand_engagement_metrics
     ? Object.keys(insightsData.brand_engagement_metrics).map((brand) => {
-      const brandData = insightsData.brand_engagement_metrics[brand];
-      let metricValue = 0;
-      if (selectedMetric.includes(".")) {
-        const nestedValue = getNestedValue(brandData, selectedMetric);
-        metricValue = nestedValue !== undefined ? nestedValue : 0;
-      } else if (brandData[selectedMetric] !== undefined) {
-        metricValue = brandData[selectedMetric];
-      } else if (brandData.platforms) {
-        metricValue = Object.keys(brandData.platforms).reduce(
-          (acc, platform) => {
-            const platformData = brandData.platforms[platform];
-            if (platformData[selectedMetric] !== undefined) {
-              return acc + platformData[selectedMetric];
-            }
-            return acc;
-          },
-          0
-        );
-      }
-      return { name: brand, value: metricValue };
-    })
+        const brandData = insightsData.brand_engagement_metrics[brand];
+        let metricValue = 0;
+        if (selectedMetric.includes(".")) {
+          const nestedValue = getNestedValue(brandData, selectedMetric);
+          metricValue = nestedValue !== undefined ? nestedValue : 0;
+        } else if (brandData[selectedMetric] !== undefined) {
+          metricValue = brandData[selectedMetric];
+        } else if (brandData.platforms) {
+          metricValue = Object.keys(brandData.platforms).reduce(
+            (acc, platform) => {
+              const platformData = brandData.platforms[platform];
+              if (platformData[selectedMetric] !== undefined) {
+                return acc + platformData[selectedMetric];
+              }
+              return acc;
+            },
+            0
+          );
+        }
+        return { name: brand, value: metricValue };
+      })
     : [];
 
   // -------------------------
@@ -338,14 +352,20 @@ const MarketingDashboard = () => {
             allNews,
             <div className="relative ">
               <div className="space-y-4 max-h-[355px] overflow-y-auto">
-                {allNewsPages[allNewscurrentPage]?.map(
-                  (item, index) => (
-                    <div key={index} className="flex items-start flex-col ">
-                      <ReactMarkdown className="text-sm">{item.summary}</ReactMarkdown>
-                      <Link to={item.source} target="_blank" className="text-blue-500">Read more</Link>
-                    </div>
-                  )
-                )}
+                {allNewsPages[allNewscurrentPage]?.map((item, index) => (
+                  <div key={index} className="flex items-start flex-col ">
+                    <ReactMarkdown className="text-sm">
+                      {item.summary}
+                    </ReactMarkdown>
+                    <Link
+                      to={item.source}
+                      target="_blank"
+                      className="text-blue-500"
+                    >
+                      Read more
+                    </Link>
+                  </div>
+                ))}
               </div>
 
               {allNewsPages.length > 1 && (
@@ -364,14 +384,19 @@ const MarketingDashboard = () => {
                     {allNewsPages.map((_, index) => (
                       <div
                         key={index}
-                        className={`h-2 w-2 rounded-full ${index === allNewscurrentPage ? "bg-blue-500" : "bg-gray-300"
-                          }`}
+                        className={`h-2 w-2 rounded-full ${
+                          index === allNewscurrentPage
+                            ? "bg-blue-500"
+                            : "bg-gray-300"
+                        }`}
                       />
                     ))}
                   </div>
                   <button
                     onClick={() =>
-                      setAllNewsCurrentPage((prev) => (prev + 1) % insightPages.length)
+                      setAllNewsCurrentPage(
+                        (prev) => (prev + 1) % insightPages.length
+                      )
                     }
                     className="p-2 hover:bg-gray-100 rounded"
                   >
@@ -481,8 +506,9 @@ const MarketingDashboard = () => {
                     {insightPages.map((_, index) => (
                       <div
                         key={index}
-                        className={`h-2 w-2 rounded-full ${index === currentPage ? "bg-blue-500" : "bg-gray-300"
-                          }`}
+                        className={`h-2 w-2 rounded-full ${
+                          index === currentPage ? "bg-blue-500" : "bg-gray-300"
+                        }`}
                       />
                     ))}
                   </div>
@@ -500,7 +526,7 @@ const MarketingDashboard = () => {
           )}
         </DashboardCard>
         {/* AI Insight & Recommendation */}
-        <DashboardCard title="AI Insight and Recommendation">
+        {/* <DashboardCard title="AI Insight and Recommendation">
           <div className="space-y-4">
             <p className="text-sm text-gray-600">
               Discover intelligent insights powered by AI to enhance your
@@ -534,6 +560,57 @@ const MarketingDashboard = () => {
             >
               Edit Marketing Form
             </button>
+          </div>
+        </DashboardCard> */}
+
+        <DashboardCard title="AI Insight and Recommendation">
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Discover intelligent insights powered by AI to enhance your
+              decision-making process and drive efficiency.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-medium mb-2">Insight</h4>
+                {aiInsights.length > 0 ? (
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                    {aiInsights.map((insight, index) => (
+                      <li key={index}>{insight}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-600">
+                    No insights available.
+                  </p>
+                )}
+              </div>
+              <div>
+                <h4 className="font-medium mb-2">Action</h4>
+                {aiActions.length > 0 ? (
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                    {aiActions.map((action, index) => (
+                      <li key={index}>{action}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-600">No actions available.</p>
+                )}
+              </div>
+            </div>
+            <div>
+              <button
+                onClick={() => navigate("/marketing/createcampaign")}
+                className="w-full mt-28 bg-[#65558F] text-white py-2 rounded-lg"
+              >
+                Create a WhatsApp Campaign
+              </button>
+              <button
+                onClick={() => navigate("/marketing/editDashboardForm")}
+                className="w-full bg-white text-[#65558F] py-2 rounded-lg mt-2"
+              >
+                Edit Marketing Form
+              </button>
+            </div>
           </div>
         </DashboardCard>
       </div>

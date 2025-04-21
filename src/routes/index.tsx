@@ -16,6 +16,7 @@ import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
 import Campaign from "../pages/Marketing/Campaign";
 import AllChats from "../pages/Conversation/AllChats";
 import UtilityDash from "../pages/Reports/UtilityDash";
+import UserManagement from "../pages/UserManagement";
 import HelpCenter from "../pages/HelpCenter";
 import Settings from "../pages/Settings";
 import MarketingDashboardForm from "../pages/Marketing/Dashboard/MarketingDashboardForm";
@@ -26,13 +27,13 @@ import VoiceChatComponent from "../pages/VoiceModule";
 import EditMarketingDashboardForm from "../pages/Marketing/Dashboard/EditMarketingDashboardForm";
 import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard";
 import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
-import Subscription from '../pages/Subscription/index';
+import Subscription from "../pages/Subscription/index";
 import ComingSoon from "../components/ComingSoon";
 import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard';
 import WhatsApp from "../pages/Marketing/Whatsapp";
 import SubscriptionFailure from "../pages/SubscriptionFailure"; import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 import ContactsCRM from "../pages/Contacts";
-
+import CloneCampaign from "../pages/Marketing/Campaign/CloneCampaign";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -83,6 +84,11 @@ export const autRoutes: any[] = [
   },
   { id: 5.2, path: "/marketing/campaign", component: <CampaignManager /> },
   { id: 5.2, path: "/marketing/createcampaign", component: <Campaign /> },
+  {
+    id: 5.2,
+    path: "/marketing/clonecampaign/:campaignId",
+    component: <CloneCampaign />,
+  },
   {
     id: 5.2,
     path: "/marketing/editcampaign/:campaignId",
@@ -142,6 +148,7 @@ export const autRoutes: any[] = [
   { id: 11, component: <HelpCenter />, path: "/help-center" },
 
   { id: 12, component: <Settings />, path: "/settings" },
+  { id: 12, component: <UserManagement />, path: "/user-management" },
 ];
 
 export const publicRoutes: any[] = [

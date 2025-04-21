@@ -42,10 +42,11 @@ const LiveChat: React.FC = (): React.ReactElement => {
   );
   const sessionsDataRedux = useSelector(selectSessions);
 
-  const selectBots = (state: RootState) => state.bot?.lists;
   const botsDataRedux = useSelector(
-    (state: RootState) => selectBots(state)?.data
+    (state: RootState) => state.bot.lists?.data || []
   );
+
+  console.log("botsDataRedux", botsDataRedux);
 
   // ---------- Derived Values ----------
   const userId = localStorage.getItem("user_id");
@@ -130,7 +131,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
         setAgentState("disconnected");
       });
 
-      socket.current.on("disconnect", () => {
+      socket.current.on("closeSession", () => {
         console.log("Socket disconnected");
         setIsAgentConnected(false);
       });

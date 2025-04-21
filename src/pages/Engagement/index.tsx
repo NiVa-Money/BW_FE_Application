@@ -1,3 +1,419 @@
+// import {
+//   Instagram,
+//   Facebook,
+//   LinkedIn,
+//   Twitter,
+//   MoreVert,
+//   WhatsApp,
+//   AttachFile,
+//   Send,
+//   Image,
+//   SmartToy,
+//   Person,
+// } from "@mui/icons-material";
+// import {
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   BarChart,
+//   Bar,
+//   Tooltip,
+//   ResponsiveContainer,
+// } from "recharts";
+
+// import { IconButton, Menu, MenuItem } from "@mui/material";
+// import { useState } from "react";
+
+// const EngagementTab = () => {
+//   const socialPlatforms = [
+//     { icon: <Instagram />, sentiment: 60 },
+//     { icon: <Facebook />, sentiment: 60 },
+//     { icon: <LinkedIn />, sentiment: 60 },
+//     { icon: <Twitter />, sentiment: 60 },
+//     { icon: <WhatsApp />, sentiment: 60 },
+//   ];
+
+//   const userProfiles = [
+//     { icon: <Facebook />, sentiment: 80 },
+//     { icon: <Twitter />, sentiment: 50 },
+//     { icon: <Instagram />, sentiment: 80 },
+//     { icon: <LinkedIn />, sentiment: 80 },
+//     { icon: <Instagram />, sentiment: 10 },
+//     { icon: <WhatsApp />, sentiment: 50 },
+//     { icon: <Facebook />, sentiment: 80 },
+//   ];
+
+//   const chartData = [
+//     { month: "Jan", value: 30 },
+//     { month: "Feb", value: 45 },
+//     { month: "Mar", value: 75 },
+//     { month: "Apr", value: 60 },
+//     { month: "May", value: 45 },
+//     { month: "Jun", value: 65 },
+//     { month: "Jul", value: 55 },
+//   ];
+
+//   const [anchorEl, setAnchorEl] = useState(null);
+//   const open = Boolean(anchorEl);
+
+//   const handleClick = (event) => {
+//     setAnchorEl(event.currentTarget);
+//   };
+
+//   const handleClose = () => {
+//     setAnchorEl(null);
+//   };
+
+//   return (
+//     <div className="p-6 bg-white min-h-screen">
+//       <h1 className="text-2xl font-semibold mb-1">Engagement</h1>
+//       <p className="text-gray-600 text-sm mb-6">
+//         Sentiment across all active channels
+//       </p>
+
+//       {/* Social Platform Metrics */}
+//       <div className="flex gap-8 mb-8">
+//         {socialPlatforms.map((platform, index) => (
+//           <div key={index} className="flex items-center gap-2">
+//             <span className="text-gray-700">{platform.icon}</span>
+//             <div className="w-24 h-1 bg-red-100 rounded-full overflow-hidden">
+//               <div
+//                 className="h-full bg-green-500 rounded-full"
+//                 style={{ width: `${platform.sentiment}%` }}
+//               />
+//             </div>
+//             <span className="text-xs text-green-500">
+//               {platform.sentiment}% Positive
+//             </span>
+//           </div>
+//         ))}
+//       </div>
+//       {/* Ticket Section  */}
+//       <div className="grid grid-cols-4 gap-4 mb-4">
+//         <div className="flex space-x-4 col-span-2">
+//           {[1, 2].map((item) => (
+//             <div
+//               key={item}
+//               className="relative bg-gray-50 rounded-lg p-4 border border-gray-300 w-[400px] h-[130px] shadow-md overflow-hidden"
+//             >
+//               {/* Notches on sides */}
+//               <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300"></div>
+//               <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300"></div>
+
+//               {/* Ticket Content */}
+//               <div className="border-b border-dashed border-gray-300 pb-2 mb-2 flex justify-between text-xs">
+//                 <div>
+//                   <p className="text-gray-700 font-semibold">Status</p>
+//                   <p className="text-sm font-medium">Open/closed</p>
+//                 </div>
+//                 <div>
+//                   <p className="text-gray-700 font-semibold">Date and Time</p>
+//                   <p className="text-sm font-medium">01/05/2023</p>
+//                 </div>
+//               </div>
+//               <div className="flex justify-between text-xs">
+//                 <div>
+//                   <p className="text-red-500 font-semibold">Complaint</p>
+//                   <p className="text-gray-600">Order misplaced</p>
+//                 </div>
+//                 <div>
+//                   <p className="text-gray-700 font-semibold">Issue Raised by</p>
+//                   <p className="text-sm font-medium">SJ</p>
+//                 </div>
+//                 <div>
+//                   <p className="text-gray-700 font-semibold">Platform</p>
+//                   <p className="text-sm font-medium">Instagram</p>
+//                 </div>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+
+//         {/* Agent Details */}
+//         <div className="bg-gray-50 ml-6 rounded-lg p-4 w-[300px] shadow-md">
+//           <h2 className="text-sm font-semibold mb-3">Agent Details</h2>
+//           <div className="space-y-2">
+//             <div className="flex justify-between">
+//               <p className="text-sm text-gray-600">No. of chats</p>
+//               <p className="text-sm font-medium">36</p>
+//             </div>
+//             <div className="flex justify-between">
+//               <p className="text-sm text-gray-600">Reviews</p>
+//               <p className="text-sm font-medium">4.5</p>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Customer Details */}
+//         <div className="bg-gray-50 rounded-lg p-4 w-[300px] shadow-md">
+//           <h2 className="text-sm font-semibold mb-3">Customer Details</h2>
+//           <div className="space-y-2">
+//             <div className="flex justify-between">
+//               <p className="text-sm text-gray-600">Issue</p>
+//               <p className="text-sm font-medium text-blue-600">Order mix up</p>
+//             </div>
+//             <div className="flex justify-between">
+//               <p className="text-sm text-gray-600">Want</p>
+//               <p className="text-sm font-medium">Refund</p>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       <div className="grid grid-cols-12 gap-4">
+//         {/* Left Column - User Profiles */}
+//         <div className="col-span-3">
+//           <div className="bg-[#65558F] bg-opacity-[0.08]  rounded-lg">
+//             {userProfiles.map((profile, index) => (
+//               <div
+//                 key={index}
+//                 className="p-3 border-b border-gray-100 flex items-center gap-2"
+//               >
+//                 <span className="w-8 h-8">{profile.icon}</span>
+//                 <div>
+//                   <p className="text-base">Jessica@maker</p>
+//                   <p className="text-base text-gray-500">hello , how are you</p>
+//                   <p
+//                     className={`text-base ${
+//                       profile.sentiment >= 50
+//                         ? "text-green-500"
+//                         : "text-red-500"
+//                     }`}
+//                   >
+//                     {profile.sentiment}% Positive comment
+//                   </p>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+
+//         {/* Middle Column - Chat */}
+//         <div className="col-span-5">
+//           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-lg p-4">
+//             <div className="flex justify-between items-start mb-4">
+//               <div>
+//                 <h2 className="text-md font-semibold">Jessica@maker</h2>
+//                 <p className="text-md text-gray-500">Jessica@email.com</p>
+//               </div>
+//               {/* <button className="px-4 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1">
+//                 Close Chat
+//               </button> */}
+//             </div>
+
+//             {/* Chat Messages */}
+//             <div className="min-h-[200px] mb-4">
+//               {/* Bot Message */}
+//               <div className="flex gap-2 mb-4">
+//                 <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
+//                   <SmartToy className="text-white w-6 h-6" />
+//                 </div>
+//                 <div className="bg-white p-3 rounded-lg max-w-[70%]">
+//                   <p className="text-sm ">
+//                     Hi I'm BotWot,
+//                     <br />
+//                     How can I assist you today?
+//                   </p>
+//                   <p className="text-xs text-gray-500 mt-1">7:30 pm</p>
+//                 </div>
+//               </div>
+
+//               {/* User Message */}
+//               <div className="flex justify-end mb-4">
+//                 <div className="bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]">
+//                   <p className="text-sm">I need to book an appointment</p>
+//                   <p className="text-xs opacity-70 mt-1">7:31 pm</p>
+//                 </div>
+//                 <div className="w-8 h-8 rounded-full bg-[#2E2F5F] ml-4 flex items-center justify-center">
+//                   <Person className="text-white w-6 h-6" />
+//                 </div>
+//               </div>
+
+//               {/* Bot Message */}
+//               <div className="flex gap-2 mb-4">
+//                 <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
+//                   <SmartToy className="text-white w-6 h-6" />
+//                 </div>
+//                 <div className="bg-white p-3 rounded-lg max-w-[70%]">
+//                   <p className="text-sm">
+//                     Sure, when do you want to book this appointment?
+//                   </p>
+//                   <p className="text-xs text-gray-500 mt-1">7:32 pm</p>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Quick Replies */}
+//             <div className="flex justify-between items-start mt-24 gap-6">
+//               {/* Quick Replies on the Left */}
+//               <div className="flex flex-col mt-10 gap-2">
+//                 {["Okay", "Fine", "That works.", "Tell me more."].map(
+//                   (text, index) => (
+//                     <button
+//                       key={index}
+//                       className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100"
+//                     >
+//                       {text}
+//                     </button>
+//                   )
+//                 )}
+//               </div>
+
+//               {/* CSAT Section on the Right */}
+//               <div className="p-4 bg-[#65558F] mb-4 bg-opacity-[0.08] text-black rounded-lg w-[250px]">
+//                 <div className="flex items-center mb-2">
+//                   <p className="text-red-400 font-bold text-sm">20% (CSAT)</p>
+//                 </div>
+//                 <div className="w-full h-2 bg-gray-500 rounded-full overflow-hidden mb-4">
+//                   <div className="h-full bg-green-500 w-[20%]" />
+//                   <div className="h-full bg-yellow-500 w-[40%]" />
+//                   <div className="h-full bg-red-500 w-[40%]" />
+//                 </div>
+//                 <div className="space-y-2 text-sm">
+//                   <div className="flex justify-between">
+//                     <span className="text-black">Chat Cue</span>
+//                     <span>Customer is anxious</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-black">Reason</span>
+//                     <span>Order mix up</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-black">Next Step</span>
+//                     <span>Confirm order details</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-black">Predictive AI</span>
+//                     <span>High resolution</span>
+//                   </div>
+//                 </div>
+//                 <hr className="my-2 border-gray-400" />
+//                 <div className="space-y-2 text-sm">
+//                   <div className="flex justify-between">
+//                     <span className="text-black">Emotion</span>
+//                     <span>Neutral</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-black">Intent</span>
+//                     <span>Inquiry</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-black">Sentiment</span>
+//                     <span>Positive</span>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Input Area */}
+//             <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50">
+//               <button className="p-1.5 hover:bg-gray-200 rounded-full">
+//                 <Image className="w-5 h-5 text-gray-600" />
+//               </button>
+//               <button className="p-1.5 hover:bg-gray-200 rounded-full">
+//                 <AttachFile className="w-5 h-5 text-gray-600" />
+//               </button>
+//               <input
+//                 type="text"
+//                 placeholder="Message"
+//                 className="flex-1 bg-transparent outline-none text-sm"
+//               />
+//               <button className="p-1.5 hover:bg-gray-200 rounded-full">
+//                 <Send className="w-5 h-5 text-gray-600" />
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Right Column - Details */}
+//         <div className="col-span-4 space-y-4">
+//           {/* Platform Health */}
+//           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
+//             <div className="flex justify-between items-center mb-4">
+//               <h2 className="text-sm font-semibold">
+//                 Platforms Health Details
+//               </h2>
+//               <div className="flex gap-2">
+//                 <button className="px-4 py-1.5 text-sm border border-purple-100 text-[#65558F] rounded-lg hover:bg-purple-50">
+//                   Date Range
+//                 </button>
+//                 <button className="px-4 py-1.5 text-sm bg-[#65558F]  text-white rounded-lg">
+//                   Platform
+//                 </button>
+//                 <IconButton onClick={handleClick}>
+//                   <MoreVert />
+//                 </IconButton>
+//                 <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+//                   <MenuItem onClick={handleClose}>Engagement Graph</MenuItem>
+//                   <MenuItem onClick={handleClose}>Sentiment Graph</MenuItem>
+//                   <MenuItem onClick={handleClose}>Interaction Graph</MenuItem>
+//                   <MenuItem onClick={handleClose}>Chats Graph</MenuItem>
+//                 </Menu>
+//               </div>
+//             </div>
+//             <div className="h-[300px]">
+//               <ResponsiveContainer>
+//                 <BarChart data={chartData}>
+//                   <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+//                   <XAxis dataKey="month" />
+//                   <YAxis />
+//                   <Tooltip />
+//                   <Bar
+//                     dataKey="value"
+//                     fill="#673ab7"
+//                     barSize={40}
+//                     radius={[4, 4, 0, 0]}
+//                   />
+//                 </BarChart>
+//               </ResponsiveContainer>
+//             </div>
+//           </div>
+
+//           {/* AI Recommendation */}
+//           <div className="bg-[#65558F] bg-opacity-[0.08]  rounded-lg p-4">
+//             <h2 className="text-sm font-semibold mb-3">
+//               AI Recommendation and Actions
+//             </h2>
+//             <div className="space-y-2">
+//               <div className="flex justify-between">
+//                 <p className="text-sm">Action</p>
+//                 <p className="text-sm">Sell the product</p>
+//               </div>
+//               <div className="flex justify-between">
+//                 <p className="text-sm">AI Recommendation</p>
+//                 <p className="text-sm">Sell the product</p>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Summary */}
+//           <div className="bg-[#65558F] bg-opacity-[0.08]  rounded-lg p-4">
+//             <h2 className="text-sm font-semibold mb-3">Summary</h2>
+//             <div className="space-y-2">
+//               {[
+//                 { label: "Potential Risk", value: "Low" },
+//                 { label: "Sales Opportunity", value: "High" },
+//                 { label: "Upcoming Trends", value: "AI-driven automation is gaining traction" },
+//                 { label: "Resolution Likelihood", value: "High" },
+//                 { label: "Retention Probability", value: "95%" },
+//               ].map((item, index) => (
+//                 <div key={index} className="flex justify-between">
+//                   <p className="text-sm">{item.label}</p>
+//                   <p className="text-sm">{item.value}</p>
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default EngagementTab;
+
+import { useEffect, useMemo, useState } from "react";
+import io from "socket.io-client";
 import {
   Instagram,
   Facebook,
@@ -10,6 +426,7 @@ import {
   Image,
   SmartToy,
   Person,
+  ChevronRight,
 } from "@mui/icons-material";
 import {
   XAxis,
@@ -20,27 +437,200 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-import { IconButton, Menu, MenuItem } from "@mui/material";
-import { useState } from "react";
+import {
+  IconButton,
+  Menu,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Typography,
+} from "@mui/material";
+import { getInstagramData } from "../../api/services/integrationServices";
 
 const EngagementTab = () => {
+  const [conversations, setConversations] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPost, setCurrentPost] = useState(null);
+
+  const [inputText, setInputText] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [availableIntegrations, setAvailableIntegrations] = useState([]);
+  const [integrationId, setIntegrationId] = useState("");
+  const open = Boolean(anchorEl);
+
+  useEffect(() => {
+    const fetchIntegrations = async () => {
+      try {
+        const response = await getInstagramData();
+        const integrations = Array.isArray(response?.data) ? response.data : [];
+        setAvailableIntegrations(integrations);
+        if (integrations.length > 0) {
+          setIntegrationId(integrations[0]._id);
+        }
+      } catch (error) {
+        console.error("Error fetching Instagram integrations:", error);
+        setAvailableIntegrations([]);
+      }
+    };
+
+    fetchIntegrations();
+  }, []);
+
+  const socket = useMemo(() => {
+    return io(`${import.meta.env.VITE_FIREBASE_BASE_URL}/instagram`, {
+      query: { integrationId },
+    });
+  }, [integrationId]);
+
+  useEffect(() => {
+    console.log("integrationId", integrationId);
+    if (!integrationId) return;
+
+    socket.on("connect", () => {
+      console.log("Connected to WebSocket server");
+      socket.emit("igFetchInitialData", integrationId);
+    });
+
+    socket.on("initialData", (data) => {
+      console.log("Received initial data (conversation):", data.conversations);
+      console.log("Received initial data (posts):", data.posts);
+
+      setConversations(data.conversations || []);
+      setPosts(data.posts || []);
+    });
+
+    socket.on("igMessageSendSuccess", (response) => {
+      const newMessage = response.data;
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.messageId === newMessage.messageId
+            ? { ...conv, messages: [...(conv.messages || []), newMessage] }
+            : conv
+        )
+      );
+    });
+
+    socket.on("igCommentSendSuccess", (response) => {
+      const newComment = response.data;
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.messageId === newComment.messageId
+            ? { ...conv, messages: [...(conv.messages || []), newComment] }
+            : conv
+        )
+      );
+    });
+
+    socket.on("igBroadcastOutgoingMessage", (response) => {
+      const broadcastMessage = response.data;
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.messageId === broadcastMessage.messageId
+            ? {
+                ...conv,
+                messages: [...(conv.messages || []), broadcastMessage],
+              }
+            : conv
+        )
+      );
+    });
+
+    socket.on("igBroadcastOutgoingComment", (response) => {
+      const broadcastComment = response.data;
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.messageId === broadcastComment.messageId
+            ? {
+                ...conv,
+                messages: [...(conv.messages || []), broadcastComment],
+              }
+            : conv
+        )
+      );
+    });
+
+    socket.on("error", (error) => {
+      console.error("WebSocket error:", error);
+    });
+
+    socket.on("igMessageSendError", (error) => {
+      console.error("Message send error:", error.message);
+    });
+
+    socket.on("igCommentSendError", (error) => {
+      console.error("Comment send error:", error.message);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [integrationId, socket]);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const sendMessage = () => {
+    if (!inputText || !selectedConversationId || !integrationId) return;
+    const selectedConversation = conversations?.find(
+      (conv) => conv.messageId === selectedConversationId
+    );
+    if (!selectedConversation) return;
+
+    if (selectedConversation.type === "DM") {
+      socket.emit("igSendMessageRequest", {
+        integrationId,
+        recipientId: selectedConversation?.recipientId,
+        recipientUsername: selectedConversation?.username,
+        message: inputText,
+      });
+    } else if (selectedConversation.type === "COMMENT") {
+      socket.emit("igSendCommentReplyRequest", {
+        integrationId,
+        parentId:
+          selectedConversation.parentCommentId ||
+          selectedConversation.replyToCommentId,
+        text: inputText,
+        postId: selectedConversation.postId,
+      });
+    }
+    setInputText("");
+  };
+
+  const displayedConversations = selectedConversationId
+    ? conversations.filter((c) => c.messageId === selectedConversationId)
+    : conversations;
+
+  const selectedConversation = conversations.find(
+    (c) => c.messageId === selectedConversationId
+  );
+
+  const openPostModal = (post) => {
+    setCurrentPost(post);
+    setIsModalOpen(true);
+  };
+  const closeModal = () => setIsModalOpen(false);
+
   const socialPlatforms = [
     { icon: <Instagram />, sentiment: 60 },
     { icon: <Facebook />, sentiment: 60 },
     { icon: <LinkedIn />, sentiment: 60 },
     { icon: <Twitter />, sentiment: 60 },
     { icon: <WhatsApp />, sentiment: 60 },
-  ];
-
-  const userProfiles = [
-    { icon: <Facebook />, sentiment: 80 },
-    { icon: <Twitter />, sentiment: 50 },
-    { icon: <Instagram />, sentiment: 80 },
-    { icon: <LinkedIn />, sentiment: 80 },
-    { icon: <Instagram />, sentiment: 10 },
-    { icon: <WhatsApp />, sentiment: 50 },
-    { icon: <Facebook />, sentiment: 80 },
   ];
 
   const chartData = [
@@ -53,20 +643,12 @@ const EngagementTab = () => {
     { month: "Jul", value: 55 },
   ];
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  // Extract Instagram posts from conversations
+  const instagramPosts = posts;
 
   return (
     <div className="p-6 bg-white min-h-screen">
-      <h1 className="text-xl font-semibold mb-1">Engagement</h1>
+      <h1 className="text-2xl font-semibold mb-1">Engagement</h1>
       <p className="text-gray-600 text-sm mb-6">
         Sentiment across all active channels
       </p>
@@ -88,48 +670,87 @@ const EngagementTab = () => {
           </div>
         ))}
       </div>
-      {/* Ticket Section  */}
-      <div className="grid grid-cols-4 gap-4 mb-4">
-        <div className="flex space-x-4 col-span-2">
-          {[1, 2].map((item) => (
-            <div
-              key={item}
-              className="relative bg-gray-50 rounded-lg p-4 border border-gray-300 w-[400px] h-[130px] shadow-md overflow-hidden"
-            >
-              {/* Notches on sides */}
-              <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300"></div>
-              <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border border-gray-300"></div>
 
-              {/* Ticket Content */}
-              <div className="border-b border-dashed border-gray-300 pb-2 mb-2 flex justify-between text-xs">
-                <div>
-                  <p className="text-gray-700 font-semibold">Status</p>
-                  <p className="text-sm font-medium">Open/closed</p>
+      {/* Selection Controls */}
+      <div className="flex gap-4 mb-6">
+        <FormControl className="w-1/2">
+          <InputLabel>Select Integration</InputLabel>
+          <Select
+            value={integrationId}
+            label="Select Integration"
+            onChange={(e) => setIntegrationId(e.target.value)}
+          >
+            {availableIntegrations.map((intg) => (
+              <MenuItem key={intg._id} value={intg._id}>
+                {intg.name || intg._id}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl className="w-1/2">
+          <InputLabel>Select Platform</InputLabel>
+          <Select
+            value={"all-platforms"}
+            label="Select Platform"
+            onChange={() => {
+              /* Add platform filter handler */
+            }}
+          >
+            <MenuItem value="all-platforms">All Platforms</MenuItem>
+            <MenuItem value="instagram">Instagram</MenuItem>
+            <MenuItem value="facebook">Facebook</MenuItem>
+            <MenuItem value="linkedin">LinkedIn</MenuItem>
+            <MenuItem value="twitter">Twitter</MenuItem>
+          </Select>
+        </FormControl>
+      </div>
+
+      {/* Ticket Section */}
+      <div className="grid grid-cols-4 gap-4 mb-4">
+        {/* Recent Posts Carousel */}
+        <div className="flex space-x-4 col-span-2">
+          <h2 className="text-lg font-semibold mb-2">Recent Posts</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {instagramPosts.length > 0 ? (
+              instagramPosts.map((post) => (
+                <div
+                  key={post?.postId}
+                  className="min-w-[200px] bg-gray-50 rounded-lg shadow p-4 cursor-pointer"
+                  // onClick={() => openInstagramPost(post)}
+                  onClick={() => openPostModal(post)}
+                >
+                  <div className="relative mb-2">
+                    <img
+                      src={post?.mediaUrl}
+                      alt="Post not available"
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                    <span className="absolute top-2 left-2 bg-white rounded-full p-1">
+                      <Instagram fontSize="small" />
+                    </span>
+                  </div>
+                  <p className="text-sm mb-2 overflow-hidden overflow-ellipsis line-clamp-3">
+                    {post?.caption}
+                  </p>
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>
+                      {new Date(post?.timestamp).toLocaleTimeString()}
+                    </span>
+                    <span>{post.comments?.length || 0} comments</span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-gray-700 font-semibold">Date and Time</p>
-                  <p className="text-sm font-medium">01/05/2023</p>
-                </div>
-              </div>
-              <div className="flex justify-between text-xs">
-                <div>
-                  <p className="text-red-500 font-semibold">Complaint</p>
-                  <p className="text-gray-600">Order misplaced</p>
-                </div>
-                <div>
-                  <p className="text-gray-700 font-semibold">Issue Raised by</p>
-                  <p className="text-sm font-medium">SJ</p>
-                </div>
-                <div>
-                  <p className="text-gray-700 font-semibold">Platform</p>
-                  <p className="text-sm font-medium">Instagram</p>
-                </div>
-              </div>
-            </div>
-          ))}
+              ))
+            ) : (
+              <p>No posts available</p>
+            )}
+            <button className="min-w-[220px] flex items-center justify-center bg-purple-100 rounded-lg">
+              View More <ChevronRight className="ml-1" />
+            </button>
+          </div>
         </div>
 
-        {/* Agent Details */}
+        {/* Agent Details Card */}
         <div className="bg-gray-50 ml-6 rounded-lg p-4 w-[300px] shadow-md">
           <h2 className="text-sm font-semibold mb-3">Agent Details</h2>
           <div className="space-y-2">
@@ -144,7 +765,7 @@ const EngagementTab = () => {
           </div>
         </div>
 
-        {/* Customer Details */}
+        {/* Customer Details Card */}
         <div className="bg-gray-50 rounded-lg p-4 w-[300px] shadow-md">
           <h2 className="text-sm font-semibold mb-3">Customer Details</h2>
           <div className="space-y-2">
@@ -161,26 +782,26 @@ const EngagementTab = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-4">
-        {/* Left Column - User Profiles */}
+        {/* Left Column - Conversations */}
         <div className="col-span-3">
-          <div className="bg-[#65558F] bg-opacity-[0.08]  rounded-lg">
-            {userProfiles.map((profile, index) => (
+          <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg">
+            {displayedConversations.map((c) => (
               <div
-                key={index}
-                className="p-3 border-b border-gray-100 flex items-center gap-2"
+                key={c.messageId}
+                className="p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer"
+                onClick={() => setSelectedConversationId(c.messageId)}
               >
-                <span className="w-8 h-8">{profile.icon}</span>
+                <span className="w-8 h-8">
+                  <Instagram />
+                </span>
                 <div>
-                  <p className="text-base">Jessica@maker</p>
-                  <p className="text-base text-gray-500">hello , how are you</p>
+                  <p className="text-base">{c?.username || "Unknown"}</p>
                   <p
                     className={`text-base ${
-                      profile.sentiment >= 50
-                        ? "text-green-500"
-                        : "text-red-500"
+                      c?.sentiment >= 50 ? "text-green-500" : "text-red-500"
                     }`}
                   >
-                    {profile.sentiment}% Positive comment
+                    {c?.sentiment}% Positive
                   </p>
                 </div>
               </div>
@@ -191,143 +812,154 @@ const EngagementTab = () => {
         {/* Middle Column - Chat */}
         <div className="col-span-5">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-lg p-4">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-md font-semibold">Jessica@maker</h2>
-                <p className="text-md text-gray-500">Jessica@email.com</p>
-              </div>
-              {/* <button className="px-4 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1">
-                Close Chat
-              </button> */}
-            </div>
+            {selectedConversation ? (
+              <>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-md font-semibold">
+                      {selectedConversation.recipientUsername || "Unknown"}
+                    </h2>
+                  </div>
+                </div>
 
-            {/* Chat Messages */}
-            <div className="min-h-[200px] mb-4">
-              {/* Bot Message */}
-              <div className="flex gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
-                  <SmartToy className="text-white w-6 h-6" />
+                {/* Chat Messages */}
+                <div className="min-h-[200px] mb-4">
+                  {(selectedConversation.messages || []).map(
+                    (message, index) => (
+                      <div
+                        key={index}
+                        className={
+                          message.senderType === "ADMIN"
+                            ? "flex justify-end mb-4"
+                            : "flex gap-2 mb-4"
+                        }
+                      >
+                        {message.senderType !== "ADMIN" && (
+                          <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
+                            <SmartToy className="text-white w-6 h-6" />
+                          </div>
+                        )}
+                        <div
+                          className={
+                            message.senderType === "ADMIN"
+                              ? "bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]"
+                              : "bg-white p-3 rounded-lg max-w-[70%]"
+                          }
+                        >
+                          <p className="text-sm">{message.message.text}</p>
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </p>
+                        </div>
+                        {message.senderType === "ADMIN" && (
+                          <div className="w-8 h-8 rounded-full bg-[#2E2F5F] ml-4 flex items-center justify-center">
+                            <Person className="text-white w-6 h-6" />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  )}
                 </div>
-                <div className="bg-white p-3 rounded-lg max-w-[70%]">
-                  <p className="text-sm ">
-                    Hi I'm BotWot,
-                    <br />
-                    How can I assist you today?
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">7:30 pm</p>
-                </div>
-              </div>
 
-              {/* User Message */}
-              <div className="flex justify-end mb-4">
-                <div className="bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]">
-                  <p className="text-sm">I need to book an appointment</p>
-                  <p className="text-xs opacity-70 mt-1">7:31 pm</p>
+                {/* Quick Replies and CSAT */}
+                <div className="flex justify-between items-start mt-24 gap-6">
+                  <div className="flex flex-col mt-10 gap-2">
+                    {["Okay", "Fine", "That works.", "Tell me more."].map(
+                      (text, index) => (
+                        <button
+                          key={index}
+                          className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100"
+                          onClick={() => {
+                            setInputText(text);
+                            sendMessage();
+                          }}
+                        >
+                          {text}
+                        </button>
+                      )
+                    )}
+                  </div>
+                  <div className="p-4 bg-[#65558F] mb-4 bg-opacity-[0.08] text-black rounded-lg w-[250px]">
+                    <div className="flex items-center mb-2">
+                      <p className="text-red-400 font-bold text-sm">
+                        20% (CSAT)
+                      </p>
+                    </div>
+                    <div className="w-full h-2 bg-gray-500 rounded-full overflow-hidden mb-4">
+                      <div className="h-full bg-green-500 w-[20%]" />
+                      <div className="h-full bg-yellow-500 w-[40%]" />
+                      <div className="h-full bg-red-500 w-[40%]" />
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-black">Chat Cue</span>
+                        <span>Customer is anxious</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-black">Reason</span>
+                        <span>Order mix up</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-black">Next Step</span>
+                        <span>Confirm order details</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-black">Predictive AI</span>
+                        <span>High resolution</span>
+                      </div>
+                    </div>
+                    <hr className="my-2 border-gray-400" />
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-black">Emotion</span>
+                        <span>Neutral</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-black">Intent</span>
+                        <span>Inquiry</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-black">Sentiment</span>
+                        <span>Positive</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-8 h-8 rounded-full bg-[#2E2F5F] ml-4 flex items-center justify-center">
-                  <Person className="text-white w-6 h-6" />
-                </div>
-              </div>
 
-              {/* Bot Message */}
-              <div className="flex gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
-                  <SmartToy className="text-white w-6 h-6" />
+                {/* Input Area */}
+                <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50">
+                  <button className="p-1.5 hover:bg-gray-200 rounded-full">
+                    <Image className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button className="p-1.5 hover:bg-gray-200 rounded-full">
+                    <AttachFile className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <input
+                    type="text"
+                    placeholder="Message"
+                    className="flex-1 bg-transparent outline-none text-sm"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                  />
+                  <button
+                    className="p-1.5 hover:bg-gray-200 rounded-full"
+                    onClick={sendMessage}
+                  >
+                    <Send className="w-5 h-5 text-gray-600" />
+                  </button>
                 </div>
-                <div className="bg-white p-3 rounded-lg max-w-[70%]">
-                  <p className="text-sm">
-                    Sure, when do you want to book this appointment?
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">7:32 pm</p>
-                </div>
+              </>
+            ) : (
+              <div className="text-center text-gray-500 mt-10">
+                Select a conversation to start chatting
               </div>
-            </div>
-
-            {/* Quick Replies */}
-            <div className="flex justify-between items-start mt-24 gap-6">
-              {/* Quick Replies on the Left */}
-              <div className="flex flex-col mt-10 gap-2">
-                {["Okay", "Fine", "That works.", "Tell me more."].map(
-                  (text, index) => (
-                    <button
-                      key={index}
-                      className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100"
-                    >
-                      {text}
-                    </button>
-                  )
-                )}
-              </div>
-
-              {/* CSAT Section on the Right */}
-              <div className="p-4 bg-[#65558F] mb-4 bg-opacity-[0.08] text-black rounded-lg w-[250px]">
-                <div className="flex items-center mb-2">
-                  <p className="text-red-400 font-bold text-sm">20% (CSAT)</p>
-                </div>
-                <div className="w-full h-2 bg-gray-500 rounded-full overflow-hidden mb-4">
-                  <div className="h-full bg-green-500 w-[20%]" />
-                  <div className="h-full bg-yellow-500 w-[40%]" />
-                  <div className="h-full bg-red-500 w-[40%]" />
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-black">Chat Cue</span>
-                    <span>Customer is anxious</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-black">Reason</span>
-                    <span>Order mix up</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-black">Next Step</span>
-                    <span>Confirm order details</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-black">Predictive AI</span>
-                    <span>High resolution</span>
-                  </div>
-                </div>
-                <hr className="my-2 border-gray-400" />
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-black">Emotion</span>
-                    <span>Neutral</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-black">Intent</span>
-                    <span>Inquiry</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-black">Sentiment</span>
-                    <span>Positive</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Input Area */}
-            <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50">
-              <button className="p-1.5 hover:bg-gray-200 rounded-full">
-                <Image className="w-5 h-5 text-gray-600" />
-              </button>
-              <button className="p-1.5 hover:bg-gray-200 rounded-full">
-                <AttachFile className="w-5 h-5 text-gray-600" />
-              </button>
-              <input
-                type="text"
-                placeholder="Message"
-                className="flex-1 bg-transparent outline-none text-sm"
-              />
-              <button className="p-1.5 hover:bg-gray-200 rounded-full">
-                <Send className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
+            )}
           </div>
         </div>
 
         {/* Right Column - Details */}
         <div className="col-span-4 space-y-4">
-          {/* Platform Health */}
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-semibold">
@@ -337,7 +969,7 @@ const EngagementTab = () => {
                 <button className="px-4 py-1.5 text-sm border border-purple-100 text-[#65558F] rounded-lg hover:bg-purple-50">
                   Date Range
                 </button>
-                <button className="px-4 py-1.5 text-sm bg-[#65558F]  text-white rounded-lg">
+                <button className="px-4 py-1.5 text-sm bg-[#65558F] text-white rounded-lg">
                   Platform
                 </button>
                 <IconButton onClick={handleClick}>
@@ -370,7 +1002,7 @@ const EngagementTab = () => {
           </div>
 
           {/* AI Recommendation */}
-          <div className="bg-[#65558F] bg-opacity-[0.08]  rounded-lg p-4">
+          <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <h2 className="text-sm font-semibold mb-3">
               AI Recommendation and Actions
             </h2>
@@ -387,13 +1019,16 @@ const EngagementTab = () => {
           </div>
 
           {/* Summary */}
-          <div className="bg-[#65558F] bg-opacity-[0.08]  rounded-lg p-4">
+          <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <h2 className="text-sm font-semibold mb-3">Summary</h2>
             <div className="space-y-2">
               {[
                 { label: "Potential Risk", value: "Low" },
                 { label: "Sales Opportunity", value: "High" },
-                { label: "Upcoming Trends", value: "AI-driven automation is gaining traction" },
+                {
+                  label: "Upcoming Trends",
+                  value: "AI-driven automation is gaining traction",
+                },
                 { label: "Resolution Likelihood", value: "High" },
                 { label: "Retention Probability", value: "95%" },
               ].map((item, index) => (
@@ -406,8 +1041,52 @@ const EngagementTab = () => {
           </div>
         </div>
       </div>
+
+      {currentPost && (
+        <Dialog open={isModalOpen} onClose={closeModal} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            Post by {currentPost.username || "botwot.io"}
+          </DialogTitle>
+          <DialogContent dividers>
+            <img
+              src={currentPost.carouselMedia[0]?.url}
+              alt="Post detail"
+              className="w-full rounded mb-4"
+            />
+            <Typography>{currentPost.caption}</Typography>
+            <Divider className="my-2" />
+            <Typography variant="subtitle1">Comments</Typography>
+            {currentPost.comments?.map((c) => (
+              <div key={c.commentId} className="mb-3">
+                <Typography variant="subtitle2">{c.username}</Typography>
+                <Typography variant="body2">{c.text}</Typography>
+                <Typography variant="caption" className="text-gray-500">
+                  {new Date(c.timestamp).toLocaleTimeString()}
+                </Typography>
+              </div>
+            ))}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeModal}>Close</Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
+};
+
+// Custom method to get relative time (polyfill if needed)
+Date.prototype.toLocaleTimeString = function () {
+  const now = new Date();
+  const diffMs = now.getTime() - (this as Date).getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+  if (diffDays > 0) return `${diffDays} day(s) ago`;
+  if (diffHours > 0) return `${diffHours} hour(s) ago`;
+  if (diffMinutes > 0) return `${diffMinutes} minute(s) ago`;
+  return "just now";
 };
 
 export default EngagementTab;
