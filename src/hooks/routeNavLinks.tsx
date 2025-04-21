@@ -16,13 +16,15 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import HelpIcon from "@mui/icons-material/Help";
 import SettingsIcon from "@mui/icons-material/Settings";
+import CallIcon from '@mui/icons-material/Call';
+import MicIcon from '@mui/icons-material/Mic';
 const filterMenuItems = (items: any[], allowedIds: string | any[]) =>
   items?.reduce((acc: any[], item: { subItems: any[]; id: any }) => {
     // If the item has subItems, filter them
     const subItems = item.subItems
       ? item.subItems.filter((subItem: { id: any }) =>
-          allowedIds?.includes(subItem.id)
-        )
+        allowedIds?.includes(subItem.id)
+      )
       : null;
 
     // Include the item if its ID or any subItem's ID is in allowedIds
@@ -54,6 +56,12 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           text: "Live Chats",
           path: "/conversations/live-chats",
           icon: <WifiTetheringIcon />,
+        },
+        {
+          id: 2.3,
+          text: "Live Calls",
+          path: "/conversations/live-calls",
+          icon: <CallIcon />,
         },
       ],
     },
@@ -87,13 +95,32 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           path: "/marketing/omnigenStudio",
           icon: <CampaignIcon />,
         },
+        {
+          id: 5.4,
+          text: "WhatsApp Dashboard",
+          path: "/marketing/whatsappdashboard",
+          icon: <CampaignIcon />,
+        },
       ],
     },
     {
       id: 6,
-      text: "Voice Agent",
+      text: "Voice",
       icon: <SupportAgentIcon />,
-      path: "/voiceagent",
+      subItems: [
+        {
+          id: 6.1,
+          text: "Agents",
+          path: "/voice/agents",
+          icon: <MicIcon />,
+        },
+        {
+          id: 6.2,
+          text: "Voice Dashboard",
+          path: "/voice/dashboard",
+          icon: <CampaignIcon />,
+        },
+      ]
     },
     { id: 7, text: "Workflow", icon: <AccountTreeIcon />, path: "/workflow" },
     { id: 8, text: "Reports", icon: <AssessmentIcon />, path: "/reports" },
