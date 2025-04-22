@@ -715,6 +715,30 @@ const EditBot: React.FC = () => {
             </div>
           </div>
 
+          {/* website link */}
+          <div className="flex flex-col w-[85%] mb-1 gap-2 text-black">
+            <div className="flex items-center mb-1">
+              <label>Website</label>
+              <Tooltip
+                title="Enter your website URL for the agent to reference."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
+
+            <Field
+              type="text"
+              name="websiteURL"
+              placeholder="Enter your website URL"
+              component={FormikFieldInputComponent}
+              className="bg-white h-[50px] px-4 rounded-[12px]"
+            />
+          </div>
+
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label>Agent Role</label>
@@ -803,6 +827,36 @@ const EditBot: React.FC = () => {
                 { label: "Custom", value: "custom" },
               ]}
             />
+          </div>
+
+          {/* Bot Smartness */}
+          <div className="flex flex-col w-[85%] mb-3 text-black">
+            <div className="flex items-center mb-2">
+              <label>Bot Smartness</label>
+              <Tooltip
+                title="Adjust the intelligence level of your bot"
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
+            <div className="bg-[#F3F2F6] h-[50px] px-4 rounded-[12px] flex items-center justify-between">
+              <span className="text-gray-500">Click to add Bot Smartness</span>
+              <label className="inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={formik.values.botSmartness}
+                  onChange={(e) => {
+                    formik.setFieldValue("botSmartness", e.target.checked);
+                  }}
+                />
+                <div className="relative w-12 h-6 bg-gray-200 peer-checked:bg-[#65558F] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:right-[22px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              </label>
+            </div>
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
@@ -1176,15 +1230,15 @@ const EditBot: React.FC = () => {
                   {renderNavigationButtons(formik)}
                 </div>
                 <CreateBotRightContainer
-                  botSmartness={formik.values.botSmartness}
+                  // botSmartness={formik.values.botSmartness}
                   imageSrc={imageSrc}
                   botName={formik.values.botName || "Bot Assistant"}
                   theme={formik.values.botTheme}
                   color={chatColor}
                   greetingMessage={formik.values.botGreetingMessage}
-                  botSmartnessHandle={(val) =>
-                    formik.setFieldValue("botSmartness", val)
-                  }
+                  // botSmartnessHandle={(val) =>
+                  //   formik.setFieldValue("botSmartness", val)
+                  // }
                   font={formik.values.botFont}
                 />
               </Form>
