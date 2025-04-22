@@ -96,7 +96,7 @@ const MyBots: React.FC = () => {
     });
   };
   const handleEdit = (id: string) => {
-    navigate(`/editbot/:${id}`);
+    navigate(`/editbot/${id}`);
   };
   const handleDelete = () => {
     dispatch(deleteBotAction(payloadDelete));
