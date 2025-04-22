@@ -322,6 +322,53 @@ const EditBot: React.FC = () => {
     }
   };
 
+  // const handleSubmit = async (values: any, { setSubmitting }: any) => {
+  //   setSubmitting(true);
+  //   try {
+  //     const formData = new FormData();
+  //     const cleanedBotId = id?.replace(":", "") || "";
+  //     formData.append("botId", cleanedBotId);
+
+  //     // Compare values with botData to find changes
+  //     Object.keys(values).forEach((key) => {
+  //       if (key === "knowledgeBaseFile" && values[key] instanceof File) {
+  //         // Handle file uploads
+  //         formData.append(key, values[key]);
+  //       } else if (key === "agentsGoals" || key === "conversationGuidelines") {
+  //         // Handle array fields
+  //         const originalArray = botData[key]?.map((item: string) =>
+  //           JSON.stringify(item)
+  //         );
+  //         const updatedArray = values[key]?.map((item: string) =>
+  //           JSON.stringify(item)
+  //         );
+  //         if (JSON.stringify(originalArray) !== JSON.stringify(updatedArray)) {
+  //           formData.append(key, JSON.stringify(values[key]));
+  //         }
+  //       } else if (values[key] !== botData[key]) {
+  //         // Add only changed fields
+  //         formData.append(key, values[key]);
+  //       }
+  //     });
+
+  //     // Add selectedFileImage if it exists (custom icon upload)
+  //     if (selectedFileImage) {
+  //       formData.append("customBotImage", selectedFileImage);
+  //     }
+
+  //     console.log("FormData being sent:");
+  //     for (const [key, value] of formData.entries()) {
+  //       console.log(`${key}:`, value); // Log each key-value pair in FormData
+  //     }
+
+  //     await dispatch(editBotAction(formData));
+  //   } catch (error) {
+  //     console.error("Submission failed:", error);
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
   const handleClose = (formik: any) => {
     formik.resetForm();
     setImageName("");
