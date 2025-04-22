@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   createNewUser,
   deleteUserAction,
+  editUser,
   getUsersAction,
 } from "../../store/actions/userActions";
 import { RootState } from "../../store";
@@ -202,14 +203,20 @@ const UserManagement = () => {
   }, [userToDelete, deleteReason]);
 
   const handleSaveUser = (userData) => {
-    // Add new user
-    const payload = {
-      emailId: userData.employeeId,
-      mobileNo: userData.mobileNo,
-      role: userData.role,
-      modules: userData.modules,
-    };
-    dispatch(createNewUser(payload));
+    if (userData?.userId) {
+      //Edit User
+      console.log("Edit Form: ", userData);
+      dispatch(editUser(userData));
+    } else {
+      // Add new user
+      const payload = {
+        emailId: userData.employeeId,
+        mobileNo: userData.mobileNo,
+        role: userData.role,
+        modules: userData.modules,
+      };
+      dispatch(createNewUser(payload));
+    }
     setIsModalOpen(false);
   };
 
