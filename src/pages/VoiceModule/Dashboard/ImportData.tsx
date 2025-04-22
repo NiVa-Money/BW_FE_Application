@@ -1,18 +1,5 @@
 import React, { useRef, useState } from "react";
 import { useDashboard } from "../../../hooks/DashboardContext";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Button,
-  Typography,
-  IconButton,
-  Box,
-  useTheme,
-} from "@mui/material";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import CloseIcon from "@mui/icons-material/Close";
 
 const ImportData: React.FC = () => {
   const { uploadData } = useDashboard();
@@ -20,7 +7,6 @@ const ImportData: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const theme = useTheme();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,7 +37,6 @@ const ImportData: React.FC = () => {
 
   const readFile = (file: File) => {
     const reader = new FileReader();
-
     reader.onload = (event) => {
       try {
         const jsonData = JSON.parse(event.target?.result as string);
@@ -63,110 +48,89 @@ const ImportData: React.FC = () => {
         console.error("Error parsing JSON file:", error);
       }
     };
-
     reader.readAsText(file);
   };
 
   return (
     <>
-      <Button
-        variant="outlined"
-        startIcon={<UploadFileIcon />}
+      <button
+        className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-600 border border-gray-300 hover:bg-blue-50 flex items-center gap-2 transition-all duration-200"
         onClick={() => setIsOpen(true)}
       >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
         Import Data
-      </Button>
+      </button>
 
-      <Dialog
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle sx={{ m: 0, p: 2 }}>
-          Import Call Data
-          <IconButton
-            aria-label="close"
-            onClick={() => setIsOpen(false)}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-
-        <DialogContent dividers>
-          <Typography variant="body2" gutterBottom>
-            Upload a JSON file containing call data to import into the
-            dashboard.
-          </Typography>
-
-          <Box
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            sx={{
-              border: "2px dashed",
-              borderColor: isDragging ? "primary.main" : "grey.400",
-              borderRadius: 2,
-              p: 4,
-              textAlign: "center",
-              cursor: "pointer",
-              backgroundColor: isDragging ? "primary.light" : "inherit",
-              transition: "background-color 0.3s",
-            }}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              hidden
-              onChange={handleFileChange}
-            />
-            <UploadFileIcon fontSize="large" color="action" />
-
-            {fileName ? (
-              <>
-                <Typography variant="subtitle1" color="primary">
-                  {fileName}
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  Click or drag to replace
-                </Typography>
-              </>
-            ) : (
-              <>
-                <Typography variant="subtitle1">
-                  Click or drag file to upload
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  JSON files only
-                </Typography>
-              </>
-            )}
-          </Box>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={() => setIsOpen(false)} variant="outlined">
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            disabled={!fileName}
-            onClick={() => {
-              setIsOpen(false);
-            }}
-          >
-            Import
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 w-full max-w-md shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Import Call Data</h3>
+              <button
+                className="text-gray-500 hover:text-gray-700"
+                onClick={() => setIsOpen(false)}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">
+              Upload a JSON file containing call data to import into the dashboard.
+            </p>
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
+                isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                hidden
+                onChange={handleFileChange}
+              />
+              <svg className="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              {fileName ? (
+                <>
+                  <p className="text-sm font-semibold text-blue-600">{fileName}</p>
+                  <p className="text-xs text-gray-500">Click or drag to replace</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-gray-600">Click or drag file to upload</p>
+                  <p className="text-xs text-gray-500">JSON files only</p>
+                </>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                className="px-4 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-100"
+                onClick={() => setIsOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={`px-4 py-2 rounded-md text-sm text-white ${
+                  fileName ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-300 cursor-not-allowed'
+                }`}
+                disabled={!fileName}
+                onClick={() => setIsOpen(false)}
+              >
+                Import
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -4,11 +4,6 @@ import {
   Card,
   CardHeader,
   CardContent,
-  Table,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
   Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -139,43 +134,42 @@ const PerformanceCard: React.FC<PerformanceCardProps> = ({
   );
 };
 
+
 const TopPerformersCard = () => (
-  <Card>
-    <CardHeader
-      title={<Typography variant="h6">Top Performers</Typography>}
-      action={
-        <Link to="/analytics" className="text-sm text-[#9b87f5] hover:underline">
-          View All
-        </Link>
-      }
-    />
-    <CardContent>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Total Calls</TableCell>
-            <TableCell>Pickups</TableCell>
-            <TableCell>Avg. Duration</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+  <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-4">
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-lg font-semibold text-gray-800">Top Performers</h3>
+      <Link to="/analytics" className="text-sm text-blue-500 hover:underline">
+        View All
+      </Link>
+    </div>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm text-gray-800">
+        <thead>
+          <tr className="text-left border-b border-gray-200">
+            <th className="py-2 px-4 font-semibold">Name</th>
+            <th className="py-2 px-4 font-semibold">Total Calls</th>
+            <th className="py-2 px-4 font-semibold">Pickups</th>
+            <th className="py-2 px-4 font-semibold">Avg. Duration</th>
+          </tr>
+        </thead>
+        <tbody>
           {[
             ['John Smith', 87, 65, '2.3 min'],
             ['Sarah Johnson', 76, 58, '3.1 min'],
             ['Michael Brown', 68, 52, '2.8 min'],
           ].map(([name, calls, pickups, duration], idx) => (
-            <TableRow key={idx}>
-              <TableCell className="font-medium">{name}</TableCell>
-              <TableCell>{calls}</TableCell>
-              <TableCell>{pickups}</TableCell>
-              <TableCell>{duration}</TableCell>
-            </TableRow>
+            <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
+              <td className="py-2 px-4 font-medium">{name}</td>
+              <td className="py-2 px-4">{calls}</td>
+              <td className="py-2 px-4">{pickups}</td>
+              <td className="py-2 px-4">{duration}</td>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
+        </tbody>
+      </table>
+    </div>
+  </div>
 );
 
 // Placeholder component

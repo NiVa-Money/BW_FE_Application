@@ -56,7 +56,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   sparklineData,
 }) => {
   return (
-    <div className="metric-card denali-card-hover">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-2">
         <h3 className="text-sm font-medium text-gray-500">{title}</h3>
         <span
@@ -64,15 +64,10 @@ const MetricCard: React.FC<MetricCardProps> = ({
             trend === "up" ? "text-green-600" : "text-red-600"
           }`}
         >
-          {trend === "up" ? (
-            <ArrowUpRight className="h-3 w-3 mr-1" />
-          ) : (
-            <ArrowDownRight className="h-3 w-3 mr-1" />
-          )}
+          {trend === "up" ? <ArrowUpRight /> : <ArrowDownRight />}
           {changePercentage}%
         </span>
       </div>
-
       <div className="flex items-end justify-between">
         <div>
           <div className="text-2xl font-bold text-gray-900">{value}</div>

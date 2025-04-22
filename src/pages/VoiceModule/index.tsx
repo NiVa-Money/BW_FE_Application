@@ -445,24 +445,21 @@ const VoiceChatComponent: React.FC = () => {
         <div className="relative shadow-xl rounded-[2.5rem] p-8 max-w-7xl w-full flex flex-col md:flex-row items-center border border-gray-100/80">
           {/* Left Column */}
           <div className="w-full md:w-1/2 space-y-5 p-4">
-            {/* <h1 className="text-4xl font-bold text-black mb-8 tracking-wide text-center md:text-left">
-              Voice AI Agent
-            </h1> */}
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">
+            <div className="flex items-center gap-4 mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 flex-1">
                 Voice AI Agents
               </h2>
               <button
-                className="bg-[#65558F] text-white px-6 py-3 rounded-full font-medium 
-                       hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
-                onClick={() => {
-                  navigate('/voice/create-agents');
-                }}
+                onClick={() => navigate("/voice/create-agents")}
+                className="
+      bg-[#65558F] text-white px-6 py-2.5 rounded-full font-medium 
+      hover:bg-[#65558F]/90 transition-colors text-base
+      whitespace-nowrap
+    "
               >
                 + Create Voice Agent
               </button>
             </div>
-
             {/* Agent Name */}
             <div className="space-y-1">
               <label className="text-sm font-medium text-gray-700/90">
