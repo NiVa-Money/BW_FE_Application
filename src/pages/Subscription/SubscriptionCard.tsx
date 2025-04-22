@@ -1,10 +1,41 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { createPaymentRequestAction, resetCreateSubscriptionAction } from "../../store/actions/subscriptionActions";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store";
 
 
 const SubscriptionCard: React.FC<any> = ({
     planInfo,
 }) => {
-    console.log("SubscriptionCard", planInfo);
+    const dispatch = useDispatch();
+    const createSubscriptionRedux = useSelector(
+        (state: RootState) => state.subscription?.create?.data
+    );
+    const createSubscriptionOrder = () => {
+
+        const paymentData: any = {
+            planId: planInfo.paypalProductId,
+            amount: planInfo.price,
+            planName: planInfo.name,
+        };
+        dispatch(createPaymentRequestAction({ planId: paymentData.planId, data: paymentData }));
+        console.log("SubscriptionCard", planInfo);
+    }
+    useEffect(() => {
+        if (createSubscriptionRedux?.approvalUrl) {
+            window.location.href = createSubscriptionRedux?.approvalUrl;
+        }
+    }, [createSubscriptionRedux?.approvalUrl]);
+
+    useEffect(() => {
+        return () => {
+            // Reset the specific state when the component unmounts
+            dispatch(resetCreateSubscriptionAction("create"));
+        }
+    }
+        , []);
+
+    console.log("createSubscriptionRedux", createSubscriptionRedux);
     return (
         <div className="flex justify-center shadow-md p-6 rounded-2xl items-center min-h-[640px] min-w-[272px] bg-gray-100">
             <div className="w-64 flex flex-col items-center">
@@ -51,7 +82,7 @@ const SubscriptionCard: React.FC<any> = ({
                     </div>
                 </div>
 
-                <button className="w-full mt-[5.5rem] py-3 px-4 bg-[#65568e] text-white font-medium rounded-full transition duration-200">
+                <button className="w-full mt-[5.5rem] py-3 px-4 bg-[#65568e] text-white font-medium rounded-full transition duration-200" onClick={() => createSubscriptionOrder()}>
                     Pay with Paypal
                 </button>
             </div>
