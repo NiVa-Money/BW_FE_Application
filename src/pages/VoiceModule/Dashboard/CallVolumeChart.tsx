@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
-import { useDashboard } from '../../hooks/DashboardContext';
+import { useDashboard } from '../../../hooks/DashboardContext';
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
   active?: boolean;

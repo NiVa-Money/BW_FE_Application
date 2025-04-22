@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useDashboard } from "../../hooks/DashboardContext";
+import { useDashboard } from "../../../hooks/DashboardContext";
 
 interface TimeRange {
   label: string;

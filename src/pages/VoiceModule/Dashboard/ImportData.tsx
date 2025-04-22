@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useDashboard } from "../../hooks/DashboardContext";
+import { useDashboard } from "../../../hooks/DashboardContext";
 import {
   Dialog,
   DialogActions,

@@ -9,14 +9,14 @@ import {
   ButtonGroup,
 } from '@mui/material';
 import { BarChart, ChatBubbleOutline } from '@mui/icons-material';
-import CallVolumeChart from '../../components/voice-dashboard/CallVolumeChart';
-import DateRangePicker from '../../components/DateRangePicker';
-import ImportData from '../../components/voice-dashboard/ImportData';
-import MetricCard from '../../components/voice-dashboard/MetricCard';
-import { DashboardProvider } from '../../hooks/DashboardContext';
-import TimeRangeSelector from '../../components/voice-dashboard/TimeRangeSelector';
-import AnalyticsTab from '../../components/voice-dashboard/AnalyticsTab';
-import ConversationsTab from '../../components/voice-dashboard/ConversationsTab';
+import CallVolumeChart from './CallVolumeChart';
+import DateRangePicker from '../../../components/DateRangePicker';
+import ImportData from './ImportData';
+import MetricCard from './MetricCard';
+import { DashboardProvider } from '../../../hooks/DashboardContext';
+import TimeRangeSelector from './TimeRangeSelector';
+import AnalyticsTab from './AnalyticsTab';
+import ConversationsTab from './ConversationsTab';
 
 const generateSparklineData = (count: number, trend: "up" | "down") => {
   const data: number[] = [];

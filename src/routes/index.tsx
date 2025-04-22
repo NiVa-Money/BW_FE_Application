@@ -35,7 +35,7 @@ import SubscriptionFailure from "../pages/SubscriptionFailure";
 import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 import ContactsCRM from "../pages/Contacts";
 import CloneCampaign from "../pages/Marketing/Campaign/CloneCampaign";
-import VoiceDashboard from "../pages/VoiceModule/VoiceDashboard";
+import VoiceDashboard from "../pages/VoiceModule/Dashboard/VoiceDashboard";
 import VoiceAgentLayout from "../pages/VoiceModule/Agent/VoiceAgentLayout";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
