@@ -3,6 +3,7 @@ import { useConversation } from "@11labs/react";
 import { Language } from "@11labs/client";
 import ConversationsTable from "./ConversationsTable";
 import VoiceRecorderModal from "./VoiceRecorder";
+import { useNavigate } from "react-router-dom";
 
 interface VoiceOption {
   voice_id: string;
@@ -436,15 +437,31 @@ const VoiceChatComponent: React.FC = () => {
     idle: "AI Assistant Ready",
   };
 
+  const navigate = useNavigate();
+
   return (
     <div>
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="relative shadow-xl rounded-[2.5rem] p-8 max-w-7xl w-full flex flex-col md:flex-row items-center border border-gray-100/80">
           {/* Left Column */}
           <div className="w-full md:w-1/2 space-y-5 p-4">
-            <h1 className="text-4xl font-bold text-black mb-8 tracking-wide text-center md:text-left">
+            {/* <h1 className="text-4xl font-bold text-black mb-8 tracking-wide text-center md:text-left">
               Voice AI Agent
-            </h1>
+            </h1> */}
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">
+                Voice AI Agents
+              </h2>
+              <button
+                className="bg-[#65558F] text-white px-6 py-3 rounded-full font-medium 
+                       hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
+                onClick={() => {
+                  navigate('/voice/create-agents');
+                }}
+              >
+                + Create Voice Agent
+              </button>
+            </div>
 
             {/* Agent Name */}
             <div className="space-y-1">

@@ -29,12 +29,14 @@ import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard"
 import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
 import Subscription from "../pages/Subscription/index";
 import ComingSoon from "../components/ComingSoon";
-import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard';
+import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
 import WhatsApp from "../pages/Marketing/Whatsapp";
-import SubscriptionFailure from "../pages/SubscriptionFailure"; import SubscriptionSuccess from "../pages/SubscriptionSuccess";
+import SubscriptionFailure from "../pages/SubscriptionFailure";
+import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 import ContactsCRM from "../pages/Contacts";
 import CloneCampaign from "../pages/Marketing/Campaign/CloneCampaign";
 import VoiceDashboard from "../pages/VoiceModule/VoiceDashboard";
+import VoiceAgentLayout from "../pages/VoiceModule/Agent/VoiceAgentLayout";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -99,6 +101,11 @@ export const autRoutes: any[] = [
   { id: 5.4, path: "/marketing/omnigenStudio", component: <WhatsApp /> },
 
   { id: 6.1, path: "/voice/agents", component: <VoiceChatComponent /> },
+  {
+    id: 6.1,
+    path: "/voice/create-agents",
+    component: <VoiceAgentLayout />,
+  },
   { id: 6.2, path: "/voice/dashboard", component: <VoiceDashboard /> },
 
   {
@@ -157,7 +164,6 @@ export const publicRoutes: any[] = [
   { path: "/signup", component: <SignUp /> },
   { path: "/subscription-success", component: <SubscriptionSuccess /> },
   { path: "/subscription-failure", component: <SubscriptionFailure /> },
-
 
   { path: "/", component: <Login /> },
   { path: "*", component: <Login /> },
