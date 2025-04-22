@@ -45,7 +45,7 @@ const AgentPreview = ({
 
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          <span className="px-3 py-1 rounded-full bg-purple-100/80 text-purple-600 text-sm font-medium backdrop-blur-sm">
+          <span className="px-3 py-1 rounded-full bg-blue-100/80 text-blue-800 text-sm font-medium backdrop-blur-sm">
             {routingType === "ai" ? "AI Agent" : routingType === "ivr" ? "IVR Menu" : "Hybrid"}
           </span>
           {hasKnowledgeBase && (
@@ -69,7 +69,7 @@ const AgentPreview = ({
           </div>
           <div className="flex justify-between py-2 border-b border-gray-100">
             <span>Status:</span>
-            <span className="text-purple-600 font-medium">Draft</span>
+            <span className="text-blue-800 font-medium">Draft</span>
           </div>
           <div className="flex justify-between py-2">
             <span>Created:</span>

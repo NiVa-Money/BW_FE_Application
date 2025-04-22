@@ -39,7 +39,7 @@ const VoiceFlowConfig = ({ config, updateConfig }: VoiceFlowConfigProps) => {
             <textarea
               value={config.greeting}
               onChange={(e) => updateConfig({ greeting: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-1 focus:ring-blue-800 focus:border-blue-600 outline-none transition-all"
               placeholder="Welcome message..."
               rows={3}
             />
@@ -50,7 +50,7 @@ const VoiceFlowConfig = ({ config, updateConfig }: VoiceFlowConfigProps) => {
             <textarea
               value={config.fallbackResponse}
               onChange={(e) => updateConfig({ fallbackResponse: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-1 focus:ring-blue-800 focus:border-blue-600 outline-none transition-all"
               placeholder="When the agent doesn't understand..."
               rows={3}
             />
@@ -65,8 +65,8 @@ const VoiceFlowConfig = ({ config, updateConfig }: VoiceFlowConfigProps) => {
                 key={option}
                 className={`p-4 rounded-xl border cursor-pointer transition-all ${
                   config.pauseHandling === option
-                    ? 'border-purple-500 bg-purple-50/50'
-                    : 'border-gray-200 hover:border-purple-300'
+                    ? 'border-blue-800 bg-blue-50/50'
+                    : 'border-gray-200 hover:border-blue-300'
                 }`}
               >
                 <input
@@ -89,7 +89,7 @@ const VoiceFlowConfig = ({ config, updateConfig }: VoiceFlowConfigProps) => {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <span className="text-gray-700 font-medium">Pause Timeout ({config.pauseTimeout}s)</span>
-            <span className="text-purple-600 font-mono">{config.pauseTimeout}s</span>
+            <span className="text-blue-800 font-mono">{config.pauseTimeout}s</span>
           </div>
           <input
             type="range"
@@ -97,7 +97,7 @@ const VoiceFlowConfig = ({ config, updateConfig }: VoiceFlowConfigProps) => {
             max="15"
             value={config.pauseTimeout}
             onChange={(e) => updateConfig({ pauseTimeout: Number(e.target.value) })}
-            className="w-full range accent-purple-500"
+            className="w-full range accent-blue-800"
           />
         </div>
 
@@ -108,11 +108,11 @@ const VoiceFlowConfig = ({ config, updateConfig }: VoiceFlowConfigProps) => {
               value={newPhrase}
               onChange={(e) => setNewPhrase(e.target.value)}
               placeholder="Add ending phrase..."
-              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-800 focus:border-blue-600 outline-none transition-all"
             />
             <button
               onClick={handleAddPhrase}
-              className="px-4 py-2 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-600 transition-colors"
+              className="px-4 py-2 bg-blue-800 text-white rounded-full font-medium hover:bg-blue-600 transition-colors"
             >
               Add
             </button>
