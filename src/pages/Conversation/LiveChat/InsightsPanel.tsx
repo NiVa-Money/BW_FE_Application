@@ -144,11 +144,11 @@ import {
                 </Box>
               </Box>
   
-              <Box mt={3} display="flex" gap={2}>
-                <Button fullWidth variant="outlined" sx={{ borderColor: "#65558F", color: "#65558F", borderRadius: "999px" }}>
+              <Box mt={2} display="flex" gap={2}>
+                <Button fullWidth variant="outlined" sx={{ borderColor: "#65558F", color: "#65558F", borderRadius: "900px" }}>
                   Schedule Follow-up
                 </Button>
-                <Button fullWidth variant="contained" sx={{ bgcolor: "#65558F", color: "white", borderRadius: "999px" }}>
+                <Button fullWidth variant="contained" sx={{ bgcolor: "#65558F", color: "white", borderRadius: "900px" }}>
                   Escalate to Manager
                 </Button>
               </Box>

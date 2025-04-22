@@ -1,13 +1,3 @@
-import {
-  TextField,
-  MenuItem,
-  Typography,
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-} from "@mui/material";
-
 type VoicebotBasicConfigProps = {
   config: {
     name: string;
@@ -18,78 +8,111 @@ type VoicebotBasicConfigProps = {
   updateConfig: (data: Partial<VoicebotBasicConfigProps["config"]>) => void;
 };
 
-const VoicebotBasicConfig = ({ config, updateConfig }: VoicebotBasicConfigProps) => {
+const VoicebotBasicConfig = ({
+  config,
+  updateConfig,
+}: VoicebotBasicConfigProps) => {
   const languages = [
-    "english", "spanish", "french", "german", "italian",
-    "portuguese", "dutch", "russian", "japanese", "chinese",
-    "korean", "arabic"
+    "english",
+    "spanish",
+    "french",
+    "german",
+    "italian",
+    "portuguese",
+    "dutch",
+    "russian",
+    "japanese",
+    "chinese",
+    "korean",
+    "arabic",
   ];
 
   const voiceStyles = [
-    "professional", "friendly", "casual", "formal",
-    "enthusiastic", "serious", "empathetic"
+    "professional",
+    "friendly",
+    "casual",
+    "formal",
+    "enthusiastic",
+    "serious",
+    "empathetic",
   ];
 
   return (
-    <Box display="flex" flexDirection="column" gap={4}>
-      <Box>
-        <Typography variant="h6">Basic Configuration</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Configure the basic settings for your voice agent including name, language, and voice style.
-        </Typography>
-      </Box>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-800">Basic Settings</h2>
+        <p className="text-gray-500 mt-1">Configure core agent identity</p>
+      </div>
 
-      <TextField
-        fullWidth
-        label="Agent Name"
-        placeholder="Customer Service Assistant"
-        value={config.name}
-        onChange={(e) => updateConfig({ name: e.target.value })}
-        helperText="This is how users will refer to your agent"
-      />
+      <div className="space-y-4">
+        <label className="block">
+          <span className="text-gray-700 font-medium mb-2 block">
+            Agent Name
+          </span>
+          <input
+            value={config.name}
+            onChange={(e) => updateConfig({ name: e.target.value })}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+            placeholder="Customer Support Agent"
+          />
+          <span className="text-sm text-gray-400 mt-2 block">
+            How users will refer to your agent
+          </span>
+        </label>
 
-      <FormControl fullWidth>
-        <InputLabel>Primary Language</InputLabel>
-        <Select
-          value={config.language}
-          label="Primary Language"
-          onChange={(e) => updateConfig({ language: e.target.value })}
-        >
-          {languages.map((lang) => (
-            <MenuItem key={lang} value={lang}>
-              {lang.charAt(0).toUpperCase() + lang.slice(1)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+        <div className="grid gap-6 md:grid-cols-2">
+          <label className="block">
+            <span className="text-gray-700 font-medium mb-2 block">
+              Language
+            </span>
+            <select
+              value={config.language}
+              onChange={(e) => updateConfig({ language: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white"
+            >
+              {languages.map((lang) => (
+                <option key={lang} value={lang}>
+                  {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
 
-      <FormControl fullWidth>
-        <InputLabel>Voice Style</InputLabel>
-        <Select
-          value={config.voiceStyle}
-          label="Voice Style"
-          onChange={(e) => updateConfig({ voiceStyle: e.target.value })}
-        >
-          {voiceStyles.map((style) => (
-            <MenuItem key={style} value={style}>
-              {style.charAt(0).toUpperCase() + style.slice(1)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+          <label className="block">
+            <span className="text-gray-700 font-medium mb-2 block">
+              Voice Style
+            </span>
+            <select
+              value={config.voiceStyle}
+              onChange={(e) => updateConfig({ voiceStyle: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-white"
+            >
+              {voiceStyles.map((style) => (
+                <option key={style} value={style}>
+                  {style.charAt(0).toUpperCase() + style.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
-      <TextField
-        multiline
-        minRows={4}
-        fullWidth
-        label="Agent Description"
-        placeholder="This agent helps customers with their account inquiries and product questions."
-        value={config.description}
-        onChange={(e) => updateConfig({ description: e.target.value })}
-        helperText="Describe what your agent does and how it should behave"
-      />
-    </Box>
+        <label className="block">
+          <span className="text-gray-700 font-medium mb-2 block">
+            Description
+          </span>
+          <span className="text-sm text-gray-400 mb-2 block">
+            Guides your agent's behavior and responses
+          </span>
+          <textarea
+            value={config.description}
+            onChange={(e) => updateConfig({ description: e.target.value })}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+            rows={4}
+            placeholder="Describe your agent's purpose..."
+          />
+        </label>
+      </div>
+    </div>
   );
 };
-
 export default VoicebotBasicConfig;

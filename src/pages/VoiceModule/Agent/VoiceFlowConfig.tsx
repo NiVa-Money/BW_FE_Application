@@ -1,15 +1,4 @@
 import { useState } from "react";
-import {
-  Box,
-  TextField,
-  Typography,
-  Slider,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Chip,
-  Button,
-} from "@mui/material";
 
 type VoiceFlowConfigProps = {
   config: {
@@ -37,85 +26,116 @@ const VoiceFlowConfig = ({ config, updateConfig }: VoiceFlowConfigProps) => {
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={4}>
-      <Box>
-        <Typography variant="h6">Voice Flow Configuration</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Configure how your agent starts conversations, handles pauses, and responds to users.
-        </Typography>
-      </Box>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-800">Conversation Flow</h2>
+        <p className="text-gray-500 mt-1">Design your agent's interaction patterns</p>
+      </div>
 
-      <TextField
-        multiline
-        minRows={2}
-        label="Greeting Message"
-        placeholder="Hello, I'm your virtual assistant. How can I help you today?"
-        value={config.greeting}
-        onChange={(e) => updateConfig({ greeting: e.target.value })}
-        fullWidth
-      />
-
-      <TextField
-        multiline
-        minRows={2}
-        label="Fallback Response"
-        placeholder="I'm sorry, I didn't understand that. Could you please rephrase?"
-        value={config.fallbackResponse}
-        onChange={(e) => updateConfig({ fallbackResponse: e.target.value })}
-        fullWidth
-      />
-
-      <Box>
-        <Typography variant="subtitle1">Pause Handling</Typography>
-        <RadioGroup
-          value={config.pauseHandling}
-          onChange={(e) => updateConfig({ pauseHandling: e.target.value })}
-        >
-          <FormControlLabel value="default" control={<Radio />} label="Default (Wait and prompt)" />
-          <FormControlLabel value="prompt" control={<Radio />} label="Proactive prompting" />
-          <FormControlLabel value="wait" control={<Radio />} label="Wait silently" />
-        </RadioGroup>
-      </Box>
-
-      <Box>
-        <Typography variant="subtitle1" gutterBottom>
-          Pause Timeout: {config.pauseTimeout}s
-        </Typography>
-        <Slider
-          min={1}
-          max={15}
-          value={config.pauseTimeout}
-          onChange={(_, value) => updateConfig({ pauseTimeout: value as number })}
-        />
-      </Box>
-
-      <Box>
-        <Typography variant="subtitle1" gutterBottom>
-          End Call Phrases
-        </Typography>
-        <Box display="flex" gap={2}>
-          <TextField
-            value={newPhrase}
-            onChange={(e) => setNewPhrase(e.target.value)}
-            placeholder="Add phrase (e.g., goodbye)"
-            fullWidth
-          />
-          <Button variant="contained" onClick={handleAddPhrase}>
-            Add
-          </Button>
-        </Box>
-        <Box mt={2} display="flex" gap={1} flexWrap="wrap">
-          {config.endCallPhrases.map((phrase, index) => (
-            <Chip
-              key={index}
-              label={phrase}
-              onDelete={() => handleRemovePhrase(phrase)}
-              color="secondary"
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <label className="block">
+            <span className="text-gray-700 font-medium mb-2 block">Greeting Message</span>
+            <textarea
+              value={config.greeting}
+              onChange={(e) => updateConfig({ greeting: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+              placeholder="Welcome message..."
+              rows={3}
             />
-          ))}
-        </Box>
-      </Box>
-    </Box>
+          </label>
+
+          <label className="block">
+            <span className="text-gray-700 font-medium mb-2 block">Fallback Response</span>
+            <textarea
+              value={config.fallbackResponse}
+              onChange={(e) => updateConfig({ fallbackResponse: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+              placeholder="When the agent doesn't understand..."
+              rows={3}
+            />
+          </label>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-gray-700 font-medium">Pause Handling</h3>
+          <div className="grid gap-3 md:grid-cols-3">
+            {['default', 'prompt', 'wait'].map((option) => (
+              <label
+                key={option}
+                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  config.pauseHandling === option
+                    ? 'border-purple-500 bg-purple-50/50'
+                    : 'border-gray-200 hover:border-purple-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  value={option}
+                  checked={config.pauseHandling === option}
+                  onChange={(e) => updateConfig({ pauseHandling: e.target.value })}
+                  className="hidden"
+                />
+                <div className="font-medium text-gray-700 capitalize">
+                  {option === 'default' && 'Wait & Prompt'}
+                  {option === 'prompt' && 'Proactive Prompt'}
+                  {option === 'wait' && 'Silent Wait'}
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-700 font-medium">Pause Timeout ({config.pauseTimeout}s)</span>
+            <span className="text-purple-600 font-mono">{config.pauseTimeout}s</span>
+          </div>
+          <input
+            type="range"
+            min="1"
+            max="15"
+            value={config.pauseTimeout}
+            onChange={(e) => updateConfig({ pauseTimeout: Number(e.target.value) })}
+            className="w-full range accent-purple-500"
+          />
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-gray-700 font-medium">End Call Phrases</h3>
+          <div className="flex gap-3">
+            <input
+              value={newPhrase}
+              onChange={(e) => setNewPhrase(e.target.value)}
+              placeholder="Add ending phrase..."
+              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all"
+            />
+            <button
+              onClick={handleAddPhrase}
+              className="px-4 py-2 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-600 transition-colors"
+            >
+              Add
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {config.endCallPhrases.map((phrase, index) => (
+              <div
+                key={index}
+                className="pl-3 pr-2 py-1 bg-white border border-gray-200 rounded-full flex items-center gap-2"
+              >
+                <span className="text-sm text-gray-600">{phrase}</span>
+                <button
+                  onClick={() => handleRemovePhrase(phrase)}
+                  className="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

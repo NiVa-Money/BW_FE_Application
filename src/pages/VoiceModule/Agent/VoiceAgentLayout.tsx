@@ -3,7 +3,6 @@ import VoiceFlowConfig from "./VoiceFlowConfig";
 import KnowledgeBaseConfig from "./KnowledgeBaseConfig";
 import VoicebotBasicConfig from "./VoicebotBasicConfig";
 import AgentPreview from "./AgentPreview";
-import { Box, Tabs, Tab, Paper, Button, Grid } from "@mui/material";
 
 const VoiceAgentLayout = () => {
   const [agentConfig, setAgentConfig] = useState({
@@ -42,74 +41,77 @@ const VoiceAgentLayout = () => {
   };
 
   return (
-    <Box maxWidth="lg" mx="auto" py={4}>
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-3xl font-bold text-gray-900">
-          Voice Agent Configurator
-        </h2>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Voice Agent Studio</h1>
+        <p className="text-gray-500 mt-2 max-w-2xl">
+          Design and deploy intelligent voice agents with AI-powered
+          conversations
+        </p>
       </div>
-      <p className="text-gray-600 text-sm mb-6">
-        Deploy your voice agent with ease. <br/> Configure the basic settings,
-        knowledge base, and voice flow to create a seamless experience for your
-        users.
-      </p>
-      <Grid container spacing={4} mt={2}>
-        <Grid item xs={12} md={4}>
-          <AgentPreview
-            name={agentConfig.basic.name}
-            language={agentConfig.basic.language}
-            voiceStyle={agentConfig.basic.voiceStyle}
-            hasKnowledgeBase={agentConfig.knowledgeBase.source !== "none"}
-            hasCustomWorkflow={agentConfig.workflow.hasCustomWorkflow}
-            routingType={agentConfig.callConfig.routingType}
-          />
-        </Grid>
 
-        <Grid item xs={12} md={8}>
-          <Tabs
-            value={tab}
-            onChange={(_, value) => setTab(value)}
-            aria-label="Voice Agent Tabs"
-          >
-            <Tab label="Basic Setup" />
-            <Tab label="Knowledge Base" />
-            <Tab label="Voice Flow" />
-          </Tabs>
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <AgentPreview name={""} language={""} voiceStyle={""} hasKnowledgeBase={false} hasCustomWorkflow={false} routingType={""} {...agentConfig} />
+        </div>
 
-          <Paper variant="outlined" sx={{ mt: 2, p: 3 }}>
-            {tab === 0 && (
-              <VoicebotBasicConfig
-                config={agentConfig.basic}
-                updateConfig={(data) => updateConfig("basic", data)}
-              />
-            )}
-            {tab === 1 && (
-              <KnowledgeBaseConfig
-                config={agentConfig.knowledgeBase}
-                updateConfig={(data) => updateConfig("knowledgeBase", data)}
-              />
-            )}
-            {tab === 2 && (
-              <VoiceFlowConfig
-                config={agentConfig.voiceFlow}
-                updateConfig={(data) => updateConfig("voiceFlow", data)}
-              />
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
+        <div className="lg:col-span-2">
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-6">
+              {["Basic Setup", "Knowledge Base", "Voice Flow"].map(
+                (tabName, index) => (
+                  <button
+                    key={tabName}
+                    onClick={() => setTab(index)}
+                    className={`pb-4 px-1 border-b-2 font-medium transition-colors ${
+                      tab === index
+                        ? "border-purple-500 text-purple-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    {tabName}
+                  </button>
+                )
+              )}
+            </nav>
+          </div>
 
-      <Box display="flex" justifyContent="flex-end" mt={4}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ borderRadius: "9999px", textTransform: "none", px: 4 }}
-        >
-          Deploy Agent
-        </Button>
-      </Box>
-    </Box>
+          <div className="mt-6 p-6 bg-white/90 backdrop-blur-lg rounded-2xl border border-gray-100 shadow-xl shadow-purple-100/20">
+            {tab === 0 && <VoicebotBasicConfig config={{
+              name: "",
+              language: "",
+              voiceStyle: "",
+              description: ""
+            }} updateConfig={function (data: Partial<{ name: string; language: string; voiceStyle: string; description: string; }>): void {
+              throw new Error("Function not implemented.");
+            } } {...updateConfig} />}
+            {tab === 1 && <KnowledgeBaseConfig config={{
+              source: "",
+              documents: [],
+              urls: [],
+              externalId: ""
+            }} updateConfig={function (data: Partial<{ source: string; documents: string[]; urls: string[]; externalId: string; }>): void {
+              throw new Error("Function not implemented.");
+            } } {...updateConfig} />}
+            {tab === 2 && <VoiceFlowConfig config={{
+              greeting: "",
+              fallbackResponse: "",
+              pauseHandling: "",
+              pauseTimeout: 0,
+              endCallPhrases: []
+            }} updateConfig={function (data: Partial<{ greeting: string; fallbackResponse: string; pauseHandling: string; pauseTimeout: number; endCallPhrases: string[]; }>): void {
+              throw new Error("Function not implemented.");
+            } } {...updateConfig} />}
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full font-medium hover:shadow-lg transition-all hover:scale-[1.02]">
+              Deploy Agent →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -17,6 +17,7 @@ import { getAllSessionLive } from "../../../store/actions/conversationActions";
 import { getBotsAction } from "../../../store/actions/botActions";
 import LiveSessionList from "./LiveSession";
 import { createSelector } from "reselect";
+import InsightsPanel from "./InsightsPanel";
 
 const LiveChat: React.FC = (): React.ReactElement => {
   const socket = useRef(null);
@@ -629,7 +630,7 @@ const playNotificationSound = () => {
             isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          <div className="p-6 h-full overflow-y-auto">
+          {/* <div className="p-6 h-full overflow-y-auto">
             <div className="space-y-4">
               <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
                 <div className="grid grid-cols-2 gap-6 items-start">
@@ -743,7 +744,8 @@ const playNotificationSound = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
+          <InsightsPanel sessionMetrics={undefined}/>
         </div>
 
         {/* Toggle Button (fixed at bottom-right) */}
