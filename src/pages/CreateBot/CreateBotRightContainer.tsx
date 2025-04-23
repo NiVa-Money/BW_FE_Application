@@ -155,7 +155,7 @@
 import React from "react";
 import SendIcon from "@mui/icons-material/Send";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import { FormControlLabel, Switch } from "@mui/material";
+// import { FormControlLabel, Switch } from "@mui/material";
 import PulsingGlowLogo from "./PulsingGlowLogo";
 
 interface CreateBotRightContainerProps {
@@ -164,9 +164,7 @@ interface CreateBotRightContainerProps {
   theme: string;
   color: string;
   font: string;
-  botSmartness: string;
   showPulsingLogo?: boolean;
-  botSmartnessHandle: any;
   greetingMessage: string;
 }
 
@@ -175,9 +173,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
   theme,
   font,
   color,
-  botSmartness,
   showPulsingLogo,
-  botSmartnessHandle,
   greetingMessage,
 }) => {
   const effectiveGreeting =
@@ -201,7 +197,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
   return (
     <div>
       <div className="flex flex-col h-[100%]">
-        <div className="flex justify-end items-center">
+        {/* <div className="flex justify-end items-center">
           <label htmlFor="botSmartness" className="text-black mr-2">
             Bot Smartness
           </label>
@@ -216,7 +212,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
             }
             label=""
           />
-        </div>
+        </div> */}
         <div
           className="w-[350px] mt-10 ml-44 border border-black h-[600px] flex justify-center items-center rounded-[12px] z-10"
           style={{ backgroundColor: theme === "dark" ? "#1D1B20" : "#E3E3E3" }}
