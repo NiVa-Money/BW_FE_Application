@@ -33,6 +33,8 @@ interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (userData: {
+    firstName: string;
+    lastName: string;
     employeeId: string;
     mobileNo: string;
     modules: number[];
@@ -80,6 +82,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 }) => {
   const formik = useFormik({
     initialValues: {
+      firstName: userDetails?.firstName || "",
+      lastName: userDetails?.lastName || "",
       employeeId: userDetails?.emailId || "",
       mobileNo: userDetails?.mobileNo || "",
       modules: userDetails?.module_maps || [],
@@ -91,6 +95,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     validationSchema,
     onSubmit: (values) => {
       onSave({
+        firstName: values.firstName,
+        lastName: values.lastName,
         employeeId: values.employeeId,
         mobileNo: values.mobileNo,
         modules: values.modules,
@@ -162,6 +168,36 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           onSubmit={formik.handleSubmit}
           className="px-6 py-3 max-h-[30rem] overflow-y-auto"
         >
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              First Name
+            </label>
+            <FormikFieldInputComponent
+              field={{
+                name: "firstName",
+                value: formik.values.firstName,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
+              placeholder="John"
+            />
+          </div>
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Last Name
+            </label>
+            <FormikFieldInputComponent
+              field={{
+                name: "lastName",
+                value: formik.values.lastName,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
+              placeholder="Doe"
+            />
+          </div>
           <div className="mb-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Employee ID
