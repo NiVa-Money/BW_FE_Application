@@ -82,6 +82,9 @@ const userData = (users) => {
   }));
 };
 
+const disableEditDelete = (user) => {
+  return user.status.toLowerCase() === "inactive";
+};
 const UserHeader: React.FC<UserHeaderProps> = ({ usersData }) => {
   const processedStats: StatItem[] = [
     {
@@ -144,17 +147,21 @@ const UserCard = ({ user, onEdit, onDelete }) => (
       <button
         className="bg-transparent px-4 py-2 rounded-full"
         style={{
-          color: COLORS.VIOLET,
-          border: `1px solid ${COLORS.DARKGRAY}`,
+          color: disableEditDelete(user) ? COLORS.GRAY : COLORS.VIOLET,
+          border: disableEditDelete(user)
+            ? `1px solid ${COLORS.GRAY}`
+            : `1px solid ${COLORS.DARKGRAY}`,
         }}
         onClick={() => onEdit(user)}
+        disabled={disableEditDelete(user)}
         aria-label={`Edit ${user.firstName}`}
       >
         <EditIcon /> Edit
       </button>
 
       <button
-        className=" text-red-600"
+        className={`text-red-600 disabled:text-[#B0B7C3]`}
+        disabled={disableEditDelete(user)}
         onClick={() => onDelete(user.id)}
         aria-label={`Delete ${user.firstName}`}
       >
