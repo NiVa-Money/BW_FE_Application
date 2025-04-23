@@ -13,6 +13,7 @@ import { RootState } from "../../store";
 import { COLORS } from "../../constants";
 import StackedAvatars from "../../components/StackedAvatars";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 
 type User = {
   firstName: string;
@@ -132,7 +133,14 @@ const UserCard = ({ user, onEdit, onDelete }) => (
 
     <div className="w-1/3 font-medium text-center">{user.roleName}</div>
 
-    <div className="w-1/3 flex justify-end space-x-2">
+    <div className="w-1/3 flex items-center justify-end space-x-2">
+      <span>
+        {user.status === "pending" ? (
+          <HourglassTopIcon style={{ color: "orange" }} />
+        ) : (
+          ""
+        )}
+      </span>
       <button
         className="bg-transparent px-4 py-2 rounded-full"
         style={{
@@ -210,6 +218,8 @@ const UserManagement = () => {
     } else {
       // Add new user
       const payload = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         emailId: userData.employeeId,
         mobileNo: userData.mobileNo,
         role: userData.role,

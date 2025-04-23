@@ -45,6 +45,8 @@ interface AddUserModalProps {
 
 // Form Validation Schema
 const validationSchema = Yup.object().shape({
+  firstName: Yup.string().required("FirstName is required"),
+  lastName: Yup.string().required("LastName is required"),
   employeeId: Yup.string()
     .email("Invalid email format")
     .required("Employee ID is required"),
