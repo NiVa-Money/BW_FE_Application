@@ -16,6 +16,7 @@ const KnowledgeBaseConfig = ({
   updateConfig,
 }: KnowledgeBaseConfigProps) => {
   const [newUrl, setNewUrl] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleAddUrl = () => {
     if (newUrl.trim() && !config.urls.includes(newUrl)) {
@@ -26,6 +27,54 @@ const KnowledgeBaseConfig = ({
 
   const handleRemoveUrl = (url: string) => {
     updateConfig({ urls: config.urls.filter((u) => u !== url) });
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const validFiles = Array.from(files).filter((file) =>
+        [
+          "application/pdf",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ].includes(file.type)
+      );
+      const newFileNames = validFiles
+        .map((file) => file.name)
+        .filter((name) => !config.documents.includes(name));
+      updateConfig({ documents: [...config.documents, ...newFileNames] });
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files) {
+      const validFiles = Array.from(files).filter((file) =>
+        [
+          "application/pdf",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ].includes(file.type)
+      );
+      const newFileNames = validFiles
+        .map((file) => file.name)
+        .filter((name) => !config.documents.includes(name));
+      updateConfig({ documents: [...config.documents, ...newFileNames] });
+    }
+  };
+
+  const handleRemoveDocument = (docName: string) => {
+    updateConfig({ documents: config.documents.filter((d) => d !== docName) });
   };
 
   return (
@@ -66,20 +115,67 @@ const KnowledgeBaseConfig = ({
                   Upload Documents
                 </div>
                 {config.source === "documents" && (
-                  <div className="mt-4 p-6 rounded-lg bg-gray-50 border border-dashed border-gray-300 text-center">
-                    <div className="text-gray-500 mb-3">
-                      Drag and drop files or
-                    </div>
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:border-blue-800 hover:text-blue-800 transition-colors"
+                  <>
+                    <div
+                      className={`mt-4 p-6 rounded-lg bg-gray-50 border border-dashed ${
+                        isDragging
+                          ? "border-blue-800 bg-blue-50"
+                          : "border-gray-300"
+                      } text-center`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
                     >
-                      Browse Files
-                    </button>
-                    <div className="mt-3 text-sm text-gray-400">
-                      PDF, DOCX, TXT, CSV (max 50MB)
+                      <div className="text-gray-500 mb-3">
+                        Drag and drop files or
+                      </div>
+                      <input
+                        type="file"
+                        accept=".pdf,.docx"
+                        multiple
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          document.getElementById("file-upload")?.click()
+                        }
+                        className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:border-blue-800 hover:text-blue-800 transition-colors"
+                      >
+                        Browse Files
+                      </button>
+                      <div className="mt-3 text-sm text-gray-400">
+                        PDF, DOCX (max 50MB)
+                      </div>
                     </div>
-                  </div>
+                    {config.documents.length > 0 && (
+                      <div className="mt-4">
+                        <div className="text-sm text-gray-600 mb-2">
+                          Selected files:
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {config.documents.map((doc, index) => (
+                            <div
+                              key={index}
+                              className="pl-3 pr-2 py-1 bg-white border border-gray-200 rounded-full flex items-center gap-2"
+                            >
+                              <span className="text-sm text-gray-600">
+                                {doc}
+                              </span>
+                              <button
+                                onClick={() => handleRemoveDocument(doc)}
+                                className="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </label>
@@ -105,9 +201,10 @@ const KnowledgeBaseConfig = ({
                         placeholder="https://example.com/page"
                         className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-800 focus:border-blue-600 outline-none transition-all"
                       />
+                      {/* This button uses handleAddUrl */}
                       <button
                         onClick={handleAddUrl}
-                        className="px-4 py-2 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-600 transition-colors"
+                        className="px-4 py-2 bg-blue-800 text-white rounded-full font-medium hover:bg-blue-700 transition-colors"
                       >
                         Add
                       </button>
@@ -119,6 +216,7 @@ const KnowledgeBaseConfig = ({
                           className="pl-3 pr-2 py-1 bg-white border border-gray-200 rounded-full flex items-center gap-2"
                         >
                           <span className="text-sm text-gray-600">{url}</span>
+                          {/* This button uses handleRemoveUrl */}
                           <button
                             onClick={() => handleRemoveUrl(url)}
                             className="w-6 h-6 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"

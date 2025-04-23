@@ -231,14 +231,13 @@ import {
   deleteVoiceAgentService,
 } from "../../../api/services/voiceModuleServices";
 
-interface StaticAgent {
-  id: string;
+interface VoiceAgent {
+  _id: string;
   name: string;
-  avatarUrl?: string;
   description: string;
   createdAt: string;
-  tone: string;
-  document?: string;
+  style: string;
+  knowledgeBase: string;
 }
 
 const formatDate = (iso: string) => {
@@ -247,13 +246,12 @@ const formatDate = (iso: string) => {
 };
 
 const MyVoiceAgents: React.FC = () => {
-  const [agents, setAgents] = useState<StaticAgent[]>([]); // State for agents
+  const [agents, setAgents] = useState<VoiceAgent[]>([]);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [menuBotId, setMenuBotId] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
-  // Fetch all agents on mount
   useEffect(() => {
     const fetchAgents = async () => {
       try {
@@ -281,11 +279,10 @@ const MyVoiceAgents: React.FC = () => {
     handleMenuClose();
   };
 
-  // Updated delete handler
   const handleDelete = async (id: string) => {
     try {
       await deleteVoiceAgentService(id);
-      setAgents(agents.filter((agent) => agent.id !== id)); // Remove deleted agent from state
+      setAgents(agents.filter((agent) => agent._id !== id));
       console.log("Agent deleted:", id);
     } catch (error) {
       console.error("Failed to delete agent:", error);
@@ -300,8 +297,7 @@ const MyVoiceAgents: React.FC = () => {
           <h2 className="text-3xl font-bold text-gray-900">My Voice Agents</h2>
           <button
             onClick={() => navigate("/voice/create-agents")}
-            className="bg-[#65558F] text-white px-6 py-3 rounded-full font-medium 
-                       hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
+            className="bg-[#65558F] text-white px-6 py-3 rounded-full font-medium hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
           >
             <AddIcon fontSize="small" />
             Create Voice Agent
@@ -312,43 +308,29 @@ const MyVoiceAgents: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {agents.map((bot) => (
               <div
-                key={bot.id}
+                key={bot._id}
                 className="relative bg-white shadow-md rounded-lg border border-gray-200 flex flex-col"
               >
-                {bot.avatarUrl && (
-                  <img
-                    src={bot.avatarUrl}
-                    alt={`${bot.name} avatar`}
-                    className="w-32 h-32 object-cover rounded-md mx-auto mt-4"
-                  />
-                )}
-
                 <div className="absolute top-2 right-2 z-10">
                   <IconButton
                     size="small"
-                    onClick={(e) => handleMenuOpen(e, bot.id)}
+                    onClick={(e) => handleMenuOpen(e, bot._id)}
                   >
                     <MoreHorizIcon />
                   </IconButton>
 
                   <Menu
                     anchorEl={menuAnchorEl}
-                    open={menuBotId === bot.id}
+                    open={menuBotId === bot._id}
                     onClose={handleMenuClose}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "right",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
-                    }}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    transformOrigin={{ vertical: "top", horizontal: "right" }}
                   >
-                    <MenuItem onClick={() => handleEdit(bot.id)}>
+                    <MenuItem onClick={() => handleEdit(bot._id)}>
                       <EditIcon fontSize="small" />
                       <span className="ml-2">Edit</span>
                     </MenuItem>
-                    <MenuItem onClick={() => handleDelete(bot.id)}>
+                    <MenuItem onClick={() => handleDelete(bot._id)}>
                       <DeleteIcon fontSize="small" />
                       <span className="ml-2">Delete</span>
                     </MenuItem>
@@ -365,20 +347,16 @@ const MyVoiceAgents: React.FC = () => {
 
                   <div className="mt-auto space-y-3 text-sm">
                     <p>
-                      <span className="font-semibold text-gray-800">
-                        Created On:
-                      </span>{" "}
+                      <span className="font-semibold text-gray-800">Created On:</span>{" "}
                       {formatDate(bot.createdAt)}
                     </p>
                     <p>
-                      <span className="font-semibold text-gray-800">Tone:</span>{" "}
-                      {bot.tone}
+                      <span className="font-semibold text-gray-800">Style:</span>{" "}
+                      {bot.style}
                     </p>
                     <p>
-                      <span className="font-semibold text-gray-800">
-                        Document:
-                      </span>{" "}
-                      {bot.document || "None"}
+                      <span className="font-semibold text-gray-800">Knowledge Base:</span>{" "}
+                      {bot.knowledgeBase}
                     </p>
                   </div>
                 </div>
@@ -386,28 +364,14 @@ const MyVoiceAgents: React.FC = () => {
                 <div className="px-6 pb-6">
                   <div className="grid grid-cols-2 gap-2">
                     <button
-                      onClick={() => navigate(`/testvoicebot/${bot.id}`)}
-                      className="
-                        flex-1
-                        border border-[#65558F] text-[#65558F]
-                        hover:bg-[#65558F1A]
-                        px-6 py-3 font-medium text-sm
-                        rounded-full transition-colors
-                        flex items-center justify-center
-                      "
+                      onClick={() => navigate(`/testvoicebot/${bot._id}`)}
+                      className="flex-1 border border-[#65558F] text-[#65558F] hover:bg-[#65558F1A] px-6 py-3 font-medium text-sm rounded-full transition-colors flex items-center justify-center"
                     >
                       Test
                     </button>
                     <button
-                      onClick={() => console.log(`Export ${bot.id}`)}
-                      className="
-                        flex-1
-                        bg-[#65558F] text-white
-                        hover:bg-[#56497A]
-                        px-6 py-3 font-medium text-sm
-                        rounded-full transition-colors
-                        flex items-center justify-center gap-2
-                      "
+                      onClick={() => console.log(`Export ${bot._id}`)}
+                      className="flex-1 bg-[#65558F] text-white hover:bg-[#56497A] px-6 py-3 font-medium text-sm rounded-full transition-colors flex items-center justify-center gap-2"
                     >
                       <FileExportIcon fontSize="small" /> Export
                     </button>

@@ -132,6 +132,7 @@ import KnowledgeBaseConfig from "./KnowledgeBaseConfig";
 import VoicebotBasicConfig from "./VoicebotBasicConfig";
 import AgentPreview from "./AgentPreview";
 import { createVoiceAgentService } from "../../../api/services/voiceModuleServices";
+import { useNavigate } from "react-router-dom";
 
 const VoiceAgentLayout = () => {
   const [agentConfig, setAgentConfig] = useState({
@@ -175,12 +176,35 @@ const VoiceAgentLayout = () => {
     }));
   };
 
-  // Handler to create the agent
+  const transformConfigToPayload = (config: any) => {
+    return {
+      name: config.basic.name,
+      language: config.basic.language,
+      style: config.basic.voiceStyle,
+      description: config.basic.description,
+      knowledgeBase: config.knowledgeBase.source,
+      knowledgeBaseData:
+        config.knowledgeBase.source === "urls"
+          ? config.knowledgeBase.urls
+          : config.knowledgeBase.source === "documents"
+          ? config.knowledgeBase.documents
+          : [],
+      greeting: config.voiceFlow.greeting,
+      fallback: config.voiceFlow.fallbackResponse,
+      pauseHandling: config.voiceFlow.pauseHandling,
+      pauseTimeout: config.voiceFlow.pauseTimeout,
+      endCallPhrases: config.voiceFlow.endCallPhrases,
+    };
+  };
+
+  const navigate = useNavigate();
+
   const handleCreateAgent = async () => {
     try {
-      const response = await createVoiceAgentService(agentConfig);
+      const payload = transformConfigToPayload(agentConfig);
+      const response = await createVoiceAgentService(payload);
       console.log("Agent created successfully:", response);
-      // Optional: Navigate to the agent list or show a success message
+      navigate("/voice/agents"); // Redirect to the agents page after creation
     } catch (error) {
       console.error("Failed to create agent:", error);
     }
