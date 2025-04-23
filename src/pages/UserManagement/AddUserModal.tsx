@@ -45,6 +45,8 @@ interface AddUserModalProps {
 
 // Form Validation Schema
 const validationSchema = Yup.object().shape({
+  firstName: Yup.string().required("FirstName is required"),
+  lastName: Yup.string().required("LastName is required"),
   employeeId: Yup.string()
     .email("Invalid email format")
     .required("Employee ID is required"),
@@ -160,7 +162,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             alt="user management"
           />
           <h2 className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-semibold text-gray-800">
-            {userDetails ? "Edit User" : "Add User"}
+            {userDetails?.id ? "Edit User" : "Add User"}
           </h2>
         </div>
         {/* TODO: Convert in FORMIK FORM usinf FormikFieldInputComponent */}
@@ -209,6 +211,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 onChange: formik.handleChange,
                 onBlur: formik.handleBlur,
               }}
+              disabled={userDetails?.id}
               form={formik}
               placeholder="example@gmail.com"
               type="email"
@@ -298,6 +301,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     <input
                       type="checkbox"
                       className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 border-gray-300 rounded mr-2"
+                      disabled
                       checked={formik.values.modules.includes(
                         module.value as number
                       )}
@@ -332,7 +336,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               className="px-4 py-2 text-white rounded-md"
               style={{ backgroundColor: COLORS.VIOLET }}
             >
-              {userDetails ? "Update" : "Done"}
+              {userDetails?.id ? "Update" : "Done"}
             </button>
           </div>
         </form>

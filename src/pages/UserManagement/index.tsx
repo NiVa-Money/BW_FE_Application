@@ -13,6 +13,7 @@ import { RootState } from "../../store";
 import { COLORS } from "../../constants";
 import StackedAvatars from "../../components/StackedAvatars";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 
 type User = {
   firstName: string;
@@ -81,6 +82,9 @@ const userData = (users) => {
   }));
 };
 
+const disableEditDelete = (user) => {
+  return user.status.toLowerCase() === "inactive";
+};
 const UserHeader: React.FC<UserHeaderProps> = ({ usersData }) => {
   const processedStats: StatItem[] = [
     {
@@ -132,21 +136,32 @@ const UserCard = ({ user, onEdit, onDelete }) => (
 
     <div className="w-1/3 font-medium text-center">{user.roleName}</div>
 
-    <div className="w-1/3 flex justify-end space-x-2">
+    <div className="w-1/3 flex items-center justify-end space-x-2">
+      <span>
+        {user.status === "pending" ? (
+          <HourglassTopIcon style={{ color: "orange" }} />
+        ) : (
+          ""
+        )}
+      </span>
       <button
         className="bg-transparent px-4 py-2 rounded-full"
         style={{
-          color: COLORS.VIOLET,
-          border: `1px solid ${COLORS.DARKGRAY}`,
+          color: disableEditDelete(user) ? COLORS.GRAY : COLORS.VIOLET,
+          border: disableEditDelete(user)
+            ? `1px solid ${COLORS.GRAY}`
+            : `1px solid ${COLORS.DARKGRAY}`,
         }}
         onClick={() => onEdit(user)}
+        disabled={disableEditDelete(user)}
         aria-label={`Edit ${user.firstName}`}
       >
         <EditIcon /> Edit
       </button>
 
       <button
-        className=" text-red-600"
+        className={`text-red-600 disabled:text-[#B0B7C3]`}
+        disabled={disableEditDelete(user)}
         onClick={() => onDelete(user.id)}
         aria-label={`Delete ${user.firstName}`}
       >
@@ -205,15 +220,21 @@ const UserManagement = () => {
   const handleSaveUser = (userData) => {
     if (userData?.userId) {
       //Edit User
-      console.log("Edit Form: ", userData);
-      dispatch(editUser(userData));
+      const { modules, ...rest } = userData;
+      const updatedPayload = {
+        ...rest,
+        module_maps: modules,
+      };
+      dispatch(editUser(updatedPayload));
     } else {
       // Add new user
       const payload = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         emailId: userData.employeeId,
         mobileNo: userData.mobileNo,
         role: userData.role,
-        modules: userData.modules,
+        module_maps: userData.modules,
       };
       dispatch(createNewUser(payload));
     }
