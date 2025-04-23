@@ -213,8 +213,12 @@ const UserManagement = () => {
   const handleSaveUser = (userData) => {
     if (userData?.userId) {
       //Edit User
-      console.log("Edit Form: ", userData);
-      dispatch(editUser(userData));
+      const { modules, ...rest } = userData;
+      const updatedPayload = {
+        ...rest,
+        module_maps: modules,
+      };
+      dispatch(editUser(updatedPayload));
     } else {
       // Add new user
       const payload = {
@@ -223,7 +227,7 @@ const UserManagement = () => {
         emailId: userData.employeeId,
         mobileNo: userData.mobileNo,
         role: userData.role,
-        modules: userData.modules,
+        module_maps: userData.modules,
       };
       dispatch(createNewUser(payload));
     }

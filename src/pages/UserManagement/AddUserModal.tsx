@@ -300,6 +300,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     <input
                       type="checkbox"
                       className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 border-gray-300 rounded mr-2"
+                      disabled
                       checked={formik.values.modules.includes(
                         module.value as number
                       )}
