@@ -166,10 +166,10 @@
 //     return [1, 2];
 //   };
 
-  // const campaignId = useSelector(
-  //   (state: RootState) =>
-  //     state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp?.campaignId
-  // );
+// const campaignId = useSelector(
+//   (state: RootState) =>
+//     state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp?.campaignId
+// );
 
 //   // Handlers for updating the state on date change
 //   const handleStartDateChange = (newValue) => {
@@ -968,8 +968,6 @@
 
 // export default WhatsappDash;
 
-
-
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -1025,9 +1023,7 @@ interface DashboardProps {
   campaignName: string;
 }
 
-const WhatsappDash: FC<DashboardProps> = ({
-  campaignName = "Campaign 1",
-}) => {
+const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [page, setPage] = useState(1);
   const [limit, _setLimit] = useState(10);
@@ -1067,6 +1063,7 @@ const WhatsappDash: FC<DashboardProps> = ({
   const campaignData = useSelector(
     (state: RootState) => state?.whatsappCampaign?.campaigns?.data
   );
+  console.log("Campaign Data from Redux:", campaignData);
 
   const campaignId = useSelector(
     (state: RootState) =>
@@ -1138,24 +1135,39 @@ const WhatsappDash: FC<DashboardProps> = ({
 
   useEffect(() => {
     const fetchDashData = async () => {
+      if (!selectedCampaignId) {
+        console.log("Skipping API call as no campaign is selected");
+        return;
+      }
       const formattedStartDate = format(startDate, "yyyy-MM-dd");
       const formattedEndDate = format(endDate, "yyyy-MM-dd");
-      const campaignId = selectedCampaignId;
+
+      console.log("API Call - Campaign ID:", selectedCampaignId);
+      console.log("API Call - Start Date:", formattedStartDate);
+      console.log("API Call - End Date:", formattedEndDate);
+
       try {
         const data = await whatsAppDashboardService(
-          campaignId,
+          selectedCampaignId,
           formattedStartDate,
           formattedEndDate
         );
-        setResponse(data);
+        console.log("API Response:", data); // Log the API response
+        if (data && data.success) {
+          setResponse(data);
+        } else {
+          console.error("Invalid API response:", data);
+        }
       } catch (error) {
         console.error("Error fetching WhatsApp data:", error);
       }
     };
+
     fetchDashData();
-  }, [startDate, endDate, campaignId, selectedCampaignId]);
+  }, [startDate, endDate, selectedCampaignId]);
 
   useEffect(() => {
+    console.log("useEffect (campaign) triggered", { campaign, response });
     if (response && response.success && response.data) {
       const {
         startDate,
@@ -1166,12 +1178,17 @@ const WhatsappDash: FC<DashboardProps> = ({
       } = response.data;
       setStartDate(new Date(startDate));
       setEndDate(new Date(endDate));
-      const selectedCampaign = campaign || campaignWiseMessagesMetrics[0]?.campaignName;
+      const selectedCampaign =
+        campaign || campaignWiseMessagesMetrics[0]?.campaignName;
       if (!campaign && selectedCampaign) setCampaign(selectedCampaign);
       const filteredMetrics = campaignWiseMessagesMetrics.filter(
         (metric) => metric.campaignName === selectedCampaign
       );
-      let totalSent = 0, totalRead = 0, totalDelivered = 0, totalFailed = 0, totalReplied = 0;
+      let totalSent = 0,
+        totalRead = 0,
+        totalDelivered = 0,
+        totalFailed = 0,
+        totalReplied = 0;
       filteredMetrics.forEach((metric) => {
         totalSent += metric.sent;
         totalRead += metric.read;
@@ -1189,20 +1206,41 @@ const WhatsappDash: FC<DashboardProps> = ({
   }, [campaign]);
 
   useEffect(() => {
-    if (response && response.success && response.data && response.data.dateWiseMetrics && response.data.engagementRateMetrics) {
-      updateChartData(response.data.dateWiseMetrics, campaign, response.data.engagementRateMetrics);
+    if (
+      response &&
+      response.success &&
+      response.data &&
+      response.data.dateWiseMetrics &&
+      response.data.engagementRateMetrics
+    ) {
+      updateChartData(
+        response.data.dateWiseMetrics,
+        campaign,
+        response.data.engagementRateMetrics
+      );
     }
   }, [campaign, response]);
 
-  const updateChartData = (dateWiseMetrics, selectedCampaign, engagementRateMetrics) => {
-    const barData = dateWiseMetrics.map((item) => ({
+  const updateChartData = (
+    dateWiseMetrics,
+    selectedCampaign,
+    engagementRateMetrics
+  ) => {
+    console.log("updateChartData called", {
+      dateWiseMetrics,
+      selectedCampaign,
+      engagementRateMetrics,
+    });
+    const barData = dateWiseMetrics?.map((item) => ({
       date: item.date,
       value: item[selectedCampaign] || 0,
     }));
-    const lineData = engagementRateMetrics.map((item) => ({
+    const lineData = engagementRateMetrics?.map((item) => ({
       date: item.date,
       value: item[selectedCampaign] || 0,
     }));
+    console.log("barData (responseChartData):", barData);
+    console.log("lineData (engagementRateMetrics):", lineData);
     setResponseChartData(barData);
     setEngagementAnalysis(lineData);
   };
@@ -1246,11 +1284,31 @@ const WhatsappDash: FC<DashboardProps> = ({
     <div className="p-6">
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-4">
-        <StatsCard title="Total Send Messages" value={totalMessagesValue} icon={<Send />} />
-        <StatsCard title="Seen Messages" value={seenMessagesValue} icon={<Visibility />} />
-        <StatsCard title="Delivered Messages" value={deliveredMessagesValue} icon={<Message />} />
-        <StatsCard title="Not Delivered Messages" value={unreadMessagesValue} icon={<MarkEmailUnread />} />
-        <StatsCard title="Hot Leads" value={hotLeadsValue} icon={<TrendingUp />} />
+        <StatsCard
+          title="Total Send Messages"
+          value={totalMessagesValue}
+          icon={<Send />}
+        />
+        <StatsCard
+          title="Seen Messages"
+          value={seenMessagesValue}
+          icon={<Visibility />}
+        />
+        <StatsCard
+          title="Delivered Messages"
+          value={deliveredMessagesValue}
+          icon={<Message />}
+        />
+        <StatsCard
+          title="Not Delivered Messages"
+          value={unreadMessagesValue}
+          icon={<MarkEmailUnread />}
+        />
+        <StatsCard
+          title="Hot Leads"
+          value={hotLeadsValue}
+          icon={<TrendingUp />}
+        />
         <div className="flex flex-col gap-2">
           <FormControl variant="outlined" className="w-full">
             <InputLabel className="text-[#65558F]">Campaign Name</InputLabel>
@@ -1269,13 +1327,23 @@ const WhatsappDash: FC<DashboardProps> = ({
           </FormControl>
           <CustomDatePicker
             label="Start Date"
-            value={new Date(campaignData?.find(item => item.campaignName === campaign)?.startDate || startDate)}
+            value={
+              new Date(
+                campaignData?.find((item) => item.campaignName === campaign)
+                  ?.startDate || startDate
+              )
+            }
             onChange={handleStartDateChange}
             placeholder="Select start date"
           />
           <CustomDatePicker
             label="End Date"
-            value={new Date(campaignData?.find(item => item.campaignName === campaign)?.endDate || endDate)}
+            value={
+              new Date(
+                campaignData?.find((item) => item.campaignName === campaign)
+                  ?.endDate || endDate
+              )
+            }
             onChange={handleEndDateChange}
             placeholder="Select start date"
           />
@@ -1289,7 +1357,10 @@ const WhatsappDash: FC<DashboardProps> = ({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div className="flex items-center text-sm">
-                <span className="inline-block rounded-full w-4 h-4 mr-2" style={{ backgroundColor: "#60A5FA" }}></span>
+                <span
+                  className="inline-block rounded-full w-4 h-4 mr-2"
+                  style={{ backgroundColor: "#60A5FA" }}
+                ></span>
                 {campaign}
               </div>
             </div>
@@ -1302,7 +1373,11 @@ const WhatsappDash: FC<DashboardProps> = ({
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="value" fill={COLORS.VIOLET} name="Response Rate" />
+                  <Bar
+                    dataKey="value"
+                    fill={COLORS.VIOLET}
+                    name="Response Rate"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -1327,12 +1402,16 @@ const WhatsappDash: FC<DashboardProps> = ({
           </div>
 
           {/* Text Insights */}
-          <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl" style={{ height: "256px", overflowY: "auto" }}>
+          <div
+            className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl"
+            style={{ height: "256px", overflowY: "auto" }}
+          >
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-medium">Campaign Insights</h3>
                 <p className="text-sm text-[#65558F]">
-                  Leveraging AI analysis, alongside conversion data and research results
+                  Leveraging AI analysis, alongside conversion data and research
+                  results
                 </p>
               </div>
             </div>
@@ -1368,19 +1447,37 @@ const WhatsappDash: FC<DashboardProps> = ({
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Most Engaged User:</strong>{" "}
-                            {insights.campaignInsights.engagementAnalysis.mostEngagedUser || "N/A"}
+                            {insights.campaignInsights.engagementAnalysis
+                              .mostEngagedUser || "N/A"}
                           </Typography>
-                          <Typography variant="body2" color="textSecondary" gutterBottom>
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            gutterBottom
+                          >
                             <strong>High Intent Users:</strong>{" "}
-                            {(insights.campaignInsights.engagementAnalysis.highIntentUsers || []).join(", ") || "N/A"}
+                            {(
+                              insights.campaignInsights.engagementAnalysis
+                                .highIntentUsers || []
+                            ).join(", ") || "N/A"}
                           </Typography>
                           <div>
-                            <Typography variant="subtitle1">Common Queries:</Typography>
-                            {Object.entries(insights.campaignInsights.engagementAnalysis.commonQueries || {}).map(([queryType, queries]) => (
+                            <Typography variant="subtitle1">
+                              Common Queries:
+                            </Typography>
+                            {Object.entries(
+                              insights.campaignInsights.engagementAnalysis
+                                .commonQueries || {}
+                            ).map(([queryType, queries]) => (
                               <div key={queryType}>
-                                <Typography variant="body2" color="textSecondary">
+                                <Typography
+                                  variant="body2"
+                                  color="textSecondary"
+                                >
                                   <strong>{queryType}:</strong>{" "}
-                                  {(Array.isArray(queries) ? queries.join(", ") : "") || "N/A"}
+                                  {(Array.isArray(queries)
+                                    ? queries.join(", ")
+                                    : "") || "N/A"}
                                 </Typography>
                               </div>
                             ))}
@@ -1394,17 +1491,28 @@ const WhatsappDash: FC<DashboardProps> = ({
                           <Typography variant="h5" gutterBottom>
                             Improvement Opportunities
                           </Typography>
-                          <Typography variant="body2" color="textSecondary" gutterBottom>
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            gutterBottom
+                          >
                             <strong>Reduce Failure Rate:</strong>{" "}
-                            {insights.campaignInsights.improvementOpportunities.reduceFailureRate || "N/A"}
+                            {insights.campaignInsights.improvementOpportunities
+                              .reduceFailureRate || "N/A"}
                           </Typography>
-                          <Typography variant="body2" color="textSecondary" gutterBottom>
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            gutterBottom
+                          >
                             <strong>Increase Engagement:</strong>{" "}
-                            {insights.campaignInsights.improvementOpportunities.increaseEngagement || "N/A"}
+                            {insights.campaignInsights.improvementOpportunities
+                              .increaseEngagement || "N/A"}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Boost Response Rate:</strong>{" "}
-                            {insights.campaignInsights.improvementOpportunities.boostResponseRate || "N/A"}
+                            {insights.campaignInsights.improvementOpportunities
+                              .boostResponseRate || "N/A"}
                           </Typography>
                         </CardContent>
                       </Card>
@@ -1417,43 +1525,53 @@ const WhatsappDash: FC<DashboardProps> = ({
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Total Contacts:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.totalContacts || 0}
+                            {insights.campaignInsights.performanceAnalytics
+                              .totalContacts || 0}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Total Messages Sent:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.totalMessagesSent || 0}
+                            {insights.campaignInsights.performanceAnalytics
+                              .totalMessagesSent || 0}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Delivered Messages:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.deliveredMessages || 0}
+                            {insights.campaignInsights.performanceAnalytics
+                              .deliveredMessages || 0}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Delivery Rate:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.deliveryRate || "0%"}
+                            {insights.campaignInsights.performanceAnalytics
+                              .deliveryRate || "0%"}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Read Messages:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.readMessages || 0}
+                            {insights.campaignInsights.performanceAnalytics
+                              .readMessages || 0}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Read Rate:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.readRate || "0%"}
+                            {insights.campaignInsights.performanceAnalytics
+                              .readRate || "0%"}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Replied Messages:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.repliedMessages || 0}
+                            {insights.campaignInsights.performanceAnalytics
+                              .repliedMessages || 0}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Response Rate:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.responseRate || "0%"}
+                            {insights.campaignInsights.performanceAnalytics
+                              .responseRate || "0%"}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Failed Messages:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.failedMessages || 0}
+                            {insights.campaignInsights.performanceAnalytics
+                              .failedMessages || 0}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             <strong>Failure Rate:</strong>{" "}
-                            {insights.campaignInsights.performanceAnalytics.failureRate || "0%"}
+                            {insights.campaignInsights.performanceAnalytics
+                              .failureRate || "0%"}
                           </Typography>
                         </CardContent>
                       </Card>
@@ -1476,7 +1594,9 @@ const WhatsappDash: FC<DashboardProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center">No insights available.</div>
+              <div className="h-full flex items-center justify-center">
+                No insights available.
+              </div>
             )}
           </div>
         </div>
@@ -1512,7 +1632,13 @@ const WhatsappDash: FC<DashboardProps> = ({
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {Array.from(new Set(messages.map((msg: { receiverNumber: string }) => msg.receiverNumber))).map((receiver: string, index: number) => (
+              {Array.from(
+                new Set(
+                  messages.map(
+                    (msg: { receiverNumber: string }) => msg.receiverNumber
+                  )
+                )
+              ).map((receiver: string, index: number) => (
                 <MenuItem key={index} value={receiver}>
                   {receiver}
                 </MenuItem>
@@ -1544,11 +1670,13 @@ const WhatsappDash: FC<DashboardProps> = ({
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {["Interested", "Not Interested", "Complaint", "Other"].map((intent, index) => (
-                <MenuItem key={index} value={intent}>
-                  {intent}
-                </MenuItem>
-              ))}
+              {["Interested", "Not Interested", "Complaint", "Other"].map(
+                (intent, index) => (
+                  <MenuItem key={index} value={intent}>
+                    {intent}
+                  </MenuItem>
+                )
+              )}
             </Select>
           </FormControl>
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
@@ -1576,7 +1704,9 @@ const WhatsappDash: FC<DashboardProps> = ({
               className="bg-gray-100 rounded-full"
             >
               <MenuItem value="">All</MenuItem>
-              {Array.from(new Set(messages.map((msg: { replied: string }) => msg.replied))).map((replied: string, index: number) => (
+              {Array.from(
+                new Set(messages.map((msg: { replied: string }) => msg.replied))
+              ).map((replied: string, index: number) => (
                 <MenuItem key={index} value={replied}>
                   {replied}
                 </MenuItem>
@@ -1611,11 +1741,14 @@ const WhatsappDash: FC<DashboardProps> = ({
                     sentiment: string;
                     replied: string;
                   }) =>
-                    (!selectedCampaignName || msg.campaignName === selectedCampaignName) &&
-                    (!selectedReceiverNumber || msg.receiverNumber === selectedReceiverNumber) &&
+                    (!selectedCampaignName ||
+                      msg.campaignName === selectedCampaignName) &&
+                    (!selectedReceiverNumber ||
+                      msg.receiverNumber === selectedReceiverNumber) &&
                     (!selectedStatus || msg.status === selectedStatus) &&
                     (!selectedIntent || msg.intent === selectedIntent) &&
-                    (!selectedSentiment || msg.sentiment === selectedSentiment) &&
+                    (!selectedSentiment ||
+                      msg.sentiment === selectedSentiment) &&
                     (!selectedReplied || msg.replied === selectedReplied)
                 )
                 .map(
@@ -1642,12 +1775,16 @@ const WhatsappDash: FC<DashboardProps> = ({
                       <td className="py-3 px-4">{msg.replied || "-"}</td>
                       <td className="py-3 px-4">{msg.repliedAt || "-"}</td>
                       <td className="py-3 px-4">
-                        {msg.time ? format(new Date(msg.time), "yyyy-MM-dd HH:mm") : "N/A"}
+                        {msg.time
+                          ? format(new Date(msg.time), "yyyy-MM-dd HH:mm")
+                          : "N/A"}
                       </td>
                       <td className="py-3 px-4">{msg.intent || "-"}</td>
                       <td className="py-3 px-4">{msg.sentiment || "-"}</td>
                       <td className="py-3 px-4">
-                        {msg.status === "failed" ? msg.failedReason || "Unknown" : "-"}
+                        {msg.status === "failed"
+                          ? msg.failedReason || "Unknown"
+                          : "-"}
                       </td>
                     </tr>
                   )
@@ -1658,7 +1795,11 @@ const WhatsappDash: FC<DashboardProps> = ({
         <div className="flex justify-center mt-4 gap-2">
           <button
             onClick={() => handlePageChange(page - 1)}
-            className={`px-4 py-2 ${page === 1 ? "opacity-50 cursor-not-allowed" : "bg-[#65558F] text-white rounded-full"}`}
+            className={`px-4 py-2 ${
+              page === 1
+                ? "opacity-50 cursor-not-allowed"
+                : "bg-[#65558F] text-white rounded-full"
+            }`}
           >
             Prev
           </button>
@@ -1666,14 +1807,22 @@ const WhatsappDash: FC<DashboardProps> = ({
             <button
               key={p}
               onClick={() => handlePageChange(p)}
-              className={`px-3 py-1 ${p === page ? "bg-[#65558F] text-white rounded-full" : "text-[#65558F]"}`}
+              className={`px-3 py-1 ${
+                p === page
+                  ? "bg-[#65558F] text-white rounded-full"
+                  : "text-[#65558F]"
+              }`}
             >
               {p}
             </button>
           ))}
           <button
             onClick={() => handlePageChange(page + 1)}
-            className={`px-4 py-2 ${page === totalPages ? "opacity-50 cursor-not-allowed" : "bg-[#65558F] text-white rounded-full"}`}
+            className={`px-4 py-2 ${
+              page === totalPages
+                ? "opacity-50 cursor-not-allowed"
+                : "bg-[#65558F] text-white rounded-full"
+            }`}
           >
             Next
           </button>

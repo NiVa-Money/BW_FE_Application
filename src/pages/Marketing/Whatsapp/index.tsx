@@ -1,5 +1,5 @@
 import React from "react";
-import WhatsappDash from "./WhatsappDashboard";
+import WhatsappDash from "./WhatsappDashboard1";
 
 const WhatsApp: React.FC = () => {
   return (
