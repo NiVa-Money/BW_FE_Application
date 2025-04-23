@@ -33,7 +33,13 @@ import {
   addToWhatsAppFavoritesService,
   removeFromWhatsAppFavoritesService,
 } from "../../../api/services/conversationServices";
-import { Menu, MenuItem, IconButton, Button , Tooltip as MuiTooltip,  } from "@mui/material";
+import {
+  Menu,
+  MenuItem,
+  IconButton,
+  Button,
+  Tooltip as MuiTooltip,
+} from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SessionsList from "./SessionsList";
 import WhatsappSectionData from "./whatsappSectionData";
@@ -87,6 +93,7 @@ const AllChats = () => {
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
   );
+  console.log("sessionsDataRedux", sessionsDataRedux);
 
   const handleSearch = async () => {
     if (!botIdVal) {
@@ -790,7 +797,7 @@ const AllChats = () => {
       </div>
 
       <div className="flex gap-2">
-        <MuiTooltip  title={filterDescriptions.bot} placement="top" arrow>
+        <MuiTooltip title={filterDescriptions.bot} placement="top" arrow>
           <select
             className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
             onChange={(e) => getBotSession(e)}
@@ -805,7 +812,7 @@ const AllChats = () => {
           </select>
         </MuiTooltip>
 
-        <MuiTooltip  title={filterDescriptions.channel} placement="top" arrow>
+        <MuiTooltip title={filterDescriptions.channel} placement="top" arrow>
           <select
             className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
             onChange={(e) => getChannelNameHandler(e)}
@@ -820,7 +827,7 @@ const AllChats = () => {
           </select>
         </MuiTooltip>
 
-        <MuiTooltip  title={filterDescriptions.intent} placement="top" arrow>
+        <MuiTooltip title={filterDescriptions.intent} placement="top" arrow>
           <select
             className="w-64 p-3 border border-gray-300 rounded-xl mb-4"
             value={intent}
@@ -835,7 +842,7 @@ const AllChats = () => {
           </select>
         </MuiTooltip>
 
-        <MuiTooltip  title={filterDescriptions.handledBy} placement="top" arrow>
+        <MuiTooltip title={filterDescriptions.handledBy} placement="top" arrow>
           <select
             className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
             value={handledByFilter}
@@ -850,7 +857,7 @@ const AllChats = () => {
           </select>
         </MuiTooltip>
 
-        <MuiTooltip  title={filterDescriptions.favorite} placement="top" arrow>
+        <MuiTooltip title={filterDescriptions.favorite} placement="top" arrow>
           <select
             className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
             value={favoriteFilter}
@@ -865,7 +872,7 @@ const AllChats = () => {
           </select>
         </MuiTooltip>
 
-        <MuiTooltip  title={filterDescriptions.block} placement="top" arrow>
+        <MuiTooltip title={filterDescriptions.block} placement="top" arrow>
           <select
             className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
             value={blockFilter}
@@ -880,7 +887,7 @@ const AllChats = () => {
           </select>
         </MuiTooltip>
 
-        <MuiTooltip  title={filterDescriptions.aiOnly} placement="top" arrow>
+        <MuiTooltip title={filterDescriptions.aiOnly} placement="top" arrow>
           <select
             className="w-64 p-3 border border-gray-300 rounded-lg mb-4"
             value={showAIOnly ? "AI" : "All"}
@@ -905,6 +912,7 @@ const AllChats = () => {
           sessionsData={
             isSearchActive ? searchResults : sessionsDataRedux?.sessions || []
           }
+          sessionFetched={sessionsDataRedux?.sessionFetched || 0}
         />
 
         <div className="flex-1 flex flex-col overflow-hidden">
