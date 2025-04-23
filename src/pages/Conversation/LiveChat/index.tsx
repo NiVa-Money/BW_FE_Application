@@ -8,7 +8,7 @@ import React, {
   useMemo,
 } from "react";
 import { SmartToy, Person, Send } from "@mui/icons-material";
-import Switch from "@mui/material/Switch";
+// import Switch from "@mui/material/Switch";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import io from "socket.io-client";
@@ -31,7 +31,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const [isChatEnabled, setIsChatEnabled] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [, setAgentState] = useState<string>("disconnected");
-  const [isAIEnabled, setIsAIEnabled] = useState(false);
+  // const [isAIEnabled, setIsAIEnabled] = useState(false);
   const [isAgentConnected, setIsAgentConnected] = useState(false);
   const [isAgentTyping, setIsAgentTyping] = useState(false);
 
@@ -146,9 +146,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
     };
   }, [isChatEnabled, selectedSessionId, userId, botId]);
 
-  const handleToggle = (event: { target: { checked: boolean } }) => {
-    setIsAIEnabled(event.target.checked);
-  };
+  // const handleToggle = (event: { target: { checked: boolean } }) => {
+  //   setIsAIEnabled(event.target.checked);
+  // };
 
   // ---------- Handlers ----------
   const handleSessionEnd = useCallback(() => {
@@ -259,12 +259,12 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   // Notification Sound Function
   // Notification Sound Function
-const playNotificationSound = () => {
-  const audio = new Audio("https://www.soundjay.com/buttons/beep-02.mp3"); // Changed to a calmer beep
-  audio.play().catch((error) => {
-    console.log("Audio play failed:", error);
-  });
-};
+  const playNotificationSound = () => {
+    const audio = new Audio("https://www.soundjay.com/buttons/beep-02.mp3"); // Changed to a calmer beep
+    audio.play().catch((error) => {
+      console.log("Audio play failed:", error);
+    });
+  };
 
   return (
     <div className="h-screen flex flex-col">
@@ -281,7 +281,7 @@ const playNotificationSound = () => {
             <div className="text-gray-500">Ques Stats</div>
             <div className="text-base text-[#2E2F5F] font-bold">350</div>
           </div>
-          <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4 shadow">
+          {/* <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4 shadow">
             <div className="text-gray-500">Live to AI</div>
             <div className="text-base font-bold text-[#2E2F5F]">
               {isAIEnabled ? "AI Enabled" : "Switch with AI"}
@@ -291,6 +291,16 @@ const playNotificationSound = () => {
               onChange={handleToggle}
               color="primary"
             />
+          </div> */}
+          <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4 shadow">
+            <div className="flex justify-between items-center">
+              <div>
+                <div className="justify-center text-gray-500">
+                  Total live chats
+                </div>
+              </div>
+              <div className="text-xl font-bold">7</div>
+            </div>
           </div>
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4 shadow">
             <div className="flex justify-between items-center">
@@ -745,7 +755,7 @@ const playNotificationSound = () => {
               </div>
             </div>
           </div> */}
-          <InsightsPanel sessionMetrics={undefined}/>
+          <InsightsPanel sessionMetrics={undefined} />
         </div>
 
         {/* Toggle Button (fixed at bottom-right) */}
@@ -761,7 +771,3 @@ const playNotificationSound = () => {
 };
 
 export default LiveChat;
-
-
-
-

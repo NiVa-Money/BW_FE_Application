@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // import {
 //   Instagram,
 //   Facebook,
@@ -412,8 +413,8 @@
 
 // export default EngagementTab;
 
-import { useEffect, useMemo, useState } from "react";
-import io from "socket.io-client";
+import { useEffect, useRef, useState } from "react";
+import { io, Socket } from "socket.io-client";
 import {
   Instagram,
   Facebook,
@@ -455,184 +456,161 @@ import {
 import { getInstagramData } from "../../api/services/integrationServices";
 
 const EngagementTab = () => {
-  const [conversations, setConversations] = useState([]);
-  const [posts, setPosts] = useState([]);
-  const [selectedConversationId, setSelectedConversationId] = useState(null);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPost, setCurrentPost] = useState(null);
-
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+  const [availableIntegrations, setAvailableIntegrations] = useState<any[]>([]);
+  const [integrationId, setIntegrationId] = useState<string>("");
   const [inputText, setInputText] = useState("");
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [availableIntegrations, setAvailableIntegrations] = useState([]);
-  const [integrationId, setIntegrationId] = useState("");
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPost, setCurrentPost] = useState<any>(null);
   const open = Boolean(anchorEl);
 
+  // ref to hold socket instance
+  const socketRef = useRef<Socket | null>(null);
+
+  // Fetch integrations once on mount
   useEffect(() => {
     const fetchIntegrations = async () => {
       try {
-        const response = await getInstagramData();
-        const integrations = Array.isArray(response?.data) ? response.data : [];
-        setAvailableIntegrations(integrations);
-        if (integrations.length > 0) {
-          setIntegrationId(integrations[0]._id);
-        }
-      } catch (error) {
-        console.error("Error fetching Instagram integrations:", error);
-        setAvailableIntegrations([]);
+        const resp = await getInstagramData();
+        const ints = Array.isArray(resp.data) ? resp.data : [];
+        setAvailableIntegrations(ints);
+        if (ints.length) setIntegrationId(ints[0]._id);
+      } catch (err) {
+        console.error("Error fetching integrations", err);
       }
     };
-
     fetchIntegrations();
   }, []);
 
-  const socket = useMemo(() => {
-    return io(`${import.meta.env.VITE_FIREBASE_BASE_URL}/instagram`, {
-      query: { integrationId },
-    });
-  }, [integrationId]);
-
+  // Create socket once
   useEffect(() => {
-    console.log("integrationId", integrationId);
-    if (!integrationId) return;
-
-    socket.on("connect", () => {
-      console.log("Connected to WebSocket server");
-      socket.emit("igFetchInitialData", integrationId);
+    const socket = io(`${import.meta.env.VITE_FIREBASE_BASE_URL}/instagram`, {
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      transports: ["websocket"],
     });
+    socketRef.current = socket;
+
+    socket.on("connect", () => console.log("Socket connected", socket.id));
+    socket.on("disconnect", (reason) =>
+      console.warn("Socket disconnected", reason)
+    );
 
     socket.on("initialData", (data) => {
-      console.log("Received initial data (conversation):", data.conversations);
-      console.log("Received initial data (posts):", data.posts);
-
+      console.log("Conversation data received", data.conversations);
+      console.log("Posts data received", data.posts);
       setConversations(data.conversations || []);
       setPosts(data.posts || []);
     });
 
-    socket.on("igMessageSendSuccess", (response) => {
-      const newMessage = response.data;
+    socket.on("igMessageSendSuccess", ({ data }) => {
       setConversations((prev) =>
-        prev.map((conv) =>
-          conv.messageId === newMessage.messageId
-            ? { ...conv, messages: [...(conv.messages || []), newMessage] }
-            : conv
+        prev.map((c) =>
+          c.messageId === data.messageId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
+        )
+      );
+    });
+    socket.on("igCommentSendSuccess", ({ data }) => {
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.messageId === data.messageId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
+        )
+      );
+    });
+    socket.on("igBroadcastOutgoingMessage", ({ data }) => {
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.messageId === data.messageId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
+        )
+      );
+    });
+    socket.on("igBroadcastOutgoingComment", ({ data }) => {
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.messageId === data.messageId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
         )
       );
     });
 
-    socket.on("igCommentSendSuccess", (response) => {
-      const newComment = response.data;
-      setConversations((prev) =>
-        prev.map((conv) =>
-          conv.messageId === newComment.messageId
-            ? { ...conv, messages: [...(conv.messages || []), newComment] }
-            : conv
-        )
-      );
-    });
-
-    socket.on("igBroadcastOutgoingMessage", (response) => {
-      const broadcastMessage = response.data;
-      setConversations((prev) =>
-        prev.map((conv) =>
-          conv.messageId === broadcastMessage.messageId
-            ? {
-                ...conv,
-                messages: [...(conv.messages || []), broadcastMessage],
-              }
-            : conv
-        )
-      );
-    });
-
-    socket.on("igBroadcastOutgoingComment", (response) => {
-      const broadcastComment = response.data;
-      setConversations((prev) =>
-        prev.map((conv) =>
-          conv.messageId === broadcastComment.messageId
-            ? {
-                ...conv,
-                messages: [...(conv.messages || []), broadcastComment],
-              }
-            : conv
-        )
-      );
-    });
-
-    socket.on("error", (error) => {
-      console.error("WebSocket error:", error);
-    });
-
-    socket.on("igMessageSendError", (error) => {
-      console.error("Message send error:", error.message);
-    });
-
-    socket.on("igCommentSendError", (error) => {
-      console.error("Comment send error:", error.message);
-    });
+    socket.on("error", (e) => console.error("Socket error", e));
+    socket.on("igMessageSendError", (e) => console.error("Msg send error", e));
+    socket.on("igCommentSendError", (e) => console.error("Cmt send error", e));
 
     return () => {
       socket.disconnect();
+      socketRef.current = null;
     };
-  }, [integrationId, socket]);
+  }, []);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  // Emit fetch when integrationId changes
+  useEffect(() => {
+    if (integrationId && socketRef.current) {
+      socketRef.current.emit("igFetchInitialData", integrationId);
+    }
+  }, [integrationId]);
 
   const sendMessage = () => {
-    if (!inputText || !selectedConversationId || !integrationId) return;
-    const selectedConversation = conversations?.find(
-      (conv) => conv.messageId === selectedConversationId
+    console.log(
+      "sendMessage fired. selectedConversationId=",
+      selectedConversationId
     );
-    if (!selectedConversation) return;
+    console.log(
+      "conversations ids=",
+      conversations.map((c) => c.userId)
+    );
+    if (!inputText || !selectedConversationId || !integrationId) return;
 
-    if (selectedConversation.type === "DM") {
-      socket.emit("igSendMessageRequest", {
+    // Fix: Use c.userId instead of c.messageId to match selectedConversationId
+    const conv = conversations.find((c) => c.userId === selectedConversationId);
+    console.log("conv=", conv);
+    if (!conv) return;
+
+    if (conv.type === "DM") {
+      socketRef.current!.emit("igSendMessageRequest", {
         integrationId,
-        recipientId: selectedConversation?.recipientId,
-        recipientUsername: selectedConversation?.username,
+        recipientId: conv.recipientId,
+        recipientUsername: conv.username,
         message: inputText,
       });
-    } else if (selectedConversation.type === "COMMENT") {
-      socket.emit("igSendCommentReplyRequest", {
+    } else {
+      socketRef.current!.emit("igSendCommentReplyRequest", {
         integrationId,
-        parentId:
-          selectedConversation.parentCommentId ||
-          selectedConversation.replyToCommentId,
+        parentId: conv.parentCommentId || conv.replyToCommentId,
         text: inputText,
-        postId: selectedConversation.postId,
+        postId: conv.postId,
       });
     }
     setInputText("");
   };
 
-  // const displayedConversations = selectedConversationId
-  //   ? conversations.filter((c) => c.messageId === selectedConversationId)
-  //   : conversations;
-
-  const displayedConversations = conversations; // Always display the full list of conversations
-
-  const selectedConversation = conversations.find(
-    (c) => c.userId === selectedConversationId // Use userId instead of id
-  );
-
-  // console.log("Selected Conversation ID:", selectedConversationId);
-  // console.log("Conversations:", conversations);
-  // console.log("Selected Conversation:", selectedConversation);
-  useEffect(() => {
-    console.log("Updated Selected Conversation ID:", selectedConversationId);
-  }, [selectedConversationId]);
-
-  const openPostModal = (post) => {
+  // UI Handlers
+  const handleClick = (e: React.MouseEvent<HTMLElement>) =>
+    setAnchorEl(e.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+  const openPostModal = (post: any) => {
     setCurrentPost(post);
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
+
+  const displayedConversations = conversations;
+  const selectedConversation = conversations.find(
+    (c) => c.userId === selectedConversationId
+  );
 
   const socialPlatforms = [
     { icon: <Instagram />, sentiment: 60 },
