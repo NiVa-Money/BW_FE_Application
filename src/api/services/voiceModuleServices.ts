@@ -100,3 +100,49 @@ export const deleteVoiceAgentService = async (agentId: string) => {
     throw error;
   }
 };
+
+export const uploadKBService = async (agentId: string, file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("File", file);
+
+    const response = await axiosInstance.post(
+      `https://vo-backend.onrender.com/voice-agent/${agentId}/upload-file`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error uploading KB:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const uploadUrlService = async (agentId: string, url: string) => {
+  try {
+    const response = await axiosInstance.post(
+      `https://vo-backend.onrender.com/voice-agent/${agentId}/upload-url`,
+      {
+        url: url,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error uploading URL:",
+        error.response?.data || error.message
+      );
+      throw new Error(error.response?.data?.message || "URL upload failed");
+    } else {
+      console.error("Unexpected error:", error);
+      throw new Error("An unexpected error occurred");
+    }
+  }
+};
