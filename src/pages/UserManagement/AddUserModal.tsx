@@ -33,6 +33,8 @@ interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (userData: {
+    firstName: string;
+    lastName: string;
     employeeId: string;
     mobileNo: string;
     modules: number[];
@@ -43,6 +45,8 @@ interface AddUserModalProps {
 
 // Form Validation Schema
 const validationSchema = Yup.object().shape({
+  firstName: Yup.string().required("FirstName is required"),
+  lastName: Yup.string().required("LastName is required"),
   employeeId: Yup.string()
     .email("Invalid email format")
     .required("Employee ID is required"),
@@ -80,6 +84,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 }) => {
   const formik = useFormik({
     initialValues: {
+      firstName: userDetails?.firstName || "",
+      lastName: userDetails?.lastName || "",
       employeeId: userDetails?.emailId || "",
       mobileNo: userDetails?.mobileNo || "",
       modules: userDetails?.module_maps || [],
@@ -91,6 +97,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     validationSchema,
     onSubmit: (values) => {
       onSave({
+        firstName: values.firstName,
+        lastName: values.lastName,
         employeeId: values.employeeId,
         mobileNo: values.mobileNo,
         modules: values.modules,
@@ -154,7 +162,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             alt="user management"
           />
           <h2 className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-semibold text-gray-800">
-            {userDetails ? "Edit User" : "Add User"}
+            {userDetails?.id ? "Edit User" : "Add User"}
           </h2>
         </div>
         {/* TODO: Convert in FORMIK FORM usinf FormikFieldInputComponent */}
@@ -162,6 +170,36 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           onSubmit={formik.handleSubmit}
           className="px-6 py-3 max-h-[30rem] overflow-y-auto"
         >
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              First Name
+            </label>
+            <FormikFieldInputComponent
+              field={{
+                name: "firstName",
+                value: formik.values.firstName,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
+              placeholder="John"
+            />
+          </div>
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Last Name
+            </label>
+            <FormikFieldInputComponent
+              field={{
+                name: "lastName",
+                value: formik.values.lastName,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
+              placeholder="Doe"
+            />
+          </div>
           <div className="mb-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Employee ID
@@ -173,6 +211,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 onChange: formik.handleChange,
                 onBlur: formik.handleBlur,
               }}
+              disabled={userDetails?.id}
               form={formik}
               placeholder="example@gmail.com"
               type="email"
@@ -262,6 +301,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     <input
                       type="checkbox"
                       className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 border-gray-300 rounded mr-2"
+                      disabled
                       checked={formik.values.modules.includes(
                         module.value as number
                       )}
@@ -296,7 +336,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               className="px-4 py-2 text-white rounded-md"
               style={{ backgroundColor: COLORS.VIOLET }}
             >
-              {userDetails ? "Update" : "Done"}
+              {userDetails?.id ? "Update" : "Done"}
             </button>
           </div>
         </form>

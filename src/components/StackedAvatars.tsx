@@ -57,7 +57,7 @@ export default function StackedAvatars({ userData }: StackedAvatarsProps) {
             <div
               className={`w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-white font-medium ${user.color} transition-transform duration-200 hover:z-10 hover:scale-110`}
             >
-              {user.firstName.charAt(0)}
+              {user?.firstName?.charAt(0) || ""}
             </div>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-2 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-opacity duration-200 whitespace-nowrap z-20 pointer-events-none">
               <p className="font-semibold">{user.firstName}</p>
@@ -102,7 +102,7 @@ export default function StackedAvatars({ userData }: StackedAvatarsProps) {
                         <div
                           className={`w-10 h-10 rounded-full mr-3 flex items-center justify-center text-white font-medium ${user.color}`}
                         >
-                          {user.firstName.charAt(0)}
+                          {user?.firstName?.charAt(0) || ""}
                         </div>
                         <div>
                           <p className="font-medium text-sm">
