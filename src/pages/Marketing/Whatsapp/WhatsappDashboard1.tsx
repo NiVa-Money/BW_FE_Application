@@ -979,6 +979,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
@@ -1043,15 +1044,15 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [unreadMessagesValue, setUnreadMessagesValue] = useState(0);
   const [hotLeadsValue, setHotLeadsValue] = useState(0);
   const [responseChartData, setResponseChartData] = useState([]);
-  const [, setEngagementAnalysis] = useState([]);
+  const [engagementRate, setEngagementRate] = useState<string | null>(null);
   const [response, setResponse] = useState<any>(null);
-
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
   const insights = useSelector(
     (state: RootState) => state.whatsappDashboard?.campaignInsights || []
   );
+  console.log("Campaign Insights:", insights);
   const messages = useSelector(
     (state: RootState) =>
       state.whatsappDashboard?.messages?.data?.messages || []
@@ -1063,7 +1064,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const campaignData = useSelector(
     (state: RootState) => state?.whatsappCampaign?.campaigns?.data
   );
-  console.log("Campaign Data from Redux:", campaignData);
+  console.log("Campaign Data from:", campaignData);
 
   const campaignId = useSelector(
     (state: RootState) =>
@@ -1166,83 +1167,106 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
     fetchDashData();
   }, [startDate, endDate, selectedCampaignId]);
 
-  useEffect(() => {
-    console.log("useEffect (campaign) triggered", { campaign, response });
-    if (response && response.success && response.data) {
-      const {
-        startDate,
-        endDate,
-        campaignWiseMessagesMetrics = [],
-        dateWiseMetrics,
-        engagementRateMetrics,
-      } = response.data;
-      setStartDate(new Date(startDate));
-      setEndDate(new Date(endDate));
-      const selectedCampaign =
-        campaign || campaignWiseMessagesMetrics[0]?.campaignName;
-      if (!campaign && selectedCampaign) setCampaign(selectedCampaign);
-      const filteredMetrics = campaignWiseMessagesMetrics.filter(
-        (metric) => metric.campaignName === selectedCampaign
-      );
-      let totalSent = 0,
-        totalRead = 0,
-        totalDelivered = 0,
-        totalFailed = 0,
-        totalReplied = 0;
-      filteredMetrics.forEach((metric) => {
-        totalSent += metric.sent;
-        totalRead += metric.read;
-        totalDelivered += metric.delivered;
-        totalFailed += metric.failed;
-        totalReplied += metric.replied;
-      });
-      setTotalMessagesValue(totalSent);
-      setSeenMessagesValue(totalRead);
-      setDeliveredMessagesValue(totalDelivered);
-      setUnreadMessagesValue(totalFailed);
-      setHotLeadsValue(totalReplied);
-      updateChartData(dateWiseMetrics, selectedCampaign, engagementRateMetrics);
-    }
-  }, [campaign]);
+  // useEffect(() => {
+  //   console.log("useEffect (campaign) triggered", { campaign, response });
+  //   if (response && response.success && response.data) {
+  //     const {
+  //       startDate,
+  //       endDate,
+  //       campaignWiseMessagesMetrics = [],
+  //       // dateWiseMetrics,
+  //       // engagementRateMetrics,
+  //     } = response.data;
+  //     setStartDate(new Date(startDate));
+  //     setEndDate(new Date(endDate));
+  //     const selectedCampaign =
+  //       campaign || campaignWiseMessagesMetrics[0]?.campaignName;
+  //     if (!campaign && selectedCampaign) setCampaign(selectedCampaign);
+  //     const filteredMetrics = campaignWiseMessagesMetrics.filter(
+  //       (metric) => metric.campaignName === selectedCampaign
+  //     );
+  //     let totalSent = 0,
+  //       totalRead = 0,
+  //       totalDelivered = 0,
+  //       totalFailed = 0,
+  //       totalReplied = 0;
+  //     filteredMetrics.forEach((metric) => {
+  //       totalSent += metric.sent;
+  //       totalRead += metric.read;
+  //       totalDelivered += metric.delivered;
+  //       totalFailed += metric.failed;
+  //       totalReplied += metric.replied;
+  //     });
+  //     setTotalMessagesValue(totalSent);
+  //     setSeenMessagesValue(totalRead);
+  //     setDeliveredMessagesValue(totalDelivered);
+  //     setUnreadMessagesValue(totalFailed);
+  //     setHotLeadsValue(totalReplied);
+  //     // updateChartData(dateWiseMetrics, selectedCampaign, engagementRateMetrics);
+  //   }
+  // }, [campaign, response]);
+
+  // useEffect(() => {
+  //   if (response && response.success && response.data) {
+  //     const { dailyStats, engagementRate } = response.data;
+
+  //     console.log("Processing dailyStats:", dailyStats);
+  //     console.log("Engagement Rate:", engagementRate);
+
+  //     // Update the chart data
+  //     updateChartData(dailyStats);
+
+  //     // Set the engagement rate
+  //     setEngagementRate(engagementRate || null);
+  //   }
+  // }, [response]);
+
+  // const updateChartData = (dailyStats: DailyStats) => {
+  //   console.log("updateChartData called", { dailyStats });
+
+  //   // Map the dailyStats object into an array of objects for the chart
+  //   const barData = Object.entries(dailyStats).map(([date, stats]) => ({
+  //     date, // X-axis: Date
+  //     totalSent: stats.sent || 0, // Y-axis: Total Sent
+  //     totalRead: stats.read || 0, // Y-axis: Total Read
+  //     totalDelivered: stats.delivered || 0, // Y-axis: Total Delivered
+  //     totalFailed: stats.failed || 0, // Y-axis: Total Failed
+  //   }));
+
+  //   console.log("barData (responseChartData):", barData);
+
+  //   // Update the state with the new data
+  //   setResponseChartData(barData);
+  // };
 
   useEffect(() => {
-    if (
-      response &&
-      response.success &&
-      response.data &&
-      response.data.dateWiseMetrics &&
-      response.data.engagementRateMetrics
-    ) {
-      updateChartData(
-        response.data.dateWiseMetrics,
-        campaign,
-        response.data.engagementRateMetrics
-      );
+    if (insights) {
+      const chartData = mapInsightsToChartData(insights);
+      setResponseChartData(chartData);
     }
-  }, [campaign, response]);
+  }, [insights]);
 
-  const updateChartData = (
-    dateWiseMetrics,
-    selectedCampaign,
-    engagementRateMetrics
-  ) => {
-    console.log("updateChartData called", {
-      dateWiseMetrics,
-      selectedCampaign,
-      engagementRateMetrics,
-    });
-    const barData = dateWiseMetrics?.map((item) => ({
-      date: item.date,
-      value: item[selectedCampaign] || 0,
-    }));
-    const lineData = engagementRateMetrics?.map((item) => ({
-      date: item.date,
-      value: item[selectedCampaign] || 0,
-    }));
-    console.log("barData (responseChartData):", barData);
-    console.log("lineData (engagementRateMetrics):", lineData);
-    setResponseChartData(barData);
-    setEngagementAnalysis(lineData);
+  const mapInsightsToChartData = (insights: any) => {
+    if (!insights?.campaignInsights?.performanceAnalytics) {
+      console.error("No performance analytics data available");
+      return [];
+    }
+
+    const { performanceAnalytics } = insights.campaignInsights;
+
+    // Map the performance analytics data to chart format
+    const chartData = [
+      {
+        name: "Response",
+        delivered: performanceAnalytics.deliveredMessages || 0,
+        read: performanceAnalytics.readMessages || 0,
+        failed: performanceAnalytics.failedMessages || 0,
+        replied: performanceAnalytics.repliedMessages || 0,
+      },
+    ];
+
+    console.log("Mapped Chart Data:", chartData);
+    return chartData;
   };
 
   const handleCampaignChange = (e: SelectChangeEvent<string>) => {
@@ -1366,23 +1390,70 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             </div>
           </div>
           <ChartCard title="Response Rate">
-            {responseChartData && responseChartData.length ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={responseChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar
-                    dataKey="value"
-                    fill={COLORS.VIOLET}
-                    name="Response Rate"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <NoDataMessage />
-            )}
+            <>
+              {insights?.campaignInsights?.performanceAnalytics && (
+                <div className="text-sm text-gray-600 mb-4">
+                  <p>
+                    Delivery Rate:{" "}
+                    <span className="font-medium">
+                      {
+                        insights.campaignInsights.performanceAnalytics
+                          .deliveryRate
+                      }
+                    </span>
+                  </p>
+                  <p>
+                    Read Rate:{" "}
+                    <span className="font-medium">
+                      {insights.campaignInsights.performanceAnalytics.readRate}
+                    </span>
+                  </p>
+                  <p>
+                    Response Rate:{" "}
+                    <span className="font-medium">
+                      {
+                        insights.campaignInsights.performanceAnalytics
+                          .responseRate
+                      }
+                    </span>
+                  </p>
+                  <p>
+                    Failure Rate:{" "}
+                    <span className="font-medium">
+                      {
+                        insights.campaignInsights.performanceAnalytics
+                          .failureRate
+                      }
+                    </span>
+                  </p>
+                </div>
+              )}
+              {responseChartData && responseChartData.length ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={responseChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="delivered"
+                      fill="#A78BFA"
+                      name="Delivered"
+                    />{" "}
+                    {/* Light Blue */}
+                    <Bar dataKey="read" fill="#60A5FA" name="Read" />{" "}
+                    {/* Light Green */}
+                    <Bar dataKey="replied" fill="#34D399" name="Replied" />{" "}
+                    {/* Light Purple */}
+                    <Bar dataKey="failed" fill="#F87171" name="Failed" />{" "}
+                    {/* Light Red */}
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <NoDataMessage />
+              )}
+            </>
           </ChartCard>
         </div>
 
