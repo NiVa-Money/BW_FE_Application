@@ -1044,7 +1044,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [unreadMessagesValue, setUnreadMessagesValue] = useState(0);
   const [hotLeadsValue, setHotLeadsValue] = useState(0);
   const [responseChartData, setResponseChartData] = useState([]);
-  const [engagementRate, setEngagementRate] = useState<string | null>(null);
+  // const [engagementRate, setEngagementRate] = useState<string | null>(null);
   const [response, setResponse] = useState<any>(null);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
@@ -1268,6 +1268,18 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
     console.log("Mapped Chart Data:", chartData);
     return chartData;
   };
+
+  useEffect(() => {
+    if (insights?.campaignInsights?.performanceAnalytics) {
+      const { performanceAnalytics } = insights.campaignInsights;
+
+      setTotalMessagesValue(performanceAnalytics.totalMessagesSent || 0);
+      setSeenMessagesValue(performanceAnalytics.readMessages || 0);
+      setDeliveredMessagesValue(performanceAnalytics.deliveredMessages || 0);
+      setUnreadMessagesValue(performanceAnalytics.failedMessages || 0);
+      setHotLeadsValue(performanceAnalytics.repliedMessages || 0);
+    }
+  }, [insights]);
 
   const handleCampaignChange = (e: SelectChangeEvent<string>) => {
     setCampaign(e.target.value as string);
