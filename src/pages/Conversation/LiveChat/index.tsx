@@ -275,7 +275,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
       <div className="px-6 pt-4 flex-none">
         <h1 className="text-2xl font-semibold">Live Chat</h1>
         <p className="text-gray-600 text-sm">Guide Your Customers to Success</p>
-      </div>
 
       {/* Queue Stats Section */}
       <div className="px-6 flex-none my-4">
@@ -643,8 +642,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
             isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          {/* <div className="p-6 h-full overflow-y-auto">
-            <div className="space-y-4">
+          {/* < className="p-6 h-full overflow-y-auto">
+            < className="space-y-4">
               <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
                 <div className="grid grid-cols-1 gap-6 items-start">
                   {/* <div>
@@ -848,8 +847,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </button>
                 </div>
               </div>
-            </div>
-          </div> */}
+          
           <InsightsPanel sessionMetrics={undefined} />
         </div>
 
@@ -861,7 +859,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
           {isAgentAssistOpen ? "Close Agent Assist" : "Open Agent Assist"}
         </button>
       </div>
-    </div>
   );
 };
 
