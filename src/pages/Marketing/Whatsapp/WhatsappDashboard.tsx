@@ -101,10 +101,10 @@ const WhatsappDash: FC<DashboardProps> = ({
 
   const totalPages = Math.ceil(totalMessages / limit);
 
-  const campaignData = useSelector(
-    (state: RootState) =>
-      state?.whatsappCampaign?.campaigns?.data?.campaigns?.whatsapp
-  );
+  const campaignData = useSelector((state: RootState) => {
+    console.log("Redux State:", state); // Log the entire Redux state
+    return state?.whatsappCampaign?.campaigns?.data || [];
+  });
 
   useEffect(() => {
     dispatch(fetchCampaignsAction({ payload: {} }));
