@@ -1010,7 +1010,6 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { Card, CardContent, Typography } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
-import { COLORS } from "../../../constants";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
@@ -1045,7 +1044,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [hotLeadsValue, setHotLeadsValue] = useState(0);
   const [responseChartData, setResponseChartData] = useState([]);
   // const [engagementRate, setEngagementRate] = useState<string | null>(null);
-  const [response, setResponse] = useState<any>(null);
+  const [_response, setResponse] = useState<any>(null);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
