@@ -101,13 +101,13 @@ export const deleteVoiceAgentService = async (agentId: string) => {
   }
 };
 
-export const uploadKBService = async (agentId: string, file: File) => {
+export const uploadKBService = async (file: File) => {
   try {
     const formData = new FormData();
     formData.append("File", file);
 
     const response = await axiosInstance.post(
-      `https://vo-backend.onrender.com/voice-agent/${agentId}/upload-file`,
+      `https://vo-backend.onrender.com/voice-agent/upload`,
       formData
     );
     return response.data;
@@ -124,10 +124,10 @@ export const uploadKBService = async (agentId: string, file: File) => {
   }
 };
 
-export const uploadUrlService = async (agentId: string, url: string) => {
+export const uploadUrlService = async (url: string) => {
   try {
     const response = await axiosInstance.post(
-      `https://vo-backend.onrender.com/voice-agent/${agentId}/upload-url`,
+      `https://vo-backend.onrender.com/voice-agent/url`,
       {
         url: url,
       }
