@@ -35,6 +35,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const [isAgentConnected, setIsAgentConnected] = useState(false);
   const [isAgentTyping, setIsAgentTyping] = useState(false);
 
+  const [sessionMetrics, setSessionMetrics] = useState<any>(null);
+
   // ---------- Memoized Selectors ----------
   const selectUserChat = (state: RootState) => state.userChat;
   const selectSessions = createSelector(
@@ -86,6 +88,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
         reconnectionDelay: 1000,
       });
 
+      // Standard socket events
       socket.current.on("connect", () => {
         setAgentState("connecting");
         socket.current.emit("joinSession", {
@@ -94,46 +97,43 @@ const LiveChat: React.FC = (): React.ReactElement => {
           botId,
           userType: "AGENT",
         });
+
+        socket.current.on("sessionMetrics", (metrics: any) => {
+          setSessionMetrics(metrics);
+        });
       });
 
       socket.current.on("agentConnected", (data: any) => {
+        console.log("Agent connected:", data);
         setAgentState("connected");
         setIsAgentConnected(true);
-        console.log("Agent connected:", data);
       });
 
       socket.current.on("messageToClient", (data: any) => {
-        console.log("New message received:", data);
         if (data.question || data.response) {
-          setMessages((prev) => {
-            const updatedMessages = [
-              ...prev,
-              {
-                ...data,
-                timestamp: data.timestamp || new Date().toISOString(),
-                sender: data.senderType === "AGENT" ? "agent" : "customer",
-                text: data.question || data.response,
-                type:
-                  data.senderType === "AGENT" ? "bot-message" : "user-message",
-              },
-            ];
-            playNotificationSound(); // Play sound for new message
-            return updatedMessages;
-          });
+          setMessages((prev) => [
+            ...prev,
+            {
+              ...data,
+              timestamp: data.timestamp || new Date().toISOString(),
+              sender: data.senderType === "AGENT" ? "agent" : "customer",
+              text: data.question || data.response,
+              type:
+                data.senderType === "AGENT" ? "bot-message" : "user-message",
+            },
+          ]);
+          playNotificationSound();
         }
       });
 
       socket.current.on("sessionClosed", handleSessionEnd);
       socket.current.on("sessionEndedByAdmin", handleSessionEnd);
       socket.current.on("adminEndedSession", handleSessionEnd);
-
       socket.current.on("connect_error", (error: any) => {
         console.error("Connection error:", error);
         setAgentState("disconnected");
       });
-
       socket.current.on("closeSession", () => {
-        console.log("Socket disconnected");
         setIsAgentConnected(false);
       });
     }
@@ -265,6 +265,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
       console.log("Audio play failed:", error);
     });
   };
+
+  const getMetric = sessionMetrics;
+  console.log("get metric", getMetric);
 
   return (
     <div className="h-screen flex flex-col">
@@ -643,8 +646,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
           {/* <div className="p-6 h-full overflow-y-auto">
             <div className="space-y-4">
               <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
-                <div className="grid grid-cols-2 gap-6 items-start">
-                  <div>
+                <div className="grid grid-cols-1 gap-6 items-start">
+                  {/* <div>
                     <h2 className="font-medium">Add to workflow</h2>
                     <p className="text-base text-gray-500">
                       Integrate this customer interaction into your workflow for
@@ -653,7 +656,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
                       Add to workflow
                     </button>
-                  </div>
+                  </div> */}
                   <div>
                     <h3 className="font-medium">Summary and Next Steps</h3>
                     <div className="space-y-1 mt-2">
@@ -700,7 +703,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
                 </button>
               </div>
 
-              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
+              {/* CSAT */}
+              {/* <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-red-500 font-medium">20%</span>
                   <span>Customer Satisfaction (CSAT)</span>
@@ -752,6 +756,97 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     Escalate to Manager
                   </button>
                 </div>
+              </div> */}
+
+              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-red-500 font-semibold text-lg">
+                    {sessionMetrics?.csatPrediction?.csatPercentage || 0}%
+                  </span>
+                  <span className="text-gray-700 font-medium">
+                    Customer Satisfaction (CSAT)
+                  </span>
+                </div>
+
+                <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-400 rounded-full"
+                    style={{
+                      width: `${
+                        sessionMetrics?.csatPrediction?.csatPercentage || 0
+                      }%`,
+                    }}
+                  ></div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+                  <div className="space-y-2">
+                    <Metric
+                      label="Chat Cue"
+                      value={
+                        sessionMetrics?.customerCues?.primaryCue ||
+                        sessionMetrics?.customerCues?.error
+                      }
+                    />
+                    <Metric
+                      label="Reason"
+                      value={
+                        sessionMetrics?.resolutionPrediction?.nextSteps[0] ||
+                        "No reason identified"
+                      }
+                    />
+                    <Metric
+                      label="Next Step"
+                      value={
+                        sessionMetrics?.resolutionPrediction?.recommendedAction
+                      }
+                    />
+                    <Metric
+                      label="Predictive AI"
+                      value={`${sessionMetrics?.resolutionPrediction?.resolutionLabel} resolution`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Metric
+                      label="Emotion"
+                      value={
+                        sessionMetrics?.sentimentAnalysis?.currentSentiment ||
+                        sessionMetrics?.sentimentAnalysis?.error
+                      }
+                    />
+                    <Metric
+                      label="Intent"
+                      value={
+                        <>
+                          <p>
+                            Confidence:{" "}
+                            {sessionMetrics?.intentAnalysis?.confidence * 100}%
+                          </p>
+                          <p>
+                            {sessionMetrics?.intentAnalysis?.primaryIntent ||
+                              sessionMetrics?.intentAnalysis?.error}
+                          </p>
+                        </>
+                      }
+                    />
+                    <Metric
+                      label="Sentiment"
+                      value={
+                        sessionMetrics?.sentimentAnalysis?.currentSentiment ||
+                        "Unknown"
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 mt-6">
+                  <button className="flex-1 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black">
+                    Schedule Follow-up
+                  </button>
+                  <button className="flex-1 bg-[#65558F] text-white px-4 py-2 rounded-full">
+                    Escalate to Manager
+                  </button>
+                </div>
               </div>
             </div>
           </div> */}
@@ -769,5 +864,12 @@ const LiveChat: React.FC = (): React.ReactElement => {
     </div>
   );
 };
+
+const Metric = ({ label, value }) => (
+  <div>
+    <span className="text-gray-600 text-xs">{label}</span>
+    <p className="text-sm font-medium">{value}</p>
+  </div>
+);
 
 export default LiveChat;
