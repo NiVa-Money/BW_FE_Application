@@ -442,10 +442,14 @@ const VoiceChatComponent: React.FC = () => {
         <div className="relative shadow-xl rounded-[2.5rem] p-8 max-w-7xl w-full flex flex-col md:flex-row items-center border border-gray-100/80">
           {/* Left Column */}
           <div className="w-full md:w-1/2 space-y-5 p-4">
-            <h1 className="text-4xl font-bold text-black mb-8 tracking-wide text-center md:text-left">
-              Voice AI Agent
-            </h1>
-
+            <div className="items-center gap-4 mb-8">
+              <h2 className="text-3xl mb-2 font-bold text-gray-900 flex-1">
+                Voice AI Agents
+              </h2>
+              <span className="text-gray-500 text-base">
+                Test your voice ai agents
+              </span>
+            </div>
             {/* Agent Name */}
             <div className="space-y-1">
               <label className="text-sm font-medium text-gray-700/90">
