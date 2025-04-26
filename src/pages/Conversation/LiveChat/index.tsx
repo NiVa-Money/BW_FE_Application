@@ -642,7 +642,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
               isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
             }`}
           >
-            <InsightsPanel sessionMetrics={undefined} />
+            {sessionMetrics && <InsightsPanel sessionMetrics={sessionMetrics} />}
+
           </div>
         </div>
       </div>
