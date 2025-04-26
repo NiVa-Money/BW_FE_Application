@@ -151,6 +151,8 @@ const AllChats = () => {
         name: bot.botName,
       }));
       setBotLists(formattedBots);
+      // Add this line to set first bot as default
+      setBotIdVal(formattedBots[0]?.value || "");
     }
   }, [botsDataRedux, botsDataLoader]);
 
