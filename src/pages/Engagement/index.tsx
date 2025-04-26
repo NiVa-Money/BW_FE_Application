@@ -475,21 +475,22 @@ const EngagementTab = () => {
   // ref to hold socket instance
   const socketRef = useRef<Socket | null>(null);
 
-  // Fetch integrations once on mount
   useEffect(() => {
     const fetchIntegrations = async () => {
       try {
         const resp = await getInstagramData();
         const ints = Array.isArray(resp.data) ? resp.data : [];
         setAvailableIntegrations(ints);
-        if (ints.length) setIntegrationId(ints[0]._id);
+        if (ints.length) {
+          // Optionally set the first Instagram integration as default
+          setIntegrationId(ints[0].instagramName); // Set instagramName as the ID
+        }
       } catch (err) {
         console.error("Error fetching integrations", err);
       }
     };
     fetchIntegrations();
   }, []);
-
   // Create socket once
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_FIREBASE_BASE_URL}/instagram`, {
@@ -675,7 +676,7 @@ const EngagementTab = () => {
           >
             {availableIntegrations.map((intg) => (
               <MenuItem key={intg._id} value={intg._id}>
-                {intg.name || intg._id}
+                {intg.instagramName} (@{intg.instagramUsername})
               </MenuItem>
             ))}
           </Select>

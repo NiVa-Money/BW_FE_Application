@@ -200,7 +200,15 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
   };
 
   const handleAddButton = () => {
-    setButtons((prev) => [...prev, { type: "quick_reply", text: "" }]);
+    setButtons((prev) => [
+      ...prev,
+      {
+        type: "call_to_action",
+        text: "",
+        ctaType: "url", // Set default to URL
+        url: "",
+      },
+    ]);
   };
 
   const updateButton = (
@@ -611,6 +619,11 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
                         placeholder="Enter button URL"
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
                       />
+                      {buttonErrors[idx] && (
+                        <div className="mt-1 text-xs text-red-600">
+                          {buttonErrors[idx]}
+                        </div>
+                      )}
                     </div>
                   )}
 
