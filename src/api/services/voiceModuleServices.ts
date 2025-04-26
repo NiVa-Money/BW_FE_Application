@@ -104,11 +104,16 @@ export const deleteVoiceAgentService = async (agentId: string) => {
 export const uploadKBService = async (file: File) => {
   try {
     const formData = new FormData();
-    formData.append("File", file);
+    formData.append("file", file);
 
     const response = await axiosInstance.post(
-      `https://vo-backend.onrender.com/voice-agent/upload`,
-      formData
+      "https://vo-backend.onrender.com/voice-agent/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -129,7 +134,7 @@ export const uploadUrlService = async (url: string) => {
     const response = await axiosInstance.post(
       `https://vo-backend.onrender.com/voice-agent/url`,
       {
-        url: url,
+        knowledgeBase: url,
       }
     );
     return response.data;

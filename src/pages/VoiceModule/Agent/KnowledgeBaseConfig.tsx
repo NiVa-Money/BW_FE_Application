@@ -316,7 +316,7 @@ const KnowledgeBaseConfig = ({ config, updateConfig }: KnowledgeBaseConfigProps)
           const validationError = validateFile(file);
           if (validationError) throw new Error(validationError);
 
-          const response = await uploadKBService(config.externalId, file);
+          const response = await uploadKBService(file);
           return response.filename;
         })
       );
@@ -358,7 +358,7 @@ const KnowledgeBaseConfig = ({ config, updateConfig }: KnowledgeBaseConfigProps)
           const validationError = validateFile(file);
           if (validationError) throw new Error(validationError);
 
-          const response = await uploadKBService(config.externalId, file);
+          const response = await uploadKBService(file);
           return response.filename;
         })
       );
@@ -382,7 +382,7 @@ const KnowledgeBaseConfig = ({ config, updateConfig }: KnowledgeBaseConfigProps)
     setUrlError(null);
 
     try {
-      const response = await uploadUrlService(config.externalId, newUrl);
+      const response = await uploadUrlService(newUrl);
       updateConfig({
         urls: [...new Set([...config.urls, response.ULI])],
       });
