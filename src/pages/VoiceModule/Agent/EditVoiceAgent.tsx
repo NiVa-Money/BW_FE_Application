@@ -498,15 +498,20 @@ const EditVoiceAgent = () => {
               />
             )}
             {tab === 1 && (
-              <KnowledgeBaseConfig
-                config={agentConfig.knowledgeBase}
-                updateConfig={(data) => updateConfig("knowledgeBase", data)}
-              />
-            )}
-            {tab === 2 && (
               <VoiceFlowConfig
                 config={agentConfig.voiceFlow}
                 updateConfig={(data) => updateConfig("voiceFlow", data)}
+              />
+            )}
+            {tab === 2 && (
+              <KnowledgeBaseConfig
+                config={agentConfig.knowledgeBase}
+                updateConfig={(data) => updateConfig("knowledgeBase", data)}
+                basicConfig={{
+                  name: "",
+                  language: "",
+                  voiceStyle: "",
+                }}
               />
             )}
           </div>
