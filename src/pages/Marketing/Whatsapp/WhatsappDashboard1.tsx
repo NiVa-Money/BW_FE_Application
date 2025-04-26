@@ -1564,7 +1564,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           {/* Text Insights */}
           <div
             className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl"
-            style={{ height: "256px", overflowY: "auto" }}
+            style={{ height: "450px", overflowY: "auto" }}
           >
             <div className="flex justify-between items-center mb-4">
               <div>
