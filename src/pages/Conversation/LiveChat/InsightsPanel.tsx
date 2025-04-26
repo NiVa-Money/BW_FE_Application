@@ -7,7 +7,16 @@
 //   SentimentNeutral,
 //   Speed,
 // } from "@mui/icons-material";
-// import { Button, Box, Typography, Grid, Paper } from "@mui/material";
+// import {
+//   Button,
+//   Box,
+//   Typography,
+//   Grid,
+//   Paper,
+//   List,
+//   ListItem,
+//   ListItemText,
+// } from "@mui/material";
 
 // // Dummy components for Donut, LinearProgress, and Metric
 // const Donut = ({ percentage }) => (
@@ -51,30 +60,43 @@
 // );
 
 // export default function InsightsPanel({ sessionMetrics }) {
+//   // Map sessionMetrics to component state
 //   const csat = sessionMetrics?.customerSatisfaction || 0;
 //   const intentClarity = sessionMetrics?.customerIntent?.clarity || 0;
+//   const intentPrimary = sessionMetrics?.customerIntent?.primary || "—";
+//   const intentSecondary = sessionMetrics?.customerIntent?.secondary || [];
 //   const sentiment = sessionMetrics?.conversationSentiment?.overall || "Unknown";
+//   const sentimentTrajectory =
+//     sessionMetrics?.conversationSentiment?.trajectory || "Unknown";
+//   const sentimentKeyPhrases =
+//     sessionMetrics?.conversationSentiment?.keyPhrases || [];
 
 //   const resolutionLikelihood =
 //     sessionMetrics?.summaryAndNextSteps?.resolutionLikelihood || "Unknown";
 //   const retentionProbability =
 //     sessionMetrics?.summaryAndNextSteps?.retentionProbability || 0;
+//   const nextSteps = sessionMetrics?.summaryAndNextSteps?.nextSteps || [];
 
 //   const potentialRisk =
 //     sessionMetrics?.vulnerabilityAnalysis?.potentialRisk || "Unknown";
 //   const salesOpportunity =
 //     sessionMetrics?.vulnerabilityAnalysis?.salesOpportunity || "Unknown";
-//   const upcomingTrend =
-//     sessionMetrics?.vulnerabilityAnalysis?.upcomingTrends?.[0] || "N/A";
+//   const upcomingTrends =
+//     sessionMetrics?.vulnerabilityAnalysis?.upcomingTrends || [];
 
-//   const emotion = sessionMetrics?.customerEmotion?.primary || "Neutral";
+//   const emotionPrimary = sessionMetrics?.customerEmotion?.primary || "Neutral";
+//   const emotionSecondary = sessionMetrics?.customerEmotion?.secondary || "None";
 //   const emotionIntensity = sessionMetrics?.customerEmotion?.intensity || 0;
+//   const emotionVolatility = sessionMetrics?.customerEmotion?.volatility || 0;
 
 //   const chatCue = sessionMetrics?.chatCues?.primaryCue || "No cue identified";
 //   const cueReason = sessionMetrics?.chatCues?.reasonForCue || "—";
-//   const nextStep = sessionMetrics?.summaryAndNextSteps?.nextSteps?.[0] || "—";
+//   const allCues = sessionMetrics?.chatCues?.allCues || [];
+//   const cueConfidence = sessionMetrics?.chatCues?.cueConfidence || 0;
 
-//   const intentPrimary = sessionMetrics?.customerIntent?.primary || "—";
+//   const csatFactors = sessionMetrics?.csatFactors || {};
+//   const advancedMetrics = sessionMetrics?.advancedMetrics || {};
+//   // const suggestedResponses = sessionMetrics?.suggestedResponses || [];
 
 //   const mapRiskToValue = (risk) =>
 //     risk === "High" ? 80 : risk === "Medium" ? 50 : 20;
@@ -127,6 +149,18 @@
 //                 </Box>
 //               </Grid>
 //             </Grid>
+//             <Box mt={2}>
+//               <Typography variant="body2" color="textSecondary">
+//                 Next Steps
+//               </Typography>
+//               <List dense>
+//                 {nextSteps.map((step, index) => (
+//                   <ListItem key={index}>
+//                     <ListItemText primary={step} />
+//                   </ListItem>
+//                 ))}
+//               </List>
+//             </Box>
 //             <Button
 //               fullWidth
 //               variant="outlined"
@@ -142,7 +176,7 @@
 //           </Paper>
 //         </Grid>
 
-//         {/* Vulnerability & Sales */}
+//         {/* Vulnerability Analysis and Sales Intelligence */}
 //         <Grid item>
 //           <Paper
 //             elevation={1}
@@ -174,7 +208,6 @@
 //                   color="#444"
 //                 />
 //               </Box>
-
 //               <Box>
 //                 <Box
 //                   display="flex"
@@ -197,10 +230,50 @@
 //                   color="#4CAF50"
 //                 />
 //               </Box>
-
-//               <Box display="flex" justifyContent="space-between">
+//               <Box>
 //                 <Typography color="textSecondary">Upcoming Trends</Typography>
-//                 <Typography fontWeight="500">{upcomingTrend}</Typography>
+//                 <List dense>
+//                   {upcomingTrends.map((trend, index) => (
+//                     <ListItem key={index}>
+//                       <ListItemText primary={trend} />
+//                     </ListItem>
+//                   ))}
+//                 </List>
+//               </Box>
+//               {/* Advanced Metrics */}
+//               <Box>
+//                 <Typography color="textSecondary">Advanced Metrics</Typography>
+//                 <Box
+//                   display="grid"
+//                   gridTemplateColumns="1fr 1fr"
+//                   gap={2}
+//                   mt={1}
+//                 >
+//                   <Metric
+//                     label="Churn Risk"
+//                     value={`${advancedMetrics.churnRisk}%`}
+//                   />
+//                   <Metric
+//                     label="Engagement Score"
+//                     value={advancedMetrics.engagementScore}
+//                   />
+//                   <Metric
+//                     label="Estimated Resolution Time"
+//                     value={advancedMetrics.estimatedResolutionTime}
+//                   />
+//                   <Metric
+//                     label="Issue Complexity"
+//                     value={advancedMetrics.issueComplexity}
+//                   />
+//                   <Metric
+//                     label="Lifetime Value Change"
+//                     value={advancedMetrics.lifetimeValueChange}
+//                   />
+//                   <Metric
+//                     label="Opportunity Value"
+//                     value={`$${advancedMetrics.opportunityValue}`}
+//                   />
+//                 </Box>
 //               </Box>
 //             </Box>
 //             <Button
@@ -218,7 +291,7 @@
 //           </Paper>
 //         </Grid>
 
-//         {/* CSAT, Intent, Sentiment */}
+//         {/* CSAT, Intent, Sentiment, and More */}
 //         <Grid item>
 //           <Paper
 //             elevation={1}
@@ -260,20 +333,94 @@
 //             >
 //               <Box display="flex" flexDirection="column" gap={2}>
 //                 <Metric label="Chat Cue" value={chatCue} />
+//                 <Metric label="Cueence" value={`${cueConfidence}%`} />
 //                 <Metric label="Reason" value={cueReason} />
-//                 <Metric label="Next Step" value={nextStep} />
+//                 <Metric label="Next Step" value={nextSteps[0] || "—"} />
+//                 <Box>
+//                   <Typography variant="body2" color="textSecondary">
+//                     All Cues
+//                   </Typography>
+//                   <List dense>
+//                     {allCues.map((cue, index) => (
+//                       <ListItem key={index}>
+//                         <ListItemText primary={cue} />
+//                       </ListItem>
+//                     ))}
+//                   </List>
+//                 </Box>
 //               </Box>
 //               <Box display="flex" flexDirection="column" gap={2}>
 //                 <Metric
 //                   label="Emotion"
-//                   value={emotion}
+//                   value={`${emotionPrimary} (${emotionSecondary})`}
 //                   barValue={emotionIntensity}
 //                 />
 //                 <Metric
+//                   label="Emotion Volatility"
+//                   value={`${emotionVolatility}%`}
+//                 />
+//                 <Metric
 //                   label="Intent"
-//                   value={intentPrimary}
+//                   value={`${intentPrimary} ${
+//                     intentSecondary.length
+//                       ? `(${intentSecondary.join(", ")})`
+//                       : ""
+//                   }`}
 //                   barValue={intentClarity}
 //                 />
+//                 <Metric
+//                   label="Sentiment Trajectory"
+//                   value={sentimentTrajectory}
+//                 />
+//                 <Box>
+//                   <Typography variant="body2" color="textSecondary">
+//                     Key Sentiment Phrases
+//                   </Typography>
+//                   <List dense>
+//                     {sentimentKeyPhrases.map((phrase, index) => (
+//                       <ListItem key={index}>
+//                         <ListItemText primary={phrase} />
+//                       </ListItem>
+//                     ))}
+//                   </List>
+//                 </Box>
+//               </Box>
+//             </Box>
+
+//             {/* CSAT Factors */}
+//             <Box mt={2}>
+//               <Typography variant="body2" color="textSecondary">
+//                 CSAT Factors
+//               </Typography>
+//               <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mt={1}>
+//                 <Metric
+//                   label="Emotional Score"
+//                   value={`${csatFactors.emotionalScore}%`}
+//                 />
+//                 <Metric
+//                   label="Resolution Score"
+//                   value={`${csatFactors.resolutionScore}%`}
+//                 />
+//                 <Metric
+//                   label="Tone Score"
+//                   value={`${csatFactors.toneScore}%`}
+//                 />
+//                 <Metric
+//                   label="Word Choice Score"
+//                   value={`${csatFactors.wordChoiceScore}%`}
+//                 />
+//               </Box>
+//               <Box mt={1}>
+//                 <Typography variant="body2" color="textSecondary">
+//                   Key Indicators
+//                 </Typography>
+//                 <List dense>
+//                   {csatFactors.keyIndicators?.map((indicator, index) => (
+//                     <ListItem key={index}>
+//                       <ListItemText primary={indicator} />
+//                     </ListItem>
+//                   ))}
+//                 </List>
 //               </Box>
 //             </Box>
 
@@ -303,6 +450,38 @@
 //             </Box>
 //           </Paper>
 //         </Grid>
+
+//         {/* Suggested Responses */}
+//         {/* <Grid item>
+//           <Paper elevation={1} sx={{ p: 3, bgcolor: "#65558F0D", borderRadius: 2 }}>
+//             <Typography variant="h6" fontWeight="500">
+//               Suggested Follow-up Messages
+//             </Typography>
+//             <Box mt={2}>
+//               <List>
+//                 {suggestedResponses.map((response, index) => (
+//                   <ListItem key={index} sx={{ flexDirection: "column", alignItems: "flex-start" }}>
+//                     <Typography variant="body1" fontWeight="500">
+//                       {response.message}
+//                     </Typography>
+//                     <Box display="flex" gap={2} mt={1}>
+//                       <Metric label="Tone" value={response.emotionalTone} />
+//                       <Metric label="Expected Impact" value={response.expectedImpact} />
+//                       <Metric label="Appropriateness" value={`${response.appropriatenessScore}%`} />
+//                     </Box>
+//                   </ListItem>
+//                 ))}
+//               </List>
+//             </Box>
+//             <Button
+//               fullWidth
+//               variant="outlined"
+//               sx={{ mt: 3, borderColor: "#65558F", color: "#65558F", borderRadius: "999px" }}
+//             >
+//               Copy Suggested Responses
+//             </Button>
+//           </Paper>
+//         </Grid> */}
 //       </Grid>
 //     </Box>
 //   );
@@ -318,38 +497,81 @@ import {
   SentimentNeutral,
   Speed,
 } from "@mui/icons-material";
-import { Button, Box, Typography, Grid, Paper, List, ListItem, ListItemText } from "@mui/material";
+import {
+  Button,
+  Box,
+  Typography,
+  Grid,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  CircularProgress,
+  LinearProgress,
+} from "@mui/material";
 
-// Dummy components for Donut, LinearProgress, and Metric
-const Donut = ({ percentage }) => (
-  <Box
-    width={40}
-    height={40}
-    borderRadius="50%"
-    bgcolor="#ddd"
-    display="flex"
-    alignItems="center"
-    justifyContent="center"
-  >
-    {percentage}%
+interface DonutProps {
+  percentage: number;
+}
+
+const Donut = ({ percentage }: DonutProps) => (
+  <Box position="relative" display="inline-flex">
+    <CircularProgress
+      variant="determinate"
+      value={percentage}
+      size={48}
+      thickness={5}
+      sx={{
+        color: "#65558F",
+        backgroundColor: "#eee",
+        borderRadius: "50%",
+      }}
+    />
+    <Box
+      top={0}
+      left={0}
+      bottom={0}
+      right={0}
+      position="absolute"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Typography variant="caption" component="div" color="textSecondary">
+        {`${percentage}%`}
+      </Typography>
+    </Box>
   </Box>
 );
 
-const LinearProgressBar = ({ value, color }) => (
+interface LinearProgressBarProps {
+  value: number;
+  color: string;
+}
+
+const LinearProgressBar = ({ value, color }: LinearProgressBarProps) => (
   <Box width="100%" bgcolor="#eee" borderRadius={4} overflow="hidden">
-    <Box height={6} width={`${value}%`} bgcolor={color} />
+    <LinearProgress
+      variant="determinate"
+      value={value}
+      sx={{
+        height: 6,
+        backgroundColor: "#eee",
+        "& .MuiLinearProgress-bar": {
+          backgroundColor: color,
+        },
+      }}
+    />
   </Box>
 );
 
-const Metric = ({
-  label,
-  value,
-  barValue,
-}: {
+interface MetricProps {
   label: string;
   value: any;
   barValue?: number;
-}) => (
+}
+
+const Metric = ({ label, value, barValue }: MetricProps) => (
   <Box>
     <Typography variant="body2" color="textSecondary">
       {label}
@@ -361,7 +583,7 @@ const Metric = ({
   </Box>
 );
 
-export default function InsightsPanel({ sessionMetrics }) {
+export default function InsightsPanel({ sessionMetrics }: { sessionMetrics: any }) {
   // Map sessionMetrics to component state
   const csat = sessionMetrics?.customerSatisfaction || 0;
   const intentClarity = sessionMetrics?.customerIntent?.clarity || 0;
@@ -391,15 +613,16 @@ export default function InsightsPanel({ sessionMetrics }) {
 
   const csatFactors = sessionMetrics?.csatFactors || {};
   const advancedMetrics = sessionMetrics?.advancedMetrics || {};
-  // const suggestedResponses = sessionMetrics?.suggestedResponses || [];
 
-  const mapRiskToValue = (risk) => (risk === "High" ? 80 : risk === "Medium" ? 50 : 20);
-  const mapOpportunityToValue = (val) => (val === "High" ? 75 : val === "Medium" ? 50 : 25);
+  const mapRiskToValue = (risk: string) =>
+    risk === "High" ? 80 : risk === "Medium" ? 50 : 20;
+  const mapOpportunityToValue = (val: string) =>
+    val === "High" ? 75 : val === "Medium" ? 50 : 25;
 
   return (
     <Box p={3} overflow="auto" height="100%">
       <Grid container spacing={3} direction="column">
-        {/* Summary and Next Steps */}
+        {/* SUMMARY AND NEXT STEPS */}
         <Grid item>
           <Paper elevation={1} sx={{ p: 3, bgcolor: "#65558F0D", borderRadius: 2 }}>
             <Typography variant="h6" fontWeight="500">
@@ -432,7 +655,7 @@ export default function InsightsPanel({ sessionMetrics }) {
                 Next Steps
               </Typography>
               <List dense>
-                {nextSteps.map((step, index) => (
+                {nextSteps.map((step: string, index: number) => (
                   <ListItem key={index}>
                     <ListItemText primary={step} />
                   </ListItem>
@@ -449,13 +672,14 @@ export default function InsightsPanel({ sessionMetrics }) {
           </Paper>
         </Grid>
 
-        {/* Vulnerability Analysis and Sales Intelligence */}
+        {/* VULNERABILITY ANALYSIS AND SALES */}
         <Grid item>
           <Paper elevation={1} sx={{ p: 3, bgcolor: "#65558F0D", borderRadius: 2 }}>
             <Typography variant="h6" fontWeight="500">
               Vulnerability Analysis and Sales Intelligence
             </Typography>
             <Box mt={2} display="flex" flexDirection="column" gap={3}>
+              {/* Risk */}
               <Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
                   <Box display="flex" alignItems="center" gap={1}>
@@ -468,6 +692,8 @@ export default function InsightsPanel({ sessionMetrics }) {
                 </Box>
                 <LinearProgressBar value={mapRiskToValue(potentialRisk)} color="#444" />
               </Box>
+
+              {/* Sales Opportunity */}
               <Box>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
                   <Box display="flex" alignItems="center" gap={1}>
@@ -480,16 +706,19 @@ export default function InsightsPanel({ sessionMetrics }) {
                 </Box>
                 <LinearProgressBar value={mapOpportunityToValue(salesOpportunity)} color="#4CAF50" />
               </Box>
+
+              {/* Trends */}
               <Box>
                 <Typography color="textSecondary">Upcoming Trends</Typography>
                 <List dense>
-                  {upcomingTrends.map((trend, index) => (
+                  {upcomingTrends.map((trend: string, index: number) => (
                     <ListItem key={index}>
                       <ListItemText primary={trend} />
                     </ListItem>
                   ))}
                 </List>
               </Box>
+
               {/* Advanced Metrics */}
               <Box>
                 <Typography color="textSecondary">Advanced Metrics</Typography>
@@ -513,7 +742,7 @@ export default function InsightsPanel({ sessionMetrics }) {
           </Paper>
         </Grid>
 
-        {/* CSAT, Intent, Sentiment, and More */}
+        {/* CSAT, INTENT, SENTIMENT, EMOTION */}
         <Grid item>
           <Paper elevation={1} sx={{ p: 3, bgcolor: "#65558F0D", borderRadius: 2 }}>
             <Grid container spacing={2} textAlign="center">
@@ -540,7 +769,7 @@ export default function InsightsPanel({ sessionMetrics }) {
               </Grid>
             </Grid>
 
-            {/* Metrics Grid */}
+            {/* Metrics */}
             <Box mt={3} p={2} bgcolor="white" borderRadius={2} display="grid" gridTemplateColumns="1fr 1fr" gap={3}>
               <Box display="flex" flexDirection="column" gap={2}>
                 <Metric label="Chat Cue" value={chatCue} />
@@ -552,7 +781,7 @@ export default function InsightsPanel({ sessionMetrics }) {
                     All Cues
                   </Typography>
                   <List dense>
-                    {allCues.map((cue, index) => (
+                    {allCues.map((cue: string, index: number) => (
                       <ListItem key={index}>
                         <ListItemText primary={cue} />
                       </ListItem>
@@ -563,14 +792,18 @@ export default function InsightsPanel({ sessionMetrics }) {
               <Box display="flex" flexDirection="column" gap={2}>
                 <Metric label="Emotion" value={`${emotionPrimary} (${emotionSecondary})`} barValue={emotionIntensity} />
                 <Metric label="Emotion Volatility" value={`${emotionVolatility}%`} />
-                <Metric label="Intent" value={`${intentPrimary} ${intentSecondary.length ? `(${intentSecondary.join(", ")})` : ""}`} barValue={intentClarity} />
+                <Metric
+                  label="Intent"
+                  value={`${intentPrimary} ${intentSecondary.length ? `(${intentSecondary.join(", ")})` : ""}`}
+                  barValue={intentClarity}
+                />
                 <Metric label="Sentiment Trajectory" value={sentimentTrajectory} />
                 <Box>
                   <Typography variant="body2" color="textSecondary">
                     Key Sentiment Phrases
                   </Typography>
                   <List dense>
-                    {sentimentKeyPhrases.map((phrase, index) => (
+                    {sentimentKeyPhrases.map((phrase: string, index: number) => (
                       <ListItem key={index}>
                         <ListItemText primary={phrase} />
                       </ListItem>
@@ -596,7 +829,7 @@ export default function InsightsPanel({ sessionMetrics }) {
                   Key Indicators
                 </Typography>
                 <List dense>
-                  {csatFactors.keyIndicators?.map((indicator, index) => (
+                  {csatFactors.keyIndicators?.map((indicator: string, index: number) => (
                     <ListItem key={index}>
                       <ListItemText primary={indicator} />
                     </ListItem>
@@ -605,56 +838,17 @@ export default function InsightsPanel({ sessionMetrics }) {
               </Box>
             </Box>
 
+            {/* Actions */}
             <Box mt={2} display="flex" gap={2}>
-              <Button
-                fullWidth
-                variant="outlined"
-                sx={{ borderColor: "#65558F", color: "#65558F", borderRadius: "900px" }}
-              >
+              <Button fullWidth variant="outlined" sx={{ borderColor: "#65558F", color: "#65558F", borderRadius: "900px" }}>
                 Schedule Follow-up
               </Button>
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{ bgcolor: "#65558F", color: "white", borderRadius: "900px" }}
-              >
+              <Button fullWidth variant="contained" sx={{ bgcolor: "#65558F", color: "white", borderRadius: "900px" }}>
                 Escalate to Manager
               </Button>
             </Box>
           </Paper>
         </Grid>
-
-        {/* Suggested Responses */}
-        {/* <Grid item>
-          <Paper elevation={1} sx={{ p: 3, bgcolor: "#65558F0D", borderRadius: 2 }}>
-            <Typography variant="h6" fontWeight="500">
-              Suggested Follow-up Messages
-            </Typography>
-            <Box mt={2}>
-              <List>
-                {suggestedResponses.map((response, index) => (
-                  <ListItem key={index} sx={{ flexDirection: "column", alignItems: "flex-start" }}>
-                    <Typography variant="body1" fontWeight="500">
-                      {response.message}
-                    </Typography>
-                    <Box display="flex" gap={2} mt={1}>
-                      <Metric label="Tone" value={response.emotionalTone} />
-                      <Metric label="Expected Impact" value={response.expectedImpact} />
-                      <Metric label="Appropriateness" value={`${response.appropriatenessScore}%`} />
-                    </Box>
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-            <Button
-              fullWidth
-              variant="outlined"
-              sx={{ mt: 3, borderColor: "#65558F", color: "#65558F", borderRadius: "999px" }}
-            >
-              Copy Suggested Responses
-            </Button>
-          </Paper>
-        </Grid> */}
       </Grid>
     </Box>
   );
