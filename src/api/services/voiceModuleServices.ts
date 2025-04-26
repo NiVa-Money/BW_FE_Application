@@ -101,11 +101,14 @@ export const deleteVoiceAgentService = async (agentId: string) => {
   }
 };
 
-export const uploadKBService = async (file: File) => {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
+interface UploadKBResponse {
+  filename: string;
+}
 
+export const uploadKBService = async (
+  formData: FormData
+): Promise<UploadKBResponse> => {
+  try {
     const response = await axiosInstance.post(
       "https://vo-backend.onrender.com/voice-agent/upload",
       formData,
@@ -117,37 +120,33 @@ export const uploadKBService = async (file: File) => {
     );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Error uploading KB:",
-        error.response?.data || error.message
-      );
-    } else {
-      console.error("Unexpected error:", error);
-    }
+    console.error("Error uploading KB:", error);
     throw error;
   }
 };
 
-export const uploadUrlService = async (url: string) => {
+interface UploadUrlPayload {
+  name: string;
+  language: string;
+  style: string;
+  knowledgeBase: string;
+}
+
+interface UploadUrlResponse {
+  ULI: string;
+}
+
+export const uploadUrlService = async (
+  payload: UploadUrlPayload
+): Promise<UploadUrlResponse> => {
   try {
     const response = await axiosInstance.post(
-      `https://vo-backend.onrender.com/voice-agent/url`,
-      {
-        knowledgeBase: url,
-      }
+      "https://vo-backend.onrender.com/voice-agent/url",
+      payload
     );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(
-        "Error uploading URL:",
-        error.response?.data || error.message
-      );
-      throw new Error(error.response?.data?.message || "URL upload failed");
-    } else {
-      console.error("Unexpected error:", error);
-      throw new Error("An unexpected error occurred");
-    }
+    console.error("Error uploading URL:", error);
+    throw error;
   }
 };
