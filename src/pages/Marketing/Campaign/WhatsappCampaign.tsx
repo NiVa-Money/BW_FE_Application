@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { WhatsApp, Upload } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -484,7 +485,7 @@ const WhatsappCampaign: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-2.5 items-start mt-2.5 w-full">
-              <div className="flex items-center p-3 border border-slate-500 rounded-3xl">
+              <div className="flex items-center p-3 border border-slate-500 rounded-3xl relative">
                 <input
                   type="file"
                   onChange={handleContactListUpload}
@@ -500,6 +501,17 @@ const WhatsappCampaign: React.FC = () => {
                     {contactList ? contactList.name : "Upload CSV"}
                   </span>
                 </label>
+                {contactList && (
+                  <button
+                    onClick={() => {
+                      setContactList(null);
+                      setFileName("");
+                    }}
+                    className="ml-2 text-red-500 hover:text-red-700 absolute right-2"
+                  >
+                    <CloseIcon fontSize="small" />
+                  </button>
+                )}
               </div>
               <button
                 onClick={handleDownloadSample}
