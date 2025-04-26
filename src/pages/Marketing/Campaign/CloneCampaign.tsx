@@ -440,7 +440,7 @@ const CloneCampaign: React.FC = () => {
               </div>
               {/* Contact upload functionality */}
               <div className="flex gap-2.5 items-start mt-2.5 w-full">
-                <div className="flex items-center p-3 border border-slate-500 rounded-3xl relative">
+                <div className="flex items-center justify-between p-3 border border-slate-500 rounded-3xl">
                   <input
                     type="file"
                     onChange={handleContactListUpload}
@@ -450,7 +450,7 @@ const CloneCampaign: React.FC = () => {
                   />
                   <label
                     htmlFor="contact-upload"
-                    className="flex gap-2 items-center cursor-pointer"
+                    className="flex gap-2 items-center cursor-pointer flex-1"
                   >
                     <Upload sx={{ fontSize: 24 }} />
                     <span className="ml-2 text-zinc-400">
@@ -463,7 +463,7 @@ const CloneCampaign: React.FC = () => {
                         setContactList(null);
                         setFileName("");
                       }}
-                      className="ml-2 text-red-500 hover:text-red-700 absolute right-2"
+                      className="ml-2 text-red-500 hover:text-red-700 flex-shrink-0"
                     >
                       <CloseIcon fontSize="small" />
                     </button>

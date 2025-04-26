@@ -485,29 +485,33 @@ const WhatsappCampaign: React.FC = () => {
               </div>
             </div>
             <div className="flex gap-2.5 items-start mt-2.5 w-full">
-              <div className="flex items-center p-3 border border-slate-500 rounded-3xl relative">
-                <input
-                  type="file"
-                  onChange={handleContactListUpload}
-                  className="hidden"
-                  id="contact-upload"
-                />
-                <label
-                  htmlFor="contact-upload"
-                  className="flex gap-2 items-center cursor-pointer"
-                >
-                  <Upload sx={{ fontSize: 24 }} />
-                  <span className="ml-2 text-zinc-400">
-                    {contactList ? contactList.name : "Upload CSV"}
-                  </span>
-                </label>
+              <div className="flex items-center justify-between p-3 border border-slate-500 rounded-3xl">
+                <div className="flex items-center gap-4 flex-1">
+                  <input
+                    type="file"
+                    onChange={handleContactListUpload}
+                    className="hidden"
+                    id="contact-upload"
+                    accept=".csv"
+                  />
+                  <label
+                    htmlFor="contact-upload"
+                    className="flex gap-2 items-center cursor-pointer flex-1"
+                  >
+                    <Upload sx={{ fontSize: 24 }} />
+                    <span className="ml-2 text-zinc-400 truncate">
+                      {contactList ? contactList.name : "Upload CSV"}
+                    </span>
+                  </label>
+                </div>
+
                 {contactList && (
                   <button
                     onClick={() => {
                       setContactList(null);
                       setFileName("");
                     }}
-                    className="ml-2 text-red-500 hover:text-red-700 absolute right-2"
+                    className="ml-2 text-red-500 hover:text-red-700 flex-shrink-0"
                   >
                     <CloseIcon fontSize="small" />
                   </button>
