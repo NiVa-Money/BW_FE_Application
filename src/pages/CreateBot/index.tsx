@@ -48,6 +48,7 @@ const CreateBot: React.FC = () => {
   const initialValues = {
     botName: "",
     botTone: "",
+    customTone: "",
     botColor: "",
     botGreetingMessage: "Hello, how can I assist you?",
     supportNumber: "",
@@ -146,6 +147,7 @@ const CreateBot: React.FC = () => {
       : Yup.object().shape({
           agentRole: Yup.string().required("Agent Role is required"),
           botTone: Yup.string().required("Tone is required"),
+          
           knowledgeBaseFile: Yup.mixed()
             .required("Knowledge Base file is required")
             .test("fileSize", "File too large", (value) => {
@@ -851,9 +853,30 @@ const CreateBot: React.FC = () => {
                 { label: "Formal", value: "Formal" },
                 { label: "Casual", value: "Casual" },
                 { label: "Enthusiastic", value: "Enthusiastic" },
-                { label: "Custom", value: "custom" },
+                { label: "Custom", value: "CUSTOM" }, 
               ]}
             />
+            {formik.values.botTone === "CUSTOM" && (
+              <div className="mt-2">
+                <div className="flex items-center mb-2">
+                  <label>Custom Tone</label>
+                  <Tooltip title="Enter a custom tone for your agent.">
+                    <InfoOutlinedIcon className="ml-1 text-gray-600 cursor-pointer" />
+                  </Tooltip>
+                </div>
+                <Field
+                  name="customTone"
+                  type="text"
+                  className="border p-2 rounded mb-3 w-full"
+                  placeholder="Enter custom tone"
+                />
+                {formik.touched.customTone && formik.errors.customTone && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {formik.errors.customTone}
+                  </div>
+                )}
+              </div>
+            )}
             {formik.touched.botTone && formik.errors.botTone && (
               <div className="text-red-500 text-sm mt-1">
                 {formik.errors.botTone}

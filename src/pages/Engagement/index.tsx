@@ -428,6 +428,8 @@ import {
   SmartToy,
   Person,
   ChevronRight,
+  Favorite,
+  Comment,
 } from "@mui/icons-material";
 import {
   XAxis,
@@ -452,6 +454,7 @@ import {
   DialogTitle,
   Divider,
   Typography,
+  Avatar,
 } from "@mui/material";
 import { getInstagramData } from "../../api/services/integrationServices";
 
@@ -1036,32 +1039,90 @@ const EngagementTab = () => {
         </div>
       </div>
 
+      {/* Modal for Post Details */}
       {currentPost && (
-        <Dialog open={isModalOpen} onClose={closeModal} maxWidth="sm" fullWidth>
+        <Dialog open={isModalOpen} onClose={closeModal} maxWidth="lg" fullWidth>
           <DialogTitle>
             Post by {currentPost.username || "botwot.io"}
           </DialogTitle>
           <DialogContent dividers>
-            <img
-              src={currentPost.carouselMedia[0]?.url}
-              alt="Post detail"
-              className="w-full rounded mb-4"
-            />
-            <Typography>{currentPost.caption}</Typography>
-            <Divider className="my-2" />
-            <Typography variant="subtitle1">Comments</Typography>
-            {currentPost.comments?.map((c) => (
-              <div key={c.commentId} className="mb-3">
-                <Typography variant="subtitle2">{c.username}</Typography>
-                <Typography variant="body2">{c.text}</Typography>
-                <Typography variant="caption" className="text-gray-500">
-                  {new Date(c.timestamp).toLocaleTimeString()}
-                </Typography>
+            <div className="grid grid-cols-2 gap-6">
+              {/* Left: Image */}
+              <div className="flex items-center justify-center">
+                <img
+                  src={currentPost.carouselMedia[0]?.url}
+                  alt="Post detail"
+                  className="w-full h-auto rounded-lg shadow-md"
+                />
               </div>
-            ))}
+
+              {/* Right: Stats & Comments */}
+              <div className="flex flex-col h-full">
+                <div className="flex items-center mb-4">
+                  <Instagram fontSize="large" className="text-pink-500 mr-2" />
+                  <Typography variant="h6">Instagram</Typography>
+                </div>
+                <div className="flex items-center justify-around text-sm text-gray-600 mb-4">
+                  <div className="flex items-center gap-1">
+                    <Favorite fontSize="small" /> {currentPost.likesCount || 0}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Comment fontSize="small" />{" "}
+                    {currentPost.comments?.length || 0}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Send fontSize="small" /> {currentPost.sharesCount || 0}
+                  </div>
+                </div>
+                <Divider />
+                <Typography variant="subtitle1" className="mt-4 mb-2">
+                  Trending comments on your recent update
+                </Typography>
+                <div className="overflow-y-auto">
+                  {currentPost.comments?.map((c: any) => (
+                    <div
+                      key={c.commentId}
+                      className="flex items-start mb-3 p-2 hover:bg-gray-100 rounded-lg"
+                    >
+                      <Avatar sx={{ width: 24, height: 24 }} className="mr-2">
+                        {c.username[0]}
+                      </Avatar>
+                      <div>
+                        <Typography variant="subtitle2">
+                          {c.username}
+                        </Typography>
+                        <Typography variant="body2" className="break-words">
+                          {c.text}
+                        </Typography>
+                        <Typography variant="caption" className="text-gray-400">
+                          {new Date(c.timestamp).toLocaleTimeString()}
+                        </Typography>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </DialogContent>
           <DialogActions>
-            <Button onClick={closeModal}>Close</Button>
+            <Button
+              onClick={closeModal}
+              variant="outlined"
+              color="primary"
+              sx={{
+                borderRadius: "12px",
+                backgroundColor: "#65558F",
+                color: "#fff",
+                px: 3,
+                py: 1,
+                fontWeight: "500",
+                "&:hover": {
+                  backgroundColor: "#56497A", // or `#65558FE6` for ~90% opacity
+                },
+              }}
+            >
+              Close
+            </Button>
           </DialogActions>
         </Dialog>
       )}
