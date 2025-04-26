@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { createPaymentRequestAction, resetCreateSubscriptionAction } from "../../store/actions/subscriptionActions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { COLORS } from "../../constants";
 
 
 const SubscriptionCard: React.FC<any> = ({
