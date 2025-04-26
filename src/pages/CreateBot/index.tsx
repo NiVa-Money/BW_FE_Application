@@ -147,7 +147,7 @@ const CreateBot: React.FC = () => {
       : Yup.object().shape({
           agentRole: Yup.string().required("Agent Role is required"),
           botTone: Yup.string().required("Tone is required"),
-          
+
           knowledgeBaseFile: Yup.mixed()
             .required("Knowledge Base file is required")
             .test("fileSize", "File too large", (value) => {
@@ -853,7 +853,7 @@ const CreateBot: React.FC = () => {
                 { label: "Formal", value: "Formal" },
                 { label: "Casual", value: "Casual" },
                 { label: "Enthusiastic", value: "Enthusiastic" },
-                { label: "Custom", value: "CUSTOM" }, 
+                { label: "Custom", value: "CUSTOM" },
               ]}
             />
             {formik.values.botTone === "CUSTOM" && (
@@ -955,7 +955,7 @@ const CreateBot: React.FC = () => {
                 >
                   Add
                 </button>
-                <button
+                {/* <button
                   type="button"
                   className="bg-gradient-to-r from-[#65558F] to-[#4D3C7F] text-white px-4 py-2 rounded-lg"
                   onClick={async () => {
@@ -982,6 +982,34 @@ const CreateBot: React.FC = () => {
                   }}
                 >
                   AI Gen
+                </button> */}
+                <button
+                  type="button"
+                  className="relative overflow-hidden bg-gradient-to-r from-[#7F5AF0] via-[#65558F] to-[#4D3C7F] text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:from-[#A78BFA] hover:to-[#8B5CF6]"
+                  onClick={async () => {
+                    const prompt = formik.values.newGoalPrompt.trim();
+                    if (!prompt) return;
+                    try {
+                      const response = await generatePromptService({
+                        initialPrompt: prompt,
+                        purpose: "agent goal",
+                      });
+                      const generatedGoals = response.prompt
+                        .split("\n")
+                        .map((line) => line.replace(/^- /, "").trim())
+                        .filter((line) => line.length > 0);
+                      const updatedGoals = [
+                        ...formik.values.agentsGoals,
+                        ...generatedGoals,
+                      ].filter((goal) => goal.trim().length > 0);
+                      formik.setFieldValue("agentsGoals", updatedGoals);
+                      formik.setFieldValue("newGoalPrompt", "");
+                    } catch (error) {
+                      console.error("Goal generation failed:", error);
+                    }
+                  }}
+                >
+                  <span className="relative z-10">✨ AI Gen</span>
                 </button>
               </div>
             </div>
@@ -1062,7 +1090,7 @@ const CreateBot: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  className="bg-gradient-to-r from-[#65558F] to-[#4D3C7F] text-white px-4 py-2 rounded-lg"
+                  className="relative overflow-hidden bg-gradient-to-r from-[#7F5AF0] via-[#65558F] to-[#4D3C7F] text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:from-[#A78BFA] hover:to-[#8B5CF6]"
                   onClick={async () => {
                     const prompt = formik.values.newGuidelinePrompt.trim();
                     if (!prompt) return;
@@ -1089,7 +1117,7 @@ const CreateBot: React.FC = () => {
                     }
                   }}
                 >
-                  AI Gen
+                  <span className="relative z-10">✨ AI Gen</span>
                 </button>
               </div>
             </div>

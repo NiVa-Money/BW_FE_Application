@@ -269,6 +269,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const getMetric = sessionMetrics;
   console.log("get metric", getMetric);
 
+  const suggestedResponses = sessionMetrics?.suggestedResponses || [];
+  console.log("suggestedResponses", suggestedResponses);
+
   return (
     <div className="h-screen flex flex-col">
       {/* Header Section */}
@@ -435,49 +438,51 @@ const LiveChat: React.FC = (): React.ReactElement => {
                 {/* Quick Replies */}
                 <div className="flex justify-between items-start mt-10 mb-2 gap-6">
                   <div className="flex flex-col mt-10 gap-2">
-                    {["Okay", "Fine", "That works.", "Tell me more."].map(
-                      (text, index) => (
-                        <button
-                          key={index}
-                          className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100"
-                          onClick={() => sendMessageQuick(text)}
-                        >
-                          {text}
-                        </button>
-                      )
-                    )}
+                    {suggestedResponses.map((response, index) => (
+                      <button
+                        key={index}
+                        className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100 text-left"
+                        onClick={() => sendMessageQuick(response.message)}
+                      >
+                        {response.message}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
                 {/* Chat Controls */}
-                <div className="flex flex-col gap-2.5 z-10 px-8 py-5 mt-2.5 w-[98%] h-auto text-base whitespace-nowrap bg-[#65558F] rounded-xl text-gray-300 max-md:flex-wrap max-md:px-5 max-md:max-w-full justify-end items-center">
-                  <div className="flex justify-end items-center w-full">
+                <div className="relative flex flex-col gap-4 px-6 py-5 mt-4 w-full max-w-full bg-[#65558F] rounded-2xl shadow-md text-white">
+                  {/* Chat Toggle */}
+                  <div className="flex justify-end">
                     <button
                       onClick={handleToggleChat}
-                      className={`mr-4 px-4 py-2 rounded-full ${
-                        isChatEnabled ? "bg-green-500" : "bg-gray-50"
-                      } text-black`}
+                      className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${
+                        isChatEnabled
+                          ? "bg-green-500 hover:bg-green-600"
+                          : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                      }`}
                     >
-                      {isChatEnabled ? "End Chat?" : "Turn on to chat now"}
+                      {isChatEnabled ? "End Chat?" : "Start Chat"}
                     </button>
                   </div>
 
+                  {/* Confirmation Modal */}
                   {showConfirmationModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                      <div className="bg-black text-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                        <h2 className="text-lg font-semibold mb-4 text-center">
-                          Are you sure you want to end this conversation?
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                      <div className="bg-[#1e1e1e] text-white rounded-2xl p-6 w-full max-w-sm space-y-6">
+                        <h2 className="text-center text-xl font-semibold">
+                          End this conversation?
                         </h2>
-                        <div className="flex justify-around">
+                        <div className="flex justify-center gap-4">
                           <button
                             onClick={() => handleResolution("Yes")}
-                            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300"
+                            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-5 rounded-full transition-all"
                           >
                             Yes
                           </button>
                           <button
                             onClick={() => handleResolution("No")}
-                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full transition duration-300"
+                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-5 rounded-full transition-all"
                           >
                             No
                           </button>
@@ -486,9 +491,10 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     </div>
                   )}
 
+                  {/* Chat Input */}
                   {isChatEnabled && (
                     <form onSubmit={sendMessage} className="mt-4">
-                      <div className="flex items-center gap-2 p-2 border rounded-lg">
+                      <div className="flex items-center gap-2 p-3 rounded-full bg-white/10 border border-white/20">
                         <input
                           type="text"
                           placeholder="Type your message..."
@@ -499,8 +505,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                           onBlur={() => setIsAgentTyping(false)}
                           disabled={!isAgentConnected}
                         />
-
-                        <button type="submit" className="text-[#65558F]">
+                        <button type="submit" className="text-white">
                           <Send />
                         </button>
                       </div>
@@ -643,7 +648,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
             }`}
           >
             <InsightsPanel sessionMetrics={sessionMetrics} />
-
           </div>
         </div>
       </div>
