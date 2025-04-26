@@ -992,6 +992,11 @@ import {
   FormControl,
   InputLabel,
   SelectChangeEvent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import {
   Message,
@@ -1046,6 +1051,16 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [_response, setResponse] = useState<any>(null);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hotLeads, setHotLeads] = useState([]);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   const insights = useSelector(
     (state: RootState) => state.whatsappDashboard?.campaignInsights || []
@@ -1164,6 +1179,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           setDeliveredMessagesValue(delivered || 0);
           setUnreadMessagesValue(failed || 0);
           setHotLeadsValue(replied || 0);
+          setHotLeads(data.data.hotLeads || []);
         } else {
           console.error("Invalid API response:", data);
         }
@@ -1369,7 +1385,56 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           title="Hot Leads"
           value={hotLeadsValue}
           icon={<TrendingUp />}
+          onClick={handleOpenModal} // Make the card clickable
         />
+        <Dialog
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle>Hot Leads</DialogTitle>
+          <DialogContent style={{ maxHeight: "400px", overflowY: "auto" }}>
+            {hotLeads.length > 0 ? (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="py-2 px-4">Phone Number</th>
+                    <th className="py-2 px-4">First Reply Time</th>
+                    <th className="py-2 px-4">Last Reply Time</th>
+                    <th className="py-2 px-4">Replies Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {hotLeads.map((lead, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="py-2 px-4">{lead.phoneNumber || "N/A"}</td>
+                      <td className="py-2 px-4">
+                        {lead.firstReplyTime
+                          ? new Date(lead.firstReplyTime).toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td className="py-2 px-4">
+                        {lead.latestReplyTime
+                          ? new Date(lead.latestReplyTime).toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td className="py-2 px-4">{lead.repliesCount || 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No hot leads available.</p>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseModal} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         <div className="flex flex-col gap-2">
           <FormControl variant="outlined" className="w-full">
             <InputLabel className="text-[#65558F]">Campaign Name</InputLabel>
@@ -1918,10 +1983,17 @@ interface StatsCardProps {
   title: string;
   value: number;
   icon: JSX.Element;
+  onClick?: () => void;
 }
 
-const StatsCard: FC<StatsCardProps> = ({ icon, title, value }) => (
-  <div className="flex items-center gap-4 p-4 bg-[rgba(101,85,143,0.08)] rounded-xl">
+const StatsCard: FC<StatsCardProps> = ({ icon, title, value, onClick }) => (
+  <div
+    className={`flex items-center gap-4 p-4 bg-[rgba(101,85,143,0.08)] rounded-xl ${
+      onClick ? "cursor-pointer hover:shadow-lg" : ""
+    }`}
+    onClick={onClick}
+  >
+    {" "}
     <div className="flex items-center gap-2">
       <div className="text-[#65558F]">{icon}</div>
       <p className="text-base text-[#65558F]">{title}</p>
