@@ -992,6 +992,11 @@ import {
   FormControl,
   InputLabel,
   SelectChangeEvent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import {
   Message,
@@ -1029,7 +1034,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [limit, _setLimit] = useState(10);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
-  const [selectedCampaignName, setSelectedCampaignName] = useState("");
   const [selectedIntent, setSelectedIntent] = useState("");
   const [selectedSentiment, setSelectedSentiment] = useState("");
   const [selectedReplied, setSelectedReplied] = useState("");
@@ -1047,6 +1051,16 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [_response, setResponse] = useState<any>(null);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hotLeads, setHotLeads] = useState([]);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   const insights = useSelector(
     (state: RootState) => state.whatsappDashboard?.campaignInsights || []
@@ -1078,9 +1092,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
 
   const selectedCampaignId =
     campaignData?.find(
-      (msg: { campaignName: string }) =>
-        msg.campaignName === selectedCampaignName
+      (item: { campaignName: string }) => item.campaignName === campaign
     )?.campaignId || "";
+
+  console.log("Selected Campaign ID:", selectedCampaignId);
 
   useEffect(() => {
     const filters: any = {};
@@ -1089,7 +1104,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
     if (selectedIntent) filters.intent = selectedIntent;
     if (selectedSentiment) filters.sentiment = selectedSentiment;
     if (selectedReplied) filters.replied = selectedReplied;
-    if (selectedCampaignName && selectedCampaignId) {
+    if (campaign && selectedCampaignId) {
       filters.campaignIds = [selectedCampaignId];
     }
     const payload: any = { page, limit };
@@ -1098,7 +1113,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
     }
     dispatch(fetchWhatsAppMessagesRequest(payload));
   }, [
-    selectedCampaignName,
+    campaign,
     selectedCampaignId,
     page,
     limit,
@@ -1134,6 +1149,12 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   };
 
   useEffect(() => {
+    console.log("_______useEffect triggered with dependencies:", {
+      campaign,
+      startDate,
+      endDate,
+      selectedCampaignId,
+    });
     const fetchDashData = async () => {
       if (!selectedCampaignId) {
         console.log("Skipping API call as no campaign is selected");
@@ -1141,10 +1162,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
       }
       const formattedStartDate = format(startDate, "yyyy-MM-dd");
       const formattedEndDate = format(endDate, "yyyy-MM-dd");
-
-      console.log("API Call - Campaign ID:", selectedCampaignId);
-      console.log("API Call - Start Date:", formattedStartDate);
-      console.log("API Call - End Date:", formattedEndDate);
 
       try {
         const data = await whatsAppDashboardService(
@@ -1155,6 +1172,14 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
         console.log("API Response:", data); // Log the API response
         if (data && data.success) {
           setResponse(data);
+          const { sent, delivered, read, replied, failed } = data.data;
+
+          setTotalMessagesValue(sent || 0);
+          setSeenMessagesValue(read || 0);
+          setDeliveredMessagesValue(delivered || 0);
+          setUnreadMessagesValue(failed || 0);
+          setHotLeadsValue(replied || 0);
+          setHotLeads(data.data.hotLeads || []);
         } else {
           console.error("Invalid API response:", data);
         }
@@ -1164,7 +1189,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
     };
 
     fetchDashData();
-  }, [startDate, endDate, selectedCampaignId]);
+  }, [campaign, startDate, endDate, selectedCampaignId]);
 
   // useEffect(() => {
   //   console.log("useEffect (campaign) triggered", { campaign, response });
@@ -1253,6 +1278,12 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
 
     const { performanceAnalytics } = insights.campaignInsights;
 
+    // Check if totalMessagesSent is greater than 0
+    if (performanceAnalytics.totalMessagesSent <= 0) {
+      console.warn("No data available for this campaign");
+      return []; // Return an empty array if no data is available
+    }
+
     // Map the performance analytics data to chart format
     const chartData = [
       {
@@ -1268,20 +1299,31 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
     return chartData;
   };
 
-  useEffect(() => {
-    if (insights?.campaignInsights?.performanceAnalytics) {
-      const { performanceAnalytics } = insights.campaignInsights;
+  // useEffect(() => {
+  //   if (insights?.campaignInsights?.performanceAnalytics) {
+  //     const { performanceAnalytics } = insights.campaignInsights;
 
-      setTotalMessagesValue(performanceAnalytics.totalMessagesSent || 0);
-      setSeenMessagesValue(performanceAnalytics.readMessages || 0);
-      setDeliveredMessagesValue(performanceAnalytics.deliveredMessages || 0);
-      setUnreadMessagesValue(performanceAnalytics.failedMessages || 0);
-      setHotLeadsValue(performanceAnalytics.repliedMessages || 0);
-    }
-  }, [insights]);
+  //     setTotalMessagesValue(performanceAnalytics.totalMessagesSent || 0);
+  //     setSeenMessagesValue(performanceAnalytics.readMessages || 0);
+  //     setDeliveredMessagesValue(performanceAnalytics.deliveredMessages || 0);
+  //     setUnreadMessagesValue(performanceAnalytics.failedMessages || 0);
+  //     setHotLeadsValue(performanceAnalytics.repliedMessages || 0);
+  //   }
+  // }, [insights]);
 
   const handleCampaignChange = (e: SelectChangeEvent<string>) => {
-    setCampaign(e.target.value as string);
+    const selectedCampaign = e.target.value as string;
+    setCampaign(selectedCampaign);
+
+    // Fetch the start and end dates for the selected campaign
+    const campaignDetails = campaignData?.find(
+      (item) => item.campaignName === selectedCampaign
+    );
+
+    if (campaignDetails) {
+      setStartDate(new Date(campaignDetails.startDate));
+      setEndDate(new Date(campaignDetails.endDate));
+    }
   };
 
   const NoDataMessage = () => (
@@ -1343,7 +1385,56 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           title="Hot Leads"
           value={hotLeadsValue}
           icon={<TrendingUp />}
+          onClick={handleOpenModal} // Make the card clickable
         />
+        <Dialog
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle>Hot Leads</DialogTitle>
+          <DialogContent style={{ maxHeight: "400px", overflowY: "auto" }}>
+            {hotLeads.length > 0 ? (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="py-2 px-4">Phone Number</th>
+                    <th className="py-2 px-4">First Reply Time</th>
+                    <th className="py-2 px-4">Last Reply Time</th>
+                    <th className="py-2 px-4">Replies Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {hotLeads.map((lead, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="py-2 px-4">{lead.phoneNumber || "N/A"}</td>
+                      <td className="py-2 px-4">
+                        {lead.firstReplyTime
+                          ? new Date(lead.firstReplyTime).toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td className="py-2 px-4">
+                        {lead.latestReplyTime
+                          ? new Date(lead.latestReplyTime).toLocaleString()
+                          : "N/A"}
+                      </td>
+                      <td className="py-2 px-4">{lead.repliesCount || 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No hot leads available.</p>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseModal} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         <div className="flex flex-col gap-2">
           <FormControl variant="outlined" className="w-full">
             <InputLabel className="text-[#65558F]">Campaign Name</InputLabel>
@@ -1362,25 +1453,15 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           </FormControl>
           <CustomDatePicker
             label="Start Date"
-            value={
-              new Date(
-                campaignData?.find((item) => item.campaignName === campaign)
-                  ?.startDate || startDate
-              )
-            }
+            value={startDate}
             onChange={handleStartDateChange}
             placeholder="Select start date"
           />
           <CustomDatePicker
             label="End Date"
-            value={
-              new Date(
-                campaignData?.find((item) => item.campaignName === campaign)
-                  ?.endDate || endDate
-              )
-            }
+            value={endDate}
             onChange={handleEndDateChange}
-            placeholder="Select start date"
+            placeholder="Select end date"
           />
         </div>
       </div>
@@ -1402,43 +1483,40 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           </div>
           <ChartCard title="Response Rate">
             <>
-              {insights?.campaignInsights?.performanceAnalytics && (
-                <div className="text-sm text-gray-600 mb-4">
-                  <p>
-                    Delivery Rate:{" "}
-                    <span className="font-medium">
-                      {
-                        insights.campaignInsights.performanceAnalytics
-                          .deliveryRate
-                      }
-                    </span>
-                  </p>
-                  <p>
-                    Read Rate:{" "}
-                    <span className="font-medium">
-                      {insights.campaignInsights.performanceAnalytics.readRate}
-                    </span>
-                  </p>
-                  <p>
-                    Response Rate:{" "}
-                    <span className="font-medium">
-                      {
-                        insights.campaignInsights.performanceAnalytics
-                          .responseRate
-                      }
-                    </span>
-                  </p>
-                  <p>
-                    Failure Rate:{" "}
-                    <span className="font-medium">
-                      {
-                        insights.campaignInsights.performanceAnalytics
-                          .failureRate
-                      }
-                    </span>
-                  </p>
-                </div>
-              )}
+              {insights?.campaignInsights?.performanceAnalytics &&
+                insights.campaignInsights.performanceAnalytics
+                  .totalMessagesSent > 0 && (
+                  <div className="text-sm text-gray-600 mb-4">
+                    <p>
+                      Delivery Rate:{" "}
+                      <span className="font-medium">
+                        {insights.campaignInsights.performanceAnalytics
+                          .deliveryRate || "N/A"}
+                      </span>
+                    </p>
+                    <p>
+                      Read Rate:{" "}
+                      <span className="font-medium">
+                        {insights.campaignInsights.performanceAnalytics
+                          .readRate || "N/A"}
+                      </span>
+                    </p>
+                    <p>
+                      Response Rate:{" "}
+                      <span className="font-medium">
+                        {insights.campaignInsights.performanceAnalytics
+                          .responseRate || "N/A"}
+                      </span>
+                    </p>
+                    <p>
+                      Failure Rate:{" "}
+                      <span className="font-medium">
+                        {insights.campaignInsights.performanceAnalytics
+                          .failureRate || "N/A"}
+                      </span>
+                    </p>
+                  </div>
+                )}
               {responseChartData && responseChartData.length ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={responseChartData}>
@@ -1486,7 +1564,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           {/* Text Insights */}
           <div
             className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl"
-            style={{ height: "256px", overflowY: "auto" }}
+            style={{ height: "450px", overflowY: "auto" }}
           >
             <div className="flex justify-between items-center mb-4">
               <div>
@@ -1690,21 +1768,9 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           <h3 className="text-lg font-medium">Contact Insights</h3>
         </div>
         <div className="flex flex-wrap gap-4 mb-2">
-          <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Campaign Name</InputLabel>
-            <Select
-              value={selectedCampaignName}
-              onChange={(e) => setSelectedCampaignName(e.target.value)}
-              label="Campaign Name"
-              className="bg-gray-100 rounded-full"
-            >
-              {campaignData?.map((item, index) => (
-                <MenuItem key={index} value={item.campaignName}>
-                  {item.campaignName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <div className="bg-gray-100 rounded-full px-4 py-2 text-sm font-medium text-[#65558F]">
+            {campaign || "No Campaign Selected"}
+          </div>
           <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Receiver Number</InputLabel>
             <Select
@@ -1823,8 +1889,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
                     sentiment: string;
                     replied: string;
                   }) =>
-                    (!selectedCampaignName ||
-                      msg.campaignName === selectedCampaignName) &&
+                    (!campaign || msg.campaignName === campaign) &&
                     (!selectedReceiverNumber ||
                       msg.receiverNumber === selectedReceiverNumber) &&
                     (!selectedStatus || msg.status === selectedStatus) &&
@@ -1918,10 +1983,17 @@ interface StatsCardProps {
   title: string;
   value: number;
   icon: JSX.Element;
+  onClick?: () => void;
 }
 
-const StatsCard: FC<StatsCardProps> = ({ icon, title, value }) => (
-  <div className="flex items-center gap-4 p-4 bg-[rgba(101,85,143,0.08)] rounded-xl">
+const StatsCard: FC<StatsCardProps> = ({ icon, title, value, onClick }) => (
+  <div
+    className={`flex items-center gap-4 p-4 bg-[rgba(101,85,143,0.08)] rounded-xl ${
+      onClick ? "cursor-pointer hover:shadow-lg" : ""
+    }`}
+    onClick={onClick}
+  >
+    {" "}
     <div className="flex items-center gap-2">
       <div className="text-[#65558F]">{icon}</div>
       <p className="text-base text-[#65558F]">{title}</p>
