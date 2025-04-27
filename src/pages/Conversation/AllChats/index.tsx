@@ -52,7 +52,7 @@ interface AnalysisSection {
 }
 
 const AllChats = () => {
-  const [searchType, setSearchType] = useState<"order" | "phone">("order");
+  const [searchType, setSearchType] = useState<"order" | "phone">("phone");
   const [searchValue, setSearchValue] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [messages, setMessages] = useState<any>([]);
@@ -151,6 +151,8 @@ const AllChats = () => {
         name: bot.botName,
       }));
       setBotLists(formattedBots);
+      // Add this line to set first bot as default
+      setBotIdVal(formattedBots[0]?.value || "");
     }
   }, [botsDataRedux, botsDataLoader]);
 

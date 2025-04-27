@@ -29,13 +29,18 @@ import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard"
 import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
 import Subscription from "../pages/Subscription/index";
 import ComingSoon from "../components/ComingSoon";
-import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard";
+import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard1';
 import WhatsApp from "../pages/Marketing/Whatsapp";
 import SubscriptionFailure from "../pages/SubscriptionFailure";
 import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 import ContactsCRM from "../pages/Contacts";
 import CloneCampaign from "../pages/Marketing/Campaign/CloneCampaign";
 import VerifyUserOtp from "../pages/VerifyUserOtp";
+import VoiceDashboard from "../pages/VoiceModule/Dashboard/VoiceDashboard";
+import VoiceAgentLayout from "../pages/VoiceModule/Agent/CreateVoiceAgent";
+import EditVoiceAgent from "../pages/VoiceModule/Agent/EditVoiceAgent";
+import MyVoiceAgents from "../pages/VoiceModule/Agent/VoiceAgentManager";
+import ConversationsTab from "../pages/VoiceModule/Dashboard/ConversationsTab";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -99,8 +104,19 @@ export const autRoutes: any[] = [
   { id: 5.3, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
   { id: 5.4, path: "/marketing/omnigenStudio", component: <WhatsApp /> },
 
-  { id: 6.1, path: "/voice/agents", component: <VoiceChatComponent /> },
-  { id: 6.2, path: "/voice/dashboard", component: <ComingSoon /> },
+  // { id: 6.1, path: "/voice/agents", component: <VoiceChatComponent /> },
+  { id: 6.1, path: "/voice/agents", component: <MyVoiceAgents /> },
+
+  {
+    id: 6.1,
+    path: "/voice/create-agents",
+    component: <VoiceAgentLayout />,
+  },
+  { id: 6.1, path: "/editvoicebot/:id", component: <EditVoiceAgent /> },
+  { id: 6.1, path: "/testvoicebot/:id", component: <VoiceChatComponent /> },
+  { id: 6.2, path: "/voice/dashboard", component: <VoiceDashboard /> },
+  { id: 6.2, path: "/voice/conversations", component: <ConversationsTab /> },
+  { id: 6.2, path: "/voice/dashboard", component: <VoiceDashboard /> },
 
   {
     id: 7,
