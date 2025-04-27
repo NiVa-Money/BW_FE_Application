@@ -9,10 +9,6 @@ import {
   Legend,
   CartesianGrid,
   ResponsiveContainer,
-  Line,
-  LineChart,
-  Area,
-  AreaChart,
   Bar,
   BarChart,
 } from "recharts";
