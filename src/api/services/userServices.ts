@@ -1,4 +1,5 @@
-import axiosInstance from "../axiosConfig";
+import axios from "axios";
+import axiosInstance, { publicBaseUrl } from "../axiosConfig";
 
 export const getUsersService = async () => {
   try {
@@ -36,5 +37,17 @@ export const getDeleteUserService = async (payload) => {
     return response.data;
   } catch {
     throw new Error("Error: Getting user all session");
+  }
+};
+
+export const getUserDetails = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${publicBaseUrl}/user/signup/verify`,
+      payload
+    );
+    return response.data;
+  } catch {
+    throw new Error("Error: Fetching User Details");
   }
 };
