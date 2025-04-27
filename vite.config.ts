@@ -13,7 +13,10 @@ export default defineConfig({
   base: "/",
   server: {
     port: 3000,
-    allowedHosts: ["uatapp.botwot.io" , "app.botwot.io"],
+    allowedHosts: ["uatapp.botwot.io", "app.botwot.io"],
+    watch: {
+      ignored: ["**/.git/**"],
+    },
   },
   css: {
     postcss: {
