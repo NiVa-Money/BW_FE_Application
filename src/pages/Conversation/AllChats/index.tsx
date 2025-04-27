@@ -70,7 +70,7 @@ const AllChats = () => {
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
-  const [channelNameVal, setChannelNameVal] = useState("");
+  const [channelNameVal, setChannelNameVal] = useState("whatsapp");
   const [botIdVal, setBotIdVal] = useState("");
   const botsDataLoader = useSelector(
     (state: RootState) => state.bot?.lists?.loader
@@ -252,7 +252,9 @@ const AllChats = () => {
   };
 
   useEffect(() => {
-    getChatHistory({});
+    if (botIdVal && channelNameVal) {
+      getChatHistory({});
+    }
   }, [
     page,
     showAIOnly,
@@ -263,6 +265,8 @@ const AllChats = () => {
     favoriteFilter,
     blockFilter,
     intent,
+    botIdVal,
+    channelNameVal,
   ]);
 
   const [sessionId, setSessionId] = useState("");
@@ -636,11 +640,48 @@ const AllChats = () => {
     );
   };
 
+  // const getBotSession = (e: any) => {
+  //   const botId = e.target.value;
+  //   setBotIdVal(botId);
+  //   setSessionId("");
+  //   setMessages([]);
+  // };
+
+  // const getChannelNameHandler = (e: any) => {
+  //   const val = e.target.value;
+  //   setChannelNameVal(val);
+  //   setSessionId("");
+  //   setMessages([]);
+
+  //   if (botIdVal?.length) {
+  //     dispatch(
+  //       getAllSession({
+  //         botId: botIdVal,
+  //         page: 1,
+  //         channelName: val,
+  //         ...(showAIOnly && { aiLevel: true }),
+  //       })
+  //     );
+  //   } else {
+  //     notifyError("Please select Bot");
+  //   }
+  // };
+
   const getBotSession = (e: any) => {
     const botId = e.target.value;
     setBotIdVal(botId);
     setSessionId("");
     setMessages([]);
+    if (botId && channelNameVal) {
+      dispatch(
+        getAllSession({
+          botId: botId,
+          page: 1,
+          channelName: channelNameVal,
+          ...(showAIOnly && { aiLevel: true }),
+        })
+      );
+    }
   };
 
   const getChannelNameHandler = (e: any) => {
@@ -648,8 +689,8 @@ const AllChats = () => {
     setChannelNameVal(val);
     setSessionId("");
     setMessages([]);
-
-    if (botIdVal?.length) {
+  
+    if (botIdVal?.length && val) {
       dispatch(
         getAllSession({
           botId: botIdVal,
@@ -658,7 +699,7 @@ const AllChats = () => {
           ...(showAIOnly && { aiLevel: true }),
         })
       );
-    } else {
+    } else if (!botIdVal) {
       notifyError("Please select Bot");
     }
   };

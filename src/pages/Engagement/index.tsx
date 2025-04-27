@@ -15,6 +15,7 @@ import {
   Person,
   ChevronRight,
   Favorite,
+  FavoriteBorder,
   Comment,
   ChevronLeft,
   ChevronRight as ChevronRightIcon,
@@ -44,6 +45,7 @@ import {
   Typography,
   Avatar,
   Box,
+  TextField,
 } from "@mui/material";
 import { getInstagramData } from "../../api/services/integrationServices";
 
@@ -56,10 +58,12 @@ const EngagementTab = () => {
   const [availableIntegrations, setAvailableIntegrations] = useState<any[]>([]);
   const [integrationId, setIntegrationId] = useState<string>("");
   const [inputText, setInputText] = useState("");
+  const [commentText, setCommentText] = useState("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPost, setCurrentPost] = useState<any>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const open = Boolean(anchorEl);
 
   // ref to hold socket instance
@@ -69,10 +73,13 @@ const EngagementTab = () => {
     const fetchIntegrations = async () => {
       try {
         const resp = await getInstagramData();
+        console.log("Integrations fetched:", resp.data);
         const ints = Array.isArray(resp.data) ? resp.data : [];
         setAvailableIntegrations(ints);
         if (ints.length > 0) {
-          setIntegrationId(ints[0]._id); // Set the first integration's _id as default
+          setIntegrationId(ints[0]._id);
+        } else {
+          console.warn("No integrations available");
         }
       } catch (err) {
         console.error("Error fetching integrations", err);
@@ -92,6 +99,8 @@ const EngagementTab = () => {
     socketRef.current = socket;
 
     socket.on("connect", () => console.log("Socket connected", socket.id));
+    socket.on("connect_error", (err) => console.error("Socket connection error", err));
+    socket.on("reconnect_attempt", () => console.log("Socket reconnecting..."));
     socket.on("disconnect", (reason) =>
       console.warn("Socket disconnected", reason)
     );
@@ -104,6 +113,8 @@ const EngagementTab = () => {
     });
 
     socket.on("igMessageSendSuccess", ({ data }) => {
+      console.log("igMessageSendSuccess received", data);
+      console.log("Current conversations:", conversations);
       setConversations((prev) =>
         prev.map((c) =>
           c.messageId === data.messageId
@@ -113,6 +124,7 @@ const EngagementTab = () => {
       );
     });
     socket.on("igCommentSendSuccess", ({ data }) => {
+      console.log("igCommentSendSuccess received", data);
       setConversations((prev) =>
         prev.map((c) =>
           c.messageId === data.messageId
@@ -120,8 +132,41 @@ const EngagementTab = () => {
             : c
         )
       );
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === data.postId
+            ? {
+                ...p,
+                comments: [
+                  ...(p.comments || []),
+                  {
+                    commentId: data.commentId,
+                    username: data.recipientUsername || "Agent",
+                    text: data.message.text,
+                    timestamp: data.timestamp,
+                  },
+                ],
+              }
+            : p
+        )
+      );
+      if (currentPost && currentPost.postId === data.postId) {
+        setCurrentPost((prev: any) => ({
+          ...prev,
+          comments: [
+            ...(prev.comments || []),
+            {
+              commentId: data.commentId,
+              username: data.recipientUsername || "Agent",
+              text: data.message.text,
+              timestamp: data.timestamp,
+            },
+          ],
+        }));
+      }
     });
     socket.on("igBroadcastOutgoingMessage", ({ data }) => {
+      console.log("igBroadcastOutgoingMessage received", data);
       setConversations((prev) =>
         prev.map((c) =>
           c.messageId === data.messageId
@@ -131,6 +176,7 @@ const EngagementTab = () => {
       );
     });
     socket.on("igBroadcastOutgoingComment", ({ data }) => {
+      console.log("igBroadcastOutgoingComment received", data);
       setConversations((prev) =>
         prev.map((c) =>
           c.messageId === data.messageId
@@ -138,30 +184,87 @@ const EngagementTab = () => {
             : c
         )
       );
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === data.postId
+            ? {
+                ...p,
+                comments: [
+                  ...(p.comments || []),
+                  {
+                    commentId: data.commentId,
+                    username: data.recipientUsername || "Agent",
+                    text: data.message.text,
+                    timestamp: data.timestamp,
+                  },
+                ],
+              }
+            : p
+        )
+      );
+      if (currentPost && currentPost.postId === data.postId) {
+        setCurrentPost((prev: any) => ({
+          ...prev,
+          comments: [
+            ...(prev.comments || []),
+            {
+              commentId: data.commentId,
+              username: data.recipientUsername || "Agent",
+              text: data.message.text,
+              timestamp: data.timestamp,
+            },
+          ],
+        }));
+      }
+    });
+    socket.on("igLikePostSuccess", ({ data }) => {
+      console.log("igLikePostSuccess received", data);
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === data.postId
+            ? { ...p, likesCount: (p.likesCount || 0) + 1 }
+            : p
+        )
+      );
+      if (currentPost && currentPost.postId === data.postId) {
+        setCurrentPost((prev: any) => ({
+          ...prev,
+          likesCount: (prev.likesCount || 0) + 1,
+        }));
+      }
+      setLikedPosts((prev) => new Set(prev).add(data.postId));
     });
 
     socket.on("error", (e) => console.error("Socket error", e));
     socket.on("igMessageSendError", (e) => console.error("Msg send error", e));
     socket.on("igCommentSendError", (e) => console.error("Cmt send error", e));
+    socket.on("igLikePostError", (e) => console.error("Like post error", e));
 
     return () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, []);
+  }, [currentPost]);
 
   // Emit fetch when integrationId changes
   useEffect(() => {
     if (integrationId && socketRef.current) {
+      console.log("Fetching initial data with integrationId:", integrationId);
       socketRef.current.emit("igFetchInitialData", integrationId);
+    } else {
+      console.warn("Cannot fetch initial data: integrationId or socket not ready", { integrationId, socket: socketRef.current });
     }
   }, [integrationId]);
 
   const sendMessage = () => {
+    console.log("sendMessage called", { inputText, selectedConversationId, integrationId });
     if (!inputText || !selectedConversationId || !integrationId) return;
 
     const conv = conversations.find((c) => c.userId === selectedConversationId);
-    if (!conv) return;
+    if (!conv) {
+      console.warn("Conversation not found for userId:", selectedConversationId);
+      return;
+    }
 
     if (conv.type === "DM") {
       socketRef.current!.emit("igSendMessageRequest", {
@@ -170,8 +273,32 @@ const EngagementTab = () => {
         recipientUsername: conv.username,
         message: inputText,
       });
+      console.log("Emitted igSendMessageRequest", {
+        integrationId,
+        recipientId: conv.recipientId,
+        recipientUsername: conv.username,
+        message: inputText,
+      });
+      // Simulate success for testing
+      setTimeout(() => {
+        socketRef.current!.emit("igMessageSendSuccess", {
+          data: {
+            messageId: selectedConversationId,
+            recipientId: conv.recipientId,
+            recipientUsername: conv.username,
+            message: { text: inputText },
+            timestamp: new Date().toISOString(),
+          },
+        });
+      }, 1000);
     } else {
       socketRef.current!.emit("igSendCommentReplyRequest", {
+        integrationId,
+        parentId: conv.parentCommentId || conv.replyToCommentId,
+        text: inputText,
+        postId: conv.postId,
+      });
+      console.log("Emitted igSendCommentReplyRequest (chat)", {
         integrationId,
         parentId: conv.parentCommentId || conv.replyToCommentId,
         text: inputText,
@@ -181,13 +308,65 @@ const EngagementTab = () => {
     setInputText("");
   };
 
+  const sendComment = () => {
+    console.log("sendComment called", { commentText, currentPost, integrationId });
+    if (!commentText || !currentPost || !integrationId) return;
+
+    socketRef.current!.emit("igSendCommentReplyRequest", {
+      integrationId,
+      parentId: null,
+      text: commentText,
+      postId: currentPost.postId,
+    });
+    console.log("Emitted igSendCommentReplyRequest (modal)", {
+      integrationId,
+      parentId: null,
+      text: commentText,
+      postId: currentPost.postId,
+    });
+    // Simulate success for testing
+    setTimeout(() => {
+      socketRef.current!.emit("igCommentSendSuccess", {
+        data: {
+          postId: currentPost.postId,
+          commentId: `test-comment-${Date.now()}`,
+          recipientUsername: "Agent",
+          message: { text: commentText },
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }, 1000);
+    setCommentText("");
+  };
+
+  const likePost = () => {
+    console.log("likePost called", { currentPost, integrationId, alreadyLiked: likedPosts.has(currentPost.postId) });
+    if (!currentPost || !integrationId || likedPosts.has(currentPost.postId))
+      return;
+
+    socketRef.current!.emit("igLikePostRequest", {
+      integrationId,
+      postId: currentPost.postId,
+    });
+    console.log("Emitted igLikePostRequest", { integrationId, postId: currentPost.postId });
+    // Simulate success for testing
+    setTimeout(() => {
+      socketRef.current!.emit("igLikePostSuccess", {
+        data: {
+          postId: currentPost.postId,
+        },
+      });
+    }, 1000);
+  };
+
   // UI Handlers
   const handleClick = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
   const openPostModal = (post: any) => {
     setCurrentPost(post);
-    setCarouselIndex(0); // Reset carousel index when opening a new post
+    setCarouselIndex(0);
+    setCommentText("");
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
@@ -367,7 +546,7 @@ const EngagementTab = () => {
             <div className="flex justify-between">
               <p className="text-sm text-gray-600">Reviews</p>
               <p className="text-sm font-medium">4.5</p>
-              </div>
+            </div>
           </div>
         </div>
 
@@ -724,7 +903,7 @@ const EngagementTab = () => {
                         <Box
                           display="flex"
                           justifyContent="center"
-                          mt= {2}
+                          mt={2}
                           gap={1}
                         >
                           {currentPost.carouselMedia.map((_: any, index: number) => (
@@ -759,7 +938,18 @@ const EngagementTab = () => {
                 </div>
                 <div className="flex items-center justify-around text-sm text-gray-600 mb-4">
                   <div className="flex items-center gap-1">
-                    <Favorite fontSize="small" /> {currentPost.likesCount || 0}
+                    <IconButton
+                      onClick={likePost}
+                      disabled={likedPosts.has(currentPost.postId)}
+                      sx={{ padding: 0 }}
+                    >
+                      {likedPosts.has(currentPost.postId) ? (
+                        <Favorite fontSize="small" color="error" />
+                      ) : (
+                        <FavoriteBorder fontSize="small" />
+                      )}
+                    </IconButton>
+                    {currentPost.likesCount || 0}
                   </div>
                   <div className="flex items-center gap-1">
                     <Comment fontSize="small" />{" "}
@@ -771,9 +961,35 @@ const EngagementTab = () => {
                 </div>
                 <Divider />
                 <Typography variant="subtitle1" className="mt-4 mb-2">
-                  Trending comments on your recent update
+                  Add a comment
                 </Typography>
-                <div className="overflow-y-auto max-h-[400px]">
+                <Box display="flex" alignItems="center" mb={2}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Write a comment..."
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && sendComment()}
+                    size="small"
+                  />
+                  <Button
+                    onClick={sendComment}
+                    variant="contained"
+                    sx={{
+                      ml: 1,
+                      backgroundColor: "#65558F",
+                      "&:hover": { backgroundColor: "#56497A" },
+                    }}
+                    disabled={!commentText.trim()}
+                  >
+                    Post
+                  </Button>
+                </Box>
+                <Typography variant="subtitle1" className="mb-2">
+                  Trending comments
+                </Typography>
+                <div className="overflow-y-auto max-h-[350px]">
                   {currentPost.comments?.map((c: any) => (
                     <div
                       key={c.commentId}
