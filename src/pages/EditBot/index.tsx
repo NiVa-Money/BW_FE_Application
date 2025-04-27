@@ -426,7 +426,7 @@ const EditBot: React.FC = () => {
             <div className="flex items-center mb-2">
               <label htmlFor="chatColor">Chat Color</label>
               <Tooltip
-                title="Select a chat color for the agent's chat interface."
+                title="Select a chat color for the agents chat interface."
                 placement="right"
               >
                 <InfoOutlinedIcon
@@ -550,7 +550,7 @@ const EditBot: React.FC = () => {
             <div className="flex items-center mb-2">
               <label>Choose theme</label>
               <Tooltip
-                title="Select the theme for your agent's interface."
+                title="Select the theme for your agents interface."
                 placement="right"
               >
                 <InfoOutlinedIcon
