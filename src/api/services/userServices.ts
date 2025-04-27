@@ -51,3 +51,19 @@ export const getUserDetails = async (payload) => {
     throw new Error("Error: Fetching User Details");
   }
 };
+export const resendOtp = async (payload) => {
+  try {
+    const response = await axios.post(`${publicBaseUrl}/resend-otp`, payload);
+    return response.data;
+  } catch {
+    throw new Error("Error: Sending OTP on Mail");
+  }
+};
+export const verifyOtp = async (payload) => {
+  try {
+    const response = await axios.post(`${publicBaseUrl}/verify-otp`, payload);
+    return response.data;
+  } catch {
+    throw new Error("Error: Verifying OTP");
+  }
+};

@@ -3,8 +3,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getUserDetails } from "../../api/services/userServices";
+import {
+  getUserDetails,
+  resendOtp,
+  verifyOtp,
+} from "../../api/services/userServices";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
+import { notifyError } from "../../components/Toast";
+import Loader from "../../components/Loader";
 
 const VerifyUserOtp = () => {
   const [searchParams] = useSearchParams();
@@ -53,34 +59,45 @@ const VerifyUserOtp = () => {
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
+      setIsLoading(true);
       try {
-        await axios.post("/api/verify-otp", {
-          userId: userEmail,
+        const payload = {
+          emailId: values.email,
           otp: values.otp,
-        });
-        navigate("/set-password");
+        };
+        const response = await verifyOtp(payload);
+        if (response.success) {
+          console.log("Verify OTP: ", response);
+        }
       } catch (error) {
-        console.error("Verification failed:", error);
+        notifyError(error.message);
+        console.error("Failed to verify OTP:", error);
+      } finally {
+        navigate("/myagents");
+        setIsLoading(false);
       }
     },
   });
 
   const handleResendOtp = async () => {
     try {
-      await axios.post("/api/resend-otp", {
-        userId: userEmail,
-      });
+      const { email, otp } = formik.values;
+      const payload = {
+        emailId: email,
+        otp: otp,
+      };
+      const response = await resendOtp(payload);
+      if (response.success) {
+        console.log("response: ", response);
+      }
     } catch (error) {
+      notifyError(error.message);
       console.error("Failed to resend OTP:", error);
     }
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
+    return <Loader loading={isLoading} />;
   }
 
   return (
@@ -100,7 +117,12 @@ const VerifyUserOtp = () => {
           />
 
           <FormikFieldInputComponent
-            field={{ name: "otp", value: formik.values.otp }}
+            field={{
+              name: "otp",
+              value: formik.values.otp,
+              onChange: formik.handleChange,
+              onBlur: formik.handleBlur,
+            }}
             form={formik}
             type="text"
             placeholder="Enter 4-digit OTP"
