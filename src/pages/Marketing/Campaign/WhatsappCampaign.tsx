@@ -305,24 +305,36 @@ const WhatsappCampaign: React.FC = () => {
       }
     });
 
-    const payload = {
+    const payload: any = {
       integrationId: selectedIntegration.secretToken,
       name: data.name,
       language: "en_US",
       category: "MARKETING",
-      header: {
-        type: headerType,
-        content: headerContent,
-      },
       body: {
         text: data.body.text,
         parameters: data.body.parameters,
       },
-      footer: {
-        text: data.footer ? data.footer.text : "",
-      },
-      buttons: mappedButtons,
     };
+
+    // Add header only if it has valid values
+    if (headerType !== "NONE" && headerContent) {
+      payload.header = {
+        type: headerType,
+        content: headerContent,
+      };
+    }
+
+    // Add footer only if it has valid text
+    if (data.footer?.text) {
+      payload.footer = {
+        text: data.footer.text,
+      };
+    }
+
+    // Add buttons only if there are valid buttons
+    if (mappedButtons.length > 0) {
+      payload.buttons = mappedButtons;
+    }
 
     dispatch(createWhatsAppTemplateAction(payload));
 
