@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useState } from "react";
 import {
   Bar,
@@ -385,7 +386,7 @@ const ChartItems: React.FC<ChartItemsProps> = ({ constructedChartsData }) => {
   const performanceBar = [
     {
       id: 1,
-      title: "Agent Performance",
+      title: "AI Agent Performance",
       component: (
         <CommonTable
           headers={aiAgentPerformanceHeaders}
