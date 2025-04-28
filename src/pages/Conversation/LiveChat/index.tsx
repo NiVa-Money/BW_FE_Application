@@ -69,6 +69,83 @@ const LiveChat: React.FC = (): React.ReactElement => {
   }, [userId, dispatch]);
 
   // Socket initialization and management
+  // useEffect(() => {
+  //   if (
+  //     !socket.current &&
+  //     isChatEnabled &&
+  //     selectedSessionId &&
+  //     userId &&
+  //     botId
+  //   ) {
+  //     socket.current = io(import.meta.env.VITE_FIREBASE_BASE_URL, {
+  //       query: {
+  //         userType: "AGENT",
+  //         sessionId: selectedSessionId,
+  //         userId,
+  //       },
+  //       reconnection: true,
+  //       reconnectionAttempts: 5,
+  //       reconnectionDelay: 1000,
+  //     });
+
+  //     // Standard socket events
+  //     socket.current.on("connect", () => {
+  //       setAgentState("connecting");
+  //       socket.current.emit("joinSession", {
+  //         sessionId: selectedSessionId,
+  //         userId,
+  //         botId,
+  //         userType: "AGENT",
+  //       });
+
+  //       socket.current.on("sessionMetrics", (metrics: any) => {
+  //         setSessionMetrics(metrics);
+  //       });
+  //     });
+
+  //     socket.current.on("agentConnected", (data: any) => {
+  //       console.log("Agent connected:", data);
+  //       setAgentState("connected");
+  //       setIsAgentConnected(true);
+  //     });
+
+  //     socket.current.on("messageToClient", (data: any) => {
+  //       if (data.question || data.response) {
+  //         setMessages((prev) => [
+  //           ...prev,
+  //           {
+  //             ...data,
+  //             timestamp: data.timestamp || new Date().toISOString(),
+  //             sender: data.senderType === "AGENT" ? "agent" : "customer",
+  //             text: data.question || data.response,
+  //             type:
+  //               data.senderType === "AGENT" ? "bot-message" : "user-message",
+  //           },
+  //         ]);
+  //         playNotificationSound();
+  //       }
+  //     });
+
+  //     socket.current.on("sessionClosed", handleSessionEnd);
+  //     socket.current.on("sessionEndedByAdmin", handleSessionEnd);
+  //     socket.current.on("adminEndedSession", handleSessionEnd);
+  //     socket.current.on("connect_error", (error: any) => {
+  //       console.error("Connection error:", error);
+  //       setAgentState("disconnected");
+  //     });
+  //     socket.current.on("closeSession", () => {
+  //       setIsAgentConnected(false);
+  //     });
+  //   }
+
+  //   return () => {
+  //     if (socket.current) {
+  //       socket.current.disconnect();
+  //       socket.current = null;
+  //     }
+  //   };
+  // }, [isChatEnabled, selectedSessionId, userId, botId]);
+
   useEffect(() => {
     if (
       !socket.current &&
@@ -96,6 +173,17 @@ const LiveChat: React.FC = (): React.ReactElement => {
           userId,
           botId,
           userType: "AGENT",
+        });
+
+        // Request session history when joining
+        socket.current.emit("sessionHistory", {
+          sessionId: selectedSessionId,
+          userId,
+          botId,
+        });
+
+        socket.current.on("sessionHistory", (history: any) => {
+          setMessages((prev) => [...(history.messages || []), ...prev]);
         });
 
         socket.current.on("sessionMetrics", (metrics: any) => {

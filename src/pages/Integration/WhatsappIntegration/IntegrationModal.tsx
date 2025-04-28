@@ -20,7 +20,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, data }) => {
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50">
-      <div className="bg-white p-8 rounded-lg w-96">
+      <div className="bg-white p-8 rounded-lg w-1/2 shadow-lg">
         <h3 className="text-xl font-semibold mb-4">
           Token and Webhook Information
         </h3>
