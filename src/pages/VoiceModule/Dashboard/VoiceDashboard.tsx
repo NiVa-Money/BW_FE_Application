@@ -192,7 +192,7 @@ import MetricCard from "./MetricCard";
 import { DashboardProvider } from "../../../hooks/DashboardContext";
 import TimeRangeSelector from "./TimeRangeSelector";
 import AnalyticsTab from "./AnalyticsTab";
-import ConversationsTab from "./ConversationsTab";
+import ConversationsTable from "../ConversationsTable";
 
 const generateSparklineData = (count: number, trend: "up" | "down") => {
   const data: number[] = [];
@@ -326,7 +326,7 @@ const VoiceDashboard = () => {
 
           {activeTab === "analytics" && <AnalyticsTab />}
 
-          {activeTab === "conversations" && <ConversationsTab />}
+          {activeTab === "conversations" && <ConversationsTable />}
         </div>
       </div>
     </DashboardProvider>

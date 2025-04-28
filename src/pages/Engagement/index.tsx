@@ -47,7 +47,10 @@ import {
   Box,
   TextField,
 } from "@mui/material";
-import { getInstagramData } from "../../api/services/integrationServices";
+import {
+  getInstagramData,
+  getFacebookIntegrations,
+} from "../../api/services/integrationServices";
 
 const EngagementTab = () => {
   const [conversations, setConversations] = useState<any[]>([]);
@@ -57,6 +60,9 @@ const EngagementTab = () => {
   >(null);
   const [availableIntegrations, setAvailableIntegrations] = useState<any[]>([]);
   const [integrationId, setIntegrationId] = useState<string>("");
+  const [platform, setPlatform] = useState<
+    "instagram" | "facebook" | "all-platforms"
+  >("instagram");
   const [inputText, setInputText] = useState("");
   const [commentText, setCommentText] = useState("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -65,14 +71,23 @@ const EngagementTab = () => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const open = Boolean(anchorEl);
-
-  // ref to hold socket instance
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     const fetchIntegrations = async () => {
       try {
-        const resp = await getInstagramData();
+        let resp: { data: any[] };
+        if (platform === "instagram") {
+          resp = await getInstagramData();
+        } else if (platform === "facebook") {
+          resp = await getFacebookIntegrations();
+        } else {
+          const [igResp, fbResp] = await Promise.all([
+            getInstagramData(),
+            getFacebookIntegrations(),
+          ]);
+          resp = { data: [...(igResp.data || []), ...(fbResp.data || [])] };
+        }
         console.log("Integrations fetched:", resp.data);
         const ints = Array.isArray(resp.data) ? resp.data : [];
         setAvailableIntegrations(ints);
@@ -86,9 +101,8 @@ const EngagementTab = () => {
       }
     };
     fetchIntegrations();
-  }, []);
+  }, [platform]);
 
-  // Create socket once
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_FIREBASE_BASE_URL}/engagement`, {
       reconnection: true,
@@ -98,268 +112,405 @@ const EngagementTab = () => {
     });
     socketRef.current = socket;
 
-    socket.on("connect", () => console.log("Socket connected", socket.id));
-    socket.on("connect_error", (err) => console.error("Socket connection error", err));
-    socket.on("reconnect_attempt", () => console.log("Socket reconnecting..."));
-    socket.on("disconnect", (reason) =>
-      console.warn("Socket disconnected", reason)
-    );
+    const setupListeners = (prefix: string) => {
+      console.log(`Setting up listeners with prefix: ${prefix}`);
 
-    socket.on("initialData", (data) => {
-      console.log("Conversation data received", data.conversations);
-      console.log("Posts data received", data.posts);
-      setConversations(data.conversations || []);
-      setPosts(data.posts || []);
-    });
+      socket.on("connect", () => {
+        console.log("Socket connected", socket.id);
+        if (integrationId) {
+          const event =
+            platform === "facebook"
+              ? "fbFetchInitialData"
+              : "igFetchInitialData";
+          console.log(
+            `Re-emitting on connect: ${event}, integrationId: ${integrationId}`
+          );
+          socket.emit(event, integrationId);
+        }
+      });
 
-    socket.on("igMessageSendSuccess", ({ data }) => {
-      console.log("igMessageSendSuccess received", data);
-      console.log("Current conversations:", conversations);
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.messageId === data.messageId
-            ? { ...c, messages: [...(c.messages || []), data] }
-            : c
-        )
+      socket.on("connect_error", (err) =>
+        console.error("Socket connection error", err)
       );
-    });
-    socket.on("igCommentSendSuccess", ({ data }) => {
-      console.log("igCommentSendSuccess received", data);
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.messageId === data.messageId
-            ? { ...c, messages: [...(c.messages || []), data] }
-            : c
-        )
+      socket.on("reconnect_attempt", () =>
+        console.log("Socket reconnecting...")
       );
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.postId === data.postId
-            ? {
-                ...p,
-                comments: [
-                  ...(p.comments || []),
-                  {
-                    commentId: data.commentId,
-                    username: data.recipientUsername || "Agent",
-                    text: data.message.text,
-                    timestamp: data.timestamp,
-                  },
-                ],
-              }
-            : p
-        )
+      socket.on("disconnect", (reason) =>
+        console.warn("Socket disconnected", reason)
       );
-      if (currentPost && currentPost.postId === data.postId) {
-        setCurrentPost((prev: any) => ({
-          ...prev,
-          comments: [
-            ...(prev.comments || []),
-            {
-              commentId: data.commentId,
-              username: data.recipientUsername || "Agent",
-              text: data.message.text,
-              timestamp: data.timestamp,
-            },
-          ],
-        }));
-      }
-    });
-    socket.on("igBroadcastOutgoingMessage", ({ data }) => {
-      console.log("igBroadcastOutgoingMessage received", data);
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.messageId === data.messageId
-            ? { ...c, messages: [...(c.messages || []), data] }
-            : c
-        )
-      );
-    });
-    socket.on("igBroadcastOutgoingComment", ({ data }) => {
-      console.log("igBroadcastOutgoingComment received", data);
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.messageId === data.messageId
-            ? { ...c, messages: [...(c.messages || []), data] }
-            : c
-        )
-      );
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.postId === data.postId
-            ? {
-                ...p,
-                comments: [
-                  ...(p.comments || []),
-                  {
-                    commentId: data.commentId,
-                    username: data.recipientUsername || "Agent",
-                    text: data.message.text,
-                    timestamp: data.timestamp,
-                  },
-                ],
-              }
-            : p
-        )
-      );
-      if (currentPost && currentPost.postId === data.postId) {
-        setCurrentPost((prev: any) => ({
-          ...prev,
-          comments: [
-            ...(prev.comments || []),
-            {
-              commentId: data.commentId,
-              username: data.recipientUsername || "Agent",
-              text: data.message.text,
-              timestamp: data.timestamp,
-            },
-          ],
-        }));
-      }
-    });
-    socket.on("igLikePostSuccess", ({ data }) => {
-      console.log("igLikePostSuccess received", data);
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.postId === data.postId
-            ? { ...p, likesCount: (p.likesCount || 0) + 1 }
-            : p
-        )
-      );
-      if (currentPost && currentPost.postId === data.postId) {
-        setCurrentPost((prev: any) => ({
-          ...prev,
-          likesCount: (prev.likesCount || 0) + 1,
-        }));
-      }
-      setLikedPosts((prev) => new Set(prev).add(data.postId));
-    });
 
-    socket.on("error", (e) => console.error("Socket error", e));
-    socket.on("igMessageSendError", (e) => console.error("Msg send error", e));
-    socket.on("igCommentSendError", (e) => console.error("Cmt send error", e));
-    socket.on("igLikePostError", (e) => console.error("Like post error", e));
+      socket.on(`${prefix}initialData`, (data) => {
+        console.log(`${prefix}initialData received`, data);
+        setConversations(data.conversations || []);
+        setPosts(data.posts || []);
+      });
+
+      socket.on("initialData", (data) => {
+        console.log("Generic initialData received", data);
+        setConversations(data.conversations || []);
+        setPosts(data.posts || []);
+      });
+
+      socket.on(`${prefix}MessageSendSuccess`, ({ data }) => {
+        console.log(`${prefix}MessageSendSuccess received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.messageId === data.messageId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+      });
+
+      socket.on(`${prefix}CommentSendSuccess`, ({ data }) => {
+        console.log(`${prefix}CommentSendSuccess received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.messageId === data.messageId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.postId === data.postId
+              ? {
+                  ...p,
+                  comments: [
+                    ...(p.comments || []),
+                    {
+                      commentId: data.commentId,
+                      username: data.recipientUsername || "Agent",
+                      text: data.message.text,
+                      timestamp: data.timestamp,
+                    },
+                  ],
+                }
+              : p
+          )
+        );
+        if (currentPost && currentPost.postId === data.postId) {
+          setCurrentPost((prev: any) => ({
+            ...prev,
+            comments: [
+              ...(prev.comments || []),
+              {
+                commentId: data.commentId,
+                username: data.recipientUsername || "Agent",
+                text: data.message.text,
+                timestamp: data.timestamp,
+              },
+            ],
+          }));
+        }
+      });
+
+      socket.on(`${prefix}BroadcastOutgoingMessage`, ({ data }) => {
+        console.log(`${prefix}BroadcastOutgoingMessage received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.messageId === data.messageId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+      });
+
+      socket.on(`${prefix}BroadcastOutgoingComment`, ({ data }) => {
+        console.log(`${prefix}BroadcastOutgoingComment received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.messageId === data.messageId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.postId === data.postId
+              ? {
+                  ...p,
+                  comments: [
+                    ...(p.comments || []),
+                    {
+                      commentId: data.commentId,
+                      username: data.recipientUsername || "Agent",
+                      text: data.message.text,
+                      timestamp: data.timestamp,
+                    },
+                  ],
+                }
+              : p
+          )
+        );
+        if (currentPost && currentPost.postId === data.postId) {
+          setCurrentPost((prev: any) => ({
+            ...prev,
+            comments: [
+              ...(prev.comments || []),
+              {
+                commentId: data.commentId,
+                username: data.recipientUsername || "Agent",
+                text: data.message.text,
+                timestamp: data.timestamp,
+              },
+            ],
+          }));
+        }
+      });
+
+      socket.on(`${prefix}LikePostSuccess`, ({ data }) => {
+        console.log(`${prefix}LikePostSuccess received`, data);
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.postId === data.postId
+              ? { ...p, likesCount: (p.likesCount || 0) + 1 }
+              : p
+          )
+        );
+        if (currentPost && currentPost.postId === data.postId) {
+          setCurrentPost((prev: any) => ({
+            ...prev,
+            likesCount: (prev.likesCount || 0) + 1,
+          }));
+        }
+        setLikedPosts((prev) => new Set(prev).add(data.postId));
+      });
+
+      socket.on(`${prefix}ManualAdminMessage`, ({ data }) => {
+        console.log(`${prefix}ManualAdminMessage received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.messageId === data.messageId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+      });
+
+      socket.on(`${prefix}IncomingUserMessage`, ({ data }) => {
+        console.log(`${prefix}IncomingUserMessage received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.userId === data.recipientId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+      });
+
+      socket.on(`${prefix}BotReplyMessage`, ({ data }) => {
+        console.log(`${prefix}BotReplyMessage received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.messageId === data.messageId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+      });
+
+      socket.on(`${prefix}ManualAdminComment`, ({ data }) => {
+        console.log(`${prefix}ManualAdminComment received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.messageId === data.messageId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.postId === data.postId
+              ? {
+                  ...p,
+                  comments: [
+                    ...(p.comments || []),
+                    {
+                      commentId: data.commentId,
+                      username: data.recipientUsername || "Agent",
+                      text: data.message.text,
+                      timestamp: data.timestamp,
+                    },
+                  ],
+                }
+              : p
+          )
+        );
+      });
+
+      socket.on(`${prefix}IncomingUserComment`, ({ data }) => {
+        console.log(`${prefix}IncomingUserComment received`, data);
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.postId === data.postId
+              ? {
+                  ...p,
+                  comments: [
+                    ...(p.comments || []),
+                    {
+                      commentId: data.commentId,
+                      username: data.username,
+                      text: data.message.text,
+                      timestamp: data.timestamp,
+                    },
+                  ],
+                }
+              : p
+          )
+        );
+      });
+
+      socket.on(`${prefix}BotReplyComment`, ({ data }) => {
+        console.log(`${prefix}BotReplyComment received`, data);
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.messageId === data.messageId
+              ? { ...c, messages: [...(c.messages || []), data] }
+              : c
+          )
+        );
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.postId === data.postId
+              ? {
+                  ...p,
+                  comments: [
+                    ...(p.comments || []),
+                    {
+                      commentId: data.commentId,
+                      username: "Bot",
+                      text: data.message.text,
+                      timestamp: data.timestamp,
+                    },
+                  ],
+                }
+              : p
+          )
+        );
+      });
+
+      socket.on(`${prefix}MessageSendError`, (e) =>
+        console.error(`${prefix} Msg send error`, e)
+      );
+      socket.on(`${prefix}CommentSendError`, (e) =>
+        console.error(`${prefix} Cmt send error`, e)
+      );
+      socket.on(`${prefix}LikePostError`, (e) =>
+        console.error(`${prefix} Like post error`, e)
+      );
+      socket.on("error", (e) => console.error("Socket error", e));
+    };
+
+    setupListeners(platform === "facebook" ? "fb" : "ig");
 
     return () => {
+      socket.removeAllListeners();
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [currentPost]);
+  }, [platform, currentPost, integrationId]);
 
-  // Emit fetch when integrationId changes
   useEffect(() => {
     if (integrationId && socketRef.current) {
-      console.log("Fetching initial data with integrationId:", integrationId);
-      socketRef.current.emit("igFetchInitialData", integrationId);
+      const event =
+        platform === "facebook" ? "fbFetchInitialData" : "igFetchInitialData";
+      console.log(
+        `Fetching initial data with event: ${event}, integrationId: ${integrationId}`
+      );
+      socketRef.current.emit(event, integrationId);
     } else {
-      console.warn("Cannot fetch initial data: integrationId or socket not ready", { integrationId, socket: socketRef.current });
+      console.warn(
+        "Cannot fetch initial data: integrationId or socket not ready",
+        { integrationId, socket: socketRef.current }
+      );
     }
-  }, [integrationId]);
+  }, [integrationId, platform]);
 
   const sendMessage = () => {
-    console.log("sendMessage called", { inputText, selectedConversationId, integrationId });
+    console.log("sendMessage called", {
+      inputText,
+      selectedConversationId,
+      integrationId,
+    });
     if (!inputText || !selectedConversationId || !integrationId) return;
 
     const conv = conversations.find((c) => c.userId === selectedConversationId);
     if (!conv) {
-      console.warn("Conversation not found for userId:", selectedConversationId);
+      console.warn(
+        "Conversation not found for userId:",
+        selectedConversationId
+      );
       return;
     }
 
-    if (conv.type === "DM") {
-      socketRef.current!.emit("igSendMessageRequest", {
-        integrationId,
-        recipientId: conv.recipientId,
-        recipientUsername: conv.username,
-        message: inputText,
-      });
-      console.log("Emitted igSendMessageRequest", {
-        integrationId,
-        recipientId: conv.recipientId,
-        recipientUsername: conv.username,
-        message: inputText,
-      });
-      // Simulate success for testing
-      setTimeout(() => {
-        socketRef.current!.emit("igMessageSendSuccess", {
-          data: {
-            messageId: selectedConversationId,
-            recipientId: conv.recipientId,
-            recipientUsername: conv.username,
-            message: { text: inputText },
-            timestamp: new Date().toISOString(),
-          },
-        });
-      }, 1000);
-    } else {
-      socketRef.current!.emit("igSendCommentReplyRequest", {
-        integrationId,
-        parentId: conv.parentCommentId || conv.replyToCommentId,
-        text: inputText,
-        postId: conv.postId,
-      });
-      console.log("Emitted igSendCommentReplyRequest (chat)", {
-        integrationId,
-        parentId: conv.parentCommentId || conv.replyToCommentId,
-        text: inputText,
-        postId: conv.postId,
-      });
-    }
+    const event =
+      platform === "facebook" ? "fbSendMessageRequest" : "igSendMessageRequest";
+    socketRef.current!.emit(event, {
+      integrationId,
+      recipientId: conv.recipientId,
+      recipientUsername: conv.username,
+      recipientName: conv.recipientName || conv.username,
+      message: inputText,
+    });
+    console.log(`Emitted ${event}`, {
+      integrationId,
+      recipientId: conv.recipientId,
+      recipientUsername: conv.username,
+      recipientName: conv.recipientName || conv.username,
+      message: inputText,
+    });
     setInputText("");
   };
 
   const sendComment = () => {
-    console.log("sendComment called", { commentText, currentPost, integrationId });
+    console.log("sendComment called", {
+      commentText,
+      currentPost,
+      integrationId,
+    });
     if (!commentText || !currentPost || !integrationId) return;
 
-    socketRef.current!.emit("igSendCommentReplyRequest", {
+    const event =
+      platform === "facebook"
+        ? "fbSendCommentReplyRequest"
+        : "igSendCommentReplyRequest";
+    socketRef.current!.emit(event, {
       integrationId,
       parentId: null,
       text: commentText,
       postId: currentPost.postId,
     });
-    console.log("Emitted igSendCommentReplyRequest (modal)", {
+    console.log(`Emitted ${event} (modal)`, {
       integrationId,
       parentId: null,
       text: commentText,
       postId: currentPost.postId,
     });
-    // Simulate success for testing
-    setTimeout(() => {
-      socketRef.current!.emit("igCommentSendSuccess", {
-        data: {
-          postId: currentPost.postId,
-          commentId: `test-comment-${Date.now()}`,
-          recipientUsername: "Agent",
-          message: { text: commentText },
-          timestamp: new Date().toISOString(),
-        },
-      });
-    }, 1000);
     setCommentText("");
   };
 
   const likePost = () => {
-    console.log("likePost called", { currentPost, integrationId, alreadyLiked: likedPosts.has(currentPost.postId) });
+    console.log("likePost called", {
+      currentPost,
+      integrationId,
+      alreadyLiked: likedPosts.has(currentPost.postId),
+    });
     if (!currentPost || !integrationId || likedPosts.has(currentPost.postId))
       return;
 
-    socketRef.current!.emit("igLikePostRequest", {
+    const event =
+      platform === "facebook" ? "fbLikePostRequest" : "igLikePostRequest";
+    socketRef.current!.emit(event, {
       integrationId,
       postId: currentPost.postId,
     });
-    console.log("Emitted igLikePostRequest", { integrationId, postId: currentPost.postId });
-    // Simulate success for testing
-    setTimeout(() => {
-      socketRef.current!.emit("igLikePostSuccess", {
-        data: {
-          postId: currentPost.postId,
-        },
-      });
-    }, 1000);
+    console.log(`Emitted ${event}`, {
+      integrationId,
+      postId: currentPost.postId,
+    });
   };
 
-  // UI Handlers
   const handleClick = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -370,24 +521,17 @@ const EngagementTab = () => {
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
-
-  // Carousel Navigation
-  const handleNext = () => {
-    if (currentPost && currentPost.carouselMedia) {
-      setCarouselIndex((prev) =>
-        prev < currentPost.carouselMedia.length - 1 ? prev + 1 : prev
-      );
-    }
-  };
-  const handlePrev = () => {
-    setCarouselIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  };
+  const handleNext = () =>
+    currentPost &&
+    setCarouselIndex((i) =>
+      Math.min(i + 1, currentPost.carouselMedia.length - 1)
+    );
+  const handlePrev = () => setCarouselIndex((i) => Math.max(i - 1, 0));
 
   const displayedConversations = conversations;
   const selectedConversation = conversations.find(
     (c) => c.userId === selectedConversationId
   );
-
   const socialPlatforms = [
     { icon: <Instagram />, sentiment: 60 },
     { icon: <Facebook />, sentiment: 60 },
@@ -395,7 +539,6 @@ const EngagementTab = () => {
     { icon: <Twitter />, sentiment: 60 },
     { icon: <WhatsApp />, sentiment: 60 },
   ];
-
   const chartData = [
     { month: "Jan", value: 30 },
     { month: "Feb", value: 45 },
@@ -405,8 +548,6 @@ const EngagementTab = () => {
     { month: "Jun", value: 65 },
     { month: "Jul", value: 55 },
   ];
-
-  // Extract Instagram posts from conversations
   const instagramPosts = posts;
 
   return (
@@ -416,7 +557,6 @@ const EngagementTab = () => {
         Sentiment across all active channels
       </p>
 
-      {/* Social Platform Metrics */}
       <div className="grid grid-cols-5 gap-4 mb-8">
         {socialPlatforms.map((platform, index) => (
           <div
@@ -437,7 +577,6 @@ const EngagementTab = () => {
         ))}
       </div>
 
-      {/* Selection Controls */}
       <div className="flex gap-4 mb-6">
         <FormControl className="w-1/2">
           <InputLabel>Select Integration</InputLabel>
@@ -448,7 +587,10 @@ const EngagementTab = () => {
           >
             {availableIntegrations.map((intg) => (
               <MenuItem key={intg._id} value={intg._id}>
-                {intg.instagramName} (@{intg.instagramUsername})
+                {platform === "instagram"
+                  ? intg.instagramName
+                  : intg.facebookPageName}{" "}
+                {platform === "instagram" ? `(@${intg.instagramUsername})` : ""}
               </MenuItem>
             ))}
           </Select>
@@ -457,24 +599,18 @@ const EngagementTab = () => {
         <FormControl className="w-1/2">
           <InputLabel>Select Platform</InputLabel>
           <Select
-            value={"all-platforms"}
+            value={platform}
             label="Select Platform"
-            onChange={() => {
-              /* Add platform filter handler */
-            }}
+            onChange={(e) => setPlatform(e.target.value as any)}
           >
             <MenuItem value="all-platforms">All Platforms</MenuItem>
             <MenuItem value="instagram">Instagram</MenuItem>
             <MenuItem value="facebook">Facebook</MenuItem>
-            <MenuItem value="linkedin">LinkedIn</MenuItem>
-            <MenuItem value="twitter">Twitter</MenuItem>
           </Select>
         </FormControl>
       </div>
 
-      {/* Ticket Section */}
       <div className="grid grid-cols-4 gap-4 mb-4">
-        {/* Recent Posts Carousel */}
         <div className="flex flex-col space-y-4 col-span-2">
           <h2 className="text-lg font-semibold mb-2">Recent Posts</h2>
           <div className="flex gap-4 overflow-x-auto pb-2">
@@ -512,7 +648,11 @@ const EngagementTab = () => {
                       </div>
                     )}
                     <span className="absolute top-2 left-2 bg-white rounded-full p-1">
-                      <Instagram fontSize="small" />
+                      {platform === "instagram" ? (
+                        <Instagram fontSize="small" />
+                      ) : (
+                        <Facebook fontSize="small" />
+                      )}
                     </span>
                   </div>
                   <p className="text-sm mb-2 overflow-hidden overflow-ellipsis line-clamp-3">
@@ -535,7 +675,6 @@ const EngagementTab = () => {
           </div>
         </div>
 
-        {/* Agent Details Card */}
         <div className="bg-gray-50 ml-6 rounded-lg p-4 w-[300px] shadow-md">
           <h2 className="text-sm font-semibold mb-3">Agent Details</h2>
           <div className="space-y-2">
@@ -550,7 +689,6 @@ const EngagementTab = () => {
           </div>
         </div>
 
-        {/* Customer Details Card */}
         <div className="bg-gray-50 rounded-lg p-4 w-[300px] shadow-md">
           <h2 className="text-sm font-semibold mb-3">Customer Details</h2>
           <div className="space-y-2">
@@ -567,7 +705,6 @@ const EngagementTab = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-4">
-        {/* Left Column - Conversations */}
         <div className="col-span-3">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg">
             {displayedConversations.map((c) => (
@@ -576,12 +713,10 @@ const EngagementTab = () => {
                 className={`p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer ${
                   selectedConversationId === c.userId ? "bg-gray-200" : ""
                 }`}
-                onClick={() => {
-                  setSelectedConversationId(c.userId);
-                }}
+                onClick={() => setSelectedConversationId(c.userId)}
               >
                 <span className="w-8 h-8">
-                  <Instagram />
+                  {platform === "instagram" ? <Instagram /> : <Facebook />}
                 </span>
                 <div>
                   <p className="text-base">{c?.username || "Unknown"}</p>
@@ -598,7 +733,6 @@ const EngagementTab = () => {
           </div>
         </div>
 
-        {/* Middle Column - Chat */}
         <div key={selectedConversationId} className="col-span-5">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-lg p-4">
             {selectedConversation ? (
@@ -611,7 +745,6 @@ const EngagementTab = () => {
                   </div>
                 </div>
 
-                {/* Chat Messages */}
                 <div className="h-[400px] overflow-y-auto mb-4">
                   {(selectedConversation.messages || []).map(
                     (message, index) => (
@@ -650,7 +783,6 @@ const EngagementTab = () => {
                   )}
                 </div>
 
-                {/* Quick Replies and CSAT */}
                 <div className="flex justify-between items-start mt-24 gap-6">
                   <div className="flex flex-col mt-10 gap-2">
                     {["Okay", "Fine", "That works.", "Tell me more."].map(
@@ -715,7 +847,6 @@ const EngagementTab = () => {
                   </div>
                 </div>
 
-                {/* Input Area */}
                 <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50">
                   <button className="p-1.5 hover:bg-gray-200 rounded-full">
                     <Image className="w-5 h-5 text-gray-600" />
@@ -747,7 +878,6 @@ const EngagementTab = () => {
           </div>
         </div>
 
-        {/* Right Column - Details */}
         <div className="col-span-4 space-y-4">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <div className="flex justify-between items-center mb-4">
@@ -790,7 +920,6 @@ const EngagementTab = () => {
             </div>
           </div>
 
-          {/* AI Recommendation */}
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <h2 className="text-sm font-semibold mb-3">
               AI Recommendation and Actions
@@ -807,7 +936,6 @@ const EngagementTab = () => {
             </div>
           </div>
 
-          {/* Summary */}
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <h2 className="text-sm font-semibold mb-3">Summary</h2>
             <div className="space-y-2">
@@ -831,7 +959,6 @@ const EngagementTab = () => {
         </div>
       </div>
 
-      {/* Modal for Post Details */}
       {currentPost && (
         <Dialog open={isModalOpen} onClose={closeModal} maxWidth="lg" fullWidth>
           <DialogTitle>
@@ -839,7 +966,6 @@ const EngagementTab = () => {
           </DialogTitle>
           <DialogContent dividers>
             <div className="grid grid-cols-2 gap-6">
-              {/* Left: Media */}
               <div className="flex items-center justify-center relative">
                 {currentPost.mediaType === "VIDEO" ? (
                   <video
@@ -873,9 +999,7 @@ const EngagementTab = () => {
                             transform: "translateY(-50%)",
                             backgroundColor: "rgba(0,0,0,0.5)",
                             color: "white",
-                            "&:hover": {
-                              backgroundColor: "rgba(0,0,0,0.7)",
-                            },
+                            "&:hover": { backgroundColor: "rgba(0,0,0,0.7)" },
                           }}
                         >
                           <ChevronLeft />
@@ -893,9 +1017,7 @@ const EngagementTab = () => {
                             transform: "translateY(-50%)",
                             backgroundColor: "rgba(0,0,0,0.5)",
                             color: "white",
-                            "&:hover": {
-                              backgroundColor: "rgba(0,0,0,0.7)",
-                            },
+                            "&:hover": { backgroundColor: "rgba(0,0,0,0.7)" },
                           }}
                         >
                           <ChevronRightIcon />
@@ -906,19 +1028,23 @@ const EngagementTab = () => {
                           mt={2}
                           gap={1}
                         >
-                          {currentPost.carouselMedia.map((_: any, index: number) => (
-                            <Box
-                              key={index}
-                              width={8}
-                              height={8}
-                              borderRadius="50%"
-                              bgcolor={
-                                index === carouselIndex ? "#65558F" : "grey.400"
-                              }
-                              sx={{ cursor: "pointer" }}
-                              onClick={() => setCarouselIndex(index)}
-                            />
-                          ))}
+                          {currentPost.carouselMedia.map(
+                            (_: any, index: number) => (
+                              <Box
+                                key={index}
+                                width={8}
+                                height={8}
+                                borderRadius="50%"
+                                bgcolor={
+                                  index === carouselIndex
+                                    ? "#65558F"
+                                    : "grey.400"
+                                }
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => setCarouselIndex(index)}
+                              />
+                            )
+                          )}
                         </Box>
                       </>
                     )}
@@ -930,11 +1056,19 @@ const EngagementTab = () => {
                 )}
               </div>
 
-              {/* Right: Stats & Comments */}
               <div className="flex flex-col h-full">
                 <div className="flex items-center mb-4">
-                  <Instagram fontSize="large" className="text-pink-500 mr-2" />
-                  <Typography variant="h6">Instagram</Typography>
+                  {platform === "instagram" ? (
+                    <Instagram
+                      fontSize="large"
+                      className="text-pink-500 mr-2"
+                    />
+                  ) : (
+                    <Facebook fontSize="large" className="text-blue-600 mr-2" />
+                  )}
+                  <Typography variant="h6">
+                    {platform === "instagram" ? "Instagram" : "Facebook"}
+                  </Typography>
                 </div>
                 <div className="flex items-center justify-around text-sm text-gray-600 mb-4">
                   <div className="flex items-center gap-1">
@@ -1027,9 +1161,7 @@ const EngagementTab = () => {
                 px: 3,
                 py: 1,
                 fontWeight: "500",
-                "&:hover": {
-                  backgroundColor: "#56497A",
-                },
+                "&:hover": { backgroundColor: "#56497A" },
               }}
             >
               Close
@@ -1041,7 +1173,6 @@ const EngagementTab = () => {
   );
 };
 
-// Custom method to get relative time (polyfill if needed)
 Date.prototype.toLocaleTimeString = function () {
   const now = new Date();
   const diffMs = now.getTime() - (this as Date).getTime();

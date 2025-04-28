@@ -46,3 +46,28 @@ export const deactivateInstagramService = async (id: string) => {
   const response = await axiosInstance.patch(`/instagram/deactivate/${id}`);
   return response.data;
 };
+
+
+export const saveFacebookIntegration = async (data: any) => {
+  const response = await axiosInstance.post("/facebook/integration", data);
+  return response.data;
+};
+
+export const getFacebookIntegrations = async () => {
+  const response = await axiosInstance.get("/facebook/integration");
+  return response.data;
+};
+
+export const updateFacebookIntegration = async (id: string, updatedData: any) => {
+  const response = await axiosInstance.put(`/facebook/integration/${id}`, updatedData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data;
+};
+
+export const deactivateFacebookIntegration = async (id: string) => {
+  const response = await axiosInstance.patch(`/facebook/integration/deactivate/${id}`);
+  return response.data;
+};
