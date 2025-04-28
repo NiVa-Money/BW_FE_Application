@@ -90,7 +90,7 @@ const EngagementTab = () => {
 
   // Create socket once
   useEffect(() => {
-    const socket = io(`${import.meta.env.VITE_FIREBASE_BASE_URL}/instagram`, {
+    const socket = io(`${import.meta.env.VITE_FIREBASE_BASE_URL}/engagement`, {
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
