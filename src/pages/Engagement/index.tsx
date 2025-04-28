@@ -99,7 +99,9 @@ const EngagementTab = () => {
     socketRef.current = socket;
 
     socket.on("connect", () => console.log("Socket connected", socket.id));
-    socket.on("connect_error", (err) => console.error("Socket connection error", err));
+    socket.on("connect_error", (err) =>
+      console.error("Socket connection error", err)
+    );
     socket.on("reconnect_attempt", () => console.log("Socket reconnecting..."));
     socket.on("disconnect", (reason) =>
       console.warn("Socket disconnected", reason)
@@ -112,9 +114,9 @@ const EngagementTab = () => {
       setPosts(data.posts || []);
     });
 
+    // Existing event listeners
     socket.on("igMessageSendSuccess", ({ data }) => {
       console.log("igMessageSendSuccess received", data);
-      console.log("Current conversations:", conversations);
       setConversations((prev) =>
         prev.map((c) =>
           c.messageId === data.messageId
@@ -235,6 +237,115 @@ const EngagementTab = () => {
       setLikedPosts((prev) => new Set(prev).add(data.postId));
     });
 
+    // New event listeners
+    socket.on("igManualAdminMessage", ({ data }) => {
+      console.log("igManualAdminMessage received", data);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.messageId === data.messageId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
+        )
+      );
+    });
+    socket.on("igIncomingUserMessage", ({ data }) => {
+      console.log("igIncomingUserMessage received", data);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.userId === data.recipientId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
+        )
+      );
+    });
+    socket.on("igBotReplyMessage", ({ data }) => {
+      console.log("igBotReplyMessage received", data);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.messageId === data.messageId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
+        )
+      );
+    });
+    socket.on("igManualAdminComment", ({ data }) => {
+      console.log("igManualAdminComment received", data);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.messageId === data.messageId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
+        )
+      );
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === data.postId
+            ? {
+                ...p,
+                comments: [
+                  ...(p.comments || []),
+                  {
+                    commentId: data.commentId,
+                    username: data.recipientUsername || "Agent",
+                    text: data.message.text,
+                    timestamp: data.timestamp,
+                  },
+                ],
+              }
+            : p
+        )
+      );
+    });
+    socket.on("igIncomingUserComment", ({ data }) => {
+      console.log("igIncomingUserComment received", data);
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === data.postId
+            ? {
+                ...p,
+                comments: [
+                  ...(p.comments || []),
+                  {
+                    commentId: data.commentId,
+                    username: data.username,
+                    text: data.message.text,
+                    timestamp: data.timestamp,
+                  },
+                ],
+              }
+            : p
+        )
+      );
+    });
+    socket.on("igBotReplyComment", ({ data }) => {
+      console.log("igBotReplyComment received", data);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.messageId === data.messageId
+            ? { ...c, messages: [...(c.messages || []), data] }
+            : c
+        )
+      );
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === data.postId
+            ? {
+                ...p,
+                comments: [
+                  ...(p.comments || []),
+                  {
+                    commentId: data.commentId,
+                    username: "Bot",
+                    text: data.message.text,
+                    timestamp: data.timestamp,
+                  },
+                ],
+              }
+            : p
+        )
+      );
+    });
+
     socket.on("error", (e) => console.error("Socket error", e));
     socket.on("igMessageSendError", (e) => console.error("Msg send error", e));
     socket.on("igCommentSendError", (e) => console.error("Cmt send error", e));
@@ -252,17 +363,27 @@ const EngagementTab = () => {
       console.log("Fetching initial data with integrationId:", integrationId);
       socketRef.current.emit("igFetchInitialData", integrationId);
     } else {
-      console.warn("Cannot fetch initial data: integrationId or socket not ready", { integrationId, socket: socketRef.current });
+      console.warn(
+        "Cannot fetch initial data: integrationId or socket not ready",
+        { integrationId, socket: socketRef.current }
+      );
     }
   }, [integrationId]);
 
   const sendMessage = () => {
-    console.log("sendMessage called", { inputText, selectedConversationId, integrationId });
+    console.log("sendMessage called", {
+      inputText,
+      selectedConversationId,
+      integrationId,
+    });
     if (!inputText || !selectedConversationId || !integrationId) return;
 
     const conv = conversations.find((c) => c.userId === selectedConversationId);
     if (!conv) {
-      console.warn("Conversation not found for userId:", selectedConversationId);
+      console.warn(
+        "Conversation not found for userId:",
+        selectedConversationId
+      );
       return;
     }
 
@@ -271,12 +392,14 @@ const EngagementTab = () => {
         integrationId,
         recipientId: conv.recipientId,
         recipientUsername: conv.username,
+        recipientName: conv.recipientName || conv.username, // Add recipientName
         message: inputText,
       });
       console.log("Emitted igSendMessageRequest", {
         integrationId,
         recipientId: conv.recipientId,
         recipientUsername: conv.username,
+        recipientName: conv.recipientName || conv.username,
         message: inputText,
       });
       // Simulate success for testing
@@ -308,8 +431,13 @@ const EngagementTab = () => {
     setInputText("");
   };
 
+  // Update sendComment function
   const sendComment = () => {
-    console.log("sendComment called", { commentText, currentPost, integrationId });
+    console.log("sendComment called", {
+      commentText,
+      currentPost,
+      integrationId,
+    });
     if (!commentText || !currentPost || !integrationId) return;
 
     socketRef.current!.emit("igSendCommentReplyRequest", {
@@ -340,7 +468,11 @@ const EngagementTab = () => {
   };
 
   const likePost = () => {
-    console.log("likePost called", { currentPost, integrationId, alreadyLiked: likedPosts.has(currentPost.postId) });
+    console.log("likePost called", {
+      currentPost,
+      integrationId,
+      alreadyLiked: likedPosts.has(currentPost.postId),
+    });
     if (!currentPost || !integrationId || likedPosts.has(currentPost.postId))
       return;
 
@@ -348,7 +480,10 @@ const EngagementTab = () => {
       integrationId,
       postId: currentPost.postId,
     });
-    console.log("Emitted igLikePostRequest", { integrationId, postId: currentPost.postId });
+    console.log("Emitted igLikePostRequest", {
+      integrationId,
+      postId: currentPost.postId,
+    });
     // Simulate success for testing
     setTimeout(() => {
       socketRef.current!.emit("igLikePostSuccess", {
@@ -906,19 +1041,23 @@ const EngagementTab = () => {
                           mt={2}
                           gap={1}
                         >
-                          {currentPost.carouselMedia.map((_: any, index: number) => (
-                            <Box
-                              key={index}
-                              width={8}
-                              height={8}
-                              borderRadius="50%"
-                              bgcolor={
-                                index === carouselIndex ? "#65558F" : "grey.400"
-                              }
-                              sx={{ cursor: "pointer" }}
-                              onClick={() => setCarouselIndex(index)}
-                            />
-                          ))}
+                          {currentPost.carouselMedia.map(
+                            (_: any, index: number) => (
+                              <Box
+                                key={index}
+                                width={8}
+                                height={8}
+                                borderRadius="50%"
+                                bgcolor={
+                                  index === carouselIndex
+                                    ? "#65558F"
+                                    : "grey.400"
+                                }
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => setCarouselIndex(index)}
+                              />
+                            )
+                          )}
                         </Box>
                       </>
                     )}

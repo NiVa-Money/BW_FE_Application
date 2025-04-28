@@ -16,7 +16,7 @@ import FormikFieldToggleComponent from "../../components/FormikFieldToggleCompon
 import CreateBotRightContainer from "./CreateBotRightContainer";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { generatePromptService } from "../../api/services/botService";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -52,7 +52,6 @@ const CreateBot: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const totalPages = 4;
   const imgViewerRef = useRef<HTMLInputElement>(null);
-  const dispatch = useDispatch();
   const initialValues = {
     botName: "",
     botTone: "",
@@ -317,30 +316,6 @@ const CreateBot: React.FC = () => {
     console.log("Confirmed submission");
   };
 
-  const handleDetachKB = async (index: number, botId: string, kbId: string) => {
-    try {
-      await detachKnowledgeBaseService(botId, kbId);
-      setKnowledgeBases((prev) =>
-        prev.map((kb, i) => (i === index ? { ...kb, kbId: undefined } : kb))
-      );
-    } catch (error) {
-      console.error("Failed to detach knowledge base:", error);
-    }
-  };
-
-  const handleDeleteKB = async (index: number, botId: string, kbId: string) => {
-    try {
-      await deleteKnowledgeBaseService(botId, kbId);
-      setKnowledgeBases((prev) => prev.filter((_, i) => i !== index));
-      const updatedFiles = formik.values.knowledgeBaseFiles.filter(
-        (_: File, i: number) => i !== index
-      );
-      formik.setFieldValue("knowledgeBaseFiles", updatedFiles);
-    } catch (error) {
-      console.error("Failed to delete knowledge base:", error);
-    }
-  };
-
   const nextPage = async (formik: any) => {
     const pageFields = {
       1: [
@@ -374,6 +349,38 @@ const CreateBot: React.FC = () => {
   const prevPage = () => setCurrentPage(currentPage - 1);
 
   const renderFormFields = (formik: any) => {
+    const handleDetachKB = async (
+      index: number,
+      botId: string,
+      kbId: string
+    ) => {
+      try {
+        await detachKnowledgeBaseService(botId, kbId);
+        setKnowledgeBases((prev) =>
+          prev.map((kb, i) => (i === index ? { ...kb, kbId: undefined } : kb))
+        );
+      } catch (error) {
+        console.error("Failed to detach knowledge base:", error);
+      }
+    };
+
+    const handleDeleteKB = async (
+      index: number,
+      botId: string,
+      kbId: string
+    ) => {
+      try {
+        await deleteKnowledgeBaseService(botId, kbId);
+        setKnowledgeBases((prev) => prev.filter((_, i) => i !== index));
+        const updatedFiles = formik.values.knowledgeBaseFiles.filter(
+          (_: File, i: number) => i !== index
+        );
+        formik.setFieldValue("knowledgeBaseFiles", updatedFiles);
+      } catch (error) {
+        console.error("Failed to delete knowledge base:", error);
+      }
+    };
+
     const steps = [
       {
         title: "Basic Settings",
@@ -852,10 +859,14 @@ const CreateBot: React.FC = () => {
                 </Tooltip>
               </div>
               <div className="relative mb-4">
-                <div className="flex items-center border border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                <label
+                  htmlFor="knowledgeBaseInput"
+                  className="flex items-center border border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-gray-50"
+                >
                   <span className="text-gray-500">Choose Files</span>
-                </div>
+                </label>
                 <input
+                  id="knowledgeBaseInput"
                   type="file"
                   onChange={(e) => handleFileChange(e, formik)}
                   accept=".pdf,.doc,.docx,.txt"
