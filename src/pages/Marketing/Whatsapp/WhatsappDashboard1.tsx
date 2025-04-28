@@ -47,6 +47,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
+import CampaignStatsCard from "./CampaignStatsCard";
 
 interface DashboardProps {
   totalMessages: number;
@@ -575,6 +576,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
                 </p>
               </div>
             </div>
+
             {insights?.campaignInsights ? (
               <div className="relative h-full">
                 <AnimatePresence initial={false} custom={direction}>
@@ -760,6 +762,32 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
+        <CampaignStatsCard
+          activeCampaigns={100}
+          scheduledCampaigns={200}
+          messagesSent={totalMessagesValue}
+          breakdown={{
+            delivered: deliveredMessagesValue,
+            read: seenMessagesValue,
+            replied: hotLeadsValue,
+            failed: unreadMessagesValue,
+          }}
+          scheduledNames={
+            Array.isArray(campaignData)
+              ? campaignData
+                  .filter((c) => new Date(c.startDate) > new Date())
+                  .map((c) => c.campaignName)
+              : []
+          }
+          sentMessages={hotLeads /* or messages array */
+            .map((m) => ({
+              id: m.id,
+              content: m.text, // adjust per your message shape
+            }))}
+        />
       </div>
 
       {/* Contact Insights Table */}
