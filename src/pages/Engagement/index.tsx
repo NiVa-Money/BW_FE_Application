@@ -967,6 +967,7 @@ const EngagementTab = () => {
           <DialogContent dividers>
             <div className="grid grid-cols-2 gap-6">
               <div className="flex items-center justify-center relative">
+                {/* Media display logic remains unchanged */}
                 {currentPost.mediaType === "VIDEO" ? (
                   <video
                     src={currentPost.mediaUrl}
@@ -1083,14 +1084,16 @@ const EngagementTab = () => {
                         <FavoriteBorder fontSize="small" />
                       )}
                     </IconButton>
-                    {currentPost.likesCount || 0}
+                    <span>{currentPost.likeCount || 0} Likes</span>{" "}
+                    {/* Updated to match data field */}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Comment fontSize="small" />{" "}
-                    {currentPost.comments?.length || 0}
+                    <Comment fontSize="small" />
+                    <span>{currentPost.comments?.length || 0} Comments</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Send fontSize="small" /> {currentPost.sharesCount || 0}
+                    <Send fontSize="small" />
+                    <span>{currentPost.sharesCount || 0} Shares</span>
                   </div>
                 </div>
                 <Divider />
@@ -1132,16 +1135,31 @@ const EngagementTab = () => {
                       <Avatar sx={{ width: 24, height: 24 }} className="mr-2">
                         {c.username[0]}
                       </Avatar>
-                      <div>
+                      <div className="flex-1">
                         <Typography variant="subtitle2">
                           {c.username}
                         </Typography>
                         <Typography variant="body2" className="break-words">
                           {c.text}
                         </Typography>
-                        <Typography variant="caption" className="text-gray-400">
-                          {new Date(c.timestamp).toLocaleTimeString()}
-                        </Typography>
+                        <div className="flex items-center gap-2">
+                          <Typography
+                            variant="caption"
+                            className="text-gray-400"
+                          >
+                            {new Date(c.timestamp).toLocaleTimeString()}
+                          </Typography>
+                          <div className="flex items-center gap-1">
+                            <FavoriteBorder fontSize="small" />
+                            <Typography
+                              variant="caption"
+                              className="text-gray-600"
+                            >
+                              {c.likeCount || 0} Likes{" "}
+                              {/* Added comment likeCount */}
+                            </Typography>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}

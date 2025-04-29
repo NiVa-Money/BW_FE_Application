@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import axiosInstance from "../axiosConfig";
 
@@ -147,6 +148,47 @@ export const uploadUrlService = async (
     return response.data;
   } catch (error) {
     console.error("Error uploading URL:", error);
+    throw error;
+  }
+};
+
+export const getAllVoicesService = async () => {
+  try {
+    const response = await axiosInstance.get(
+      "https://vo-backend.onrender.com/voice-agent/voice-config"
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching voices:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const recordAndCloneVoiceService = async (
+  formData: FormData
+): Promise<any> => {
+  try {
+    const response = await axiosInstance.post(
+      "https://vo-backend.onrender.com/voice-agent/record-and-clone",
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error recording and cloning voice:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
     throw error;
   }
 };

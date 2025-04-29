@@ -47,6 +47,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
+import CampaignStatsCard from "./CampaignStatsCard";
 
 interface DashboardProps {
   totalMessages: number;
@@ -575,6 +576,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
                 </p>
               </div>
             </div>
+
             {insights?.campaignInsights ? (
               <div className="relative h-full">
                 <AnimatePresence initial={false} custom={direction}>
@@ -760,6 +762,61 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
+        <CampaignStatsCard
+          activeCampaigns={3}
+          scheduledCampaigns={2}
+          messagesSent={150}
+          // breakdown={{ delivered: 120, read: 110, replied: 30, failed: 5 }}
+          scheduledNames={
+            Array.isArray(campaignData)
+              ? campaignData
+                  .filter((c) => new Date(c.startDate) > new Date())
+                  .map((c) => c.campaignName)
+              : []
+          }
+          sentMessages={hotLeads /* or messages array */
+            .map((m) => ({
+              id: m.id,
+              content: m.text, // adjust per your message shape
+            }))}
+          stepStats={[
+            {
+              stepName: "Step1",
+              sent: 50,
+              read: 45,
+              delivered: 48,
+              failed: 2,
+              intentAnalysis: 10,
+            },
+            {
+              stepName: "Step2",
+              sent: 50,
+              read: 48,
+              delivered: 50,
+              failed: 0,
+              intentAnalysis: 12,
+            },
+            {
+              stepName: "Step3",
+              sent: 50,
+              read: 50,
+              delivered: 50,
+              failed: 0,
+              intentAnalysis: 8,
+            },
+            {
+              stepName: "Finish",
+              sent: 0,
+              read: 0,
+              delivered: 0,
+              failed: 0,
+              intentAnalysis: 0,
+            },
+          ]}
+        />
       </div>
 
       {/* Contact Insights Table */}
