@@ -48,6 +48,7 @@ import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignAct
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
 import CampaignStatsCard from "./CampaignStatsCard";
+import CampaignWorkflowBuilder from "./CampaignWorkflow";
 
 interface DashboardProps {
   totalMessages: number;
@@ -764,6 +765,9 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
         </div>
       </div>
 
+      <div>
+        <CampaignWorkflowBuilder />
+      </div>
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
         <CampaignStatsCard
           activeCampaigns={3}

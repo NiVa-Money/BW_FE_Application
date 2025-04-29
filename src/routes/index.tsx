@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Login from "../pages/login";
 import SignUp from "../pages/Signup";
-import DashBoard from "../pages/DashboardNew";
+// import DashBoard from "../pages/DashboardNew";
 import CreateBot from "../pages/CreateBot";
 import IntegrationsPage from "../pages/Integration";
 import EngagementTab from "../pages/Engagement";
@@ -41,6 +41,7 @@ import MyVoiceAgents from "../pages/VoiceModule/Agent/VoiceAgentManager";
 import FacebookIntegrationList from "../pages/Integration/FacebookIntegration/facebookIntegrationList";
 import WhatsappIntegrationList from "../pages/Integration/WhatsappIntegration/integrationsList";
 import ConversationsTable from "../pages/VoiceModule/ConversationsTable";
+import MainDashboard from "../pages/MainDashboard";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -49,7 +50,7 @@ export const autRoutes: any[] = [
   {
     id: 1,
     path: "/dashboard",
-    component: <DashBoard />,
+    component: <MainDashboard />,
   },
   { id: 2.1, path: "/conversations/all-chats", component: <AllChats /> },
   { id: 2.2, path: "/conversations/live-chats", component: <LiveChat /> },
