@@ -48,7 +48,7 @@ import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignAct
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
 import CampaignStatsCard from "./CampaignStatsCard";
-import CampaignWorkflowBuilder from "./CampaignWorkflow";
+
 
 interface DashboardProps {
   totalMessages: number;
@@ -765,15 +765,14 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
         </div>
       </div>
 
-      <div>
+      {/* <div>
         <CampaignWorkflowBuilder />
-      </div>
+      </div> */}
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
         <CampaignStatsCard
           activeCampaigns={3}
           scheduledCampaigns={2}
           messagesSent={150}
-
           scheduledNames={
             Array.isArray(campaignData)
               ? campaignData
@@ -781,11 +780,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
                   .map((c) => c.campaignName)
               : []
           }
-          sentMessages={hotLeads 
-            .map((m) => ({
-              id: m.id,
-              content: m.text, 
-            }))}
+          sentMessages={hotLeads.map((m) => ({
+            id: m.id,
+            content: m.text,
+          }))}
           stepStats={[
             {
               stepName: "Step1",
@@ -821,7 +819,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             },
           ]}
         />
-      </div> */}
+      </div>
 
       {/* Contact Insights Table */}
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">

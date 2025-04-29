@@ -8,7 +8,8 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
 import Header from "./Charts/Header";
-import AHTChart from "./Charts/AHTChart";
+import AIHumanChart from "./Charts/AIHumanChart";
+import CustomerSentimentCard from "./Charts/SentimentAnalysis";
 
 // Simulate live data for mini charts
 const resolutionData = [40, 42, 38, 45, 48, 50];
@@ -19,7 +20,7 @@ const escalationData = [40, 38, 35, 32, 33, 35];
 
 const MainDashboard = () => {
   return (
-    <div className="container mx-auto p-4">
+    <div className="container p-6 mx-auto">
       <Header />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
         <StatCard
@@ -59,12 +60,15 @@ const MainDashboard = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
         <div className="h-[400px]">
           <EngagementChart />
         </div>
         <div className="h-[400px]">
           <PerformanceChart />
+        </div>
+        <div className="h-[400px]">
+          <CustomerSentimentCard />
         </div>
       </div>
 
@@ -76,7 +80,7 @@ const MainDashboard = () => {
           <ResolvedChatsChart />
         </div>
         <div className="h-[400px]">
-          <AHTChart />
+          <AIHumanChart />
         </div>
       </div>
     </div>
