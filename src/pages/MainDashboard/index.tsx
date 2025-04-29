@@ -10,7 +10,7 @@ import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutl
 import Header from "./Charts/Header";
 import AIHumanChart from "./Charts/AIHumanChart";
 import CustomerSentimentCard from "./Charts/SentimentAnalysis";
-import PerformanceTables from "./PerformanceTable";
+import PerformanceTable from "./Tables/PerformanceTable";
 
 // Simulate live data for mini charts
 const resolutionData = [40, 42, 38, 45, 48, 50];
@@ -18,6 +18,85 @@ const liveSessionsData = [18, 22, 25, 23, 20, 25];
 const aiVsHumanData = [55, 58, 60, 59, 62, 60];
 const messagesData = [800, 850, 900, 950, 980, 1000];
 const escalationData = [40, 38, 35, 32, 33, 35];
+
+const agentPerformance = [
+  {
+    name: "Agent Name",
+    totalSessions: 22,
+    whatsappSessions: 22,
+    webSessions: 22,
+    resolvedPercentage: 90,
+    unresolvedPercentage: 10,
+    dateCreated: "1 JAN 2024",
+  },
+  {
+    name: "Agent Name",
+    totalSessions: 34,
+    whatsappSessions: 34,
+    webSessions: 34,
+    resolvedPercentage: 70,
+    unresolvedPercentage: 30,
+    dateCreated: "1 JAN 2024",
+  },
+  {
+    name: "Agent Name",
+    totalSessions: 14,
+    whatsappSessions: 14,
+    webSessions: 14,
+    resolvedPercentage: 80,
+    unresolvedPercentage: 20,
+    dateCreated: "1 JAN 2024",
+  },
+  {
+    name: "Agent Name",
+    totalSessions: 65,
+    whatsappSessions: 65,
+    webSessions: 65,
+    resolvedPercentage: 100,
+    unresolvedPercentage: 0,
+    dateCreated: "1 JAN 2024",
+  },
+];
+
+// Mock data for human performance, with different values for clear testing
+const humanPerformance = [
+  {
+    name: "Agent Name",
+    totalSessions: 22,
+    whatsappSessions: 22,
+    webSessions: 22,
+    resolvedPercentage: 40,
+    unresolvedPercentage: 60,
+    dateCreated: "1 JAN 2024",
+  },
+  {
+    name: "Agent Name",
+    totalSessions: 34,
+    whatsappSessions: 34,
+    webSessions: 34,
+    resolvedPercentage: 20,
+    unresolvedPercentage: 80,
+    dateCreated: "1 JAN 2024",
+  },
+  {
+    name: "Agent Name",
+    totalSessions: 14,
+    whatsappSessions: 14,
+    webSessions: 14,
+    resolvedPercentage: 35,
+    unresolvedPercentage: 65,
+    dateCreated: "1 JAN 2024",
+  },
+  {
+    name: "Agent Name",
+    totalSessions: 65,
+    whatsappSessions: 65,
+    webSessions: 65,
+    resolvedPercentage: 55,
+    unresolvedPercentage: 45,
+    dateCreated: "1 JAN 2024",
+  },
+];
 
 const MainDashboard = () => {
   return (
@@ -85,7 +164,9 @@ const MainDashboard = () => {
         </div>
       </div>
       <div className="mt-2">
-        <PerformanceTables />
+        <PerformanceTable title="Agent Performance" data={agentPerformance} />
+
+        <PerformanceTable title="Human Performance" data={humanPerformance} />
       </div>
     </div>
   );
