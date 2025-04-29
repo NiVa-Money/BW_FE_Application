@@ -51,7 +51,6 @@ const SignUp: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [otp, setOtp] = useState<string>("");
   const [saveDataEmail, setSaveDataEmail] = useState<string>("");
-  const navigate = useNavigate();
 
   const validateField = (name: keyof FormData, value: string): string => {
     switch (name) {
