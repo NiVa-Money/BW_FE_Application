@@ -349,7 +349,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   // Notification Sound Function
   // Notification Sound Function
   const playNotificationSound = () => {
-    const audio = new Audio("https://www.soundjay.com/buttons/beep-02.mp3"); // Changed to a calmer beep
+    const audio = new Audio("https://jumpshare.com/s/NiLeGdQk6YJJh1PzNDg4");
     audio.play().catch((error) => {
       console.log("Audio play failed:", error);
     });
