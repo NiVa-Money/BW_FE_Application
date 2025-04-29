@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { PieChart, Pie, ResponsiveContainer, Cell, Sector } from 'recharts';
 
 const data = [
-  { name: 'Promoters', value: 67, color: '#3f2181' },
-  { name: 'Neutrals', value: 23, color: '#a5ffd6' },
-  { name: 'Detractors', value: 10, color: '#78c9f1' },
+  { name: 'Promoters', value: 67, color: '#4A2E91' },
+  { name: 'Neutrals', value: 23, color: '#CFBDFF' },
+  { name: 'Detractors', value: 10, color: '#6B91C9' },
 ];
 
 const renderActiveShape = (props: any) => {

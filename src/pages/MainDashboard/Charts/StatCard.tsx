@@ -76,7 +76,7 @@ const StatCard: React.FC<StatCardProps> = ({
       </div>
 
       {formattedChartData && (
-        <div className="mt-1">
+         <div className="mt-3 h-8">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={formattedChartData}
