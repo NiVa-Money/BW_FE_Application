@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface OtpModalProps {
   isOpen: boolean;
@@ -32,7 +32,7 @@ const OtpModal: React.FC<OtpModalProps> = ({
     setOtpValues(newOtpValues);
 
     const otp = newOtpValues.join(""); // Join all digits
-    onChangeOtp(otp); 
+    onChangeOtp(otp);
 
     // Move to the next input field if a digit is entered
     if (value && index < inputRefs.length - 1) {
@@ -49,6 +49,13 @@ const OtpModal: React.FC<OtpModalProps> = ({
       inputRefs[index - 1].current?.focus();
     }
   };
+  useEffect(() => {
+    return () => {
+      // Clear OTP values when the modal is closed
+      setOtpValues(["", "", "", ""]);
+    } // Cleanup function to reset OTP values
+  }, [isOpen]); // Reset OTP values when the modal opens
+
 
   if (!isOpen) return null;
 
