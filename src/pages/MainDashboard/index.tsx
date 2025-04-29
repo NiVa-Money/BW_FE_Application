@@ -10,6 +10,7 @@ import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutl
 import Header from "./Charts/Header";
 import AIHumanChart from "./Charts/AIHumanChart";
 import CustomerSentimentCard from "./Charts/SentimentAnalysis";
+import PerformanceTables from "./PerformanceTable";
 
 // Simulate live data for mini charts
 const resolutionData = [40, 42, 38, 45, 48, 50];
@@ -82,6 +83,9 @@ const MainDashboard = () => {
         <div className="h-[400px]">
           <AIHumanChart />
         </div>
+      </div>
+      <div className="mt-2">
+        <PerformanceTables />
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ const StatCard: React.FC<StatCardProps> = ({
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <p className="text-xs text-gray-500">{title}</p>
-          <p className="text-xl font-semibold text-gray-900">{value}</p>
+          <p className="text-xl font-medium text-gray-900">{value}</p>
           {change && (
             <div className="flex items-center gap-1">
               <div

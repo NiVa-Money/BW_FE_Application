@@ -24,7 +24,7 @@ const AIHumanChart = () => {
     <div className="bg-white rounded-xl shadow-sm border border-purple-light p-5 flex flex-col h-full">
       <div className="flex justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-purple-dark">
+          <h3 className="text-lg font-semibold text-purple-950">
             AI agent/human over time
           </h3>
           <p className="text-sm text-muted-foreground">

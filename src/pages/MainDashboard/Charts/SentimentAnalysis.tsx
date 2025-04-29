@@ -11,14 +11,24 @@ const CustomerSentimentCard = () => {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-purple-light p-5 flex flex-col h-full">
-      <h1 className="text-2xl font-bold text-black mb-16">
-        Customer Sentiment Analysis
-      </h1>
+      <div className="flex justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-semibold text-purple-950">
+            Customer Senitment Analysis
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Analyze customer satisfaction levels
+          </p>
+        </div>
+      </div>
 
       <div className="flex-1 flex flex-col items-center justify-center mb-12">
-        <div className="relative mb-10" style={{ height: "120px", width: "100%", marginTop: "-20px" }}>
+        <div
+          className="relative mb-10"
+          style={{ height: "140px", width: "100%", marginTop: "-70px" }}
+        >
           {/* Gauge Chart using Recharts */}
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="50%" minHeight={200}>
             <PieChart>
               <Pie
                 data={sentimentData}
@@ -40,18 +50,23 @@ const CustomerSentimentCard = () => {
           </ResponsiveContainer>
 
           {/* Center Text Overlay - Better Centered */}
-          <div className="absolute left-1/2 transform -translate-x-1/2" style={{ top: "45%" }}>
+          <div
+            className="absolute left-1/2 transform -translate-x-1/2"
+            style={{ top: "100%" }}
+          >
             <div className="flex flex-col items-center">
-              <p className="text-3xl mt-2 font-bold text-black">{sentimentData[0].value}%</p>
+              <p className="text-3xl mt-2 font-bold text-black">
+                {sentimentData[0].value}%
+              </p>
               <p className="text-xl text-black">Positive</p>
             </div>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex justify-center gap-6 mt-10 pt-10 w-full">
+        <div className="flex justify-center gap-5 w-full">
           {sentimentData.map((entry) => (
-            <div key={entry.name} className="flex items-center gap-2">
+            <div key={entry.name} className="flex items-center mt-36 gap-2">
               <div
                 className="w-6 h-6 rounded"
                 style={{ backgroundColor: entry.color }}

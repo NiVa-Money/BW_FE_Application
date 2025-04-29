@@ -15,7 +15,7 @@ const PerformanceChart = () => {
     <div className="bg-white rounded-xl shadow-sm border border-purple-light p-5 h-full flex flex-col h-full">
       <div className="flex justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-purple-dark">Chatbot Performance</h3>
+          <h3 className="text-lg font-semibold text-purple-950">Chatbot Performance</h3>
           <p className="text-sm text-muted-foreground">Accuracy and response speed metrics</p>
         </div>
       </div>

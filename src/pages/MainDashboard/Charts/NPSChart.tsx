@@ -56,11 +56,11 @@ const NPSChart = () => {
     <div className="bg-white rounded-xl shadow-sm border border-purple-light p-5 flex flex-col h-full">
       <div className="flex justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-purple-dark">Net Promoter Score</h3>
+          <h3 className="text-lg font-semibold text-purple-950">Net Promoter Score</h3>
           <p className="text-sm text-muted-foreground">Customer satisfaction rating</p>
         </div>
         <div className="bg-purple-light/30 px-3 py-1 rounded-md flex items-center gap-2">
-          <span className="text-lg font-bold text-purple-dark">{npsScore}</span>
+          <span className="text-lg font-bold text-purple-950">{npsScore}</span>
           <div className="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
             +5%
           </div>

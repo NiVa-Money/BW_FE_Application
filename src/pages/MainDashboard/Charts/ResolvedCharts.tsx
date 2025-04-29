@@ -14,11 +14,11 @@ const ResolvedChatsChart = () => {
     <div className="bg-white rounded-xl shadow-sm border border-purple-light p-5 h-full flex flex-col h-full">
       <div className="flex justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-purple-dark">Resolved Chats</h3>
+          <h3 className="text-lg font-semibold text-purple-950">Resolved Chats</h3>
           <p className="text-sm text-muted-foreground">Chats resolved vs. total chats</p>
         </div>
         <div className="bg-purple-light/30 px-3 py-1 rounded-md">
-          <span className="text-lg font-bold text-purple-dark">
+          <span className="text-lg font-bold text-purple-950">
             {((data[data.length - 1].resolved / data[data.length - 1].total) * 100).toFixed(0)}%
           </span>
         </div>

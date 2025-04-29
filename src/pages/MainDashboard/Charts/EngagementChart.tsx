@@ -12,10 +12,10 @@ const data = [
 
 const EngagementChart = () => {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-purple-light p-5 h-full flex flex-col h-full">
+    <div className="bg-white rounded-xl shadow-sm border border-purple-light p-5 flex flex-col h-full">
       <div className="flex justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-purple-dark">Platform Engagement</h3>
+          <h3 className="text-lg font-semibold text-purple-950">Platform Engagement</h3>
           <p className="text-sm text-muted-foreground">Messages received per platform</p>
         </div>
       </div>
