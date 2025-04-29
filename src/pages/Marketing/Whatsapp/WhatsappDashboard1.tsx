@@ -764,12 +764,12 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
         </div>
       </div>
 
-      <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
+      {/* <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
         <CampaignStatsCard
           activeCampaigns={3}
           scheduledCampaigns={2}
           messagesSent={150}
-          // breakdown={{ delivered: 120, read: 110, replied: 30, failed: 5 }}
+
           scheduledNames={
             Array.isArray(campaignData)
               ? campaignData
@@ -777,10 +777,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
                   .map((c) => c.campaignName)
               : []
           }
-          sentMessages={hotLeads /* or messages array */
+          sentMessages={hotLeads 
             .map((m) => ({
               id: m.id,
-              content: m.text, // adjust per your message shape
+              content: m.text, 
             }))}
           stepStats={[
             {
@@ -817,7 +817,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             },
           ]}
         />
-      </div>
+      </div> */}
 
       {/* Contact Insights Table */}
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
