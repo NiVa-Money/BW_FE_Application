@@ -174,8 +174,7 @@ const CreateBot: React.FC = () => {
                 })
             ),
           websiteURL: Yup.string()
-            .url("Invalid URL")
-            .required("Website URL is required"),
+            .url("Invalid URL"),
           agentRole: Yup.string().required("Agent Role is required"),
         })
       : Yup.object().shape({
@@ -342,8 +341,6 @@ const CreateBot: React.FC = () => {
         "supportNumber",
         "supportEmail",
         "appointmentSchedulerLink",
-        "botTheme",
-        "botFont",
         "openByDefault",
         "pulsing",
       ],
@@ -813,7 +810,7 @@ const CreateBot: React.FC = () => {
                   className="w-full max-w-md flex flex-wrap gap-2"
                   options={[
                     { label: "Formal", value: "Formal" },
-                    { label: "Professional", value: "Professional" },
+                    // { label: "Professional", value: "Professional" },
                     { label: "Casual", value: "Casual" },
                     { label: "Enthusiastic", value: "Enthusiastic" },
                     { label: "Custom", value: "CUSTOM" },
@@ -1265,8 +1262,8 @@ const CreateBot: React.FC = () => {
       {
         title: "Configuration & Submit",
         content: (
-          <div className="grid grid-cols-1 gap-6">
-            <div className="card p-6 bg-white shadow-md rounded-lg">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="card p-6 bg-white shadow-md rounded-lg col-span-2">
               <div className="flex items-center mb-4">
                 <label className="text-sm font-medium text-gray-800">
                   Agent Limit per Message
@@ -1345,7 +1342,7 @@ const CreateBot: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="card p-6 bg-white shadow-md rounded-lg">
+            <div className="card p-6 bg-white shadow-md rounded-lg w-full">
               <div className="flex items-center mb-4">
                 <label className="text-sm font-medium text-gray-800">
                   Bot Smartness
