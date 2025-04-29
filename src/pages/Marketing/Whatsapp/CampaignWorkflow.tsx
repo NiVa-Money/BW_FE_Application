@@ -327,7 +327,7 @@ const CampaignWorkflowBuilder = () => {
               <Typography sx={{ color: '#1f2937' }}>Delay Duration</Typography>
               <Slider
                 value={selectedStep.config.duration || 1}
-                onChange={(e, value) =>
+                onChange={(_e, value) =>
                   setSelectedStep({
                     ...selectedStep,
                     config: { ...selectedStep.config, duration: value as number },

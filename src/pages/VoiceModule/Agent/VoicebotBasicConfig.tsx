@@ -17,8 +17,8 @@ export const VoicebotBasicConfig = ({
 }: VoicebotBasicConfigProps) => {
   const [languages, setLanguages] = useState<string[]>([]);
   const [voiceStyles, setVoiceStyles] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [_isLoading, setIsLoading] = useState(true);
+  const [_fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
