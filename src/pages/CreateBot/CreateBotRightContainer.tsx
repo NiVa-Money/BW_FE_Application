@@ -177,7 +177,8 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
   greetingMessage,
   agentRole = "Support Agent",
 }) => {
-  const effectiveGreeting = greetingMessage.trim() || "Hello, how can I assist you?";
+  const effectiveGreeting =
+    greetingMessage.trim() || "Hello, how can I assist you?";
 
   const messages = [
     {
@@ -207,17 +208,25 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
               style={{ backgroundColor: `${color}` }}
             >
               <div className="p-2 flex">
-                {imageSrc && <img src={imageSrc} alt="logo" width={40} height={40} />}
+                {imageSrc && (
+                  <img src={imageSrc} alt="logo" width={40} height={40} />
+                )}
                 <div className="flex flex-col items-center justify-center w-full">
                   <h3
                     className="text-[1rem] text-center font-medium"
-                    style={{ color: theme === "dark" ? "#f3f2f6" : "#2E2F5F", fontFamily: font }}
+                    style={{
+                      color: theme === "dark" ? "#f3f2f6" : "#2E2F5F",
+                      fontFamily: font,
+                    }}
                   >
                     Chatbot
                   </h3>
                   <h3
                     className="text-[0.8rem] text-center"
-                    style={{ color: theme === "dark" ? "#f3f2f6" : "#2E2F5F", fontFamily: font }}
+                    style={{
+                      color: theme === "dark" ? "#f3f2f6" : "#2E2F5F",
+                      fontFamily: font,
+                    }}
                   >
                     {agentRole}
                   </h3>
@@ -241,7 +250,13 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
                     }`}
                   >
                     {msg.sender === "bot" && imageSrc && (
-                      <img src={imageSrc} alt="logo" width={30} height={30} className="mr-2" />
+                      <img
+                        src={imageSrc}
+                        alt="logo"
+                        width={30}
+                        height={30}
+                        className="mr-2"
+                      />
                     )}
                     <div className="ml-1">
                       <p
@@ -280,7 +295,10 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
           </div>
         </div>
         {showPulsingLogo && (
-          <div className="flex justify-end items-center">
+          <div
+            className="flex justify-end items-center mb-50"
+            style={{ overflow: "visible", marginBottom: "50px" }}
+          >
             <PulsingGlowLogo theme={theme} imageSrc={imageSrc} />
           </div>
         )}
