@@ -47,7 +47,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
-import CampaignStatsCard from "./CampaignStatsCard";
 
 interface DashboardProps {
   totalMessages: number;
