@@ -1265,8 +1265,8 @@ const EditBot: React.FC = () => {
       {
         title: "Configuration & Submit",
         content: (
-          <div className="grid grid-cols-1 gap-6">
-            <div className="card p-6 bg-white shadow-md rounded-lg">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="card p-6 bg-white shadow-md rounded-lg col-span-2">
               <div className="flex items-center mb-4">
                 <label className="text-sm font-medium text-gray-800">
                   Agent Limit per Message
@@ -1345,7 +1345,7 @@ const EditBot: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="card p-6 bg-white shadow-md rounded-lg">
+            <div className="card p-6 bg-white shadow-md rounded-lg w-full">
               <div className="flex items-center mb-4">
                 <label className="text-sm font-medium text-gray-800">
                   Bot Smartness
