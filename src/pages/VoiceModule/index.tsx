@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { useConversation } from "@11labs/react";
 import { Language } from "@11labs/client";

@@ -766,15 +766,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
 
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
         <CampaignStatsCard
-          activeCampaigns={100}
-          scheduledCampaigns={200}
-          messagesSent={totalMessagesValue}
-          breakdown={{
-            delivered: deliveredMessagesValue,
-            read: seenMessagesValue,
-            replied: hotLeadsValue,
-            failed: unreadMessagesValue,
-          }}
+          activeCampaigns={3}
+          scheduledCampaigns={2}
+          messagesSent={150}
+          // breakdown={{ delivered: 120, read: 110, replied: 30, failed: 5 }}
           scheduledNames={
             Array.isArray(campaignData)
               ? campaignData
@@ -787,6 +782,40 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
               id: m.id,
               content: m.text, // adjust per your message shape
             }))}
+          stepStats={[
+            {
+              stepName: "Step1",
+              sent: 50,
+              read: 45,
+              delivered: 48,
+              failed: 2,
+              intentAnalysis: 10,
+            },
+            {
+              stepName: "Step2",
+              sent: 50,
+              read: 48,
+              delivered: 50,
+              failed: 0,
+              intentAnalysis: 12,
+            },
+            {
+              stepName: "Step3",
+              sent: 50,
+              read: 50,
+              delivered: 50,
+              failed: 0,
+              intentAnalysis: 8,
+            },
+            {
+              stepName: "Finish",
+              sent: 0,
+              read: 0,
+              delivered: 0,
+              failed: 0,
+              intentAnalysis: 0,
+            },
+          ]}
         />
       </div>
 

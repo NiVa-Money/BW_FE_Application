@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState, useEffect } from "react";
+import { getAllVoicesService } from "../../../api/services/voiceModuleServices";
+
 type VoicebotBasicConfigProps = {
   config: {
     name: string;
@@ -7,34 +11,35 @@ type VoicebotBasicConfigProps = {
   updateConfig: (data: Partial<VoicebotBasicConfigProps["config"]>) => void;
 };
 
-const VoicebotBasicConfig = ({
+export const VoicebotBasicConfig = ({
   config,
   updateConfig,
 }: VoicebotBasicConfigProps) => {
-  const languages = [
-    "english",
-    "spanish",
-    "french",
-    "german",
-    "italian",
-    "portuguese",
-    "dutch",
-    "russian",
-    "japanese",
-    "chinese",
-    "korean",
-    "arabic",
-  ];
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [voiceStyles, setVoiceStyles] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const voiceStyles = [
-    "professional",
-    "friendly",
-    "casual",
-    "formal",
-    "enthusiastic",
-    "serious",
-    "empathetic",
-  ];
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getAllVoicesService();
+        setLanguages(
+          Array.isArray(data.availableLanguages) ? data.availableLanguages : []
+        );
+        setVoiceStyles(Array.isArray(data.voiceStyles) ? data.voiceStyles : []);
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+        setFetchError("Failed to load language and style options.");
+        setLanguages([]);
+        setVoiceStyles([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -71,7 +76,7 @@ const VoicebotBasicConfig = ({
             >
               {languages.map((lang) => (
                 <option key={lang} value={lang}>
-                  {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                  {lang}
                 </option>
               ))}
             </select>
@@ -88,7 +93,7 @@ const VoicebotBasicConfig = ({
             >
               {voiceStyles.map((style) => (
                 <option key={style} value={style}>
-                  {style.charAt(0).toUpperCase() + style.slice(1)}
+                  {style}
                 </option>
               ))}
             </select>
