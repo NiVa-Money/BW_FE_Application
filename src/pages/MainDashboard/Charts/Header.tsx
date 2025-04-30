@@ -1,95 +1,75 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import React from "react";
-// import {
-//   Button,
-//   Stack,
-//   MenuItem,
-//   Select,
-//   FormControl,
-//   InputLabel,
-// } from "@mui/material";
-// import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-// import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-
-// const Header = () => {
-//   const [platform, setPlatform] = React.useState("all");
-
-//   return (
-//     <header className="flex p-4 flex-col md:flex-row justify-between items-start md:items-center mb-2">
-//       <div>
-//         <h1 className="text-2xl font-bold text-black">Dashboard</h1>
-//         <p className="text-muted-foreground">
-//           View performance metrics across platforms
-//         </p>
-//       </div>
-
-//       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-//         <Button
-//           variant="outlined"
-//           startIcon={<CalendarTodayIcon fontSize="small" />}
-//           endIcon={<KeyboardArrowDownIcon fontSize="small" />}
-//         >
-//           Last 30 days
-//         </Button>
-
-//         <FormControl size="small" sx={{ minWidth: 180 }}>
-//           <InputLabel>Agents</InputLabel>
-//           <Select
-//             value={platform}
-//             label="Platform"
-//             onChange={(e) => setPlatform(e.target.value)}
-//           >
-//             <MenuItem value="whatsapp">Agent 1</MenuItem>
-//           </Select>
-//         </FormControl>
-//       </Stack>
-//     </header>
-//   );
-// };
-
-// export default Header;
-
-import {
-  Button,
-  Stack,
-} from "@mui/material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { Stack } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../../store";
 import { useEffect, useState } from "react";
+import { getBotsAction } from "../../../store/actions/botActions";
+import CustomDatePicker from "../../../components/CustomDatePicker";
 
-const Header = () => {
-  const [botLists, setBotLists] = useState<any[]>([]);
-  const botsDataLoader = useSelector( 
-    (state: RootState) => state.bot.lists.isLoading
-  );
-  const selectedBotId = useSelector(
-    (state: RootState) => state.bot.selectedBotId
-  );
+interface HeaderProps {
+  onBotSelect: (botId: string) => void; // Callback for bot selection
+  onDateRangeChange: (startDate: Date | null, endDate: Date | null) => void; // Callback for date range
+}
+
+const Header = ({ onBotSelect, onDateRangeChange }: HeaderProps) => {
+  const [botLists, setBotLists] = useState<{ botId: string; botName: string }[]>([]);
+  const [selectedBotId, setSelectedBotId] = useState<string>(""); // Local state for selected bot
+  const [startDate, setStartDate] = useState<Date | null>(null); // State for start date
+  const [endDate, setEndDate] = useState<Date | null>(null); // State for end date
   const dispatch = useDispatch();
 
-  const handleBotChange = (event: any) => {
-    dispatch(selectedBotId(event.target.value));
+  const botsDataRedux = useSelector((state: RootState) => state.bot?.lists?.data);
+  const botsDataLoader = useSelector((state: RootState) => state.bot?.lists?.loading);
+  const userId = localStorage.getItem("user_id");
+
+  useEffect(() => {
+    if (userId) {
+      dispatch(getBotsAction(userId));
+    }
+  }, [dispatch, userId]);
+
+  useEffect(() => {
+    if (Array.isArray(botsDataRedux) && botsDataRedux.length && !botsDataLoader) {
+      const formatted = botsDataRedux.map((bot: any) => ({
+        botId: bot._id,
+        botName: bot.botName || `Bot ${bot._id.substring(0, 8)}`,
+      }));
+      setBotLists(formatted);
+      if (formatted.length > 0 && !selectedBotId) {
+        setSelectedBotId(formatted[0].botId);
+        onBotSelect(formatted[0].botId); // Notify parent of the default selection
+      }
+    } else {
+      setBotLists([]);
+    }
+  }, [botsDataRedux, botsDataLoader, selectedBotId, onBotSelect]);
+
+  const handleBotChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const botId = event.target.value;
+    setSelectedBotId(botId);
+    onBotSelect(botId); // Pass the selected bot ID to the parent
   };
 
-  const botsDataRedux = useSelector(
-    (state: RootState) => state.bot?.lists?.data
-  );
-  
+  const handleStartDateChange = (newValue: Date | null) => {
+    setStartDate(newValue);
+    onDateRangeChange(newValue, endDate); // Notify parent of date range change
+  };
+
+  const handleEndDateChange = (newValue: Date | null) => {
+    setEndDate(newValue);
+    onDateRangeChange(startDate, newValue); // Notify parent of date range change
+  };
+
+  // Default to last 30 days if no dates are selected
   useEffect(() => {
-    if (
-      Array.isArray(botsDataRedux) &&
-      botsDataRedux.length &&
-      !botsDataLoader
-    ) {
-      const formattedBots = botsDataRedux.map((bot: any) => ({
-        _id: bot._id,
-        botName: bot.botName,
-      }));
-      setBotLists(formattedBots);
+    if (!startDate || !endDate) {
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today.setDate(today.getDate() - 30));
+      setStartDate(thirtyDaysAgo);
+      setEndDate(new Date());
+      onDateRangeChange(thirtyDaysAgo, new Date());
     }
-  }, [botsDataRedux, botsDataLoader]);
+  }, [startDate, endDate, onDateRangeChange]);
 
   return (
     <header className="flex p-4 flex-col md:flex-row justify-between items-start md:items-center mb-2">
@@ -101,22 +81,29 @@ const Header = () => {
       </div>
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-        <Button
-          variant="outlined"
-          startIcon={<CalendarTodayIcon fontSize="small" />}
-          endIcon={<KeyboardArrowDownIcon fontSize="small" />}
-        >
-          Last 30 days
-        </Button>
-
+        <CustomDatePicker
+          label="Start Date"
+          value={startDate}
+          onChange={handleStartDateChange}
+          disableFuture
+          sx={{ minWidth: 180 }}
+        />
+        <CustomDatePicker
+          label="End Date"
+          value={endDate}
+          onChange={handleEndDateChange}
+          disableFuture
+          sx={{ minWidth: 180 }}
+        />
         <select
-          className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-          onChange={(e) => handleBotChange(e.target.value)}
+          className="w-full p-3 border border-gray-300 bg-cyan-50 rounded-lg mb-4"
+          value={selectedBotId}
+          onChange={handleBotChange}
         >
           <option value="">Select a bot</option>
-          {botLists.map((bot: { value: string; name: string }) => (
-            <option key={bot.value} value={bot.value}>
-              {bot.name}
+          {botLists.map((bot) => (
+            <option key={bot.botId} value={bot.botId}>
+              {bot.botName}
             </option>
           ))}
         </select>
