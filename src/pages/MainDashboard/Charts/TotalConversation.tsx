@@ -95,7 +95,7 @@ interface Props {
   payload: { botId: string; startDate: string; endDate: string; timezone: string };
 }
 
-const EngagementChart: React.FC<Props> = ({ payload }) => {
+const TotalConversation: React.FC<Props> = ({ payload }) => {
   const [data, setData] = useState<EngagementData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -207,4 +207,4 @@ const EngagementChart: React.FC<Props> = ({ payload }) => {
   );
 };
 
-export default EngagementChart;
+export default TotalConversation;

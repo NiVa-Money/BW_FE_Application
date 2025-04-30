@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // import { useState, useMemo, useEffect } from "react";
 // import { useDispatch, useSelector } from "react-redux";
 // import EngagementChart from "./Charts/EngagementChart";
@@ -16,7 +17,7 @@
 // import AHTChart from "./Charts/AHTChart";
 // import { getBotsAction } from "../../store/actions/botActions";
 
-// // Mock data for Agent Performance table (unchanged)
+// // Mock data for Agent Performance table
 // const agentPerformance = [
 //   {
 //     name: "Agent Name",
@@ -58,12 +59,12 @@
 
 // const MainDashboard = () => {
 //   const dispatch = useDispatch();
-//   // Get bot data and selected bot from Redux
 //   const botsDataRedux = useSelector((state: RootState) => state.bot.lists.data);
-//   const selectedBotId = useSelector(
-//     (state: RootState) => state.bot.selectedBotId
-//   );
 //   const userId = localStorage.getItem("user_id");
+
+//   const [selectedBotId, setSelectedBotId] = useState<string>("");
+//   const [startDate, setStartDate] = useState<Date | null>(null);
+//   const [endDate, setEndDate] = useState<Date | null>(null);
 
 //   useEffect(() => {
 //     if (userId?.length) {
@@ -71,15 +72,6 @@
 //     }
 //   }, [userId, dispatch]);
 
-//   // Date range state (last 30 days by default)
-//   const [dateRange] = useState({
-//     startDate: new Date(
-//       new Date().setDate(new Date().getDate() - 30)
-//     ).toISOString(),
-//     endDate: new Date().toISOString(),
-//   });
-
-//   // Memoize payload with timezone
 //   const payload = useMemo(
 //     () => ({
 //       botId:
@@ -87,17 +79,41 @@
 //         (Array.isArray(botsDataRedux) && botsDataRedux.length > 0
 //           ? botsDataRedux[0]._id
 //           : null),
-//       startDate: dateRange.startDate,
-//       endDate: dateRange.endDate,
-//       timezone: "Asia/Kolkata", // Default as per backend
+//       startDate: startDate
+//         ? startDate.toISOString()
+//         : new Date(new Date().setDate(new Date().getDate() - 30)).toISOString(),
+//       endDate: endDate ? endDate.toISOString() : new Date().toISOString(),
+//       timezone: "Asia/Kolkata",
 //     }),
-//     [selectedBotId, botsDataRedux, dateRange.startDate, dateRange.endDate]
+//     [selectedBotId, botsDataRedux, startDate, endDate]
 //   );
+
+//   // Trigger re-fetch when selectedBotId changes
+//   useEffect(() => {
+//     if (payload.botId) {
+//       console.log("Bot ID changed, triggering API calls with:", payload);
+//     }
+//   }, [payload, payload.botId]);
+
+//   const handleBotSelect = (botId: string) => {
+//     setSelectedBotId(botId);
+//   };
+
+//   const handleDateRangeChange = (
+//     newStartDate: Date | null,
+//     newEndDate: Date | null
+//   ) => {
+//     setStartDate(newStartDate);
+//     setEndDate(newEndDate);
+//   };
 
 //   if (!payload.botId) {
 //     return (
 //       <div className="container p-6 mx-auto">
-//         <Header />
+//         <Header
+//           onBotSelect={handleBotSelect}
+//           onDateRangeChange={handleDateRangeChange}
+//         />
 //         <p>Loading bots... Please wait.</p>
 //       </div>
 //     );
@@ -105,7 +121,10 @@
 
 //   return (
 //     <div className="container p-6 mx-auto">
-//       <Header />
+//       <Header
+//         onBotSelect={handleBotSelect}
+//         onDateRangeChange={handleDateRangeChange}
+//       />
 //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
 //         <StatCard
 //           title="Resolution Rate"
@@ -172,9 +191,10 @@
 
 // export default MainDashboard;
 
+
 import { useState, useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import EngagementChart from "./Charts/EngagementChart";
+import TotalConversation from "./Charts/TotalConversation";
 import NPSChart from "./Charts/NPSChart";
 import PerformanceChart from "./Charts/PerformanceChart";
 import StatCard from "./Charts/StatCard";
@@ -189,46 +209,17 @@ import PerformanceTable from "./Tables/PerformanceTable";
 import { RootState } from "../../store";
 import AHTChart from "./Charts/AHTChart";
 import { getBotsAction } from "../../store/actions/botActions";
+import { getHumanPerformance, getAiAgentPerformance } from "../../api/services/mainDashboardServices";
 
-// Mock data for Agent Performance table
-const agentPerformance = [
-  {
-    name: "Agent Name",
-    totalSessions: 22,
-    whatsappSessions: 22,
-    webSessions: 22,
-    resolvedPercentage: 90,
-    unresolvedPercentage: 10,
-    dateCreated: "1 JAN 2024",
-  },
-  {
-    name: "Agent Name",
-    totalSessions: 34,
-    whatsappSessions: 34,
-    webSessions: 34,
-    resolvedPercentage: 70,
-    unresolvedPercentage: 30,
-    dateCreated: "1 JAN 2024",
-  },
-  {
-    name: "Agent Name",
-    totalSessions: 14,
-    whatsappSessions: 14,
-    webSessions: 14,
-    resolvedPercentage: 80,
-    unresolvedPercentage: 20,
-    dateCreated: "1 JAN 2024",
-  },
-  {
-    name: "Agent Name",
-    totalSessions: 65,
-    whatsappSessions: 65,
-    webSessions: 65,
-    resolvedPercentage: 100,
-    unresolvedPercentage: 0,
-    dateCreated: "1 JAN 2024",
-  },
-];
+interface AgentData {
+  name: string;
+  totalSessions: number;
+  whatsappSessions: number;
+  webSessions: number;
+  resolvedPercentage: number;
+  unresolvedPercentage: number;
+  dateCreated: string;
+}
 
 const MainDashboard = () => {
   const dispatch = useDispatch();
@@ -238,6 +229,8 @@ const MainDashboard = () => {
   const [selectedBotId, setSelectedBotId] = useState<string>("");
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [humanPerformanceData, setHumanPerformanceData] = useState<AgentData[]>([]);
+  const [aiAgentPerformanceData, setAiAgentPerformanceData] = useState<AgentData[]>([]);
 
   useEffect(() => {
     if (userId?.length) {
@@ -261,21 +254,58 @@ const MainDashboard = () => {
     [selectedBotId, botsDataRedux, startDate, endDate]
   );
 
-  // Trigger re-fetch when selectedBotId changes
+  // Fetch Human and AI Agent Performance Data
   useEffect(() => {
-    if (payload.botId) {
-      console.log("Bot ID changed, triggering API calls with:", payload);
-    }
-  }, [payload, payload.botId]);
+    const fetchPerformanceData = async () => {
+      if (!payload.botId) return;
+
+      try {
+        // Fetch Human Performance
+        const humanResponse = await getHumanPerformance(payload);
+        const humanMetrics = humanResponse.data.humanMetrics || [];
+        const formattedHumanData: AgentData[] = humanMetrics.map((metric: any) => ({
+          name: metric.agentName || "Unknown Agent",
+          totalSessions: metric.totalSessions || 0,
+          whatsappSessions: metric.totalWhatsappSessions || 0,
+          webSessions: metric.totalWebSessions || 0,
+          dateCreated: new Date(metric.date).toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }).toUpperCase(),
+        }));
+        setHumanPerformanceData(formattedHumanData);
+
+        // Fetch AI Agent Performance
+        const aiResponse = await getAiAgentPerformance(payload);
+        const aiMetrics = aiResponse.data.aiAgentMetrics || [];
+        const formattedAiData: AgentData[] = aiMetrics.map((metric: any) => ({
+          name: metric.agentName || "Unknown Agent",
+          totalSessions: metric.totalSessions || 0,
+          whatsappSessions: metric.totalWhatsappSessions || 0,
+          webSessions: metric.totalWebSessions || 0,
+          resolvedPercentage: 0, // API doesn't provide this; assuming 0 for now
+          unresolvedPercentage: 0, // API doesn't provide this; assuming 0 for now
+          dateCreated: new Date(metric.date).toLocaleDateString("en-US", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }).toUpperCase(),
+        }));
+        setAiAgentPerformanceData(formattedAiData);
+      } catch (error) {
+        console.error("Error fetching performance data:", error);
+      }
+    };
+
+    fetchPerformanceData();
+  }, [payload]);
 
   const handleBotSelect = (botId: string) => {
     setSelectedBotId(botId);
   };
 
-  const handleDateRangeChange = (
-    newStartDate: Date | null,
-    newEndDate: Date | null
-  ) => {
+  const handleDateRangeChange = (newStartDate: Date | null, newEndDate: Date | null) => {
     setStartDate(newStartDate);
     setEndDate(newEndDate);
   };
@@ -330,7 +360,7 @@ const MainDashboard = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
         <div className="h-[400px]">
-          <EngagementChart payload={payload} />
+          <TotalConversation payload={payload} />
         </div>
         <div className="h-[400px]">
           <PerformanceChart payload={payload} />
@@ -352,8 +382,8 @@ const MainDashboard = () => {
         </div>
       </div>
       <div className="mt-2">
-        <PerformanceTable title="Agent Performance" data={agentPerformance} />
-        <PerformanceTable title="Human Performance" data={agentPerformance} />
+        <PerformanceTable title="Agent Performance" data={aiAgentPerformanceData} />
+        <PerformanceTable title="Human Performance" data={humanPerformanceData} />
       </div>
     </div>
   );
