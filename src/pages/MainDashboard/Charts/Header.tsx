@@ -14,11 +14,11 @@ const Header = () => {
   const [platform, setPlatform] = React.useState("all");
 
   return (
-    <header className="flex p-6 flex-col md:flex-row justify-between items-start md:items-center mb-2">
+    <header className="flex p-4 flex-col md:flex-row justify-between items-start md:items-center mb-2">
       <div>
-        <h1 className="text-2xl font-bold text-black">Chatbot Insights</h1>
+        <h1 className="text-2xl font-bold text-black">Dashboard</h1>
         <p className="text-muted-foreground">
-          Monitor your chatbot performance across platforms
+            View performance metrics across platforms
         </p>
       </div>
 
@@ -45,7 +45,7 @@ const Header = () => {
           </Select>
         </FormControl>
       </Stack>
-    </header>
+    </header>  
   );
 };
 

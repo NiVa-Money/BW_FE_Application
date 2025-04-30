@@ -15,11 +15,10 @@ const EngagementChart = () => {
     <div className="bg-white rounded-xl shadow-sm border border-purple-light p-5 flex flex-col h-full">
       <div className="flex justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-purple-950">Platform Engagement</h3>
+          <h3 className="text-lg font-semibold text-purple-950">Total Conversation</h3>
           <p className="text-sm text-muted-foreground">Messages received per platform</p>
         </div>
       </div>
-      
       <div className="flex-1 w-full mt-2">
         <ResponsiveContainer width="100%" height="100%" minHeight={250}>
           <BarChart

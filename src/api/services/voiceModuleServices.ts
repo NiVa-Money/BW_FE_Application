@@ -192,3 +192,134 @@ export const recordAndCloneVoiceService = async (
     throw error;
   }
 };
+
+type VoiceCallStatus = "Live" | "Completed" | "Failed" | "Retried";
+
+interface CreateVoiceCallPayload {
+  agentId: string;
+  phoneNumber: string;
+  status: VoiceCallStatus;
+  transcript?: string;
+  recordingUrl?: string;
+  retryCount?: number;
+  duration?: number;
+}
+
+interface VoiceCall {
+  id: string;
+  agentId: string;
+  phoneNumber: string;
+  status: VoiceCallStatus;
+  transcript: string;
+  recordingUrl: string;
+  retryCount: number;
+  duration: number;
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
+}
+
+export const createVoiceCallService = async (
+  data: CreateVoiceCallPayload
+): Promise<VoiceCall> => {
+  // Add return type
+  try {
+    const response = await axiosInstance.post(
+      "https://vo-backend.onrender.com/voice-calls",
+      data
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error creating voice call:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const getAllVoiceCallsService = async (): Promise<VoiceCall[]> => {
+  try {
+    const response = await axiosInstance.get(
+      "https://vo-backend.onrender.com/voice-calls"
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching voice calls:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const getVoiceCallByIdService = async (
+  callId: string
+): Promise<VoiceCall> => {
+  try {
+    const response = await axiosInstance.get(
+      `https://vo-backend.onrender.com/voice-calls/${callId}`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching voice call:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const updateVoiceCallStatusService = async (
+  callId: string,
+  status: VoiceCallStatus
+) => {
+  try {
+    const response = await axiosInstance.put(
+      `https://vo-backend.onrender.com/voice-calls/${callId}/update-status`,
+      { status }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error updating call status:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const transcribeVoiceCallService = async (callId: string) => {
+  try {
+    const response = await axiosInstance.patch(
+      `https://vo-backend.onrender.com/voice-calls/${callId}/transcribe`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error transcribing call:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
