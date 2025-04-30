@@ -404,11 +404,10 @@ export default function InsightsPanel({
                 />
                 <Metric
                   label="Intent"
-                  value={`${intentPrimary} ${
-                    intentSecondary.length
-                      ? `(${intentSecondary.join(", ")})`
-                      : ""
-                  }`}
+                  value={`${intentPrimary} ${intentSecondary.length
+                    ? `(${intentSecondary.join(", ")})`
+                    : ""
+                    }`}
                   barValue={intentClarity}
                 />
                 <Metric
@@ -440,19 +439,21 @@ export default function InsightsPanel({
               <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mt={1}>
                 <Metric
                   label="Emotional Score"
-                  value={`${csatFactors.emotionalScore}%`}
+                  value={`${csatFactors?.emotionalScore ? `${csatFactors?.emotionalScore} %` : '-'}`}
+
                 />
                 <Metric
                   label="Resolution Score"
-                  value={`${csatFactors.resolutionScore}%`}
+                  value={`${csatFactors?.resolutionScore ? `${csatFactors?.resolutionScore} %` : '-'}`}
                 />
                 <Metric
                   label="Tone Score"
-                  value={`${csatFactors.toneScore}%`}
+                  value={`${csatFactors?.toneScore ? `${csatFactors?.toneScore} %` : '-'}`}
                 />
                 <Metric
                   label="Word Choice Score"
-                  value={`${csatFactors.wordChoiceScore}%`}
+                  value={`${csatFactors?.wordChoiceScore ? `${csatFactors?.wordChoiceScore} %` : '-'}`}
+
                 />
               </Box>
               <Box mt={1}>

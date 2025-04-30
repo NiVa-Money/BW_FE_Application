@@ -155,17 +155,17 @@
 import React from "react";
 import SendIcon from "@mui/icons-material/Send";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-// import { FormControlLabel, Switch } from "@mui/material";
 import PulsingGlowLogo from "./PulsingGlowLogo";
 
 interface CreateBotRightContainerProps {
   botName?: string;
-  imageSrc?: any;
+  imageSrc?: string;
   theme: string;
   color: string;
   font: string;
   showPulsingLogo?: boolean;
   greetingMessage: string;
+  agentRole?: string;
 }
 
 const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
@@ -175,11 +175,12 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
   color,
   showPulsingLogo,
   greetingMessage,
+  agentRole = "Support Agent",
 }) => {
   const effectiveGreeting =
-    greetingMessage?.trim() || "Hello, how can I assist you?";
+    greetingMessage.trim() || "Hello, how can I assist you?";
 
-  const messages: any = [
+  const messages = [
     {
       id: 1,
       sender: "bot",
@@ -197,24 +198,8 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
   return (
     <div>
       <div className="flex flex-col h-[100%]">
-        {/* <div className="flex justify-end items-center">
-          <label htmlFor="botSmartness" className="text-black mr-2">
-            Bot Smartness
-          </label>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={Boolean(botSmartness)}
-                onClick={(e: any) => botSmartnessHandle(e.target.checked)}
-                name="botSmartness"
-                color="primary"
-              />
-            }
-            label=""
-          />
-        </div> */}
         <div
-          className="w-[350px] mt-10 ml-44 border border-black h-[600px] flex justify-center items-center rounded-[12px] z-10"
+          className="w-[400px] mt-10 ml-16 border border-black h-[500px] flex justify-center items-center rounded-[12px] z-10"
           style={{ backgroundColor: theme === "dark" ? "#1D1B20" : "#E3E3E3" }}
         >
           <div className="h-[100%] w-[100%] flex flex-col">
@@ -223,21 +208,27 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
               style={{ backgroundColor: `${color}` }}
             >
               <div className="p-2 flex">
-                {imageSrc?.length ? (
-                  <img src={imageSrc} alt="logo" width={40} height={80} />
-                ) : null}
+                {imageSrc && (
+                  <img src={imageSrc} alt="logo" width={40} height={40} />
+                )}
                 <div className="flex flex-col items-center justify-center w-full">
                   <h3
                     className="text-[1rem] text-center font-medium"
-                    style={{ color: theme === "dark" ? "#f3f2f6" : "#2E2F5F" }}
+                    style={{
+                      color: theme === "dark" ? "#f3f2f6" : "#2E2F5F",
+                      fontFamily: font,
+                    }}
                   >
                     Chatbot
                   </h3>
                   <h3
                     className="text-[0.8rem] text-center"
-                    style={{ color: theme === "dark" ? "#f3f2f6" : "#2E2F5F" }}
+                    style={{
+                      color: theme === "dark" ? "#f3f2f6" : "#2E2F5F",
+                      fontFamily: font,
+                    }}
                   >
-                    Support Agent
+                    {agentRole}
                   </h3>
                 </div>
               </div>
@@ -258,7 +249,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
                         : "bg-[#8AE0C1] text-gray-800"
                     }`}
                   >
-                    {msg?.sender === "bot" && imageSrc?.length ? (
+                    {msg.sender === "bot" && imageSrc && (
                       <img
                         src={imageSrc}
                         alt="logo"
@@ -266,13 +257,13 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
                         height={30}
                         className="mr-2"
                       />
-                    ) : null}
+                    )}
                     <div className="ml-1">
                       <p
                         className={`text-[0.8rem] ${
                           msg.sender === "user" ? "text-right" : "text-left"
                         }`}
-                        style={{ fontFamily: `${font}` }}
+                        style={{ fontFamily: font }}
                       >
                         {msg.text}
                       </p>
@@ -280,7 +271,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
                         className={`text-xs block ${
                           msg.sender === "bot" ? "text-left" : "text-right"
                         }`}
-                        style={{ fontFamily: `${font}` }}
+                        style={{ fontFamily: font }}
                       >
                         {msg.time}
                       </span>
@@ -295,7 +286,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
                   type="text"
                   placeholder="Write a message"
                   className="w-full bg-transparent outline-none border-none text-[#2E2F5F] placeholder-[#2E2F5F]"
-                  style={{ fontFamily: `${font}` }}
+                  style={{ fontFamily: font }}
                 />
                 <AddPhotoAlternateIcon className="text-[#2E2F5F] mx-2" />
               </div>
@@ -304,7 +295,10 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
           </div>
         </div>
         {showPulsingLogo && (
-          <div className="flex justify-end items-center">
+          <div
+            className="flex justify-end items-center mb-50"
+            style={{ overflow: "visible", marginBottom: "50px" }}
+          >
             <PulsingGlowLogo theme={theme} imageSrc={imageSrc} />
           </div>
         )}

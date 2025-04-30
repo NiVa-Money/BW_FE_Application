@@ -27,7 +27,7 @@ const Subscription: React.FC = (): React.ReactElement => {
         <h1 className="text-xl font-semibold">Flexible Pricing for Everyone</h1>
         <p className="text-gray-600 text-sm">Unlock Your Creative Potential with Our Tailored Plans</p>
       </div>
-      <div className="flex px-6 mt-4 justify-start gap-10 items-center">
+      <div className="flex px-6 mt-4 justify-between gap-10 items-center">
         {plansData.map((plan: any, index: any) => <SubscriptionCard key={index} planInfo={plan} />)}
 
 

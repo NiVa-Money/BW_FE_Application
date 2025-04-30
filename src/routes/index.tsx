@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Login from "../pages/login";
 import SignUp from "../pages/Signup";
-import DashBoard from "../pages/DashboardNew";
+// import DashBoard from "../pages/DashboardNew";
 import CreateBot from "../pages/CreateBot";
 import IntegrationsPage from "../pages/Integration";
 import EngagementTab from "../pages/Engagement";
 import MyBots from "../pages/MyBots/index";
-import EditBot from "../pages/EditBot";
+import EditBot from "../pages/EditBot/index1";
 import LiveChat from "../pages/Conversation/LiveChat";
 import TestBot from "../pages/TestBot";
-import IntegrationList from "../pages/Integration/WhatsappIntegration/integrationsList";
 import WhatsAppIntegration from "../pages/Integration/WhatsappIntegration";
 import CrudIntegration from "../pages/Integration/WhatsappIntegration/crudIntegration";
 import CampaignManager from "../pages/Marketing/Campaign/CampaignManager";
@@ -29,8 +28,7 @@ import MarketingDashboard from "../pages/Marketing/Dashboard/MarketingDashboard"
 import EditWhatsappCampaign from "../pages/Marketing/Campaign/EditCampaign";
 import Subscription from "../pages/Subscription/index";
 import ComingSoon from "../components/ComingSoon";
-import WhatsappDash from '../pages/Marketing/Whatsapp/WhatsappDashboard1';
-import WhatsApp from "../pages/Marketing/Whatsapp";
+import WhatsappDash from "../pages/Marketing/Whatsapp/WhatsappDashboard1";
 import SubscriptionFailure from "../pages/SubscriptionFailure";
 import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 import ContactsCRM from "../pages/Contacts";
@@ -40,7 +38,11 @@ import VoiceDashboard from "../pages/VoiceModule/Dashboard/VoiceDashboard";
 import VoiceAgentLayout from "../pages/VoiceModule/Agent/CreateVoiceAgent";
 import EditVoiceAgent from "../pages/VoiceModule/Agent/EditVoiceAgent";
 import MyVoiceAgents from "../pages/VoiceModule/Agent/VoiceAgentManager";
-import ConversationsTab from "../pages/VoiceModule/Dashboard/ConversationsTab";
+import FacebookIntegrationList from "../pages/Integration/FacebookIntegration/facebookIntegrationList";
+import WhatsappIntegrationList from "../pages/Integration/WhatsappIntegration/integrationsList";
+import ConversationsTable from "../pages/VoiceModule/ConversationsTable";
+import MainDashboard from "../pages/MainDashboard";
+import CampaignWorkflowBuilder from "../pages/Marketing/Whatsapp/CampaignWorkflow";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -49,7 +51,7 @@ export const autRoutes: any[] = [
   {
     id: 1,
     path: "/dashboard",
-    component: <DashBoard />,
+    component: <MainDashboard />,
   },
   { id: 2.1, path: "/conversations/all-chats", component: <AllChats /> },
   { id: 2.2, path: "/conversations/live-chats", component: <LiveChat /> },
@@ -102,7 +104,7 @@ export const autRoutes: any[] = [
     component: <EditWhatsappCampaign />,
   },
   { id: 5.3, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
-  { id: 5.4, path: "/marketing/omnigenStudio", component: <WhatsApp /> },
+  { id: 5.3, path: "/marketing/workflowbuilder", component: <CampaignWorkflowBuilder /> },
 
   // { id: 6.1, path: "/voice/agents", component: <VoiceChatComponent /> },
   { id: 6.1, path: "/voice/agents", component: <MyVoiceAgents /> },
@@ -115,7 +117,7 @@ export const autRoutes: any[] = [
   { id: 6.1, path: "/editvoicebot/:id", component: <EditVoiceAgent /> },
   { id: 6.1, path: "/testvoicebot/:id", component: <VoiceChatComponent /> },
   { id: 6.2, path: "/voice/dashboard", component: <VoiceDashboard /> },
-  { id: 6.2, path: "/voice/conversations", component: <ConversationsTab /> },
+  { id: 6.2, path: "/voice/conversations", component: <ConversationsTable /> },
   { id: 6.2, path: "/voice/dashboard", component: <VoiceDashboard /> },
 
   {
@@ -140,13 +142,18 @@ export const autRoutes: any[] = [
   },
   {
     id: 10,
-    path: "/integrationList",
-    component: <IntegrationList />,
+    path: "/whatsappIntegrationList",
+    component: <WhatsappIntegrationList />,
   },
   {
     id: 10,
     path: "/instagramIntegrationList",
     component: <InstagramIntegrationList />,
+  },
+  {
+    id: 10,
+    path: "/facebookIntegrationList",
+    component: <FacebookIntegrationList />,
   },
   {
     id: 10,

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import React, { useEffect, useRef, useState } from "react";
 import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
@@ -13,15 +12,14 @@ import BotSuccessContent from "../../components/confirmationModal/BotSuccessCont
 import FormikFieldChipComponent from "../../components/FormikFieldChipComponent";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
 import FormikFieldToggleComponent from "../../components/FormikFieldToggleComponent";
-import CreateBotRightContainer from "../CreateBot/CreateBotRightContainer";
+import CreateBotRightContainer from "./CreateBotRightContainer";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import { editBotAction } from "../../store/actions/botActions";
+import { createBotAction } from "../../store/actions/botActions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { useNavigate, useParams } from "react-router-dom";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { generatePromptService } from "../../api/services/botService";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 enum BOTICONS {
   list = "list",
@@ -33,10 +31,7 @@ enum THEME {
   dark = "dark",
 }
 
-const EditBot: React.FC = () => {
-  const { id } = useParams();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+const CreateBot: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [chatColor, setChatColor] = useState("#5D39AD");
@@ -48,67 +43,74 @@ const EditBot: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const totalPages = 2;
   const imgViewerRef = useRef<HTMLInputElement>(null);
-
-  const botEditDataRedux = useSelector(
-    (state: RootState) => state.bot?.lists?.data
-  );
-  const editBotDataRedux = useSelector(
-    (state: RootState) => state.bot?.edit?.data
-  );
-
-  console.log("botEditDataRedux", botEditDataRedux);
-
-  const [botData, setBotData] = useState<any>(null);
-
-  useEffect(() => {
-    if (botEditDataRedux?.length && id) {
-      const botParamId = id.replace(":", "");
-      const data = botEditDataRedux.find(
-        (bot: { _id: string }) => bot._id === botParamId
-      );
-      if (data) {
-        setBotData(data);
-        setChatColor(data.botColor || "#5D39AD");
-        setImageSrc(data.botURL || "/assets/bot1.svg");
-        setImageName(data.botURL ? "Current Icon" : "");
-        setFileName(data.docName || "");
-        setSelectedFileImage(null); // Reset to allow new upload
-      }
-    }
-  }, [botEditDataRedux, id]);
-
-  console.log("botData", botData);
-
-  useEffect(() => {
-    if (editBotDataRedux?.success) {
-      setIsModalOpen(true);
-    }
-  }, [editBotDataRedux]);
-
+  const dispatch = useDispatch();
   const initialValues = {
-    botName: botData?.botName || "",
-    docId: botData?._id || "",
-    botTone: botData?.botTone || "",
-    botColor: botData?.botColor || "",
-    botGreetingMessage:
-      botData?.botGreetingMessage || "Hello, how can I assist you?",
-    supportNumber: botData?.supportNumber || "",
-    supportEmail: botData?.supportEmail || "",
-    docName: botData?.docName || "",
-    docType: botData?.docType || "",
-    appointmentSchedulerLink: botData?.appointmentSchedulerLink || "",
-    botFont: botData?.botFont || "",
-    botTheme: botData?.botTheme || "",
-    agentRole: botData?.agentRole || "",
-    agentRoleDescription: botData?.agentRoleDescription || "",
-    agentsGoals: botData?.agentsGoals || [""],
-    conversationGuidelines: botData?.conversationGuidelines || [""],
+    botName: "",
+    botTone: "",
+    customTone: "",
+    botColor: "",
+    botGreetingMessage: "Hello, how can I assist you?",
+    supportNumber: "",
+    supportEmail: "",
+    docName: "",
+    docType: "",
+    appointmentSchedulerLink: "",
+    botFont: "",
+    botTheme: "",
+    agentRole: "",
+    agentRoleDescription: "",
     newGoalPrompt: "",
     newGuidelinePrompt: "",
-    wordLimitPerMessage: botData?.wordLimitPerMessage || "",
+    agentsGoals: [""],
+    conversationGuidelines: [""],
+    wordLimitPerMessage: "",
     knowledgeBaseFile: null,
-    botSmartness: botData?.botSmartness || true,
-    botIconOption: botData?.botURL ? BOTICONS.custom : BOTICONS.list,
+    botSmartness: true,
+    botIconOption: BOTICONS.list,
+  };
+
+  const createBotDataRedux = useSelector(
+    (state: RootState) => state.bot?.create?.data
+  );
+
+  useEffect(() => {
+    if (createBotDataRedux !== null) {
+      const success = createBotDataRedux?.success;
+      if (success) {
+        setIsModalOpen(success);
+      }
+    }
+  }, [createBotDataRedux]);
+
+  const handleGoalChange = (index: number, newValue: string, formik: any) => {
+    const updatedGoals = [...formik.values.agentsGoals];
+    updatedGoals[index] = newValue;
+    formik.setFieldValue("agentsGoals", updatedGoals);
+  };
+
+  const deleteGoal = (index: number, formik: any) => {
+    const updatedGoals = [...formik.values.agentsGoals];
+    updatedGoals.splice(index, 1);
+
+    // Force a state update even when array becomes empty
+    formik.setFieldValue(
+      "agentsGoals",
+      updatedGoals.length > 0 ? updatedGoals : [""]
+    );
+  };
+
+  const handleGuidelineChange = (index: number, value: string, formik: any) => {
+    const updatedGuidelines = [...formik.values.conversationGuidelines];
+    updatedGuidelines[index] = value;
+    formik.setFieldValue("conversationGuidelines", updatedGuidelines);
+  };
+
+  const deleteGuideline = (index: number, formik: any) => {
+    const updatedGuidelines = formik.values.conversationGuidelines.filter(
+      (_: string, i: number) => i !== index
+    );
+    if (updatedGuidelines.length === 0) updatedGuidelines.push("");
+    formik.setFieldValue("conversationGuidelines", updatedGuidelines);
   };
 
   const validationSchema =
@@ -144,6 +146,7 @@ const EditBot: React.FC = () => {
       : Yup.object().shape({
           agentRole: Yup.string().required("Agent Role is required"),
           botTone: Yup.string().required("Tone is required"),
+
           knowledgeBaseFile: Yup.mixed()
             .required("Knowledge Base file is required")
             .test("fileSize", "File too large", (value) => {
@@ -168,9 +171,8 @@ const EditBot: React.FC = () => {
     setImageSrc(item.imageUrl);
     const response = await fetch(item.imageUrl);
     const blob = await response.blob();
-    const file = new File([blob], "bot-icon.svg", { type: blob.type });
+    const file = new File([blob], "bot-icon.svg", { type: blob.type }); // Ensure proper filename
     setSelectedFileImage(file);
-    setImageName("");
   };
 
   const handleColorClick = (color: string) => {
@@ -187,7 +189,7 @@ const EditBot: React.FC = () => {
     if (!file) return;
     setImageName(file.name);
     setImageSrc(URL.createObjectURL(file));
-    setSelectedFileImage(file);
+    setSelectedFileImage(file); // Directly use the File object
   };
 
   const handleFileChange = (
@@ -202,172 +204,64 @@ const EditBot: React.FC = () => {
     }
   };
 
-  const deleteGoal = (index: number, formik: any) => {
-    const updatedGoals = [...formik.values.agentsGoals];
-    updatedGoals.splice(index, 1);
-    formik.setFieldValue(
-      "agentsGoals",
-      updatedGoals.length > 0 ? updatedGoals : [""]
-    );
-  };
+  // const userId: string = localStorage.getItem("user_id") || "";
 
-  const deleteGuideline = (index: number, formik: any) => {
-    const updatedGuidelines = formik.values.conversationGuidelines.filter(
-      (_: string, i: number) => i !== index
-    );
-    formik.setFieldValue(
-      "conversationGuidelines",
-      updatedGuidelines.length > 0 ? updatedGuidelines : [""]
-    );
-  };
+  const handleSubmit = async (values: any, { setSubmitting }) => {
+    setSubmitting(true); // Show loading state
 
-  // const handleSubmit = async (values: any, { setSubmitting }: any) => {
-  //   setSubmitting(true);
-  //   try {
-  //     const formData = new FormData();
-  //     if (selectedFileImage) {
-  //       formData.append("customBotImage", selectedFileImage);
-  //     }
-  //     formData.append("botName", values.botName || "");
-  //     formData.append("botTone", values.botTone || "");
-  //     formData.append("botColor", chatColor || "");
-  //     formData.append("botGreetingMessage", values.botGreetingMessage || "");
-  //     formData.append("supportNumber", values.supportNumber || "");
-  //     formData.append("supportEmail", values.supportEmail || "");
-  //     formData.append("docName", filename || "");
-  //     formData.append("docType", filename ? "pdf" : "");
-  //     formData.append("file", values.knowledgeBaseFile || "");
-  //     formData.append(
-  //       "appointmentSchedulerLink",
-  //       values.appointmentSchedulerLink || ""
-  //     );
-  //     formData.append("botFont", values.botFont || "");
-  //     formData.append("botTheme", values.botTheme || "");
-  //     formData.append("agentsGoals", JSON.stringify(values.agentsGoals || []));
-  //     formData.append(
-  //       "conversationGuidelines",
-  //       JSON.stringify(values.conversationGuidelines || [])
-  //     );
-  //     formData.append("agentRole", values.agentRole || "");
-  //     formData.append(
-  //       "agentRoleDescription",
-  //       values.agentRoleDescription || ""
-  //     );
-  //     formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
-  //     formData.append("botId", id || "");
-
-  //     dispatch(editBotAction(formData));
-  //   } catch (error) {
-  //     console.error("Submission failed:", error);
-  //   } finally {
-  //     setSubmitting(false);
-  //   }
-  // };
-
-  const handleSubmit = async (values: any, { setSubmitting }: any) => {
-    console.log("Form submitted with values:", values); // Log the form values
-    setSubmitting(true);
     try {
+      // Build formData
       const formData = new FormData();
-      const cleanedBotId = id?.replace(":", "") || "";
-      formData.append("botId", cleanedBotId); // Use cleaned botId
-      formData.append("docId", values.docId || ""); // <-- Make sure you pass this in from botData
 
+      // // Choose the correct image file
+      // const imageFile = base64Image || selectedFileImage;
       if (selectedFileImage) {
         formData.append("customBotImage", selectedFileImage);
       }
 
+      // Append required form fields
       formData.append("botName", values.botName || "");
       formData.append("botTone", values.botTone || "");
       formData.append("botColor", chatColor || "");
       formData.append("botGreetingMessage", values.botGreetingMessage || "");
       formData.append("supportNumber", values.supportNumber || "");
       formData.append("supportEmail", values.supportEmail || "");
-      formData.append(
-        "botSmartness",
-        values.botSmartness?.toString() || "true"
-      );
-      formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
-
-      if (values.knowledgeBaseFile) {
-        formData.append("file", values.knowledgeBaseFile);
-      }
-
+      formData.append("docName", filename || "");
+      formData.append("docType", filename ? "pdf" : "");
+      formData.append("file", values.knowledgeBaseFile || "");
       formData.append(
         "appointmentSchedulerLink",
         values.appointmentSchedulerLink || ""
       );
       formData.append("botFont", values.botFont || "");
       formData.append("botTheme", values.botTheme || "");
+
+      // Append JSON-encoded arrays
       formData.append("agentsGoals", JSON.stringify(values.agentsGoals || []));
       formData.append(
         "conversationGuidelines",
         JSON.stringify(values.conversationGuidelines || [])
       );
+
+      // Append additional fields
       formData.append("agentRole", values.agentRole || "");
       formData.append(
         "agentRoleDescription",
         values.agentRoleDescription || ""
       );
-      console.log("FormData being sent:");
-      for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value); // Log each key-value pair in FormData
-      }
+      formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
 
-      await dispatch(editBotAction(formData));
+      // formData.append("userId", userId || "");
+
+      // Dispatch the API call and wait for the response
+      await dispatch(createBotAction(formData));
+      // setIsModalOpen(true);
     } catch (error) {
       console.error("Submission failed:", error);
     } finally {
-      setSubmitting(false);
+      setSubmitting(false); // Stop loading state
     }
   };
-
-  // const handleSubmit = async (values: any, { setSubmitting }: any) => {
-  //   setSubmitting(true);
-  //   try {
-  //     const formData = new FormData();
-  //     const cleanedBotId = id?.replace(":", "") || "";
-  //     formData.append("botId", cleanedBotId);
-
-  //     // Compare values with botData to find changes
-  //     Object.keys(values).forEach((key) => {
-  //       if (key === "knowledgeBaseFile" && values[key] instanceof File) {
-  //         // Handle file uploads
-  //         formData.append(key, values[key]);
-  //       } else if (key === "agentsGoals" || key === "conversationGuidelines") {
-  //         // Handle array fields
-  //         const originalArray = botData[key]?.map((item: string) =>
-  //           JSON.stringify(item)
-  //         );
-  //         const updatedArray = values[key]?.map((item: string) =>
-  //           JSON.stringify(item)
-  //         );
-  //         if (JSON.stringify(originalArray) !== JSON.stringify(updatedArray)) {
-  //           formData.append(key, JSON.stringify(values[key]));
-  //         }
-  //       } else if (values[key] !== botData[key]) {
-  //         // Add only changed fields
-  //         formData.append(key, values[key]);
-  //       }
-  //     });
-
-  //     // Add selectedFileImage if it exists (custom icon upload)
-  //     if (selectedFileImage) {
-  //       formData.append("customBotImage", selectedFileImage);
-  //     }
-
-  //     console.log("FormData being sent:");
-  //     for (const [key, value] of formData.entries()) {
-  //       console.log(`${key}:`, value); // Log each key-value pair in FormData
-  //     }
-
-  //     await dispatch(editBotAction(formData));
-  //   } catch (error) {
-  //     console.error("Submission failed:", error);
-  //   } finally {
-  //     setSubmitting(false);
-  //   }
-  // };
 
   const handleClose = (formik: any) => {
     formik.resetForm();
@@ -376,12 +270,17 @@ const EditBot: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const handleConfirmation = () => {
+  const handleConfirmation = (formik: any) => {
     setIsModalOpen(false);
-    navigate("/integrations");
+    formik.resetForm();
+    setImageName("");
+    setFileName("");
+    // Here you would typically redirect to another page
+    console.log("Confirmed submission");
   };
 
-  const nextPage = async (formik: any) => {
+  const nextPage = async (formik) => {
+    // Mark all fields on page 1 as touched to trigger validation messages
     const page1Fields = [
       "botName",
       "botGreetingMessage",
@@ -391,8 +290,13 @@ const EditBot: React.FC = () => {
       "botTheme",
       "botFont",
     ];
+
     page1Fields.forEach((field) => formik.setFieldTouched(field, true));
+
+    // Validate the form before moving to the next page
     const errors = await formik.validateForm();
+
+    // If no errors exist, move to the next page
     if (!Object.keys(errors).some((field) => page1Fields.includes(field))) {
       setCurrentPage(currentPage + 1);
     }
@@ -404,10 +308,14 @@ const EditBot: React.FC = () => {
     if (currentPage === 1) {
       return (
         <>
+          {/* Agent Name */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label htmlFor="botName">Agent Name</label>
-              <Tooltip title="Enter the name for your agent." placement="right">
+              <Tooltip
+                title="Enter the name for your agent. This will be displayed in conversations."
+                placement="right"
+              >
                 <InfoOutlinedIcon
                   fontSize="medium"
                   className="ml-1 text-gray-600 cursor-pointer"
@@ -418,6 +326,7 @@ const EditBot: React.FC = () => {
               type="text"
               id="botName"
               name="botName"
+              // placeholder="Enter your Agent Name"
               component={FormikFieldInputComponent}
             />
           </div>
@@ -426,7 +335,7 @@ const EditBot: React.FC = () => {
             <div className="flex items-center mb-2">
               <label htmlFor="chatColor">Chat Color</label>
               <Tooltip
-                title="Select a chat color for the agents chat interface."
+                title="Select a chat color for the agent chat interface."
                 placement="right"
               >
                 <InfoOutlinedIcon
@@ -496,11 +405,13 @@ const EditBot: React.FC = () => {
                     key={idx}
                     src={item.imageUrl}
                     alt="logo"
-                    className={`w-full h-auto cursor-pointer rounded-md ${
-                      imageSrc === item.imageUrl
-                        ? "bg-[#65558F] bg-opacity-[0.5]"
-                        : "bg-transparent"
-                    }`}
+                    className={`w-full h-auto cursor-pointer rounded-md
+            ${
+              imageSrc === item.imageUrl
+                ? "bg-[#65558F] bg-opacity-[0.5] rounded-md " // Highlight style
+                : " bg-transparent"
+            }
+          `}
                     onClick={() => handleBotSampleClick(item)}
                   />
                 ))}
@@ -550,7 +461,7 @@ const EditBot: React.FC = () => {
             <div className="flex items-center mb-2">
               <label>Choose theme</label>
               <Tooltip
-                title="Select the theme for your agents interface."
+                title="Select the theme for your agent's interface (light or dark)."
                 placement="right"
               >
                 <InfoOutlinedIcon
@@ -593,7 +504,10 @@ const EditBot: React.FC = () => {
               options={[
                 { label: "Georgia", value: "Georgia" },
                 { label: "Helvetica", value: "Helvetica, sans-serif" },
-                { label: "Monospace", value: "monospace" },
+                {
+                  label: "Monospace",
+                  value: "monospace",
+                },
                 { label: "Cursive", value: "cursive" },
                 { label: "Poppins (default)", value: "poppins" },
               ]}
@@ -609,7 +523,7 @@ const EditBot: React.FC = () => {
             <div className="flex items-center mb-2">
               <label>Agent Greeting Message</label>
               <Tooltip
-                title="Enter a greeting message for your agent."
+                title="Enter a greeting message that your agent will display when starting a chat."
                 placement="right"
               >
                 <InfoOutlinedIcon
@@ -621,15 +535,78 @@ const EditBot: React.FC = () => {
             <Field
               type="text"
               name="botGreetingMessage"
+              // placeholder="Enter your Agent Greeting Message"
               component={FormikFieldInputComponent}
             />
           </div>
 
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
+              <label>Open by Default</label>
+              <Tooltip
+                title="Choose when the chatbot should appear on the page automatically."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
+            {/* <p className="text-sm text-gray-600 mb-2">
+              Choose when chatbot will appear
+            </p> */}
+            <select
+              className="bg-[#F3F2F6] h-[50px] px-4 rounded-[12px] text-gray-500"
+              value={formik.values.openByDefault}
+              onChange={(e) =>
+                formik.setFieldValue("openByDefault", e.target.value)
+              }
+            >
+              <option value="none">Do not open automatically</option>
+              <option value="onLoad">Open automatically on load</option>
+              <option value="afterFive">Open automatically after 5 secs</option>
+              <option value="afterFifteen">
+                Open automatically after 15 sec
+              </option>
+            </select>
+          </div>
+
+          <div className="flex flex-col w-[85%] mb-3 text-black">
+            <div className="flex items-center mb-2">
+              <label>Pulsing</label>
+              <Tooltip
+                title="Toggle a pulsing effect on the agent's avatar."
+                placement="right"
+              >
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
+              </Tooltip>
+            </div>
+            <div className="bg-[#F3F2F6] h-[50px] px-4 rounded-[12px] flex items-center justify-between">
+              <span className="text-gray-500">
+                Add a pulsing effect on the avatar
+              </span>
+              <label className="inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={formik.values.pulsing}
+                  onChange={(e) =>
+                    formik.setFieldValue("pulsing", e.target.checked)
+                  }
+                />
+                <div className="relative w-12 h-6 bg-gray-200 peer-checked:bg-[#65558F] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:right-[22px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-col w-[85%] mb-3 text-black">
+            <div className="flex items-center mb-2">
               <label>Appointment Link</label>
               <Tooltip
-                title="Provide a link for scheduling appointments."
+                title="Provide a link for scheduling appointments with your agent."
                 placement="right"
               >
                 <InfoOutlinedIcon
@@ -641,6 +618,7 @@ const EditBot: React.FC = () => {
             <Field
               type="text"
               name="appointmentSchedulerLink"
+              // placeholder="Enter your Appointment Link"
               component={FormikFieldInputComponent}
             />
           </div>
@@ -648,19 +626,23 @@ const EditBot: React.FC = () => {
           <div className="flex flex-col w-[85%] mb-3 gap-2 text-black">
             <div className="flex items-center mb-2">
               <label>Support Contact</label>
-              <Tooltip title="Enter support contact details." placement="right">
+              <Tooltip
+                title="Enter support contact details including phone number and email."
+                placement="right"
+              >
                 <InfoOutlinedIcon
                   fontSize="medium"
                   className="ml-1 text-gray-600 cursor-pointer"
                 />
               </Tooltip>
             </div>
+
             <Field
               type="text"
               name="supportNumber"
               placeholder="Enter your Phone Number"
               component={FormikFieldInputComponent}
-              onInput={(e: any) => {
+              onInput={(e) => {
                 e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
               }}
             />
@@ -680,7 +662,10 @@ const EditBot: React.FC = () => {
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label>Knowledge Base</label>
-              <Tooltip title="Upload a knowledge base file." placement="right">
+              <Tooltip
+                title="Upload a knowledge base file (PDF, DOC, TXT) that contains information for your agent."
+                placement="right"
+              >
                 <InfoOutlinedIcon
                   fontSize="medium"
                   className="ml-1 text-gray-600 cursor-pointer"
@@ -714,7 +699,6 @@ const EditBot: React.FC = () => {
               />
             </div>
           </div>
-
           {/* website link */}
           <div className="flex flex-col w-[85%] mb-1 gap-2 text-black">
             <div className="flex items-center mb-1">
@@ -762,12 +746,16 @@ const EditBot: React.FC = () => {
                 { label: "Custom", value: "CUSTOM_FLAG" },
               ]}
             />
-            {formik.values.agentRole === "CUSTOM_FLAG" && (
+
+            {(formik.values.agentRole === "CUSTOM_FLAG" ||
+              !["Customer Service", "Sales", "Human Resource"].includes(
+                formik.values.agentRole
+              )) && (
               <div className="mt-2">
                 <div className="flex items-center mb-2">
                   <label>Custom Role</label>
                   <Tooltip
-                    title="Enter a custom role for your agent."
+                    title="Enter a custom role for your agent if 'Custom' is selected."
                     placement="right"
                   >
                     <InfoOutlinedIcon
@@ -779,19 +767,19 @@ const EditBot: React.FC = () => {
                 <Field
                   name="agentRole"
                   type="text"
-                  component={FormikFieldInputComponent}
+                  className="border p-2 rounded mb-3 w-full"
                   placeholder="Enter custom role name"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    formik.setFieldValue("agentRole", value || "CUSTOM_FLAG");
+                  }}
                 />
+
+                {/* Custom Role Description */}
                 <div className="flex items-center mb-2">
                   <label>Role Description</label>
-                  <Tooltip
-                    title="Describe the responsibilities of this custom role."
-                    placement="right"
-                  >
-                    <InfoOutlinedIcon
-                      fontSize="medium"
-                      className="ml-1 text-gray-600 cursor-pointer"
-                    />
+                  <Tooltip title="Describe the responsibilities of this custom role">
+                    <InfoOutlinedIcon className="ml-1 text-gray-600 cursor-pointer" />
                   </Tooltip>
                 </div>
                 <Field
@@ -802,13 +790,18 @@ const EditBot: React.FC = () => {
                 />
               </div>
             )}
-          </div>
 
+            {formik.touched.agentRole && formik.errors.agentRole && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.agentRole}
+              </div>
+            )}
+          </div>
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label>Tone of voice</label>
               <Tooltip
-                title="Select the tone of voice for your agent."
+                title="Select the tone of voice your agent should use in conversations."
                 placement="right"
               >
                 <InfoOutlinedIcon
@@ -824,11 +817,36 @@ const EditBot: React.FC = () => {
                 { label: "Formal", value: "Formal" },
                 { label: "Casual", value: "Casual" },
                 { label: "Enthusiastic", value: "Enthusiastic" },
-                { label: "Custom", value: "custom" },
+                { label: "Custom", value: "CUSTOM" },
               ]}
             />
+            {formik.values.botTone === "CUSTOM" && (
+              <div className="mt-2">
+                <div className="flex items-center mb-2">
+                  <label>Custom Tone</label>
+                  <Tooltip title="Enter a custom tone for your agent.">
+                    <InfoOutlinedIcon className="ml-1 text-gray-600 cursor-pointer" />
+                  </Tooltip>
+                </div>
+                <Field
+                  name="customTone"
+                  type="text"
+                  className="border p-2 rounded mb-3 w-full"
+                  placeholder="Enter custom tone"
+                />
+                {formik.touched.customTone && formik.errors.customTone && (
+                  <div className="text-red-500 text-sm mt-1">
+                    {formik.errors.customTone}
+                  </div>
+                )}
+              </div>
+            )}
+            {formik.touched.botTone && formik.errors.botTone && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.botTone}
+              </div>
+            )}
           </div>
-
           {/* Bot Smartness */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
@@ -858,7 +876,7 @@ const EditBot: React.FC = () => {
               </label>
             </div>
           </div>
-
+          {/* Agent Goals */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label className="text-lg font-medium">Agent Goals</label>
@@ -866,10 +884,14 @@ const EditBot: React.FC = () => {
                 title="List the main goals of your agent. You can also generate goals using AI."
                 placement="right"
               >
-                <InfoOutlinedIcon className="ml-1 text-gray-600 cursor-pointer" />
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
               </Tooltip>
             </div>
 
+            {/* New Goal Input + Buttons for Manual Add or AI Generation */}
             <div className="flex gap-2 mb-4">
               <input
                 type="text"
@@ -897,7 +919,7 @@ const EditBot: React.FC = () => {
                 >
                   Add
                 </button>
-                <button
+                {/* <button
                   type="button"
                   className="bg-gradient-to-r from-[#65558F] to-[#4D3C7F] text-white px-4 py-2 rounded-lg"
                   onClick={async () => {
@@ -924,63 +946,85 @@ const EditBot: React.FC = () => {
                   }}
                 >
                   AI Gen
+                </button> */}
+                <button
+                  type="button"
+                  className="relative overflow-hidden bg-gradient-to-r from-[#7F5AF0] via-[#65558F] to-[#4D3C7F] text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:from-[#A78BFA] hover:to-[#8B5CF6]"
+                  onClick={async () => {
+                    const prompt = formik.values.newGoalPrompt.trim();
+                    if (!prompt) return;
+                    try {
+                      const response = await generatePromptService({
+                        initialPrompt: prompt,
+                        purpose: "agent goal",
+                      });
+                      const generatedGoals = response.prompt
+                        .split("\n")
+                        .map((line) => line.replace(/^- /, "").trim())
+                        .filter((line) => line.length > 0);
+                      const updatedGoals = [
+                        ...formik.values.agentsGoals,
+                        ...generatedGoals,
+                      ].filter((goal) => goal.trim().length > 0);
+                      formik.setFieldValue("agentsGoals", updatedGoals);
+                      formik.setFieldValue("newGoalPrompt", "");
+                    } catch (error) {
+                      console.error("Goal generation failed:", error);
+                    }
+                  }}
+                >
+                  <span className="relative z-10">✨ AI Gen</span>
                 </button>
               </div>
             </div>
-            <div className="space-y-2 mb-4">
-              {formik.values.agentsGoals?.map((goal: string, index: number) => (
-                <div key={index} className="relative">
-                  <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-3 pr-10">
-                    <span className="text-gray-700">{goal}</span>
-                    {formik.values.agentsGoals.length > 1 && (
-                      <button
-                        onClick={() => deleteGoal(index, formik)}
-                        className="absolute right-3 text-gray-400 hover:text-red-500"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Updated Conversation Guidelines Section */}
+            {/* Render Existing Goals */}
+            {formik.values.agentsGoals?.map((goal, index) => (
+              <div key={index} className="relative mb-3">
+                <input
+                  type="text"
+                  value={goal}
+                  onChange={(e) =>
+                    handleGoalChange(index, e.target.value, formik)
+                  }
+                  className="h-[50px] w-full rounded-[12px] bg-[#F3F2F6] px-4 pr-10"
+                  placeholder="Your main goal is to assist customers in their shopping journey."
+                />
+
+                {formik.values.agentsGoals?.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => deleteGoal(index, formik)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          {/* Conversation Guidelines */}
           <div className="flex flex-col w-[85%] mb-3 text-black">
             <div className="flex items-center mb-2">
               <label className="text-lg font-medium">
                 Conversation Guidelines
               </label>
               <Tooltip
-                title="Set rules for how your agent should respond in chat channels."
+                title="Set clear rules for how your agent should respond in chat channels."
                 placement="right"
               >
-                <InfoOutlinedIcon className="ml-1 text-gray-600 cursor-pointer" />
+                <InfoOutlinedIcon
+                  fontSize="medium"
+                  className="ml-1 text-gray-600 cursor-pointer"
+                />
               </Tooltip>
             </div>
+            <p className="text-sm text-gray-500 mb-2">
+              Set clear rules for how your agent should respond in chat channels
+            </p>
 
-            <div className="space-y-2 mb-4">
-              {formik.values.conversationGuidelines?.map(
-                (guideline: string, index: number) => (
-                  <div key={index} className="relative">
-                    <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-3 pr-10">
-                      <span className="text-gray-700">{guideline}</span>
-                      {formik.values.conversationGuidelines.length > 1 && (
-                        <button
-                          onClick={() => deleteGuideline(index, formik)}
-                          className="absolute right-3 text-gray-400 hover:text-red-500"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-
-            <div className="flex gap-2">
+            {/* New input field with AI Gen button */}
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 value={formik.values.newGuidelinePrompt || ""}
@@ -1010,7 +1054,7 @@ const EditBot: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  className="bg-gradient-to-r from-[#65558F] to-[#4D3C7F] text-white px-4 py-2 rounded-lg"
+                  className="relative overflow-hidden bg-gradient-to-r from-[#7F5AF0] via-[#65558F] to-[#4D3C7F] text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:from-[#A78BFA] hover:to-[#8B5CF6]"
                   onClick={async () => {
                     const prompt = formik.values.newGuidelinePrompt.trim();
                     if (!prompt) return;
@@ -1037,12 +1081,40 @@ const EditBot: React.FC = () => {
                     }
                   }}
                 >
-                  AI Gen
+                  <span className="relative z-10">✨ AI Gen</span>
                 </button>
               </div>
             </div>
-          </div>
+            {formik.values.conversationGuidelines.map((guideline, index) => (
+              <div key={index} className="relative mb-3">
+                <input
+                  type="text"
+                  value={guideline}
+                  onChange={(e) =>
+                    handleGuidelineChange(index, e.target.value, formik)
+                  }
+                  className="h-[50px] w-full rounded-[12px] bg-[#F3F2F6] px-4 pr-10"
+                  placeholder="Always be helpful and accurate."
+                />
+                {formik.values.conversationGuidelines.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => deleteGuideline(index, formik)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
 
+            {formik.touched.conversationGuidelines &&
+              formik.errors.conversationGuidelines && (
+                <div className="text-red-500 text-sm mt-1">
+                  {formik.errors.conversationGuidelines}
+                </div>
+              )}
+          </div>
           {/* limit */}
           <div className="flex flex-col w-full mb-3 text-black">
             <div className="flex items-center mb-2">
@@ -1050,7 +1122,7 @@ const EditBot: React.FC = () => {
                 Agent limit per Message
               </label>
               <Tooltip
-                title="Select the maximum number of words per message."
+                title="Select the maximum number of words per message your agent can use."
                 placement="right"
               >
                 <InfoOutlinedIcon
@@ -1125,7 +1197,7 @@ const EditBot: React.FC = () => {
     }
   };
 
-  const renderNavigationButtons = (formik: any) => {
+  const renderNavigationButtons = (formik) => {
     return (
       <div className="flex justify-between w-[85%] mt-6 mb-6">
         {currentPage > 1 && (
@@ -1140,10 +1212,12 @@ const EditBot: React.FC = () => {
                 borderRadius: "100px",
               },
             }}
+            className="bg-[#65558F] w-[134px] self-end rounded-[100px]"
           >
             Previous
           </Button>
         )}
+
         {currentPage < totalPages ? (
           <Button
             variant="contained"
@@ -1156,21 +1230,33 @@ const EditBot: React.FC = () => {
                 borderRadius: "100px",
               },
             }}
-            className="ml-auto"
+            className="bg-[#65558F] w-[134px] self-end rounded-[100px] ml-auto"
           >
             Next
           </Button>
         ) : (
           <Button
             variant="contained"
-            type="button"
+            type="button" // Change from default "submit" type
             onClick={() => {
+              // Log validation state for debugging
+              console.log("Form errors:", formik.errors);
+              console.log("Form values:", formik.values);
+              console.log("Form touched:", formik.touched);
+
+              // Touch all fields to trigger validation messages
               const allFields = Object.keys(formik.values);
               const touchedFields = allFields.reduce(
-                (acc, field) => ({ ...acc, [field]: true }),
+                (acc, field) => ({
+                  ...acc,
+                  [field]: true,
+                }),
                 {}
               );
+
               formik.setTouched(touchedFields, true);
+
+              // Submit if valid
               if (formik.isValid) {
                 formik.submitForm();
               }
@@ -1182,9 +1268,9 @@ const EditBot: React.FC = () => {
                 borderRadius: "100px",
               },
             }}
-            className="ml-auto"
+            className="bg-[#65558F] w-[134px] self-end rounded-[100px] ml-auto"
           >
-            Save Changes
+            Submit
           </Button>
         )}
       </div>
@@ -1194,8 +1280,10 @@ const EditBot: React.FC = () => {
   return (
     <>
       <div className="p-6 ml-2">
-        <h1 className="text-xl font-semibold mb-1">Edit Agent</h1>
-        <p className="text-gray-600 text-sm">Modify your agent's settings.</p>
+        <h1 className="text-xl font-semibold mb-1">Create Agents</h1>
+        <p className="text-gray-600 text-sm">
+          Get started by creating an agent tailored to your needs.
+        </p>
         <div className="flex items-center mt-2">
           <div className="text-sm font-medium mr-2">
             Page {currentPage} of {totalPages}
@@ -1217,7 +1305,6 @@ const EditBot: React.FC = () => {
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
-          enableReinitialize
           validateOnChange={true}
           validateOnBlur={true}
           validateOnMount={false}
@@ -1226,19 +1313,18 @@ const EditBot: React.FC = () => {
             <>
               <Form className="w-[95%] m-auto h-[95%] grid grid-cols-[60%_40%]">
                 <div className="flex-col">
-                  {renderFormFields(formik)}
-                  {renderNavigationButtons(formik)}
+                  <div className="flex-col">
+                    {renderFormFields(formik)}
+                    {renderNavigationButtons(formik)}
+                  </div>
                 </div>
                 <CreateBotRightContainer
-                  // botSmartness={formik.values.botSmartness}
                   imageSrc={imageSrc}
                   botName={formik.values.botName || "Bot Assistant"}
                   theme={formik.values.botTheme}
                   color={chatColor}
                   greetingMessage={formik.values.botGreetingMessage}
-                  // botSmartnessHandle={(val) =>
-                  //   formik.setFieldValue("botSmartness", val)
-                  // }
+                  showPulsingLogo={formik.values.pulsing}
                   font={formik.values.botFont}
                 />
               </Form>
@@ -1246,13 +1332,13 @@ const EditBot: React.FC = () => {
               <ConfirmationModal
                 open={isModalOpen}
                 onClose={() => handleClose(formik)}
-                onConfirm={handleConfirmation}
-                heading="Changes Saved!"
+                onConfirm={() => handleConfirmation(formik)}
+                heading="Congratulations!!!"
                 contentComponent={
                   <BotSuccessContent
-                    subHeading1={`Your Agent ${formik.values.botName} Has Been Updated!`}
-                    subHeading2={`Your ${formik.values.agentRole} Agent is ready.`}
-                    bodyText={`Engage with your updated bot or integrate ${formik.values.botName} into your platforms.`}
+                    subHeading1={`Your Agent ${formik.values.botName} Is Ready!`}
+                    subHeading2={`Your ${formik.values.agentRole} Agent is ready for action`}
+                    bodyText={`Engage with your bot through testing or chatting, or seamlessly integrate ${formik.values.botName} into your social media platforms.`}
                     open={false}
                     onClose={() => {}}
                     onConfirm={() => {}}
@@ -1268,4 +1354,4 @@ const EditBot: React.FC = () => {
   );
 };
 
-export default EditBot;
+export default CreateBot;

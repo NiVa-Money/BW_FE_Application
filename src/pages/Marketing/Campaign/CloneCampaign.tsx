@@ -17,6 +17,7 @@ import { RootState } from "../../../store";
 import { getWhatsappRequest } from "../../../store/actions/integrationActions";
 import { createWhatsAppCampaignAction } from "../../../store/actions/whatsappCampaignActions";
 import CampaignTemplate from "../../../components/CampaignTemplate";
+import CreateTemplateModal from "./CreateTemplate";
 
 const CloneCampaign: React.FC = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
@@ -36,6 +37,9 @@ const CloneCampaign: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mode, setMode] = useState<"Template">("Template");
+  const [customizeScreen, setCustomizeScreen] = useState(false);
+  const [integrationId, setIntegrationId] = useState<string>("");
 
   // Get campaign data from Redux
   const campaignData = useSelector(
@@ -60,13 +64,21 @@ const CloneCampaign: React.FC = () => {
     (state: RootState) => state.whatsappCampaign.success
   );
 
+  const campError = useSelector(
+    (state: RootState) => state.whatsappCampaign.error
+  );
+
   useEffect(() => {
     if (campSuccess && isSubmitting) {
       setSuccess(true);
       setIsLoading(false);
       setIsSubmitting(false);
+    } else if (campError && isSubmitting) {
+      setError(campError);
+      setIsLoading(false);
+      setIsSubmitting(false);
     }
-  }, [campSuccess, isSubmitting]);
+  }, [campSuccess, campError, isSubmitting]);
 
   useEffect(() => {
     if (reduxTemplateId) {
@@ -82,15 +94,14 @@ const CloneCampaign: React.FC = () => {
     if (selectedCampaign) {
       console.log("Selected Campaign Details:", selectedCampaign);
 
-      // Explicitly NOT setting the campaign name from the original campaign
-      // Leave it blank for the user to fill in
-
-      // Properly extract template ID and data
+      // Set the initial template details from the selected campaign
       if (selectedCampaign.template) {
-        // Make sure we're setting the complete template object with id
         setSelectedTemplate({
-          id: selectedCampaign.template.id || selectedCampaign.templateId,
-          name: selectedCampaign.template.name || "Template",
+          id: selectedCampaign.templateId || selectedCampaign.template.id,
+          name:
+            selectedCampaign.templateName ||
+            selectedCampaign.template.name ||
+            "Template",
           header: selectedCampaign.template.header?.content || "",
           headerType: selectedCampaign.template.header?.type || "NONE",
           body: selectedCampaign.template.body?.text || "",
@@ -122,6 +133,7 @@ const CloneCampaign: React.FC = () => {
       console.error("Template ID missing");
       return;
     }
+    console.log("Selected Template:", template); // Debugging
     setSelectedTemplate(template);
     setShowTemplate(false);
   };
@@ -180,10 +192,15 @@ const CloneCampaign: React.FC = () => {
     }
   };
 
+  const handleModeChange = (selectedMode: "Template") => {
+    setMode(selectedMode);
+    setShowTemplate(selectedMode === "Template");
+  };
+
   const integrationsData = useSelector(
     (state: RootState) => state?.crudIntegration?.crudIntegration?.data
   );
-
+  console.log("Integrations Data:", integrationsData);
   useEffect(() => {
     dispatch(getWhatsappRequest(""));
   }, [dispatch]);
@@ -194,11 +211,42 @@ const CloneCampaign: React.FC = () => {
       : [integrationsData]
     : [];
 
+  console.log("Integration List:", integrationList);
+  console.log("Selected Phone Number ID:", selectedPhoneNumberId);
+  integrationList.forEach((integration) => {
+    console.log("Integration Phone Number ID:", integration.phoneNumberId);
+  });
+  const selectedIntegration = integrationList.find(
+    (integration) =>
+      String(integration.phoneNumberId) === String(selectedPhoneNumberId)
+  );
+
+  console.log("Selected Integration:", selectedIntegration);
+
   useEffect(() => {
     if (integrationList.length > 0 && !selectedPhoneNumberId) {
       setSelectedPhoneNumberId(integrationList[0].phoneNumberId.toString());
     }
   }, [integrationList, selectedPhoneNumberId]);
+
+  useEffect(() => {
+    console.log("Selected Phone Number ID:", selectedPhoneNumberId);
+    console.log("Integration List:", integrationList);
+
+    const integration = integrationList.find(
+      (integration) =>
+        String(integration.phoneNumberId) === String(selectedPhoneNumberId)
+    );
+    console.log("Selected Integration:", integration);
+
+    if (integration) {
+      console.log("Updated Integration ID:", integration._id);
+      setIntegrationId(integration._id);
+    } else {
+      console.log("No matching integration found");
+      setIntegrationId("");
+    }
+  }, [selectedPhoneNumberId, integrationList]);
 
   // Reset form function
   const resetForm = () => {
@@ -235,7 +283,12 @@ const CloneCampaign: React.FC = () => {
       return;
     }
 
-    // Ensure a new contact list is uploaded
+    if (!integrationId) {
+      setError("Integration ID is required");
+      setIsSubmitting(false);
+      return;
+    }
+
     if (!contactList) {
       setError("A new contact list file is required");
       setIsLoading(false);
@@ -246,14 +299,6 @@ const CloneCampaign: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-
-      const integrationId = selectedCampaign?.integrationId || "";
-      if (!integrationId) {
-        setError("Integration ID is required");
-        setIsLoading(false);
-        setIsSubmitting(false);
-        return;
-      }
 
       // Create combined date for scheduling
       const combinedDate = new Date(
@@ -301,12 +346,34 @@ const CloneCampaign: React.FC = () => {
       console.log("Final campaign payload:", campaignPayload);
 
       // Dispatch action to create campaign
-      dispatch(createWhatsAppCampaignAction(campaignPayload));
+      await dispatch(createWhatsAppCampaignAction(campaignPayload));
+
+      // Wait for Redux state to update
+      if (!campSuccess) {
+        throw new Error(
+          "Failed to create campaign. Please check the error in Redux state."
+        );
+      }
+
+      // If successful, set success state
+      setSuccess(true);
     } catch (err) {
       console.error("Failed to clone campaign:", err);
-      setError(`Failed to clone campaign: ${err.message || "Unknown error"}`);
+      setError(`Failed to clone campaign`);
+      setSuccess(false); // Ensure success is not set to true
+    } finally {
       setIsLoading(false);
+      setIsSubmitting(false);
     }
+  };
+
+  const handleTemplateDone = (data: any) => {
+    if (!data?.id) {
+      console.error("Template creation failed: Missing template ID");
+      return;
+    }
+    setSelectedTemplate(data);
+    setCustomizeScreen(false);
   };
 
   const handleGoWizard = () => {
@@ -351,8 +418,8 @@ const CloneCampaign: React.FC = () => {
                 </label>
                 <select
                   value={selectedPhoneNumberId}
-                  disabled={true}
-                  className="w-full p-3 border border-gray-300 rounded-lg mb-2 bg-gray-100 text-gray-600 cursor-not-allowed"
+                  onChange={(e) => setSelectedPhoneNumberId(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg mb-2 bg-white text-gray-700"
                 >
                   <option value="">Select a WhatsApp Number ID</option>
                   {integrationList.map((integration) => (
@@ -373,19 +440,29 @@ const CloneCampaign: React.FC = () => {
                   {["Template"].map((m) => (
                     <div
                       key={m}
-                      className="flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 bg-gray-100 text-gray-600 cursor-not-allowed"
+                      onClick={() => handleModeChange(m as "Template")}
+                      className={`flex flex-1 justify-center border rounded-full min-h-[48px] px-3 py-2.5 cursor-pointer ${
+                        mode === m ? "bg-purple-200" : "bg-white"
+                      }`}
                     >
                       {m}
                     </div>
                   ))}
                 </div>
                 <button
-                  disabled={true}
-                  className="flex gap-2 w-full mt-4 whitespace-nowrap min-h-[45px] justify-center items-center text-base font-medium text-gray-100 bg-gray-400 rounded-3xl cursor-not-allowed"
+                  className="flex gap-2 w-full mt-4 whitespace-nowrap min-h-[45px] justify-center items-center text-base font-medium text-gray-100 bg-[#65558F] rounded-3xl"
+                  onClick={() => setCustomizeScreen(true)}
                 >
                   Create Template
                 </button>
               </div>
+              {customizeScreen && (
+                <CreateTemplateModal
+                  onClose={() => setCustomizeScreen(false)}
+                  onDone={handleTemplateDone}
+                  secretToken={selectedIntegration?.secretToken || ""}
+                />
+              )}
 
               {/* Schedule section - editable */}
               <div className="flex flex-col w-full mb-4">
@@ -554,59 +631,58 @@ const CloneCampaign: React.FC = () => {
                 </div>
                 <div className="p-4 h-full bg-gray-100 overflow-y-auto">
                   <div className="w-fit max-w-[80%] mt-10 rounded-lg bg-white p-2 mb-3">
-                    {selectedCampaign?.template && (
+                    {(selectedTemplate || selectedCampaign?.template) && (
                       <div className="mt-4 p-4 rounded-md">
                         <h3 className="text-xl font-semibold">
                           {campaignName || "New Campaign"}
                         </h3>
 
-                        {/* Header Rendering based on structure */}
-                        {selectedCampaign.template.header?.type === "IMAGE" && (
+                        {/* Header Rendering */}
+                        {(selectedTemplate?.headerType ||
+                          selectedCampaign?.template?.header?.type) ===
+                          "IMAGE" && (
                           <img
-                            src={selectedCampaign.template.header.s3Url || ""}
+                            src={
+                              selectedTemplate?.header ||
+                              selectedCampaign?.template?.header ||
+                              ""
+                            }
                             alt="Template Header"
                             className="w-full h-auto mt-2 rounded"
                             onError={(
                               e: React.SyntheticEvent<HTMLImageElement>
                             ) => {
-                              // Try base64 if s3Url fails
-                              const content =
-                                selectedCampaign.template.header.content;
-                              if (content) {
-                                e.currentTarget.src = content.startsWith(
-                                  "data:"
-                                )
-                                  ? content
-                                  : `data:image/jpeg;base64,${content}`;
-                              }
+                              e.currentTarget.src = ""; // Fallback if the image fails to load
                             }}
                           />
                         )}
 
-                        {selectedCampaign.template.header?.type === "TEXT" && (
+                        {(selectedTemplate?.headerType ||
+                          selectedCampaign?.template?.header?.type) ===
+                          "TEXT" && (
                           <p className="font-bold mt-2">
-                            {selectedCampaign.template.header.content || ""}
+                            {selectedTemplate?.header?.content ||
+                              selectedCampaign?.template?.header?.content ||
+                              ""}
                           </p>
                         )}
 
-                        {selectedCampaign.template.header?.type === "VIDEO" && (
+                        {(selectedTemplate?.headerType ||
+                          selectedCampaign?.template?.header?.type) ===
+                          "VIDEO" && (
                           <video
-                            src={selectedCampaign.template.header.s3Url || ""}
+                            src={
+                              selectedTemplate?.header ||
+                              selectedCampaign?.template?.header ||
+                              ""
+                            }
                             controls
                             className="w-full h-auto mt-2 rounded"
-                            onError={(
-                              e: React.SyntheticEvent<HTMLVideoElement>
-                            ) => {
-                              // Try content URL if available
-                              if (selectedCampaign.template.header.content) {
-                                e.currentTarget.src =
-                                  selectedCampaign.template.header.content;
-                              }
-                            }}
                           />
                         )}
 
-                        {selectedCampaign.template.header?.type ===
+                        {(selectedTemplate?.headerType ||
+                          selectedCampaign?.template?.header?.type) ===
                           "DOCUMENT" && (
                           <div className="w-full h-32 flex items-center justify-center bg-gray-100 rounded-lg mt-2">
                             <div className="text-center">
@@ -614,7 +690,8 @@ const CloneCampaign: React.FC = () => {
                                 📄
                               </div>
                               <div className="text-sm text-gray-700">
-                                {selectedCampaign.template.header.filename ||
+                                {selectedTemplate?.filename ||
+                                  selectedCampaign?.template?.filename ||
                                   "Document"}
                               </div>
                             </div>
@@ -623,31 +700,41 @@ const CloneCampaign: React.FC = () => {
 
                         {/* Body */}
                         <p className="mt-2">
-                          {selectedCampaign.template.body?.text || ""}
+                          {selectedTemplate?.body ||
+                            selectedCampaign?.template?.body?.text ||
+                            ""}
                         </p>
 
                         {/* Footer */}
-                        {selectedCampaign.template.footer && (
+                        {(selectedTemplate?.footer ||
+                          selectedCampaign?.template?.footer?.text) && (
                           <p className="text-sm text-gray-500 mt-2">
-                            {selectedCampaign.template.footer.text || ""}
+                            {selectedTemplate?.footer ||
+                              selectedCampaign?.template?.footer?.text}
                           </p>
                         )}
 
                         {/* Buttons */}
-                        {selectedCampaign.template.buttons &&
-                          Array.isArray(selectedCampaign.template.buttons) &&
-                          selectedCampaign.template.buttons.length > 0 && (
+                        {(Array.isArray(selectedTemplate?.buttons) ||
+                          Array.isArray(selectedCampaign?.template?.buttons)) &&
+                          (
+                            selectedTemplate?.buttons ||
+                            selectedCampaign?.template?.buttons ||
+                            []
+                          ).length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-2">
-                              {selectedCampaign.template.buttons.map(
-                                (button: any, index: number) => (
-                                  <button
-                                    key={index}
-                                    className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600"
-                                  >
-                                    {button.text || ""}
-                                  </button>
-                                )
-                              )}
+                              {(
+                                selectedTemplate?.buttons ||
+                                selectedCampaign?.template?.buttons ||
+                                []
+                              ).map((button: any, index: number) => (
+                                <button
+                                  key={index}
+                                  className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600"
+                                >
+                                  {button.text || ""}
+                                </button>
+                              ))}
                             </div>
                           )}
                       </div>

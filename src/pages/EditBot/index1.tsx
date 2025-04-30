@@ -13,7 +13,7 @@ import BotSuccessContent from "../../components/confirmationModal/BotSuccessCont
 import FormikFieldChipComponent from "../../components/FormikFieldChipComponent";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
 import FormikFieldToggleComponent from "../../components/FormikFieldToggleComponent";
-import CreateBotRightContainer from "./CreateBotRightContainer";
+import CreateBotRightContainer from "../CreateBot/CreateBotRightContainer";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useSelector } from "react-redux";
@@ -39,7 +39,7 @@ enum THEME {
   dark = "dark",
 }
 
-const CreateBot: React.FC = () => {
+const EditBot: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [chatColor, setChatColor] = useState("#5D39AD");
@@ -174,7 +174,8 @@ const CreateBot: React.FC = () => {
                 })
             ),
           websiteURL: Yup.string()
-            .url("Invalid URL"),
+            .url("Invalid URL")
+            .required("Website URL is required"),
           agentRole: Yup.string().required("Agent Role is required"),
         })
       : Yup.object().shape({
@@ -341,6 +342,8 @@ const CreateBot: React.FC = () => {
         "supportNumber",
         "supportEmail",
         "appointmentSchedulerLink",
+        "botTheme",
+        "botFont",
         "openByDefault",
         "pulsing",
       ],
@@ -810,7 +813,7 @@ const CreateBot: React.FC = () => {
                   className="w-full max-w-md flex flex-wrap gap-2"
                   options={[
                     { label: "Formal", value: "Formal" },
-                    // { label: "Professional", value: "Professional" },
+                    { label: "Professional", value: "Professional" },
                     { label: "Casual", value: "Casual" },
                     { label: "Enthusiastic", value: "Enthusiastic" },
                     { label: "Custom", value: "CUSTOM" },
@@ -1455,10 +1458,10 @@ const CreateBot: React.FC = () => {
 
   return (
     <div className="p-6 ml-2 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-1">Create Agents</h1>
-      <p className="text-gray-600 text-sm mb-6">
+      <h1 className="text-2xl font-semibold mb-1">Edit Agent</h1>
+      {/* <p className="text-gray-600 text-sm mb-6">
         Get started by creating an agent tailored to your needs.
-      </p>
+      </p> */}
       <div className="mb-6">
         <div className="flex justify-between items-center">
           {[
@@ -1561,4 +1564,4 @@ const CreateBot: React.FC = () => {
   );
 };
 
-export default CreateBot;
+export default EditBot;

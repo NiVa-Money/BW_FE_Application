@@ -305,24 +305,36 @@ const WhatsappCampaign: React.FC = () => {
       }
     });
 
-    const payload = {
+    const payload: any = {
       integrationId: selectedIntegration.secretToken,
       name: data.name,
       language: "en_US",
       category: "MARKETING",
-      header: {
-        type: headerType,
-        content: headerContent,
-      },
       body: {
         text: data.body.text,
         parameters: data.body.parameters,
       },
-      footer: {
-        text: data.footer ? data.footer.text : "",
-      },
-      buttons: mappedButtons,
     };
+
+    // Add header only if it has valid values
+    if (headerType !== "NONE" && headerContent) {
+      payload.header = {
+        type: headerType,
+        content: headerContent,
+      };
+    }
+
+    // Add footer only if it has valid text
+    if (data.footer?.text) {
+      payload.footer = {
+        text: data.footer.text,
+      };
+    }
+
+    // Add buttons only if there are valid buttons
+    if (mappedButtons.length > 0) {
+      payload.buttons = mappedButtons;
+    }
 
     dispatch(createWhatsAppTemplateAction(payload));
 
@@ -551,6 +563,31 @@ const WhatsappCampaign: React.FC = () => {
               >
                 Launch AI Assistant
               </button>
+            </div>
+
+            <div
+              className="flex flex-col w-full mb-4 mt-5 rounded-3xl p-4 bg-white border-4"
+              style={{
+                borderStyle: "solid",
+                borderImage:
+                  "linear-gradient(to right, #E4E748 7%, #C0EE24 20%, #A5FFD6 23%, #27D692 36%, #4BA2A4 41%, #418DF9 45%, #A5FFD6 50%, #418DF9 53%, #00C2FF 56%, #A5FFD6 85%, #4BA2A4 91%) 1",
+              }}
+            >
+              <label className="text-slate-700 font-medium text-lg ">
+                Design a workflow with triggers, delays, and messages
+              </label>
+              <p className="mt-1 text-zinc-500">
+                Allow our AI to assist you to build a custom workflow to
+                automate your campaign steps.
+              </p>
+              <div className="flex gap-4 mt-2">
+                <button
+                  onClick={() => navigate("/marketing/workflowbuilder")}
+                  className="flex w-[200px] whitespace-nowrap justify-center mt-2 py-2 text-lg font-medium text-[#65558F] bg-transparent border-2 border-[#65558F] rounded-3xl"
+                >
+                  Build Workflow
+                </button>
+              </div>
             </div>
 
             <div className="flex justify-center mt-4 gap-4">

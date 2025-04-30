@@ -1,14 +1,36 @@
-import React from "react";
+import React, { useEffect } from "react";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { COLORS } from "../../constants";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { capturePaymentService } from "../../api/services/subscriptionServices";
 
 
 const SubscriptionSuccess: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const subscriptionId = queryParams.get('subscription_id');
+    console.log("Subscription ID:", subscriptionId);
+
     const dahboardHandler = () => {
         navigate("/dashboard");
     };
+    useEffect(() => {
+        const capturePayment = async () => {
+            if (subscriptionId) {
+                try {
+                    const result = await capturePaymentService(subscriptionId);
+                    console.log('Payment captured:', result);
+                    // You can show a success message here if needed
+                } catch (error) {
+                    console.error(error);
+                    // You can show an error message here if needed
+                }
+            }
+        };
+
+        capturePayment();
+    }, [subscriptionId]);
     return (
         <div className="overflow-hidden py-4 pr-20 pl-4 bg-white rounded-none max-md:pr-5 h-screen w-screen flex justify-center items-center">
             <div className="flex justify-center flex-col items-center">
