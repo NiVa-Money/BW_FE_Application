@@ -106,7 +106,7 @@ const ConversationsTable: React.FC = () => {
   return (
     <div className="p-6">
       {/* Center the table container */}
-      <div className="max-w-6xl mx-auto overflow-x-auto">
+      <div className="max-w-7xl mx-auto overflow-x-auto">
         <table className="w-full border-collapse rounded-2xl overflow-hidden shadow-lg">
           <thead className="bg-gradient-to-r from-blue-50 to-indigo-50">
             <tr>
