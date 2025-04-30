@@ -1812,8 +1812,6 @@
 
 // export default EngagementTab;
 
-
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
@@ -1868,10 +1866,10 @@ import { getFacebookIntegrations } from "../../api/services/integrationServices"
 
 // Define sender types as constants
 const SenderType = {
-  USER: 'USER', // Message sent by the user
-  ADMIN: 'ADMIN', // Message sent by an admin
-  AI: 'AI', // AI-generated message
-  CUSTOM_MESSAGE: 'CUSTOM_MESSAGE',
+  USER: "USER", // Message sent by the user
+  ADMIN: "ADMIN", // Message sent by an admin
+  AI: "AI", // AI-generated message
+  CUSTOM_MESSAGE: "CUSTOM_MESSAGE",
 };
 
 const EngagementTab = () => {
@@ -2884,7 +2882,7 @@ const EngagementTab = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-4 h-[400px]">
-        <div className="col-span-3">
+        <div className="col-span-3 h-[calc(100vh-200px)] flex flex-col">
           <FormControl className="w-full">
             <InputLabel>Filter</InputLabel>
             <Select
@@ -2896,7 +2894,7 @@ const EngagementTab = () => {
               <MenuItem value="comments">Comments</MenuItem>
             </Select>
           </FormControl>
-          <div className="bg-[#65558F] bg-opacity-[0.08] mt-4 rounded-lg">
+          <div className="bg-[#65558F] bg-opacity-[0.08] mt-4 rounded-lg overflow-y-auto flex-1">
             {displayedItems.map((item) => (
               <div
                 key={
@@ -2938,7 +2936,8 @@ const EngagementTab = () => {
                     <p className="text-base">{item?.username || "Unknown"}</p>
                   ) : (
                     <p className="text-base">
-                      {item.username || "Unknown"} commented: {item.text || "No text"} (
+                      {item.username || "Unknown"} commented:{" "}
+                      {item.text || "No text"} (
                       {new Date(item.timestamp).toLocaleTimeString()})
                     </p>
                   )}
@@ -2983,7 +2982,9 @@ const EngagementTab = () => {
                               : "bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]"
                           }
                         >
-                          <p className="text-sm">{message.message.text || "No text"}</p>
+                          <p className="text-sm">
+                            {message.message.text || "No text"}
+                          </p>
                           <p className="text-xs opacity-70 mt-1">
                             {new Date(message.timestamp).toLocaleTimeString()}
                           </p>
@@ -3242,7 +3243,9 @@ const EngagementTab = () => {
                             <Person className="text-white w-6 h-6" />
                           </div>
                           <div className="bg-white p-3 rounded-lg max-w-[70%]">
-                            <p className="text-sm">{comment.text || "No text"}</p>
+                            <p className="text-sm">
+                              {comment.text || "No text"}
+                            </p>
                             <p className="text-xs opacity-70 mt-1">
                               {new Date(comment.timestamp).toLocaleTimeString()}
                             </p>
