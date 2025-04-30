@@ -133,16 +133,21 @@ const DashboardPanel = () => {
       today.setHours(0, 0, 0, 0);
       return today;
     })(),
-    endDate: Date | null | string = new Date()
+    endDate: Date | null | string = new Date(),
+    selectedBotId = botId?.length ? botId : botsDataRedux?.[0]?._id
   ) => {
+    if (!selectedBotId) return;
+
     try {
       setIsLoading(true);
-      const formattedStartDate = startDate instanceof Date ? startDate.toISOString() : startDate;
-      const formattedEndDate = endDate instanceof Date ? endDate.toISOString() : endDate;
+      const formattedStartDate =
+        startDate instanceof Date ? startDate.toISOString() : startDate;
+      const formattedEndDate =
+        endDate instanceof Date ? endDate.toISOString() : endDate;
       const response: DashboardResponse = await dashBoardDataService({
         startDate: formatDateString(formattedStartDate, true),
         endDate: formatDateString(formattedEndDate, true),
-        botIds: [botId?.length ? botId : botsDataRedux[0]._id],
+        botIds: [selectedBotId],
       });
       if (response?.success) {
         setStats(response);
@@ -216,7 +221,7 @@ const DashboardPanel = () => {
     setBotId(selectedBotId);
     setBotName(selectedBot?.botName || "");
     if (!isTodayRef.current) {
-      fetchData(dateRange.startDate, dateRange.endDate);
+      fetchData(dateRange.startDate, dateRange.endDate, selectedBotId);
     }
   };
 
@@ -241,7 +246,7 @@ const DashboardPanel = () => {
   const handleDateRangeChange = (startDate: Date, endDate: Date) => {
     setDateRange({ startDate, endDate });
     if (!isTodayRef.current) {
-      fetchData(startDate, endDate);
+      fetchData(startDate, endDate, botId);
     }
   };
   // useEffect(() => {
