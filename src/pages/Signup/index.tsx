@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   SignUpUserService,
   verifyOtpUserService,
@@ -51,7 +51,6 @@ const SignUp: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [otp, setOtp] = useState<string>("");
   const [saveDataEmail, setSaveDataEmail] = useState<string>("");
-  const navigate = useNavigate();
 
   const validateField = (name: keyof FormData, value: string): string => {
     switch (name) {
@@ -73,10 +72,10 @@ const SignUp: React.FC = () => {
         return value.length < 8
           ? "Password must be at least 8 characters long"
           : !value.match(/[A-Z]/)
-          ? "Password must contain at least one uppercase letter"
-          : !value.match(/[0-9]/)
-          ? "Password must contain at least one number"
-          : "";
+            ? "Password must contain at least one uppercase letter"
+            : !value.match(/[0-9]/)
+              ? "Password must contain at least one number"
+              : "";
       default:
         return "";
     }
@@ -140,8 +139,8 @@ const SignUp: React.FC = () => {
       } else {
         setErrorMessage(
           response.error ||
-            response.message ||
-            "Signup failed. Please try again."
+          response.message ||
+          "Signup failed. Please try again."
         );
       }
     } catch (error: any) {
@@ -161,7 +160,9 @@ const SignUp: React.FC = () => {
       });
 
       if (response.success) {
-        navigate("/login");
+        setOtpModalOpen(false);
+        // TODO : need to look for better approach for this
+        window.location.href = '/login';
       } else {
         setOtpErrorMessage(
           response.message || "OTP verification failed. Please try again."

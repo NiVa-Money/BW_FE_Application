@@ -18,6 +18,7 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import LiveSessionList from "./LiveSession";
 import { createSelector } from "reselect";
 import InsightsPanel from "./InsightsPanel";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const LiveChat: React.FC = (): React.ReactElement => {
   const socket = useRef(null);
@@ -348,7 +349,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   // Notification Sound Function
   // Notification Sound Function
   const playNotificationSound = () => {
-    const audio = new Audio("https://www.soundjay.com/buttons/beep-02.mp3"); // Changed to a calmer beep
+    const audio = new Audio("https://jumpshare.com/s/NiLeGdQk6YJJh1PzNDg4");
     audio.play().catch((error) => {
       console.log("Audio play failed:", error);
     });
@@ -361,7 +362,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   console.log("suggestedResponses", suggestedResponses);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col relative">
       {/* Header Section */}
       <div className="px-6 pt-4 flex-none">
         <h1 className="text-2xl font-semibold">Live Chat</h1>
@@ -544,11 +545,10 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   <div className="flex justify-end">
                     <button
                       onClick={handleToggleChat}
-                      className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${
-                        isChatEnabled
-                          ? "bg-green-500 hover:bg-green-600"
-                          : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-                      }`}
+                      className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${isChatEnabled
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                        }`}
                     >
                       {isChatEnabled ? "End Chat?" : "Start Chat"}
                     </button>
@@ -731,9 +731,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
           {/* Agent Assist Overlay */}
           <div
-            className={`fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-              isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
-            }`}
+            className={`fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
+              }`}
           >
             <InsightsPanel sessionMetrics={sessionMetrics} />
           </div>
@@ -743,9 +742,14 @@ const LiveChat: React.FC = (): React.ReactElement => {
       {/* Toggle Button (fixed at bottom-right) */}
       <button
         onClick={() => setIsAgentAssistOpen(!isAgentAssistOpen)}
-        className="fixed bottom-4 right-4 z-50 bg-[#A5FFD6] text-black px-4 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105"
-      >
-        {isAgentAssistOpen ? "Close Agent Assist" : "Open Agent Assist"}
+        style={{
+          position: "absolute",
+          top: isAgentAssistOpen ? "50%" : "77%",
+          bottom: isAgentAssistOpen ? "45%" : "18%",
+          right: isAgentAssistOpen ? "32.7%" : "0%"
+        }}
+        className="bottom-4 right-4 z-50 bg-[#eadeff] text-black px-4 py-2 rounded-l-full shadow-lg transition-all duration-300 hover:scale-105"      >
+        <span><ArrowBackIcon /> Agent Assist</span>
       </button>
     </div>
   );

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { FC, useState, useEffect, Key } from "react";
@@ -47,7 +46,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
-import CampaignStatsCard from "./CampaignStatsCard";
+// import CampaignStatsCard from "./CampaignStatsCard";
 
 interface DashboardProps {
   totalMessages: number;
@@ -61,7 +60,7 @@ interface DashboardProps {
 const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [campaign, setCampaign] = useState<string>(campaignName);
   const [page, setPage] = useState(1);
-  const [limit, _setLimit] = useState(10);
+  const [limit] = useState(10);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedReceiverNumber, setSelectedReceiverNumber] = useState("");
   const [selectedIntent, setSelectedIntent] = useState("");
@@ -78,7 +77,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [hotLeadsValue, setHotLeadsValue] = useState(0);
   const [responseChartData, setResponseChartData] = useState([]);
   // const [engagementRate, setEngagementRate] = useState<string | null>(null);
-  const [_response, setResponse] = useState<any>(null);
+  const [, setResponse] = useState<any>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -764,12 +763,12 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
         </div>
       </div>
 
+      {/*     
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
         <CampaignStatsCard
           activeCampaigns={3}
           scheduledCampaigns={2}
           messagesSent={150}
-          // breakdown={{ delivered: 120, read: 110, replied: 30, failed: 5 }}
           scheduledNames={
             Array.isArray(campaignData)
               ? campaignData
@@ -777,11 +776,10 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
                   .map((c) => c.campaignName)
               : []
           }
-          sentMessages={hotLeads /* or messages array */
-            .map((m) => ({
-              id: m.id,
-              content: m.text, // adjust per your message shape
-            }))}
+          sentMessages={hotLeads.map((m) => ({
+            id: m.id,
+            content: m.text,
+          }))}
           stepStats={[
             {
               stepName: "Step1",
@@ -817,7 +815,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             },
           ]}
         />
-      </div>
+      </div> */}
 
       {/* Contact Insights Table */}
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">

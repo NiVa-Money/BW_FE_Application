@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { WhatsApp, Upload } from "@mui/icons-material";
@@ -45,13 +44,13 @@ const WhatsappCampaign: React.FC = () => {
   const [contactList, setContactList] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
-  const [_fileName, setFileName] = useState("");
+  const [, setFileName] = useState("");
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
-  const [_secretToken, setSecretToken] = useState("");
-  const [_whatsappName, setWhatsappName] = useState("");
+  const [, setSecretToken] = useState("");
+  const [, setWhatsappName] = useState("");
   const whatsappNumbers = useSelector(
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
@@ -101,7 +100,7 @@ const WhatsappCampaign: React.FC = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err) {
+    } catch {
       alert("Failed to download sample CSV. Please try again.");
     }
   };
@@ -342,7 +341,7 @@ const WhatsappCampaign: React.FC = () => {
     setSelectedTemplate({
       name: data.name,
       id: data.id,
-      header: headerContent,
+      header: data.header?.content || "",
       headerType: headerType,
       body: data.body.text,
       footer: data.footer ? data.footer.text : "",
@@ -563,6 +562,31 @@ const WhatsappCampaign: React.FC = () => {
               >
                 Launch AI Assistant
               </button>
+            </div>
+
+            <div
+              className="flex flex-col w-full mb-4 mt-5 rounded-3xl p-4 bg-white border-4"
+              style={{
+                borderStyle: "solid",
+                borderImage:
+                  "linear-gradient(to right, #E4E748 7%, #C0EE24 20%, #A5FFD6 23%, #27D692 36%, #4BA2A4 41%, #418DF9 45%, #A5FFD6 50%, #418DF9 53%, #00C2FF 56%, #A5FFD6 85%, #4BA2A4 91%) 1",
+              }}
+            >
+              <label className="text-slate-700 font-medium text-lg ">
+                Design a workflow with triggers, delays, and messages
+              </label>
+              <p className="mt-1 text-zinc-500">
+                Allow our AI to assist you to build a custom workflow to
+                automate your campaign steps.
+              </p>
+              <div className="flex gap-4 mt-2">
+                <button
+                  onClick={() => navigate("/marketing/workflowbuilder")}
+                  className="flex w-[200px] whitespace-nowrap justify-center mt-2 py-2 text-lg font-medium text-[#65558F] bg-transparent border-2 border-[#65558F] rounded-3xl"
+                >
+                  Build Workflow
+                </button>
+              </div>
             </div>
 
             <div className="flex justify-center mt-4 gap-4">
