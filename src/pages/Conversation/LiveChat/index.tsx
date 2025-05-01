@@ -592,7 +592,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
 
             {/* Right Section (Customer Details - Always visible) */}
-            <div className="">
+            <div>
               <div className="space-y-4">
                 <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
                   <div className="flex items-center justify-between mb-4">
