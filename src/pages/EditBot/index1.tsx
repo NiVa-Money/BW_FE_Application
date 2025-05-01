@@ -17,17 +17,13 @@ import CreateBotRightContainer from "../CreateBot/CreateBotRightContainer";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useSelector } from "react-redux";
+import { editBotProfileService } from "../../api/services/agentBuilderServices";
+import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store";
 import { generatePromptService } from "../../api/services/botService";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import {
-  // appendKnowledgeBaseService,
-  createBotProfileService,
-  deleteKnowledgeBaseService,
-  detachKnowledgeBaseService,
-} from "../../api/services/agentBuilderServices";
-import { Delete, LinkOff } from "@mui/icons-material";
+
 
 enum BOTICONS {
   list = "list",
@@ -40,6 +36,8 @@ enum THEME {
 }
 
 const EditBot: React.FC = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [chatColor, setChatColor] = useState("#5D39AD");
@@ -48,51 +46,68 @@ const EditBot: React.FC = () => {
   const [knowledgeBases, setKnowledgeBases] = useState<
     { file: File; filename: string; kbId?: string }[]
   >([]);
-  const [filename, setFileName] = useState("");
+  //   const [filename, setFileName] = useState("");
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const totalPages = 4;
   const imgViewerRef = useRef<HTMLInputElement>(null);
-  const initialValues = {
-    botName: "",
-    botTone: "",
-    customTone: "",
-    botColor: "",
-    botGreetingMessage: "Hello, how can I assist you?",
-    supportNumber: "",
-    supportEmail: "",
-    docName: "",
-    docType: "",
-    appointmentSchedulerLink: "",
-    botFont: "",
-    botTheme: "",
-    agentRole: "",
-    agentRoleDescription: "",
-    newGoalPrompt: "",
-    newGuidelinePrompt: "",
-    agentsGoals: [""],
-    conversationGuidelines: [""],
-    wordLimitPerMessage: "",
-    knowledgeBaseFiles: [],
-    botSmartness: true,
-    botIconOption: BOTICONS.list,
-    openByDefault: "none",
-    pulsing: false,
-    websiteURL: "",
-  };
+  const [botData, setBotData] = useState<any>(null);
 
-  const createBotDataRedux = useSelector(
-    (state: RootState) => state.bot?.create?.data
+  const botEditDataRedux = useSelector(
+    (state: RootState) => state.bot?.lists?.data
+  );
+  const editBotDataRedux = useSelector(
+    (state: RootState) => state.bot?.edit?.data
   );
 
   useEffect(() => {
-    if (createBotDataRedux !== null) {
-      const success = createBotDataRedux?.success;
-      if (success) {
-        setIsModalOpen(success);
+    if (botEditDataRedux?.length && id) {
+      const botParamId = id.replace(":", "");
+      const data = botEditDataRedux.find(
+        (bot: { _id: string }) => bot._id === botParamId
+      );
+      console.log("Selected bot data:", data); // Log the selected bot data
+      if (data) {
+        setBotData(data);
+        setChatColor(data.botColor || "#5D39AD");
+        setImageSrc(data.botURL || "/assets/bot1.svg");
+        setImageName(data.botURL ? "Current Icon" : "");
+        // setFileName(data.docName || "");
+        setSelectedFileImage(null); // Reset to allow new upload
       }
     }
-  }, [createBotDataRedux]);
+  }, [botEditDataRedux, id]);
+
+  useEffect(() => {
+    if (editBotDataRedux?.success) {
+      setIsModalOpen(true);
+    }
+  }, [editBotDataRedux]);
+
+  const initialValues = {
+    botName: botData?.botName || "", // Default to an empty string
+    docId: botData?._id || "",
+    botTone: botData?.botTone || "",
+    botColor: botData?.botColor || "",
+    botGreetingMessage:
+      botData?.botGreetingMessage || "Hello, how can I assist you?",
+    supportNumber: botData?.supportNumber || "",
+    supportEmail: botData?.supportEmail || "",
+    appointmentSchedulerLink: "", // Default to an empty string
+    botFont: botData?.botFont || "",
+    botTheme: botData?.botTheme || "",
+    agentRole: botData?.agentRole || "",
+    agentRoleDescription: "", // Default to an empty string
+    agentsGoals: botData?.agentsGoals || [""], // Default to an array with an empty string
+    conversationGuidelines: botData?.conversationGuidelines || [""], // Default to an array with an empty string
+    newGoalPrompt: "",
+    newGuidelinePrompt: "",
+    wordLimitPerMessage: botData?.wordLimitPerMessage || "",
+    knowledgeBaseFiles: [], // Changed from knowledgeBaseFile: null to array
+    pulsing: true, // Added initialization for pulsing
+    botSmartness: botData?.botSmartness || true,
+    botIconOption: botData?.botURL ? BOTICONS.custom : BOTICONS.list,
+  };
 
   const handleGoalChange = (index: number, newValue: string, formik: any) => {
     const updatedGoals = [...formik.values.agentsGoals];
@@ -129,7 +144,7 @@ const EditBot: React.FC = () => {
           botName: Yup.string().required("Agent Name is required"),
           botGreetingMessage: Yup.string().required("Greeting is required"),
           supportNumber: Yup.string()
-            .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+            .matches(/^\d*$/, "Phone number must contain only digits")
             .required("Phone Number is required"),
           supportEmail: Yup.string()
             .email("Invalid email")
@@ -174,8 +189,7 @@ const EditBot: React.FC = () => {
                 })
             ),
           websiteURL: Yup.string()
-            .url("Invalid URL")
-            .required("Website URL is required"),
+            .url("Invalid URL"),
           agentRole: Yup.string().required("Agent Role is required"),
         })
       : Yup.object().shape({
@@ -204,6 +218,7 @@ const EditBot: React.FC = () => {
     const blob = await response.blob();
     const file = new File([blob], "bot-icon.svg", { type: blob.type });
     setSelectedFileImage(file);
+    setImageName("");
   };
 
   const handleColorClick = (color: string) => {
@@ -234,10 +249,10 @@ const EditBot: React.FC = () => {
       filename: file.name,
     }));
     setKnowledgeBases((prev) => [...prev, ...newKnowledgeBases]);
-    setFileName(newKnowledgeBases[newKnowledgeBases.length - 1].filename);
+    // setFileName(newKnowledgeBases[newKnowledgeBases.length - 1].filename);
 
     formik.setFieldValue("knowledgeBaseFiles", [
-      ...formik.values.knowledgeBaseFiles,
+      ...(formik.values.knowledgeBaseFiles || []),
       ...Array.from(files),
     ]);
   };
@@ -246,6 +261,8 @@ const EditBot: React.FC = () => {
     setSubmitting(true);
     try {
       const formData = new FormData();
+      const cleanedBotId = id?.replace(":", "") || "";
+      formData.append("botId", cleanedBotId); // Use cleaned botId
       if (selectedFileImage) {
         formData.append("customBotImage", selectedFileImage);
       }
@@ -255,8 +272,6 @@ const EditBot: React.FC = () => {
       formData.append("botGreetingMessage", values.botGreetingMessage || "");
       formData.append("supportNumber", values.supportNumber || "");
       formData.append("supportEmail", values.supportEmail || "");
-      formData.append("docName", filename || "");
-      formData.append("docType", filename ? "pdf" : "");
       formData.append(
         "appointmentSchedulerLink",
         values.appointmentSchedulerLink || ""
@@ -265,7 +280,7 @@ const EditBot: React.FC = () => {
       formData.append("botTheme", values.botTheme || "");
       formData.append("websiteURL", values.websiteURL || "");
       formData.append("openByDefault", values.openByDefault || "");
-      formData.append("pulsing", values.pulsing.toString() || "");
+      formData.append("pulsing", values.pulsing?.toString() || "");
       formData.append("agentsGoals", JSON.stringify(values.agentsGoals || []));
       formData.append(
         "conversationGuidelines",
@@ -285,38 +300,23 @@ const EditBot: React.FC = () => {
         });
       }
 
-      // Create bot profile
-      const botResponse = await createBotProfileService(formData);
-      console.log("Response from api:", botResponse);
-      // const botId = botResponse.botId; // Assuming botId is returned
-
-      // Append knowledge bases
-      // for (let i = 0; i < knowledgeBases.length; i++) {
-      //   const kbFormData = new FormData();
-      //   kbFormData.append("file", knowledgeBases[i].file);
-
-      //   // Log the contents of kbFormData
-      //   for (const [key, value] of kbFormData.entries()) {
-      //     console.log(`Key: ${key}, Value:`, value);
-      //   }
-      //   const kbResponse = await appendKnowledgeBaseService(
-      //     botId,
-      //     "",
-      //     kbFormData
-      //   );
-      //   setKnowledgeBases((prev) =>
-      //     prev.map((kb, index) =>
-      //       index === i ? { ...kb, kbId: kbResponse.kbId } : kb
-      //     )
-      //   );
-      // }
-
-      setIsModalOpen(true);
+      // Directly call editBotProfileService
+      const response = await editBotProfileService(cleanedBotId, formData);
+      if (response) {
+        setIsModalOpen(true);
+      }
     } catch (error) {
       console.error("Submission failed:", error);
     } finally {
       setSubmitting(false);
     }
+
+    //   setIsModalOpen(true);
+    // } catch (error) {
+    //   console.error("Submission failed:", error);
+    // } finally {
+    //   setSubmitting(false);
+    // }
   };
 
   const handleClose = (formik: any) => {
@@ -332,6 +332,7 @@ const EditBot: React.FC = () => {
     setImageName("");
     setKnowledgeBases([]);
     console.log("Confirmed submission");
+    navigate("/integrations");
   };
 
   const nextPage = async (formik: any) => {
@@ -342,8 +343,6 @@ const EditBot: React.FC = () => {
         "supportNumber",
         "supportEmail",
         "appointmentSchedulerLink",
-        "botTheme",
-        "botFont",
         "openByDefault",
         "pulsing",
       ],
@@ -367,37 +366,37 @@ const EditBot: React.FC = () => {
   const prevPage = () => setCurrentPage(currentPage - 1);
 
   const renderFormFields = (formik: any) => {
-    const handleDetachKB = async (
-      index: number,
-      botId: string,
-      kbId: string
-    ) => {
-      try {
-        await detachKnowledgeBaseService(botId, kbId);
-        setKnowledgeBases((prev) =>
-          prev.map((kb, i) => (i === index ? { ...kb, kbId: undefined } : kb))
-        );
-      } catch (error) {
-        console.error("Failed to detach knowledge base:", error);
-      }
-    };
+    // const handleDetachKB = async (
+    //   index: number,
+    //   botId: string,
+    //   kbId: string
+    // ) => {
+    //   try {
+    //     await detachKnowledgeBaseService(botId, kbId);
+    //     setKnowledgeBases((prev) =>
+    //       prev.map((kb, i) => (i === index ? { ...kb, kbId: undefined } : kb))
+    //     );
+    //   } catch (error) {
+    //     console.error("Failed to detach knowledge base:", error);
+    //   }
+    // };
 
-    const handleDeleteKB = async (
-      index: number,
-      botId: string,
-      kbId: string
-    ) => {
-      try {
-        await deleteKnowledgeBaseService(botId, kbId);
-        setKnowledgeBases((prev) => prev.filter((_, i) => i !== index));
-        const updatedFiles = formik.values.knowledgeBaseFiles.filter(
-          (_: File, i: number) => i !== index
-        );
-        formik.setFieldValue("knowledgeBaseFiles", updatedFiles);
-      } catch (error) {
-        console.error("Failed to delete knowledge base:", error);
-      }
-    };
+    // const handleDeleteKB = async (
+    //   index: number,
+    //   botId: string,
+    //   kbId: string
+    // ) => {
+    //   try {
+    //     await deleteKnowledgeBaseService(botId, kbId);
+    //     setKnowledgeBases((prev) => prev.filter((_, i) => i !== index));
+    //     const updatedFiles = formik.values.knowledgeBaseFiles.filter(
+    //       (_: File, i: number) => i !== index
+    //     );
+    //     formik.setFieldValue("knowledgeBaseFiles", updatedFiles);
+    //   } catch (error) {
+    //     console.error("Failed to delete knowledge base:", error);
+    //   }
+    // };
 
     const steps = [
       {
@@ -813,7 +812,7 @@ const EditBot: React.FC = () => {
                   className="w-full max-w-md flex flex-wrap gap-2"
                   options={[
                     { label: "Formal", value: "Formal" },
-                    { label: "Professional", value: "Professional" },
+                    // { label: "Professional", value: "Professional" },
                     { label: "Casual", value: "Casual" },
                     { label: "Enthusiastic", value: "Enthusiastic" },
                     { label: "Custom", value: "CUSTOM" },
@@ -904,7 +903,7 @@ const EditBot: React.FC = () => {
                         <span>{kb.filename}</span>
                       </div>
                       <div className="flex gap-2">
-                        {kb.kbId && (
+                        {/* {kb.kbId && (
                           <Button
                             variant="outlined"
                             size="small"
@@ -920,8 +919,8 @@ const EditBot: React.FC = () => {
                           >
                             Detach
                           </Button>
-                        )}
-                        <Button
+                        )} */}
+                        {/* <Button
                           variant="outlined"
                           size="small"
                           startIcon={<Delete />}
@@ -946,7 +945,7 @@ const EditBot: React.FC = () => {
                           }
                         >
                           Delete
-                        </Button>
+                        </Button> */}
                       </div>
                     </div>
                   ))}
@@ -1501,6 +1500,7 @@ const EditBot: React.FC = () => {
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
+            enableReinitialize
             validateOnChange={true}
             validateOnBlur={true}
             validateOnMount={false}
