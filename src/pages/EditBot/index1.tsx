@@ -16,20 +16,14 @@ import FormikFieldToggleComponent from "../../components/FormikFieldToggleCompon
 import CreateBotRightContainer from "../CreateBot/CreateBotRightContainer";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
-import { editBotAction } from "../../store/actions/botActions";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+import { editBotProfileService } from "../../api/services/agentBuilderServices";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store";
 import { generatePromptService } from "../../api/services/botService";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-// import {
-//   // appendKnowledgeBaseService,
-//   createBotProfileService,
-//   deleteKnowledgeBaseService,
-//   detachKnowledgeBaseService,
-// } from "../../api/services/agentBuilderServices";
-// import { Delete, LinkOff } from "@mui/icons-material";
+
 
 enum BOTICONS {
   list = "list",
@@ -43,7 +37,6 @@ enum THEME {
 
 const EditBot: React.FC = () => {
   const { id } = useParams();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -92,7 +85,7 @@ const EditBot: React.FC = () => {
   }, [editBotDataRedux]);
 
   const initialValues = {
-    botName: botData?.botName || "",
+    botName: botData?.botName || "", // Default to an empty string
     docId: botData?._id || "",
     botTone: botData?.botTone || "",
     botColor: botData?.botColor || "",
@@ -100,17 +93,18 @@ const EditBot: React.FC = () => {
       botData?.botGreetingMessage || "Hello, how can I assist you?",
     supportNumber: botData?.supportNumber || "",
     supportEmail: botData?.supportEmail || "",
-    appointmentSchedulerLink: "", // Keep this field empty
+    appointmentSchedulerLink: "", // Default to an empty string
     botFont: botData?.botFont || "",
     botTheme: botData?.botTheme || "",
     agentRole: botData?.agentRole || "",
-    agentRoleDescription: "", // Keep this field empty
-    agentsGoals: [""],
-    conversationGuidelines: [""], // Keep this field empty
+    agentRoleDescription: "", // Default to an empty string
+    agentsGoals: botData?.agentsGoals || [""], // Default to an array with an empty string
+    conversationGuidelines: botData?.conversationGuidelines || [""], // Default to an array with an empty string
     newGoalPrompt: "",
     newGuidelinePrompt: "",
     wordLimitPerMessage: botData?.wordLimitPerMessage || "",
-    knowledgeBaseFile: null,
+    knowledgeBaseFiles: [], // Changed from knowledgeBaseFile: null to array
+    pulsing: true, // Added initialization for pulsing
     botSmartness: botData?.botSmartness || true,
     botIconOption: botData?.botURL ? BOTICONS.custom : BOTICONS.list,
   };
@@ -150,7 +144,7 @@ const EditBot: React.FC = () => {
           botName: Yup.string().required("Agent Name is required"),
           botGreetingMessage: Yup.string().required("Greeting is required"),
           supportNumber: Yup.string()
-            .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+            .matches(/^\d*$/, "Phone number must contain only digits")
             .required("Phone Number is required"),
           supportEmail: Yup.string()
             .email("Invalid email")
@@ -195,8 +189,7 @@ const EditBot: React.FC = () => {
                 })
             ),
           websiteURL: Yup.string()
-            .url("Invalid URL")
-            .required("Website URL is required"),
+            .url("Invalid URL"),
           agentRole: Yup.string().required("Agent Role is required"),
         })
       : Yup.object().shape({
@@ -259,7 +252,7 @@ const EditBot: React.FC = () => {
     // setFileName(newKnowledgeBases[newKnowledgeBases.length - 1].filename);
 
     formik.setFieldValue("knowledgeBaseFiles", [
-      ...formik.values.knowledgeBaseFiles,
+      ...(formik.values.knowledgeBaseFiles || []),
       ...Array.from(files),
     ]);
   };
@@ -287,7 +280,7 @@ const EditBot: React.FC = () => {
       formData.append("botTheme", values.botTheme || "");
       formData.append("websiteURL", values.websiteURL || "");
       formData.append("openByDefault", values.openByDefault || "");
-      formData.append("pulsing", values.pulsing.toString() || "");
+      formData.append("pulsing", values.pulsing?.toString() || "");
       formData.append("agentsGoals", JSON.stringify(values.agentsGoals || []));
       formData.append(
         "conversationGuidelines",
@@ -307,8 +300,11 @@ const EditBot: React.FC = () => {
         });
       }
 
-      // Create bot profile
-      await dispatch(editBotAction(formData));
+      // Directly call editBotProfileService
+      const response = await editBotProfileService(cleanedBotId, formData);
+      if (response) {
+        setIsModalOpen(true);
+      }
     } catch (error) {
       console.error("Submission failed:", error);
     } finally {
@@ -816,7 +812,7 @@ const EditBot: React.FC = () => {
                   className="w-full max-w-md flex flex-wrap gap-2"
                   options={[
                     { label: "Formal", value: "Formal" },
-                    { label: "Professional", value: "Professional" },
+                    // { label: "Professional", value: "Professional" },
                     { label: "Casual", value: "Casual" },
                     { label: "Enthusiastic", value: "Enthusiastic" },
                     { label: "Custom", value: "CUSTOM" },
