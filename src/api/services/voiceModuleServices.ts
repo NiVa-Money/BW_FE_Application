@@ -206,6 +206,8 @@ interface CreateVoiceCallPayload {
 }
 
 interface VoiceCall {
+  insights: any;
+  _id: any;
   id: string;
   agentId: string;
   phoneNumber: string;

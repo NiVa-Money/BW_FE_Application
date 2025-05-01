@@ -44,6 +44,7 @@ import MainDashboard from "../pages/MainDashboard";
 import CampaignWorkflowBuilder from "../pages/Marketing/Whatsapp/CampaignWorkflow";
 import InstagramIntegration from "../pages/Integration/InstagramIntegration";
 import FacebookIntegration from "../pages/Integration/FacebookIntegration";
+import CrudFacebookIntegration from "../pages/Integration/FacebookIntegration/crudFacebookIntegration";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -175,6 +176,16 @@ export const autRoutes: any[] = [
     id: 10,
     path: "/editintegration",
     component: <CrudIntegration />,
+  },
+  {
+    id: 10,
+    path: "/editInstagramIntegration",
+    component: <CrudInstagramIntegration />,
+  },
+  {
+    id: 10,
+    path: "/editFacebookIntegration",
+    component: <CrudFacebookIntegration />,
   },
   {
     id: 10,

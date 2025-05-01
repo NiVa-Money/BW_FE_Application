@@ -141,8 +141,8 @@ export default function InsightsPanel({
     val === "High" ? 75 : val === "Medium" ? 50 : 25;
 
   return (
-    <Box p={3} overflow="auto" height="100%">
-      <Grid container spacing={3} direction="column">
+    <Box p={2} overflow="auto" height="100%">
+      <Grid container spacing={2} direction="column">
         {/* SUMMARY AND NEXT STEPS */}
         <Grid item>
           <Paper

@@ -8,20 +8,19 @@ import React, {
   useMemo,
 } from "react";
 import { SmartToy, Person, Send } from "@mui/icons-material";
-// import Switch from "@mui/material/Switch";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import io from "socket.io-client";
 import CloseIcon from "@mui/icons-material/Close";
 import { getAllSessionLive } from "../../../store/actions/conversationActions";
 import { getBotsAction } from "../../../store/actions/botActions";
 import LiveSessionList from "./LiveSession";
 import { createSelector } from "reselect";
 import InsightsPanel from "./InsightsPanel";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { io, Socket } from "socket.io-client";
 
 const LiveChat: React.FC = (): React.ReactElement => {
-  const socket = useRef(null);
+  const socket = useRef<Socket | null>(null);
   const dispatch = useDispatch();
 
   // ---------- State ----------
@@ -32,11 +31,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const [isChatEnabled, setIsChatEnabled] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [, setAgentState] = useState<string>("disconnected");
-  // const [isAIEnabled, setIsAIEnabled] = useState(false);
   const [isAgentConnected, setIsAgentConnected] = useState(false);
-  const [isAgentTyping, setIsAgentTyping] = useState(false);
-
   const [sessionMetrics, setSessionMetrics] = useState<any>(null);
+  const [error, setError] = useState<string>("");
 
   // ---------- Memoized Selectors ----------
   const selectUserChat = (state: RootState) => state.userChat;
@@ -50,11 +47,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
     (state: RootState) => state.bot.lists?.data || []
   );
 
-  console.log("botsDataRedux", botsDataRedux);
-
   // ---------- Derived Values ----------
-  const userId = localStorage.getItem("user_id");
-  const botId = botsDataRedux?.[0]?._id;
+  const userId = localStorage.getItem("user_id") || "default-user-id"; // Fallback userId
+  const botId = botsDataRedux?.[0]?._id || "";
   const botLists = useMemo(
     () =>
       (botsDataRedux || []).map((bot: any) => ({
@@ -70,83 +65,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
   }, [userId, dispatch]);
 
   // Socket initialization and management
-  // useEffect(() => {
-  //   if (
-  //     !socket.current &&
-  //     isChatEnabled &&
-  //     selectedSessionId &&
-  //     userId &&
-  //     botId
-  //   ) {
-  //     socket.current = io(import.meta.env.VITE_FIREBASE_BASE_URL, {
-  //       query: {
-  //         userType: "AGENT",
-  //         sessionId: selectedSessionId,
-  //         userId,
-  //       },
-  //       reconnection: true,
-  //       reconnectionAttempts: 5,
-  //       reconnectionDelay: 1000,
-  //     });
-
-  //     // Standard socket events
-  //     socket.current.on("connect", () => {
-  //       setAgentState("connecting");
-  //       socket.current.emit("joinSession", {
-  //         sessionId: selectedSessionId,
-  //         userId,
-  //         botId,
-  //         userType: "AGENT",
-  //       });
-
-  //       socket.current.on("sessionMetrics", (metrics: any) => {
-  //         setSessionMetrics(metrics);
-  //       });
-  //     });
-
-  //     socket.current.on("agentConnected", (data: any) => {
-  //       console.log("Agent connected:", data);
-  //       setAgentState("connected");
-  //       setIsAgentConnected(true);
-  //     });
-
-  //     socket.current.on("messageToClient", (data: any) => {
-  //       if (data.question || data.response) {
-  //         setMessages((prev) => [
-  //           ...prev,
-  //           {
-  //             ...data,
-  //             timestamp: data.timestamp || new Date().toISOString(),
-  //             sender: data.senderType === "AGENT" ? "agent" : "customer",
-  //             text: data.question || data.response,
-  //             type:
-  //               data.senderType === "AGENT" ? "bot-message" : "user-message",
-  //           },
-  //         ]);
-  //         playNotificationSound();
-  //       }
-  //     });
-
-  //     socket.current.on("sessionClosed", handleSessionEnd);
-  //     socket.current.on("sessionEndedByAdmin", handleSessionEnd);
-  //     socket.current.on("adminEndedSession", handleSessionEnd);
-  //     socket.current.on("connect_error", (error: any) => {
-  //       console.error("Connection error:", error);
-  //       setAgentState("disconnected");
-  //     });
-  //     socket.current.on("closeSession", () => {
-  //       setIsAgentConnected(false);
-  //     });
-  //   }
-
-  //   return () => {
-  //     if (socket.current) {
-  //       socket.current.disconnect();
-  //       socket.current = null;
-  //     }
-  //   };
-  // }, [isChatEnabled, selectedSessionId, userId, botId]);
-
   useEffect(() => {
     if (
       !socket.current &&
@@ -155,6 +73,11 @@ const LiveChat: React.FC = (): React.ReactElement => {
       userId &&
       botId
     ) {
+      console.log("Initializing socket with:", {
+        userId,
+        botId,
+        selectedSessionId,
+      });
       socket.current = io(import.meta.env.VITE_FIREBASE_BASE_URL, {
         query: {
           userType: "AGENT",
@@ -168,8 +91,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
       // Standard socket events
       socket.current.on("connect", () => {
+        console.log("Socket connected");
         setAgentState("connecting");
-        socket.current.emit("joinSession", {
+        socket.current?.emit("joinSession", {
           sessionId: selectedSessionId,
           userId,
           botId,
@@ -177,17 +101,17 @@ const LiveChat: React.FC = (): React.ReactElement => {
         });
 
         // Request session history when joining
-        socket.current.emit("sessionHistory", {
+        socket.current?.emit("sessionHistory", {
           sessionId: selectedSessionId,
           userId,
           botId,
         });
 
-        socket.current.on("sessionHistory", (history: any) => {
+        socket.current?.on("sessionHistory", (history: any) => {
           setMessages((prev) => [...(history.messages || []), ...prev]);
         });
 
-        socket.current.on("sessionMetrics", (metrics: any) => {
+        socket.current?.on("sessionMetrics", (metrics: any) => {
           setSessionMetrics(metrics);
         });
       });
@@ -221,6 +145,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
       socket.current.on("connect_error", (error: any) => {
         console.error("Connection error:", error);
         setAgentState("disconnected");
+        setError("Failed to connect to server");
       });
       socket.current.on("closeSession", () => {
         setIsAgentConnected(false);
@@ -235,10 +160,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
     };
   }, [isChatEnabled, selectedSessionId, userId, botId]);
 
-  // const handleToggle = (event: { target: { checked: boolean } }) => {
-  //   setIsAIEnabled(event.target.checked);
-  // };
-
   // ---------- Handlers ----------
   const handleSessionEnd = useCallback(() => {
     setIsChatEnabled(false);
@@ -249,6 +170,10 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   const getBotSession = useCallback(
     (botId: string) => {
+      if (!botId) {
+        setError("Please select a bot");
+        return;
+      }
       dispatch(getAllSessionLive({ botId, userId }));
     },
     [dispatch, userId]
@@ -260,6 +185,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
       if (session) {
         setSelectedSessionId(sessionId);
         setMessages(session.sessions || []);
+        setError("");
+      } else {
+        setError("Invalid session selected");
       }
     },
     [sessionsDataRedux]
@@ -268,7 +196,29 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const sendMessage = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (!newMessage.trim() || !socket.current || !selectedSessionId) return;
+      console.log("sendMessage called", {
+        newMessage,
+        socket: socket.current,
+        selectedSessionId,
+        isAgentConnected,
+      });
+
+      if (!newMessage.trim()) {
+        setError("Message cannot be empty");
+        return;
+      }
+      if (!socket.current) {
+        setError("Socket not connected. Please start the chat.");
+        return;
+      }
+      if (!selectedSessionId) {
+        setError("No session selected");
+        return;
+      }
+      if (!isAgentConnected) {
+        setError("Agent not connected");
+        return;
+      }
 
       const messageData = {
         sessionId: selectedSessionId,
@@ -291,12 +241,13 @@ const LiveChat: React.FC = (): React.ReactElement => {
       ]);
 
       setNewMessage("");
+      setError("");
     },
-    [newMessage, selectedSessionId, userId, botId]
+    [newMessage, selectedSessionId, userId, botId, isAgentConnected]
   );
 
   const sendMessageQuick = (text: string) => {
-    if (isAgentConnected && text) {
+    if (isAgentConnected && text && socket.current && selectedSessionId) {
       const msg = {
         chatMode: "manual",
         text,
@@ -304,7 +255,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
         timestamp: new Date().toISOString(),
         sender: "agent",
       };
-      socket.current?.emit("messageToServer", {
+      socket.current.emit("messageToServer", {
         sessionId: selectedSessionId,
         userId,
         botId,
@@ -312,6 +263,10 @@ const LiveChat: React.FC = (): React.ReactElement => {
         userType: "AGENT",
       });
       setMessages((prev) => [...prev, msg]);
+    } else {
+      setError(
+        "Cannot send quick message: Agent not connected or no session selected"
+      );
     }
   };
 
@@ -332,7 +287,16 @@ const LiveChat: React.FC = (): React.ReactElement => {
     if (isChatEnabled) {
       setShowConfirmationModal(true);
     } else {
+      if (!botId) {
+        setError("Please select a bot first");
+        return;
+      }
+      if (!selectedSessionId) {
+        setError("Please select a session");
+        return;
+      }
       setIsChatEnabled(true);
+      setError("");
     }
   };
 
@@ -347,22 +311,24 @@ const LiveChat: React.FC = (): React.ReactElement => {
   }, [selectedSessionId, userId, handleSessionEnd]);
 
   // Notification Sound Function
-  // Notification Sound Function
   const playNotificationSound = () => {
     const audio = new Audio("https://jumpshare.com/s/NiLeGdQk6YJJh1PzNDg4");
-    audio.play().catch((error) => {
+    audio.play().catch((error: any) => {
       console.log("Audio play failed:", error);
     });
   };
 
-  const getMetric = sessionMetrics;
-  console.log("get metric", getMetric);
-
   const suggestedResponses = sessionMetrics?.suggestedResponses || [];
-  console.log("suggestedResponses", suggestedResponses);
 
   return (
     <div className="h-screen flex flex-col relative">
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-100 text-red-700 p-3 mx-6 mb-4 rounded">
+          {error}
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="px-6 pt-4 flex-none">
         <h1 className="text-2xl font-semibold">Live Chat</h1>
@@ -375,17 +341,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
               <div className="text-gray-500">Ques Stats</div>
               <div className="text-base text-[#2E2F5F] font-bold">350</div>
             </div>
-            {/* <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4 shadow">
-            <div className="text-gray-500">Live to AI</div>
-            <div className="text-base font-bold text-[#2E2F5F]">
-              {isAIEnabled ? "AI Enabled" : "Switch with AI"}
-            </div>
-            <Switch
-              checked={isAIEnabled}
-              onChange={handleToggle}
-              color="primary"
-            />
-          </div> */}
             <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4 shadow">
               <div className="flex justify-between items-center">
                 <div>
@@ -423,9 +378,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
         {/* Main Content (3-column layout) */}
         <div className="px-6 flex-1 overflow-y-auto pb-10">
-          <div className="grid grid-cols-3 gap-6 h-full">
+          <div className="grid grid-cols-[1fr_2fr_1fr] gap-6 h-full">
             {/* Left Section */}
-            <div className="space-y-4 overflow-y-auto">
+            <div className="space-y-4 w-80 overflow-y-auto">
               <select
                 className="w-full p-3 border border-gray-300 rounded-lg mb-4"
                 onChange={(e) => getBotSession(e.target.value)}
@@ -448,7 +403,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
 
             {/* Middle Section (Chat) */}
-            <div className="overflow-y-auto">
+            <div className="overflow-y-auto w-full">
               <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4">
                 <div className="flex justify-between items-start mb-4">
                   {messages?.length > 0 && (
@@ -458,11 +413,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     >
                       Close Chat <CloseIcon className="ml-1 w-4 h-4" />
                     </button>
-                  )}
-                  {!isAgentConnected && (
-                    <div className="text-red-500 text-sm">
-                      Connecting to user session...
-                    </div>
                   )}
                 </div>
 
@@ -517,11 +467,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       )}
                     </div>
                   ))}
-                  {isAgentTyping && (
-                    <div className="text-sm text-gray-500 mt-2">
-                      Agent is typing...
-                    </div>
-                  )}
                 </div>
 
                 {/* Quick Replies */}
@@ -545,10 +490,11 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   <div className="flex justify-end">
                     <button
                       onClick={handleToggleChat}
-                      className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${isChatEnabled
-                        ? "bg-green-500 hover:bg-green-600"
-                        : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-                        }`}
+                      className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${
+                        isChatEnabled
+                          ? "bg-green-500 hover:bg-green-600"
+                          : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                      }`}
                     >
                       {isChatEnabled ? "End Chat?" : "Start Chat"}
                     </button>
@@ -589,9 +535,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                           className="flex-1 bg-transparent outline-none"
                           value={newMessage}
                           onChange={(e) => setNewMessage(e.target.value)}
-                          onFocus={() => setIsAgentTyping(true)}
-                          onBlur={() => setIsAgentTyping(false)}
-                          disabled={!isAgentConnected}
+                          // Temporarily removed disabled prop for testing
                         />
                         <button type="submit" className="text-white">
                           <Send />
@@ -604,7 +548,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
 
             {/* Right Section (Customer Details - Always visible) */}
-            <div className="overflow-y-auto">
+            <div>
               <div className="space-y-4">
                 <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
                   <div className="flex items-center justify-between mb-4">
@@ -653,10 +597,12 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                    <button className="w-full text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black">
                       Send Email
                     </button>
-                    <button className="mt-2 whitespace-nowrap text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button className="w-full text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black">
                       Send Whatsapp message
                     </button>
                   </div>
@@ -731,8 +677,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
           {/* Agent Assist Overlay */}
           <div
-            className={`fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
-              }`}
+            className={`fixed top-0 right-0 h-full w-[400px] bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+              isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
+            }`}
           >
             <InsightsPanel sessionMetrics={sessionMetrics} />
           </div>
@@ -746,16 +693,16 @@ const LiveChat: React.FC = (): React.ReactElement => {
           position: "absolute",
           top: isAgentAssistOpen ? "50%" : "77%",
           bottom: isAgentAssistOpen ? "45%" : "18%",
-          right: isAgentAssistOpen ? "32.7%" : "0%"
+          right: isAgentAssistOpen ? "25%" : "0%",
         }}
-        className="bottom-4 right-4 z-50 bg-[#eadeff] text-black px-4 py-2 rounded-l-full shadow-lg transition-all duration-300 hover:scale-105"      >
-        <span><ArrowBackIcon /> Agent Assist</span>
+        className="bottom-4 right-4 z-50 bg-[#eadeff] text-black px-4 py-2 rounded-l-full shadow-lg transition-all duration-300 hover:scale-105"
+      >
+        <span>
+          <ArrowBackIcon /> Agent Assist
+        </span>
       </button>
     </div>
   );
 };
 
 export default LiveChat;
-
- 
-
