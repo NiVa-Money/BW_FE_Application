@@ -36,12 +36,15 @@ const MyBots: React.FC = () => {
     success: boolean;
     url: string;
   } | null>(null);
+  const [isExportLoading, setIsExportLoading] = useState(false);
   const [botId, setBotId] = useState("");
 
   const exportS = useSelector((state: RootState) => state?.bot?.export?.data);
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
+
+  console.log("Bots Data Redux:", botsDataRedux);
   const createBotRedux = useSelector(
     (state: RootState) => state.bot?.create?.data
   );
@@ -108,6 +111,7 @@ const MyBots: React.FC = () => {
   };
   const handleExport = (botId: string) => {
     if (botId && userId) {
+      setIsExportLoading(true);
       setIsExportModalOpen(true);
       dispatch(exportBotProfileServiceAction({ botId, userId }));
     } else {
@@ -123,6 +127,7 @@ const MyBots: React.FC = () => {
   useEffect(() => {
     if (exportS) {
       setExportResponse({ success: true, url: exportS?.url });
+      setIsExportLoading(false);
     }
   }, [exportS]);
 
@@ -343,6 +348,7 @@ const MyBots: React.FC = () => {
         open={isExportModalOpen}
         onClose={closeExportModal}
         exportResponse={exportResponse}
+        isLoading={isExportLoading}
       />
       <TestBotModal open={isTestOpen} onClose={handleTestClose} botId={botId} />
     </div>
