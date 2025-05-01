@@ -142,7 +142,86 @@ interface FAQ {
 }
 
 const faqs: FAQ[] = [
-  // FAQs remain unchanged, omitted for brevity
+  {
+    question: "What is Botwot?",
+    answer:
+      "BotWot iCX is an AI-first Customer Intelligence Engine that unifies marketing, sales, and service through autonomous AI agents. Designed to boost revenue, reduce operational costs, and enhance customer experiences, BotWot transforms every interaction into a growth opportunity.",
+  },
+  {
+    question: "How can BotWot reduce my operational costs?",
+    answer:
+      "By automating repetitive tasks like responding to FAQs, booking appointments, lead routing, and collecting feedback, BotWot cuts down on manual work and staffing costs—while delivering faster, more accurate service.",
+  },
+  {
+    question: "What does “multi-agent orchestration” mean?",
+    answer:
+      "Think of it as your AI dream team. BotWot deploys specialized agents for sales, support, marketing, and feedback—each working together in real time to deliver seamless customer journeys across every channel.",
+  },
+  {
+    question: "Can BotWot help increase my sales?",
+    answer:
+      "Yes. BotWot’s Adaptive Recommendation Engine analyzes behavior in real time and pushes the right product or service at the right moment—supercharging cross-sell and upsell conversions across digital touchpoints.",
+  },
+  {
+    question: "How soon can I see results?",
+    answer:
+      "Fast. BotWot’s no-code setup gets you live in minutes. Most businesses start seeing improved efficiency, higher engagement, and measurable ROI in under 14 days.",
+  },
+  {
+    question: "Is BotWot suitable for SMBs?",
+    answer:
+      "Absolutely. BotWot was built to democratize AI—giving SMBs access to enterprise-grade capabilities at startup-friendly prices. Scale as you grow, without overinvesting upfront.",
+  },
+  {
+    question: "How does BotWot boost customer retention?",
+    answer:
+      "By understanding customer emotions in real time, BotWot responds with empathy and context—resolving concerns proactively and helping you build deeper customer trust and loyalty.",
+  },
+  {
+    question: "What tools does BotWot integrate with?",
+    answer:
+      "BotWot plugs into your ecosystem: Salesforce, HubSpot, Shopify, WooCommerce, WhatsApp, Slack, email, and major ticketing platforms. Need something custom? Our open APIs have you covered.",
+  },
+  {
+    question: "Does BotWot support offline-to-online transitions?",
+    answer:
+      "Yes. If you’re starting your digital journey, BotWot gives you instant online presence with intelligent chatbots and engagement flows—no tech team needed.",
+  },
+  {
+    question: "How secure is customer data with BotWot?",
+    answer:
+      "Very. We follow the highest standards—end-to-end encryption, GDPR/CCPA compliance, and strict access controls—to keep your customer data safe and confidential.",
+  },
+  {
+    question: "Can BotWot analyze customer behavior?",
+    answer:
+      "Definitely. BotWot provides powerful real-time dashboards with sentiment analysis, engagement trends, and actionable insights—so you can make smarter decisions, faster.",
+  },
+  {
+    question: "Will BotWot scale as we grow?",
+    answer:
+      "Yes. Whether you're managing a few hundred or a few million interactions, BotWot scales effortlessly with your business—ensuring consistent performance at every stage.",
+  },
+  {
+    question: "How does BotWot support internal teams?",
+    answer:
+      "BotWot acts as your AI-powered assistant—taking care of repetitive queries, surfacing insights, and freeing up your teams to focus on strategic growth and customer delight.",
+  },
+  {
+    question: "Can BotWot speak multiple languages?",
+    answer:
+      "Yes. BotWot supports multilingual conversations, helping you connect with diverse markets while maintaining a consistent brand voice and experience.",
+  },
+  {
+    question: "Is BotWot customizable?",
+    answer:
+      "Completely. You can tailor workflows, conversation logic, bot tone, and branding—without writing a single line of code. It’s your AI, your way.",
+  },
+  {
+    question: "What makes BotWot different?",
+    answer:
+      "BotWot isn’t just automation—it’s autonomy. With predictive intelligence, emotional context, and decision-making agents, it’s built to grow your business—not just respond to tickets.",
+  },
 ];
 
 const HelpCenter: React.FC = () => {

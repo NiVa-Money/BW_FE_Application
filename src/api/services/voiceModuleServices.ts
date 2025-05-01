@@ -305,11 +305,23 @@ export const updateVoiceCallStatusService = async (
   }
 };
 
-export const transcribeVoiceCallService = async (callId: string) => {
+export const transcribeVoiceCallService = async (file: File) => {
   try {
-    const response = await axiosInstance.patch(
-      `https://vo-backend.onrender.com/voice-calls/${callId}/transcribe`
+    const formData = new FormData();
+    formData.append("model_id", "scribe_v1");
+    formData.append("file", file);
+
+    const response = await axios.post(
+      "https://api.elevenlabs.io/v1/speech-to-text",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "xi-api-key": import.meta.env.VITE_ELEVENLABS_API_KEY,
+        },
+      }
     );
+
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
