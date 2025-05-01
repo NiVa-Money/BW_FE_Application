@@ -12,14 +12,20 @@ interface HeaderProps {
 }
 
 const Header = ({ onBotSelect, onDateRangeChange }: HeaderProps) => {
-  const [botLists, setBotLists] = useState<{ botId: string; botName: string }[]>([]);
+  const [botLists, setBotLists] = useState<
+    { botId: string; botName: string }[]
+  >([]);
   const [selectedBotId, setSelectedBotId] = useState<string>(""); // Local state for selected bot
   const [startDate, setStartDate] = useState<Date | null>(null); // State for start date
   const [endDate, setEndDate] = useState<Date | null>(null); // State for end date
   const dispatch = useDispatch();
 
-  const botsDataRedux = useSelector((state: RootState) => state.bot?.lists?.data);
-  const botsDataLoader = useSelector((state: RootState) => state.bot?.lists?.loading);
+  const botsDataRedux = useSelector(
+    (state: RootState) => state.bot?.lists?.data
+  );
+  const botsDataLoader = useSelector(
+    (state: RootState) => state.bot?.lists?.loading
+  );
   const userId = localStorage.getItem("user_id");
 
   useEffect(() => {
@@ -29,7 +35,11 @@ const Header = ({ onBotSelect, onDateRangeChange }: HeaderProps) => {
   }, [dispatch, userId]);
 
   useEffect(() => {
-    if (Array.isArray(botsDataRedux) && botsDataRedux.length && !botsDataLoader) {
+    if (
+      Array.isArray(botsDataRedux) &&
+      botsDataRedux.length &&
+      !botsDataLoader
+    ) {
       const formatted = botsDataRedux.map((bot: any) => ({
         botId: bot._id,
         botName: bot.botName || `Bot ${bot._id.substring(0, 8)}`,
@@ -64,10 +74,12 @@ const Header = ({ onBotSelect, onDateRangeChange }: HeaderProps) => {
   useEffect(() => {
     if (!startDate || !endDate) {
       const today = new Date();
-      const thirtyDaysAgo = new Date(today.setDate(today.getDate() - 30));
-      setStartDate(thirtyDaysAgo);
-      setEndDate(new Date());
-      onDateRangeChange(thirtyDaysAgo, new Date());
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(today.getDate() - 7);
+
+      setStartDate(oneWeekAgo);
+      setEndDate(today);
+      onDateRangeChange(oneWeekAgo, today);
     }
   }, [startDate, endDate, onDateRangeChange]);
 

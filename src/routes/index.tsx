@@ -42,6 +42,8 @@ import WhatsappIntegrationList from "../pages/Integration/WhatsappIntegration/in
 import ConversationsTable from "../pages/VoiceModule/ConversationsTable";
 import MainDashboard from "../pages/MainDashboard";
 import CampaignWorkflowBuilder from "../pages/Marketing/Whatsapp/CampaignWorkflow";
+import InstagramIntegration from "../pages/Integration/InstagramIntegration";
+import FacebookIntegration from "../pages/Integration/FacebookIntegration";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -158,6 +160,16 @@ export const autRoutes: any[] = [
     id: 10,
     path: "/createintegration",
     component: <WhatsAppIntegration />,
+  },
+  {
+    id: 10,
+    path: "/createInstagramIntegration",
+    component: <InstagramIntegration />,
+  },
+  {
+    id: 10,
+    path: "/createFacebookIntegration",
+    component: <FacebookIntegration />,
   },
   {
     id: 10,

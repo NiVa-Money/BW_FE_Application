@@ -276,7 +276,7 @@ const NPSChart: React.FC<Props> = ({ payload }) => {
         {data.data.map((entry) => (
           <div key={entry.name} className="flex items-center gap-2">
             <div
-              className="w-3 h-3 rounded-sm"
+              className="w-5 h-3 rounded-sm"
               style={{ backgroundColor: entry.color }}
             />
             <span className="text-sm text-muted-foreground">{entry.name}</span>

@@ -436,7 +436,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4"> 
         {/* Response Rate Chart */}
         <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
           <div className="flex items-center justify-between mb-4">

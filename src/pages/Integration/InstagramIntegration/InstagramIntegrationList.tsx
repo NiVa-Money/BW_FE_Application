@@ -82,7 +82,7 @@ export default function InstagramIntegrationList() {
           </h2>
           <button
             className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
-            onClick={() => navigate("/createintegration")}
+            onClick={() => navigate("/createInstagramIntegration")}
           >
             <AddIcon /> Add Integration
           </button>
