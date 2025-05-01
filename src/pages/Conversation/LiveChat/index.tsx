@@ -18,7 +18,7 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import LiveSessionList from "./LiveSession";
 import { createSelector } from "reselect";
 import InsightsPanel from "./InsightsPanel";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const LiveChat: React.FC = (): React.ReactElement => {
   const socket = useRef(null);
@@ -34,7 +34,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const [, setAgentState] = useState<string>("disconnected");
   // const [isAIEnabled, setIsAIEnabled] = useState(false);
   const [isAgentConnected, setIsAgentConnected] = useState(false);
-  const [isAgentTyping, setIsAgentTyping] = useState(false);
 
   const [sessionMetrics, setSessionMetrics] = useState<any>(null);
 
@@ -423,9 +422,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
         {/* Main Content (3-column layout) */}
         <div className="px-6 flex-1 overflow-y-auto pb-10">
-          <div className="grid grid-cols-3 gap-6 h-full">
+          <div className="grid grid-cols-[1fr_2fr_1fr] gap-6 h-full">
             {/* Left Section */}
-            <div className="space-y-4 overflow-y-auto">
+            <div className="space-y-4 w-80 overflow-y-auto">
               <select
                 className="w-full p-3 border border-gray-300 rounded-lg mb-4"
                 onChange={(e) => getBotSession(e.target.value)}
@@ -448,7 +447,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
 
             {/* Middle Section (Chat) */}
-            <div className="overflow-y-auto">
+            <div className="overflow-y-auto w-full ">
               <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4">
                 <div className="flex justify-between items-start mb-4">
                   {messages?.length > 0 && (
@@ -458,11 +457,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     >
                       Close Chat <CloseIcon className="ml-1 w-4 h-4" />
                     </button>
-                  )}
-                  {!isAgentConnected && (
-                    <div className="text-red-500 text-sm">
-                      Connecting to user session...
-                    </div>
                   )}
                 </div>
 
@@ -517,11 +511,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       )}
                     </div>
                   ))}
-                  {isAgentTyping && (
-                    <div className="text-sm text-gray-500 mt-2">
-                      Agent is typing...
-                    </div>
-                  )}
                 </div>
 
                 {/* Quick Replies */}
@@ -545,10 +534,11 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   <div className="flex justify-end">
                     <button
                       onClick={handleToggleChat}
-                      className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${isChatEnabled
-                        ? "bg-green-500 hover:bg-green-600"
-                        : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-                        }`}
+                      className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${
+                        isChatEnabled
+                          ? "bg-green-500 hover:bg-green-600"
+                          : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                      }`}
                     >
                       {isChatEnabled ? "End Chat?" : "Start Chat"}
                     </button>
@@ -589,8 +579,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                           className="flex-1 bg-transparent outline-none"
                           value={newMessage}
                           onChange={(e) => setNewMessage(e.target.value)}
-                          onFocus={() => setIsAgentTyping(true)}
-                          onBlur={() => setIsAgentTyping(false)}
                           disabled={!isAgentConnected}
                         />
                         <button type="submit" className="text-white">
@@ -604,7 +592,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
 
             {/* Right Section (Customer Details - Always visible) */}
-            <div className="overflow-y-auto">
+            <div className="">
               <div className="space-y-4">
                 <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
                   <div className="flex items-center justify-between mb-4">
@@ -653,12 +641,14 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <button className="mt-2 text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
+                    <button className="w-full text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black">
                       Send Email
                     </button>
-                    <button className="mt-2 whitespace-nowrap text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black w-full">
-                      Send Whatsapp message
-                    </button>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                  <button className="w-full text-[#65558F] font-semibold px-4 py-2 rounded-full border border-black">
+                    Send Whatsapp message
+                  </button>
                   </div>
                 </div>
 
@@ -731,8 +721,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
           {/* Agent Assist Overlay */}
           <div
-            className={`fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
-              }`}
+            className={`fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+              isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
+            }`}
           >
             <InsightsPanel sessionMetrics={sessionMetrics} />
           </div>
@@ -746,16 +737,16 @@ const LiveChat: React.FC = (): React.ReactElement => {
           position: "absolute",
           top: isAgentAssistOpen ? "50%" : "77%",
           bottom: isAgentAssistOpen ? "45%" : "18%",
-          right: isAgentAssistOpen ? "32.7%" : "0%"
+          right: isAgentAssistOpen ? "32.7%" : "0%",
         }}
-        className="bottom-4 right-4 z-50 bg-[#eadeff] text-black px-4 py-2 rounded-l-full shadow-lg transition-all duration-300 hover:scale-105"      >
-        <span><ArrowBackIcon /> Agent Assist</span>
+        className="bottom-4 right-4 z-50 bg-[#eadeff] text-black px-4 py-2 rounded-l-full shadow-lg transition-all duration-300 hover:scale-105"
+      >
+        <span>
+          <ArrowBackIcon /> Agent Assist
+        </span>
       </button>
     </div>
   );
 };
 
 export default LiveChat;
-
- 
-
