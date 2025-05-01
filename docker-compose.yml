@@ -1,0 +1,39 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+        - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+        - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+        - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+        - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+        - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+        - VITE_FIREBASE_MEASUREMENT_ID=${VITE_FIREBASE_MEASUREMENT_ID}
+        - VITE_FIREBASE_PAYPAL_CLIENT_ID=${VITE_FIREBASE_PAYPAL_CLIENT_ID}
+        - VITE_FIREBASE_BASE_URL=${VITE_FIREBASE_BASE_URL}
+        - VITE_ELEVENLABS_ID=${VITE_ELEVENLABS_ID}
+        - VITE_ELEVENLABS_API_KEY=${VITE_ELEVENLABS_API_KEY}
+    ports:
+      - "8080:3000"  # Match your dev server port (e.g., Vite uses 3000)
+      - "24678:24678"
+    volumes:
+      - ./:/app  # Mount the entire project directory
+      - /app/node_modules
+    env_file:
+      - .env 
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    restart: unless-stopped
+ 
+    # Load all variables for runtime if needed
+    # If you need environment variables
+    # environment:
+    #   - VITE_API_URL=https://api.example.com
+
+  # Add additional services as needed (API, database, etc.)
+  # api:
+  #   image: api-image
+  #   ports:
+  #     - "3000:3000"

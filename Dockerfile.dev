@@ -1,0 +1,20 @@
+# Development stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files first (better caching)
+COPY package*.json ./
+
+# Install dependencies (including devDependencies)
+RUN npm install
+
+# Copy all files (volumes will override this in dev)
+COPY . .
+
+# Expose ports (Vite default: 3000 + HMR 24678)
+EXPOSE 3000
+EXPOSE 24678
+
+# Start the dev server (adjust based on your framework)
+CMD ["npm", "run", "dev"]
