@@ -893,6 +893,7 @@ const CreateBot: React.FC = () => {
                         <Button
                           variant="outlined"
                           size="small"
+                          color="error"
                           startIcon={<Delete />}
                           onClick={() =>
                             kb.kbId && createBotDataRedux?.botId

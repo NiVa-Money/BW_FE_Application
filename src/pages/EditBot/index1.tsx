@@ -17,13 +17,16 @@ import CreateBotRightContainer from "../CreateBot/CreateBotRightContainer";
 import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useSelector } from "react-redux";
-import { editBotProfileService } from "../../api/services/agentBuilderServices";
+import {
+  editBotProfileService,
+  deleteKnowledgeBaseService,
+} from "../../api/services/agentBuilderServices";
 import { useNavigate, useParams } from "react-router-dom";
 import { RootState } from "../../store";
 import { generatePromptService } from "../../api/services/botService";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
+import { Delete } from "@mui/icons-material";
 
 enum BOTICONS {
   list = "list",
@@ -58,6 +61,10 @@ const EditBot: React.FC = () => {
   );
   const editBotDataRedux = useSelector(
     (state: RootState) => state.bot?.edit?.data
+  );
+
+  const createBotDataRedux = useSelector(
+    (state: RootState) => state.bot?.create?.data
   );
 
   useEffect(() => {
@@ -188,8 +195,7 @@ const EditBot: React.FC = () => {
                   );
                 })
             ),
-          websiteURL: Yup.string()
-            .url("Invalid URL"),
+          websiteURL: Yup.string().url("Invalid URL"),
           agentRole: Yup.string().required("Agent Role is required"),
         })
       : Yup.object().shape({
@@ -381,22 +387,22 @@ const EditBot: React.FC = () => {
     //   }
     // };
 
-    // const handleDeleteKB = async (
-    //   index: number,
-    //   botId: string,
-    //   kbId: string
-    // ) => {
-    //   try {
-    //     await deleteKnowledgeBaseService(botId, kbId);
-    //     setKnowledgeBases((prev) => prev.filter((_, i) => i !== index));
-    //     const updatedFiles = formik.values.knowledgeBaseFiles.filter(
-    //       (_: File, i: number) => i !== index
-    //     );
-    //     formik.setFieldValue("knowledgeBaseFiles", updatedFiles);
-    //   } catch (error) {
-    //     console.error("Failed to delete knowledge base:", error);
-    //   }
-    // };
+    const handleDeleteKB = async (
+      index: number,
+      botId: string,
+      kbId: string
+    ) => {
+      try {
+        await deleteKnowledgeBaseService(botId, kbId);
+        setKnowledgeBases((prev) => prev.filter((_, i) => i !== index));
+        const updatedFiles = formik.values.knowledgeBaseFiles.filter(
+          (_: File, i: number) => i !== index
+        );
+        formik.setFieldValue("knowledgeBaseFiles", updatedFiles);
+      } catch (error) {
+        console.error("Failed to delete knowledge base:", error);
+      }
+    };
 
     const steps = [
       {
@@ -920,9 +926,10 @@ const EditBot: React.FC = () => {
                             Detach
                           </Button>
                         )} */}
-                        {/* <Button
+                        <Button
                           variant="outlined"
                           size="small"
+                          color="error"
                           startIcon={<Delete />}
                           onClick={() =>
                             kb.kbId && createBotDataRedux?.botId
@@ -945,7 +952,7 @@ const EditBot: React.FC = () => {
                           }
                         >
                           Delete
-                        </Button> */}
+                        </Button>
                       </div>
                     </div>
                   ))}
