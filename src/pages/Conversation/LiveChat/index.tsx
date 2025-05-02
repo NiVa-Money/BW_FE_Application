@@ -403,7 +403,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
 
             {/* Middle Section (Chat) */}
-            <div className="overflow-y-auto w-full">
+            <div className="overflow-y-auto w-full h-[25rem]">
               <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4">
                 <div className="flex justify-between items-start mb-4">
                   {messages?.length > 0 && (
@@ -485,7 +485,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                 </div>
 
                 {/* Chat Controls */}
-                <div className="relative flex flex-col gap-4 px-6 py-5 mt-4 w-full max-w-full bg-[#65558F] rounded-2xl shadow-md text-white">
+                <div className="relative flex flex-col gap-4 px-6 py-5 mt-4 w-full max-w-full bg-[#65558F] bg-opacity-[0.06] rounded-2xl shadow-md text-white">
                   {/* Chat Toggle */}
                   <div className="flex justify-end">
                     <button
@@ -493,7 +493,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${
                         isChatEnabled
                           ? "bg-green-500 hover:bg-green-600"
-                          : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                          : "bg-[#65558F] hover:bg-[#65558F]/90 text-white transition-colors"
                       }`}
                     >
                       {isChatEnabled ? "End Chat?" : "Start Chat"}
@@ -532,12 +532,15 @@ const LiveChat: React.FC = (): React.ReactElement => {
                         <input
                           type="text"
                           placeholder="Type your message..."
-                          className="flex-1 bg-transparent outline-none"
+                          className="flex-1 bg-transparent outline-none border-none text-black placeholder:text-gray-500 focus:ring-0 focus:border-transparent"
                           value={newMessage}
                           onChange={(e) => setNewMessage(e.target.value)}
                           // Temporarily removed disabled prop for testing
                         />
-                        <button type="submit" className="text-white">
+                        <button
+                          type="submit"
+                          className="bg-[#65558F] hover:bg-[#65558F]/90 text-white rounded-full p-2"
+                        >
                           <Send />
                         </button>
                       </div>
