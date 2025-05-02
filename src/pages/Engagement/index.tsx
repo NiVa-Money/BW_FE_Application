@@ -1847,8 +1847,6 @@
 
 // export default EngagementTab;
 
- 
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
@@ -1922,7 +1920,9 @@ const EngagementTab = () => {
   const [inputText, setInputText] = useState("");
   const [commentText, setCommentText] = useState("");
   const [replyText, setReplyText] = useState("");
-  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(
+    null
+  );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPost, setCurrentPost] = useState<any>(null);
@@ -2684,7 +2684,10 @@ const EngagementTab = () => {
       return;
     }
 
-    const integrationID = currentPost.CHANNEL === "Facebook" ? facebookIntegrationId : integrationId;
+    const integrationID =
+      currentPost.CHANNEL === "Facebook"
+        ? facebookIntegrationId
+        : integrationId;
 
     if (!integrationID) {
       setError(
@@ -2728,7 +2731,14 @@ const EngagementTab = () => {
     setReplyText("");
     setSelectedCommentId(null);
     setError(null);
-  }, [replyText, currentPost, selectedCommentId, orgId, integrationId, facebookIntegrationId]);
+  }, [
+    replyText,
+    currentPost,
+    selectedCommentId,
+    orgId,
+    integrationId,
+    facebookIntegrationId,
+  ]);
 
   const likePost = useCallback(() => {
     if (!currentPost || !orgId || likedPosts.has(currentPost.postId)) {
@@ -3474,7 +3484,9 @@ const EngagementTab = () => {
                       className="flex-1 bg-transparent outline-none text-sm"
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && sendCommentReply()}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && sendCommentReply()
+                      }
                     />
                     <button
                       className="p-1.5 hover:bg-gray-200 rounded-full"
