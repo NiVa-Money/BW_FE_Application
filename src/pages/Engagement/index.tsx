@@ -50,6 +50,14 @@
 // import { getInstagramData } from "../../api/services/integrationServices";
 // import { getFacebookIntegrations } from "../../api/services/integrationServices";
 
+// // Define sender types as constants
+// const SenderType = {
+//   USER: "USER", // Message sent by the user
+//   ADMIN: "ADMIN", // Message sent by an admin
+//   AI: "AI", // AI-generated message
+//   CUSTOM_MESSAGE: "CUSTOM_MESSAGE",
+// };
+
 // const EngagementTab = () => {
 //   const [conversations, setConversations] = useState<any[]>([]);
 //   const [posts, setPosts] = useState<any[]>([]);
@@ -98,11 +106,11 @@
 //         }
 
 //         // Fetch Facebook integration
-//         const fbResponse = await getFacebookIntegrations(); // Assume this API exists
+//         const fbResponse = await getFacebookIntegrations();
 //         const fbIntegrations = Array.isArray(fbResponse?.data)
 //           ? fbResponse.data
 //           : [];
-//           console.log("Facebook Integrations:", fbIntegrations);
+//         console.log("Facebook Integrations:", fbIntegrations);
 //         if (fbIntegrations.length > 0) {
 //           setFacebookIntegrationId(fbIntegrations[0]._id);
 //         }
@@ -168,7 +176,7 @@
 //       const newComment = {
 //         commentId: data.commentId,
 //         username: data.recipientUsername || data.username || "Agent",
-//         text: data.message?.text || data.text,
+//         text: data.message?.text || data.text || "",
 //         timestamp: data.timestamp || new Date().toISOString(),
 //         CHANNEL: channel,
 //         likeCount: data.likeCount || 0,
@@ -248,9 +256,9 @@
 //                 CHANNEL: "Instagram",
 //                 messageId: msg.messageId,
 //                 message: {
-//                   text: msg.message.text || "",
-//                   type: msg.message.type,
-//                   senderType: msg.senderType,
+//                   text: msg.message?.text || "",
+//                   type: msg.message?.type || "TEXT",
+//                   senderType: msg.senderType || SenderType.USER,
 //                 },
 //                 timestamp: msg.timestamp,
 //                 status: msg.status,
@@ -267,14 +275,20 @@
 //                 post.postId ||
 //                 post._id ||
 //                 `post_${Math.random().toString(36).substr(2, 9)}`,
-//               caption: post.caption,
+//               caption: post.caption || "",
 //               mediaType: post.mediaType,
-//               likeCount: post.likeCount,
+//               likeCount: post.likeCount || 0,
 //               timestamp: post.timestamp,
 //               createdAt: post.createdAt,
 //               updatedAt: post.updatedAt,
 //               carouselMedia: post.carouselMedia || [],
-//               comments: post.comments || [],
+//               comments: (post.comments || []).map((comment: any) => ({
+//                 ...comment,
+//                 text: comment.text || "",
+//                 username: comment.username || "Unknown",
+//                 timestamp: comment.timestamp || new Date().toISOString(),
+//                 likeCount: comment.likeCount || 0,
+//               })),
 //               mediaUrl:
 //                 post.mediaUrl ||
 //                 (post.carouselMedia?.length ? post.carouselMedia[0].url : ""),
@@ -416,19 +430,19 @@
 //               ...conv,
 //               CHANNEL: "Facebook",
 //               userId: conv.userId,
+//               username: conv.username || "Unknown",
 //               messages: conv.messages.map((msg: any) => ({
 //                 ...msg,
 //                 CHANNEL: "Facebook",
 //                 messageId: msg.messageId,
 //                 message: {
-//                   text: msg.message.text,
-//                   type: msg.message.type,
-//                   senderType: msg.senderType,
+//                   text: msg.message?.text || "",
+//                   type: msg.message?.type || "TEXT",
+//                   senderType: msg.senderType || SenderType.USER,
 //                 },
 //                 timestamp: msg.timestamp,
 //                 status: msg.status,
 //               })),
-//               username: conv.username,
 //               messageCount: conv.messageCount,
 //             }))
 //           );
@@ -439,14 +453,20 @@
 //               CHANNEL: "Facebook",
 //               postId:
 //                 post._id || `post_${Math.random().toString(36).substr(2, 9)}`,
-//               caption: post.caption,
+//               caption: post.caption || "",
 //               mediaType: post.mediaType,
-//               likeCount: post.likeCount,
+//               likeCount: post.likeCount || 0,
 //               timestamp: post.timestamp,
 //               createdAt: post.createdAt,
 //               updatedAt: post.updatedAt,
 //               carouselMedia: post.carouselMedia || [],
-//               comments: post.comments || [],
+//               comments: (post.comments || []).map((comment: any) => ({
+//                 ...comment,
+//                 text: comment.text || "",
+//                 username: comment.username || "Unknown",
+//                 timestamp: comment.timestamp || new Date().toISOString(),
+//                 likeCount: comment.likeCount || 0,
+//               })),
 //               mediaUrl:
 //                 post.mediaUrl ||
 //                 (post.carouselMedia?.length ? post.carouselMedia[0].url : ""),
@@ -642,7 +662,7 @@
 //     if (conv.CHANNEL === "Facebook") {
 //       payload = {
 //         integrationId: facebookIntegrationId,
-//         recipientUsername: conv.username || "Unknown", // Default to "Suraj" as per example
+//         recipientUsername: conv.username || "Unknown",
 //         recipientId: conv.userId,
 //         message: inputText.trim(),
 //         orgId: orgId,
@@ -652,8 +672,8 @@
 //       payload = {
 //         integrationId: integrationId,
 //         recipientId: conv.userId,
-//         recipientUsername: conv.username || "string", // Default as per example
-//         recipientName: conv.recipientName || conv.username || "string", // Default as per example
+//         recipientUsername: conv.username || "string",
+//         recipientName: conv.recipientName || conv.username || "string",
 //         message: inputText.trim(),
 //         orgId: orgId,
 //       };
@@ -706,7 +726,7 @@
 //                   message: {
 //                     text: inputText.trim(),
 //                     type: "TEXT",
-//                     senderType: "ADMIN",
+//                     senderType: SenderType.ADMIN,
 //                   },
 //                   timestamp: new Date().toISOString(),
 //                   status: "SENT",
@@ -731,9 +751,21 @@
 //   ]);
 
 //   const sendComment = useCallback(() => {
-//     if (!commentText.trim() || !currentPost || !orgId || !integrationId) {
+//     if (!commentText.trim() || !currentPost || !orgId) {
 //       setError(
-//         "Please enter a comment, select a post, and ensure integration is set."
+//         "Please enter a comment, select a post, and ensure organization ID is set."
+//       );
+//       return;
+//     }
+
+//     const integrationID =
+//       currentPost.CHANNEL === "Facebook"
+//         ? facebookIntegrationId
+//         : integrationId;
+
+//     if (!integrationID) {
+//       setError(
+//         `${currentPost.CHANNEL} integration ID is missing. Please set up an integration.`
 //       );
 //       return;
 //     }
@@ -744,10 +776,7 @@
 //         : "igSendCommentReplyRequest";
 //     const commentId = `comment_${Math.random().toString(36).substr(2, 9)}`;
 //     socketRef.current!.emit(event, {
-//       integrationID:
-//         currentPost.CHANNEL === "Facebook"
-//           ? facebookIntegrationId
-//           : integrationId,
+//       integrationID,
 //       parentID: null,
 //       text: commentText,
 //       postID: currentPost.postId,
@@ -873,7 +902,6 @@
 //   ];
 
 //   // Determine if the send message button should be disabled
-//   // Determine if the send message button should be disabled
 //   const isSendMessageDisabled =
 //     !inputText.trim() ||
 //     !selectedConversationId ||
@@ -991,7 +1019,7 @@
 //                       </span>
 //                     </div>
 //                     <p className="text-sm mb-2 overflow-hidden overflow-ellipsis line-clamp-3">
-//                       {post?.caption}
+//                       {post?.caption || "No caption"}
 //                     </p>
 //                     <div className="flex justify-between items-center text-xs text-gray-500">
 //                       <span>
@@ -1040,7 +1068,7 @@
 //       </div>
 
 //       <div className="grid grid-cols-12 gap-4 h-[400px]">
-//         <div className="col-span-3">
+//         <div className="col-span-3 h-[calc(100vh-200px)] flex flex-col">
 //           <FormControl className="w-full">
 //             <InputLabel>Filter</InputLabel>
 //             <Select
@@ -1052,7 +1080,7 @@
 //               <MenuItem value="comments">Comments</MenuItem>
 //             </Select>
 //           </FormControl>
-//           <div className="bg-[#65558F] bg-opacity-[0.08] mt-4 rounded-lg">
+//           <div className="bg-[#65558F] bg-opacity-[0.08] mt-4 rounded-lg overflow-y-auto flex-1">
 //             {displayedItems.map((item) => (
 //               <div
 //                 key={
@@ -1094,7 +1122,8 @@
 //                     <p className="text-base">{item?.username || "Unknown"}</p>
 //                   ) : (
 //                     <p className="text-base">
-//                       {item.username} commented: {item.text} (
+//                       {item.username || "Unknown"} commented:{" "}
+//                       {item.text || "No text"} (
 //                       {new Date(item.timestamp).toLocaleTimeString()})
 //                     </p>
 //                   )}
@@ -1111,7 +1140,7 @@
 //                 <div className="flex justify-between items-start mb-4">
 //                   <div>
 //                     <h2 className="text-md font-semibold">
-//                       {selectedConversation.recipientUsername || "Unknown"}
+//                       {selectedConversation.username || "Unknown"}
 //                     </h2>
 //                   </div>
 //                 </div>
@@ -1122,29 +1151,33 @@
 //                       <div
 //                         key={message.messageId || index}
 //                         className={
-//                           message.senderType === "ADMIN"
-//                             ? "flex justify-end mb-4"
-//                             : "flex gap-2 mb-4"
+//                           message.senderType === SenderType.USER
+//                             ? "flex gap-2 mb-4"
+//                             : "flex justify-end mb-4"
 //                         }
 //                       >
-//                         {message.senderType !== "ADMIN" && (
+//                         {message.senderType === SenderType.USER && (
 //                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
 //                             <SmartToy className="text-white w-6 h-6" />
 //                           </div>
 //                         )}
 //                         <div
 //                           className={
-//                             message.senderType === "ADMIN"
-//                               ? "bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]"
-//                               : "bg-white p-3 rounded-lg max-w-[70%]"
+//                             message.senderType === SenderType.USER
+//                               ? "bg-white p-3 rounded-lg max-w-[70%]"
+//                               : "bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]"
 //                           }
 //                         >
-//                           <p className="text-sm">{message.message.text}</p>
+//                           <p className="text-sm">
+//                             {message.message.text || "No text"}
+//                           </p>
 //                           <p className="text-xs opacity-70 mt-1">
 //                             {new Date(message.timestamp).toLocaleTimeString()}
 //                           </p>
 //                         </div>
-//                         {message.senderType === "ADMIN" && (
+//                         {(message.senderType === SenderType.ADMIN ||
+//                           message.senderType === SenderType.AI ||
+//                           message.senderType === SenderType.CUSTOM_MESSAGE) && (
 //                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] ml-4 flex items-center justify-center">
 //                             <Person className="text-white w-6 h-6" />
 //                           </div>
@@ -1395,8 +1428,10 @@
 //                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
 //                             <Person className="text-white w-6 h-6" />
 //                           </div>
-//                           <div className=" bg-white p-3 rounded-lg max-w-[70%]">
-//                             <p className="text-sm">{comment.text}</p>
+//                           <div className="bg-white p-3 rounded-lg max-w-[70%]">
+//                             <p className="text-sm">
+//                               {comment.text || "No text"}
+//                             </p>
 //                             <p className="text-xs opacity-70 mt-1">
 //                               {new Date(comment.timestamp).toLocaleTimeString()}
 //                             </p>
@@ -1740,14 +1775,14 @@
 //                       className="flex items-start mb-3 p-2 hover:bg-gray-100 rounded-lg"
 //                     >
 //                       <Avatar sx={{ width: 24, height: 24 }} className="mr-2">
-//                         {c.username[0]}
+//                         {c.username?.[0] || "U"}
 //                       </Avatar>
 //                       <div className="flex-1">
 //                         <Typography variant="subtitle2">
-//                           {c.username}
+//                           {c.username || "Unknown"}
 //                         </Typography>
 //                         <Typography variant="body2" className="break-words">
-//                           {c.text}
+//                           {c.text || "No text"}
 //                         </Typography>
 //                         <div className="flex items-center gap-2">
 //                           <Typography
@@ -1812,6 +1847,8 @@
 
 // export default EngagementTab;
 
+ 
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
@@ -1833,6 +1870,7 @@ import {
   ChevronLeft,
   ChevronRight as ChevronRightIcon,
   MoreVert,
+  Reply,
 } from "@mui/icons-material";
 import {
   XAxis,
@@ -1883,6 +1921,8 @@ const EngagementTab = () => {
   >("all-platforms");
   const [inputText, setInputText] = useState("");
   const [commentText, setCommentText] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPost, setCurrentPost] = useState<any>(null);
@@ -1994,6 +2034,7 @@ const EngagementTab = () => {
         timestamp: data.timestamp || new Date().toISOString(),
         CHANNEL: channel,
         likeCount: data.likeCount || 0,
+        parentId: data.parentId || null,
       };
 
       setPosts((prev) =>
@@ -2071,8 +2112,9 @@ const EngagementTab = () => {
                 messageId: msg.messageId,
                 message: {
                   text: msg.message?.text || "",
-                  type: msg.message?.type || "TEXT",
+                  type: msg.message?.type || "text",
                   senderType: msg.senderType || SenderType.USER,
+                  mediaUrl: msg.message?.mediaUrl || "",
                 },
                 timestamp: msg.timestamp,
                 status: msg.status,
@@ -2102,6 +2144,7 @@ const EngagementTab = () => {
                 username: comment.username || "Unknown",
                 timestamp: comment.timestamp || new Date().toISOString(),
                 likeCount: comment.likeCount || 0,
+                parentId: comment.parentId || null,
               })),
               mediaUrl:
                 post.mediaUrl ||
@@ -2174,18 +2217,34 @@ const EngagementTab = () => {
         setError("Failed to send comment. Please try again.");
       });
 
-      socket.on("igBroadcastOutgoingComment", (data) => {
-        if (platform === "all-platforms" || platform === "instagram") {
-          updatePostComment(data, "Instagram");
-          updateConversation(data, "Instagram");
-        }
-      });
-
       socket.on("igCommentSendSuccess", (data) => {
         if (platform === "all-platforms" || platform === "instagram") {
           updatePostComment(data, "Instagram");
-          updateConversation(data, "Instagram");
           setError(null);
+        }
+      });
+
+      socket.on("igBroadcastOutgoingComment", (data) => {
+        if (platform === "all-platforms" || platform === "instagram") {
+          updatePostComment(data, "Instagram");
+        }
+      });
+
+      socket.on("igSendCommentReplyError", (e) => {
+        console.error("igSendCommentReplyError", e);
+        setError("Failed to send comment reply. Please try again.");
+      });
+
+      socket.on("igSendCommentReplySuccess", (data) => {
+        if (platform === "all-platforms" || platform === "instagram") {
+          updatePostComment(data, "Instagram");
+          setError(null);
+        }
+      });
+
+      socket.on("igBroadcastOutgoingCommentReply", (data) => {
+        if (platform === "all-platforms" || platform === "instagram") {
+          updatePostComment(data, "Instagram");
         }
       });
 
@@ -2438,7 +2497,6 @@ const EngagementTab = () => {
   ]);
 
   const sendMessage = useCallback(() => {
-    // Validate inputs
     if (!inputText.trim()) {
       setError("Message cannot be empty.");
       return;
@@ -2464,7 +2522,6 @@ const EngagementTab = () => {
         : "igSendMessageRequest";
     const messageId = `msg_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Prepare payload based on channel
     let payload: {
       integrationId: string | null;
       recipientId: string;
@@ -2482,18 +2539,16 @@ const EngagementTab = () => {
         orgId: orgId,
       };
     } else {
-      // Instagram
       payload = {
         integrationId: integrationId,
-        recipientId: conv.userId,
-        recipientUsername: conv.username || "string",
+        recipientId: conv.usersternam || "string",
         recipientName: conv.recipientName || conv.username || "string",
+        recipientUsername: conv.username || "Unknown",
         message: inputText.trim(),
         orgId: orgId,
       };
     }
 
-    // Validate required fields
     if (!payload.integrationId) {
       setError(
         `${conv.CHANNEL} integration ID is missing. Please set up an integration.`
@@ -2521,13 +2576,10 @@ const EngagementTab = () => {
       return;
     }
 
-    // Log payload for debugging
     console.log("Sending message payload:", payload);
 
-    // Emit socket event
     socketRef.current!.emit(event, payload);
 
-    // Optimistic UI update
     setConversations((prev) =>
       prev.map((c) =>
         c.userId === selectedConversationId && c.CHANNEL === conv.CHANNEL
@@ -2539,7 +2591,7 @@ const EngagementTab = () => {
                   messageId,
                   message: {
                     text: inputText.trim(),
-                    type: "TEXT",
+                    type: "text",
                     senderType: SenderType.ADMIN,
                   },
                   timestamp: new Date().toISOString(),
@@ -2587,7 +2639,7 @@ const EngagementTab = () => {
     const event =
       currentPost.CHANNEL === "Facebook"
         ? "fbSendCommentReplyRequest"
-        : "igSendCommentReplyRequest";
+        : "igSendCommentRequest";
     const commentId = `comment_${Math.random().toString(36).substr(2, 9)}`;
     socketRef.current!.emit(event, {
       integrationID,
@@ -2597,7 +2649,6 @@ const EngagementTab = () => {
       orgID: orgId,
     });
 
-    // Optimistic UI update
     const newComment = {
       commentId,
       username: "Agent",
@@ -2605,6 +2656,7 @@ const EngagementTab = () => {
       timestamp: new Date().toISOString(),
       CHANNEL: currentPost.CHANNEL,
       likeCount: 0,
+      parentId: null,
     };
 
     setPosts((prev) =>
@@ -2624,6 +2676,60 @@ const EngagementTab = () => {
     setError(null);
   }, [commentText, currentPost, orgId, integrationId, facebookIntegrationId]);
 
+  const sendCommentReply = useCallback(() => {
+    if (!replyText.trim() || !currentPost || !selectedCommentId || !orgId) {
+      setError(
+        "Please enter a reply, select a comment and post, and ensure organization ID is set."
+      );
+      return;
+    }
+
+    const integrationID = currentPost.CHANNEL === "Facebook" ? facebookIntegrationId : integrationId;
+
+    if (!integrationID) {
+      setError(
+        `${currentPost.CHANNEL} integration ID is missing. Please set up an integration.`
+      );
+      return;
+    }
+
+    const commentId = `comment_${Math.random().toString(36).substr(2, 9)}`;
+    socketRef.current!.emit("igSendCommentReplyRequest", {
+      integrationID,
+      parentID: selectedCommentId,
+      text: replyText,
+      postID: currentPost.postId,
+      orgID: orgId,
+    });
+
+    const newComment = {
+      commentId,
+      username: "Agent",
+      text: replyText,
+      timestamp: new Date().toISOString(),
+      CHANNEL: currentPost.CHANNEL,
+      likeCount: 0,
+      parentId: selectedCommentId,
+    };
+
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.postId === currentPost.postId && p.CHANNEL === currentPost.CHANNEL
+          ? { ...p, comments: [...(p.comments || []), newComment] }
+          : p
+      )
+    );
+
+    setCurrentPost((prev: any) => ({
+      ...prev,
+      comments: [...(prev.comments || []), newComment],
+    }));
+
+    setReplyText("");
+    setSelectedCommentId(null);
+    setError(null);
+  }, [replyText, currentPost, selectedCommentId, orgId, integrationId, facebookIntegrationId]);
+
   const likePost = useCallback(() => {
     if (!currentPost || !orgId || likedPosts.has(currentPost.postId)) {
       setError("Post already liked or invalid post.");
@@ -2636,7 +2742,6 @@ const EngagementTab = () => {
         : "igLikePostRequest";
     socketRef.current!.emit(event, { orgId, postId: currentPost.postId });
 
-    // Optimistic UI update
     setLikedPosts((prev) => new Set(prev).add(currentPost.postId));
     setPosts((prev) =>
       prev.map((p) =>
@@ -2660,6 +2765,8 @@ const EngagementTab = () => {
     setCurrentPost(post);
     setCarouselIndex(0);
     setCommentText("");
+    setReplyText("");
+    setSelectedCommentId(null);
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
@@ -2715,7 +2822,6 @@ const EngagementTab = () => {
     { month: "Jul", value: 55 },
   ];
 
-  // Determine if the send message button should be disabled
   const isSendMessageDisabled =
     !inputText.trim() ||
     !selectedConversationId ||
@@ -2982,9 +3088,31 @@ const EngagementTab = () => {
                               : "bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]"
                           }
                         >
-                          <p className="text-sm">
-                            {message.message.text || "No text"}
-                          </p>
+                          {message.message.type === "text" ? (
+                            <p className="text-sm">
+                              {message.message.text || "No text"}
+                            </p>
+                          ) : message.message.type === "image" ? (
+                            <img
+                              src={message.message.mediaUrl}
+                              alt="Message image"
+                              className="max-w-[200px] rounded-md"
+                            />
+                          ) : message.message.type === "video" ? (
+                            <video
+                              src={message.message.mediaUrl}
+                              controls
+                              className="max-w-[200px] rounded-md"
+                            />
+                          ) : message.message.type === "audio" ? (
+                            <audio
+                              src={message.message.mediaUrl}
+                              controls
+                              className="w-full"
+                            />
+                          ) : (
+                            <p className="text-sm">Unsupported message type</p>
+                          )}
                           <p className="text-xs opacity-70 mt-1">
                             {new Date(message.timestamp).toLocaleTimeString()}
                           </p>
@@ -3249,6 +3377,17 @@ const EngagementTab = () => {
                             <p className="text-xs opacity-70 mt-1">
                               {new Date(comment.timestamp).toLocaleTimeString()}
                             </p>
+                            {currentPost.CHANNEL === "Instagram" && (
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setSelectedCommentId(comment.commentId);
+                                  setReplyText("");
+                                }}
+                              >
+                                <Reply fontSize="small" />
+                              </IconButton>
+                            )}
                           </div>
                         </div>
                       )
@@ -3326,6 +3465,31 @@ const EngagementTab = () => {
                     <Send className="w-5 h-5 text-gray-600" />
                   </button>
                 </div>
+
+                {selectedCommentId && (
+                  <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50 mt-2">
+                    <input
+                      type="text"
+                      placeholder="Write a reply..."
+                      className="flex-1 bg-transparent outline-none text-sm"
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && sendCommentReply()}
+                    />
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded-full"
+                      onClick={sendCommentReply}
+                    >
+                      <Send className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button
+                      className="p-1.5 hover:bg-gray-200 rounded-full"
+                      onClick={() => setSelectedCommentId(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center text-gray-500 mt-10">
@@ -3614,7 +3778,52 @@ const EngagementTab = () => {
                               {c.likeCount || 0} Likes
                             </Typography>
                           </div>
+                          {currentPost.CHANNEL === "Instagram" && (
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setSelectedCommentId(c.commentId);
+                                setReplyText("");
+                              }}
+                            >
+                              <Reply fontSize="small" />
+                            </IconButton>
+                          )}
                         </div>
+                        {c.commentId === selectedCommentId && (
+                          <Box display="flex" alignItems="center" mt={1}>
+                            <TextField
+                              fullWidth
+                              variant="outlined"
+                              placeholder="Write a reply..."
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              onKeyPress={(e) =>
+                                e.key === "Enter" && sendCommentReply()
+                              }
+                              size="small"
+                            />
+                            <Button
+                              onClick={sendCommentReply}
+                              variant="contained"
+                              sx={{
+                                ml: 1,
+                                backgroundColor: "#65558F",
+                                "&:hover": { backgroundColor: "#56497A" },
+                              }}
+                              disabled={!replyText.trim()}
+                            >
+                              Reply
+                            </Button>
+                            <Button
+                              onClick={() => setSelectedCommentId(null)}
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                            >
+                              Cancel
+                            </Button>
+                          </Box>
+                        )}
                       </div>
                     </div>
                   ))}
