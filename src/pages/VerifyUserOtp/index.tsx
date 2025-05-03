@@ -14,10 +14,10 @@ import Loader from "../../components/Loader";
 
 const VerifyUserOtp = () => {
   const [searchParams] = useSearchParams();
-  const email = searchParams.get("email");
+  const userId = searchParams.get("userId");
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
-  const [userDetails, setUserDetails] = useState(email);
+  const [userDetails, setUserDetails] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   // Decode userId and fetch user data
@@ -25,12 +25,21 @@ const VerifyUserOtp = () => {
     const fetchUserData = async () => {
       try {
         const payload = {
-          emailId: email,
+          userId: userId,
         };
         const response = await getUserDetails(payload);
         if (response.success) {
           const { token, user } = response;
-          localStorage.setItem("authToken", token);
+          localStorage.setItem("user_id", response.user._id);
+          localStorage.setItem("orgId", response.user.orgID);
+          localStorage.setItem("token", response.token);
+          localStorage.setItem(
+            "userData",
+            JSON.stringify({
+              user: response.user,
+              moduleMap: response.moduleMap,
+            })
+          );
           setUserDetails(user);
           setUserEmail(user.emailId);
         }
@@ -42,19 +51,19 @@ const VerifyUserOtp = () => {
     };
 
     fetchUserData();
-  }, [email]);
+  }, [userId]);
 
   const validationSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required("Required"),
     otp: Yup.string()
-      .length(4, "OTP must be 4 characters")
+      .matches(/^\d{4}$/, "OTP must be a 4-digit number")
       .required("OTP is required"),
   });
 
   const formik = useFormik({
     initialValues: {
       email: userEmail,
-      otp: "",
+      otp: null,
     },
     validationSchema,
     enableReinitialize: true,
@@ -62,18 +71,18 @@ const VerifyUserOtp = () => {
       setIsLoading(true);
       try {
         const payload = {
-          emailId: values.email,
+          userId,
           otp: values.otp,
         };
         const response = await verifyOtp(payload);
         if (response.success) {
           console.log("Verify OTP: ", response);
+          navigate("/user/set-password");
         }
       } catch (error) {
         notifyError(error.message);
         console.error("Failed to verify OTP:", error);
       } finally {
-        navigate("/myagents");
         setIsLoading(false);
       }
     },
@@ -124,9 +133,16 @@ const VerifyUserOtp = () => {
               onBlur: formik.handleBlur,
             }}
             form={formik}
-            type="text"
+            type="number"
             placeholder="Enter 4-digit OTP"
-            inputProps={{ maxLength: 4 }}
+            inputProps={{
+              maxLength: 4,
+              onInput: (e: React.ChangeEvent<HTMLInputElement>) => {
+                if (e.target.value.length > 4) {
+                  e.target.value = e.target.value.slice(0, 4); // Restrict input to 4 digits
+                }
+              },
+            }}
           />
 
           <div className="flex justify-between items-center">

@@ -42,9 +42,8 @@ export const getDeleteUserService = async (payload) => {
 
 export const getUserDetails = async (payload) => {
   try {
-    const response = await axios.post(
-      `${publicBaseUrl}/user/signup/verify`,
-      payload
+    const response = await axios.get(
+      `${publicBaseUrl}/user/getUserById?userId=${payload.userId}`
     );
     return response.data;
   } catch {
@@ -61,9 +60,23 @@ export const resendOtp = async (payload) => {
 };
 export const verifyOtp = async (payload) => {
   try {
-    const response = await axios.post(`${publicBaseUrl}/verify-otp`, payload);
+    const response = await axios.post(
+      `${publicBaseUrl}/user-management/verifyCreateUserOtp`,
+      payload
+    );
     return response.data;
   } catch {
     throw new Error("Error: Verifying OTP");
+  }
+};
+export const setPassword = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${publicBaseUrl}/user/set-password`,
+      payload
+    );
+    return response.data;
+  } catch {
+    throw new Error("Error: Setting Password");
   }
 };

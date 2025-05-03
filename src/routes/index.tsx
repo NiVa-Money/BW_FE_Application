@@ -43,6 +43,7 @@ import WhatsappIntegrationList from "../pages/Integration/WhatsappIntegration/in
 import ConversationsTable from "../pages/VoiceModule/ConversationsTable";
 import MainDashboard from "../pages/MainDashboard";
 import CampaignWorkflowBuilder from "../pages/Marketing/Whatsapp/CampaignWorkflow";
+import SetPassword from "../pages/VerifyUserOtp/setPassword";
 
 const userData = localStorage.getItem("userData") || JSON.stringify({});
 const moduleMapping = JSON.parse(userData).moduleMap;
@@ -104,7 +105,11 @@ export const autRoutes: any[] = [
     component: <EditWhatsappCampaign />,
   },
   { id: 5.3, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
-  { id: 5.3, path: "/marketing/workflowbuilder", component: <CampaignWorkflowBuilder /> },
+  {
+    id: 5.3,
+    path: "/marketing/workflowbuilder",
+    component: <CampaignWorkflowBuilder />,
+  },
 
   // { id: 6.1, path: "/voice/agents", component: <VoiceChatComponent /> },
   { id: 6.1, path: "/voice/agents", component: <MyVoiceAgents /> },
@@ -180,8 +185,12 @@ export const publicRoutes: any[] = [
   { path: "/login", component: <Login /> },
   { path: "/signup", component: <SignUp /> },
   {
-    path: "/verify-otp/*",
+    path: "/user/verify-otp/*",
     component: <VerifyUserOtp />,
+  },
+  {
+    path: "/user/set-password",
+    component: <SetPassword />,
   },
   { path: "/subscription-success", component: <SubscriptionSuccess /> },
   { path: "/subscription-failure", component: <SubscriptionFailure /> },

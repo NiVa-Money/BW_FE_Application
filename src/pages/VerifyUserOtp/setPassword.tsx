@@ -1,100 +1,55 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
-import { useSearchParams, useNavigate } from "react-router-dom";
-import {
-  getUserDetails,
-  resendOtp,
-  verifyOtp,
-} from "../../api/services/userServices";
+import { useNavigate } from "react-router-dom";
 import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
 import { notifyError } from "../../components/Toast";
 import Loader from "../../components/Loader";
+import { setPassword } from "../../api/services/userServices";
 
-const VerifyUserOtp = () => {
-  const [searchParams] = useSearchParams();
-  const email = searchParams.get("email");
+const SetPassword = () => {
   const navigate = useNavigate();
-  const [userEmail, setUserEmail] = useState("");
-  const [userDetails, setUserDetails] = useState(email);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Decode userId and fetch user data
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const payload = {
-          emailId: email,
-        };
-        const response = await getUserDetails(payload);
-        if (response.success) {
-          const { token, user } = response;
-          localStorage.setItem("authToken", token);
-          setUserDetails(user);
-          setUserEmail(user.emailId);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [email]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validationSchema = Yup.object().shape({
-    email: Yup.string().email("Invalid email").required("Required"),
-    otp: Yup.string()
-      .length(4, "OTP must be 4 characters")
-      .required("OTP is required"),
+    password: Yup.string()
+      .min(8, "Password must be at least 8 characters")
+      .required("Password is required"),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref("password"), null], "Passwords must match")
+      .required("Confirm Password is required"),
   });
 
   const formik = useFormik({
     initialValues: {
-      email: userEmail,
-      otp: "",
+      password: "",
+      confirmPassword: "",
     },
     validationSchema,
-    enableReinitialize: true,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
         const payload = {
-          emailId: values.email,
-          otp: values.otp,
+          userId: localStorage.getItem("user_id"),
+          password: values.password,
         };
-        const response = await verifyOtp(payload);
+        console.log("Password payload:", payload);
+
+        const response = await setPassword(payload);
         if (response.success) {
-          console.log("Verify OTP: ", response);
+          console.log("Set Password: ", response);
+          navigate("/login");
         }
       } catch (error) {
         notifyError(error.message);
-        console.error("Failed to verify OTP:", error);
+        console.error("Failed to set password:", error);
       } finally {
-        navigate("/myagents");
         setIsLoading(false);
       }
     },
   });
-
-  const handleResendOtp = async () => {
-    try {
-      const { email, otp } = formik.values;
-      const payload = {
-        emailId: email,
-        otp: otp,
-      };
-      const response = await resendOtp(payload);
-      if (response.success) {
-        console.log("response: ", response);
-      }
-    } catch (error) {
-      notifyError(error.message);
-      console.error("Failed to resend OTP:", error);
-    }
-  };
 
   if (isLoading) {
     return <Loader loading={isLoading} />;
@@ -104,46 +59,44 @@ const VerifyUserOtp = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6">
-          Verify Your Account
+          Set Your Password
         </h1>
 
         <form onSubmit={formik.handleSubmit} className="space-y-4">
-          <FormikFieldInputComponent
-            field={{ name: "email", value: formik.values.email }}
-            form={formik}
-            label="Email"
-            type="email"
-            disabled
-          />
+          <div className="relative">
+            <FormikFieldInputComponent
+              field={{
+                name: "password",
+                value: formik.values.password,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter Password"
+            />
+          </div>
 
-          <FormikFieldInputComponent
-            field={{
-              name: "otp",
-              value: formik.values.otp,
-              onChange: formik.handleChange,
-              onBlur: formik.handleBlur,
-            }}
-            form={formik}
-            type="text"
-            placeholder="Enter 4-digit OTP"
-            inputProps={{ maxLength: 4 }}
-          />
-
-          <div className="flex justify-between items-center">
-            <button
-              type="button"
-              onClick={handleResendOtp}
-              className="text-sm  text-indigo-600 hover:text-indigo-500"
-            >
-              Resend OTP
-            </button>
+          {/* Confirm Password Field */}
+          <div className="relative">
+            <FormikFieldInputComponent
+              field={{
+                name: "confirmPassword",
+                value: formik.values.confirmPassword,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm Password"
+            />
           </div>
 
           <button
             type="submit"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
-            Verify
+            Set Password
           </button>
         </form>
       </div>
@@ -151,4 +104,4 @@ const VerifyUserOtp = () => {
   );
 };
 
-export default VerifyUserOtp;
+export default SetPassword;
