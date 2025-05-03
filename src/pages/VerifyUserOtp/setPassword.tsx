@@ -10,8 +10,8 @@ import { setPassword } from "../../api/services/userServices";
 const SetPassword = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // const [showPassword, setShowPassword] = useState(false);
+  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validationSchema = Yup.object().shape({
     password: Yup.string()
@@ -72,7 +72,7 @@ const SetPassword = () => {
                 onBlur: formik.handleBlur,
               }}
               form={formik}
-              type={showPassword ? "text" : "password"}
+              type={"password"}
               placeholder="Enter Password"
             />
           </div>
@@ -87,7 +87,7 @@ const SetPassword = () => {
                 onBlur: formik.handleBlur,
               }}
               form={formik}
-              type={showConfirmPassword ? "text" : "password"}
+              type={"password"}
               placeholder="Confirm Password"
             />
           </div>
