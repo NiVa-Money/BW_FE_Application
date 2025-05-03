@@ -32,7 +32,7 @@ const VerifyUserOtp = () => {
           const { token, user } = response;
           localStorage.setItem("user_id", response.user._id);
           localStorage.setItem("orgId", response.user.orgID);
-          localStorage.setItem("token", response.token);
+          localStorage.setItem("token", token);
           localStorage.setItem(
             "userData",
             JSON.stringify({
