@@ -806,10 +806,10 @@ const CreateTemplateModal: React.FC<CreateTemplateModalProps> = ({
 
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const MAX_FILE_SIZE = 2 * 1024 * 1024;
+      const MAX_FILE_SIZE = 25 * 1024 * 1024;
       if (file.size > MAX_FILE_SIZE) {
         setHeaderError(
-          "File size exceeds 2 MB limit. Please upload a smaller file."
+          "File size exceeds 25 MB limit. Please upload a smaller file."
         );
         return;
       }
