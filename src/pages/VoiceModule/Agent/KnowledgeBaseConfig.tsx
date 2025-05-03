@@ -365,22 +365,6 @@ const KnowledgeBaseConfig = ({
                 )}
               </div>
             </label>
-
-            <label className="block">
-              <span className="text-gray-700 font-medium mb-2 block">
-                Description
-              </span>
-              <span className="text-sm text-gray-400 mb-2 block">
-                Guides your agent's behavior and responses
-              </span>
-              <textarea
-                value={config.description}
-                onChange={(e) => updateConfig({ description: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-1 focus:ring-blue-800 focus:border-blue-600 outline-none transition-all"
-                rows={4}
-                placeholder="Describe your agent's purpose..."
-              />
-            </label>
           </div>
         </div>
       </div>

@@ -169,6 +169,7 @@ interface CreateBotRightContainerProps {
 }
 
 const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
+  botName,
   imageSrc,
   theme,
   font,
@@ -219,7 +220,7 @@ const CreateBotRightContainer: React.FC<CreateBotRightContainerProps> = ({
                       fontFamily: font,
                     }}
                   >
-                    Chatbot
+                    {botName || "BotWot"}
                   </h3>
                   <h3
                     className="text-[0.8rem] text-center"

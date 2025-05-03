@@ -14,7 +14,12 @@ const VoiceAgentLayout = () => {
       language: "english",
       voiceStyle: "professional",
       description: "",
+      systemPrompt:
+        "You are a helpful AI assistant built to communicate clearly and politely.",
+      behavioralPrompt:
+        "Always greet users warmly and provide clear, helpful responses.",
     },
+
     knowledgeBase: {
       source: "none",
       documents: [],
@@ -55,6 +60,8 @@ const VoiceAgentLayout = () => {
       language: config.basic.language,
       style: config.basic.voiceStyle,
       description: config.basic.description,
+      systemPrompt: config.basic.systemPrompt,
+      behavioralPrompt: config.basic.behavioralPrompt,
       knowledgeBase: config.knowledgeBase.source,
       knowledgeBaseData:
         config.knowledgeBase.source === "urls"
@@ -69,6 +76,7 @@ const VoiceAgentLayout = () => {
       endCallPhrases: config.voiceFlow.endCallPhrases,
     };
   };
+  
 
   const navigate = useNavigate();
 

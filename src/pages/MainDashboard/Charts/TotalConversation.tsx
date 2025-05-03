@@ -1,8 +1,8 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // import { useState, useEffect } from "react";
 // import {
-//   AreaChart,
-//   Area,
+//   LineChart,
+//   Line,
 //   XAxis,
 //   YAxis,
 //   CartesianGrid,
@@ -10,12 +10,12 @@
 //   ResponsiveContainer,
 //   Legend,
 // } from "recharts";
-// import { getEscalationRateMetrics } from "../../../api/services/mainDashboardServices";
+// import { getChannelWiseConversation } from "../../../api/services/mainDashboardServices";
 
-// interface PerformanceData {
+// interface EngagementData {
 //   name: string;
-//   accuracy: number;
-//   speed: number;
+//   whatsapp: number;
+//   website: number;
 // }
 
 // interface Props {
@@ -27,8 +27,8 @@
 //   };
 // }
 
-// const PerformanceChart: React.FC<Props> = ({ payload }) => {
-//   const [data, setData] = useState<PerformanceData[]>([]);
+// const TotalConversation: React.FC<Props> = ({ payload }) => {
+//   const [data, setData] = useState<EngagementData[]>([]);
 //   const [loading, setLoading] = useState(true);
 //   const [error, setError] = useState<string | null>(null);
 
@@ -37,26 +37,16 @@
 //       setLoading(true);
 //       setError(null);
 //       try {
-//         const response = await getEscalationRateMetrics(payload);
-//         const metrics = response.data.escalationRateMetrics;
-//         const transformedData: PerformanceData[] = metrics.map(
-//           (metric: any) => {
-//             const total = metric.solved;
-//             const accuracy = total
-//               ? ((total - metric.escalated) / total) * 100
-//               : 0;
-//             return {
-//               name: new Date(metric.date).toLocaleString("en-US", {
-//                 month: "short",
-//               }),
-//               accuracy: parseFloat(accuracy.toFixed(2)),
-//               speed: 80 + Math.random() * 15, // Mocked speed (API doesn't provide)
-//             };
-//           }
-//         );
+//         const response = await getChannelWiseConversation(payload);
+//         const metrics = response.data.channelWiseConversation;
+//         const transformedData: EngagementData[] = metrics.map((metric: any) => ({
+//           name: new Date(metric.date).toLocaleString("en-US", { weekday: "short" }),
+//           whatsapp: metric.whatsapp,
+//           website: metric.web,
+//         }));
 //         setData(transformedData);
 //       } catch {
-//         setError("Failed to load performance data");
+//         setError("Failed to load engagement data");
 //       } finally {
 //         setLoading(false);
 //       }
@@ -88,36 +78,20 @@
 //       <div className="flex justify-between mb-6">
 //         <div>
 //           <h3 className="text-lg font-semibold text-purple-950">
-//             Escalation Rate
+//             Total Conversation
 //           </h3>
 //           <p className="text-sm text-muted-foreground">
-//             Indicates the accuracy and speed of handling escalations
+//             Messages received per platform
 //           </p>
 //         </div>
 //       </div>
-
 //       <div className="flex-1 w-full mt-2">
 //         <ResponsiveContainer width="100%" height="100%" minHeight={250}>
-//           <AreaChart
+//           <LineChart
 //             data={data}
 //             margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
 //           >
-//             <defs>
-//               <linearGradient id="accuracyGradient" x1="0" y1="0" x2="0" y2="1">
-//                 <stop offset="5%" stopColor="#3f2181" stopOpacity={0.3} />
-//                 <stop offset="95%" stopColor="#3f2181" stopOpacity={0.1} />
-//               </linearGradient>
-//               <linearGradient id="speedGradient" x1="0" y1="0" x2="0" y2="1">
-//                 <stop offset="5%" stopColor="#78c9f1" stopOpacity={0.3} />
-//                 <stop offset="95%" stopColor="#78c9f1" stopOpacity={0.1} />
-//               </linearGradient>
-//             </defs>
-//             <CartesianGrid
-//               strokeDasharray="3 3"
-//               stroke="#f0f0f0"
-//               horizontal={true}
-//               vertical={false}
-//             />
+//             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
 //             <XAxis dataKey="name" axisLine={false} tickLine={false} />
 //             <YAxis axisLine={false} tickLine={false} />
 //             <Tooltip
@@ -129,36 +103,33 @@
 //               }}
 //             />
 //             <Legend />
-//             <Area
+//             <Line
 //               type="monotone"
-//               dataKey="accuracy"
-//               name="Accuracy (%)"
+//               dataKey="whatsapp"
+//               name="WhatsApp"
 //               stroke="#3f2181"
-//               fill="url(#accuracyGradient)"
 //               strokeWidth={2}
-//               dot={{ r: 4, strokeWidth: 1, stroke: "#3f2181", fill: "white" }}
-//               activeDot={{ r: 7, stroke: "#3f2181", strokeWidth: 1 }}
+//               dot={{ r: 4 }}
+//               activeDot={{ r: 6 }}
 //             />
-//             <Area
+//             <Line
 //               type="monotone"
-//               dataKey="speed"
-//               name="Speed %"
-//               stroke="#78c9f1"
-//               fill="url(#speedGradient)"
+//               dataKey="website"
+//               name="Website"
+//               stroke="#e573b7"
 //               strokeWidth={2}
-//               dot={{ r: 4, strokeWidth: 1, stroke: "#78c9f1", fill: "white" }}
-//               activeDot={{ r: 7, stroke: "#78c9f1", strokeWidth: 1 }}
+//               dot={{ r: 4 }}
+//               activeDot={{ r: 6 }}
 //             />
-//           </AreaChart>
+//           </LineChart>
 //         </ResponsiveContainer>
 //       </div>
 //     </div>
 //   );
 // };
 
-// export default PerformanceChart;
+// export default TotalConversation;
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import {
   AreaChart,
@@ -170,12 +141,12 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { getEscalationRateMetrics } from "../../../api/services/mainDashboardServices";
+import { getChannelWiseConversation } from "../../../api/services/mainDashboardServices";
 
-interface PerformanceData {
+interface EngagementData {
   name: string;
-  solved: number;
-  escalated: number;
+  whatsapp: number;
+  website: number;
 }
 
 interface Props {
@@ -187,8 +158,8 @@ interface Props {
   };
 }
 
-const PerformanceChart: React.FC<Props> = ({ payload }) => {
-  const [data, setData] = useState<PerformanceData[]>([]);
+const TotalConversation: React.FC<Props> = ({ payload }) => {
+  const [data, setData] = useState<EngagementData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -197,21 +168,21 @@ const PerformanceChart: React.FC<Props> = ({ payload }) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await getEscalationRateMetrics(payload);
-        const metrics = response.data.escalationRateMetrics;
-        const transformedData: PerformanceData[] = metrics.map(
-          (metric: any) => {
-            const { solved, escalated, date } = metric;
-            return {
-              name: date, // Keep raw ISO date for proper formatting
-              solved,
-              escalated,
-            };
-          }
+        const response = await getChannelWiseConversation(payload);
+        const metrics = response.data.channelWiseConversation;
+        const transformedData: EngagementData[] = metrics.map(
+          (metric: any) => ({
+            name: new Date(metric.date).toLocaleString("en-US", {
+              day: "numeric",
+              weekday: "short",
+            }),
+            whatsapp: metric.whatsapp,
+            website: metric.web,
+          })
         );
         setData(transformedData);
       } catch {
-        setError("Failed to load performance data");
+        setError("Failed to load engagement data");
       } finally {
         setLoading(false);
       }
@@ -243,14 +214,13 @@ const PerformanceChart: React.FC<Props> = ({ payload }) => {
       <div className="flex justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold text-purple-950">
-            Escalation Rate
+            Total Conversation
           </h3>
           <p className="text-sm text-muted-foreground">
-            Shows how many were escalated vs solved efficiently.
+            Messages received per platform
           </p>
         </div>
       </div>
-
       <div className="flex-1 w-full mt-2">
         <ResponsiveContainer width="100%" height="100%" minHeight={250}>
           <AreaChart
@@ -258,25 +228,18 @@ const PerformanceChart: React.FC<Props> = ({ payload }) => {
             margin={{ top: 5, right: 30, left: 5, bottom: 5 }}
           >
             <defs>
-              <linearGradient id="solvedGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3f2181" stopOpacity={0.3} />
+              <linearGradient id="whatsappGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3f2181" stopOpacity={0.5} />
                 <stop offset="95%" stopColor="#3f2181" stopOpacity={0.1} />
               </linearGradient>
-              <linearGradient
-                id="escalatedGradient"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop offset="5%" stopColor="#78c9f1" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#78c9f1" stopOpacity={0.1} />
+              <linearGradient id="websiteGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#d4b6f5" stopOpacity={0.5} />
+                <stop offset="95%" stopColor="#d4b6f5" stopOpacity={0.1} />
               </linearGradient>
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="#f0f0f0"
-              horizontal
               vertical={false}
             />
             <XAxis dataKey="name" axisLine={false} tickLine={false} />
@@ -292,23 +255,23 @@ const PerformanceChart: React.FC<Props> = ({ payload }) => {
             <Legend />
             <Area
               type="monotone"
-              dataKey="solved"
-              name="Solved"
-              stroke="#3f2181"
-              fill="url(#solvedGradient)"
+              dataKey="website"
+              name="Website"
+              stroke="#d4b6f5"
+              fill="url(#websiteGradient)"
               strokeWidth={2}
-              dot={{ r: 4, strokeWidth: 1, stroke: "#3f2181", fill: "white" }}
-              activeDot={{ r: 7, stroke: "#3f2181", strokeWidth: 1 }}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
             />
             <Area
               type="monotone"
-              dataKey="escalated"
-              name="Escalated"
-              stroke="#78c9f1"
-              fill="url(#escalatedGradient)"
+              dataKey="whatsapp"
+              name="WhatsApp"
+              stroke="#3f2181"
+              fill="url(#whatsappGradient)"
               strokeWidth={2}
-              dot={{ r: 4, strokeWidth: 1, stroke: "#78c9f1", fill: "white" }}
-              activeDot={{ r: 7, stroke: "#78c9f1", strokeWidth: 1 }}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -317,4 +280,4 @@ const PerformanceChart: React.FC<Props> = ({ payload }) => {
   );
 };
 
-export default PerformanceChart;
+export default TotalConversation;

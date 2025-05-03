@@ -192,3 +192,148 @@ export const recordAndCloneVoiceService = async (
     throw error;
   }
 };
+
+type VoiceCallStatus = "Live" | "Completed" | "Failed" | "Retried";
+
+interface CreateVoiceCallPayload {
+  agentId: string;
+  phoneNumber: string;
+  status: VoiceCallStatus;
+  transcript?: string;
+  recordingUrl?: string;
+  retryCount?: number;
+  duration?: number;
+}
+
+interface VoiceCall {
+  insights: any;
+  _id: any;
+  id: string;
+  agentId: string;
+  phoneNumber: string;
+  status: VoiceCallStatus;
+  transcript: string;
+  recordingUrl: string;
+  retryCount: number;
+  duration: number;
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
+}
+
+export const createVoiceCallService = async (
+  data: CreateVoiceCallPayload
+): Promise<VoiceCall> => {
+  // Add return type
+  try {
+    const response = await axiosInstance.post(
+      "https://vo-backend.onrender.com/voice-calls",
+      data
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error creating voice call:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const getAllVoiceCallsService = async (): Promise<VoiceCall[]> => {
+  try {
+    const response = await axiosInstance.get(
+      "https://vo-backend.onrender.com/voice-calls"
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching voice calls:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const getVoiceCallByIdService = async (
+  callId: string
+): Promise<VoiceCall> => {
+  try {
+    const response = await axiosInstance.get(
+      `https://vo-backend.onrender.com/voice-calls/${callId}`
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching voice call:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const updateVoiceCallStatusService = async (
+  callId: string,
+  status: VoiceCallStatus
+) => {
+  try {
+    const response = await axiosInstance.put(
+      `https://vo-backend.onrender.com/voice-calls/${callId}/update-status`,
+      { status }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error updating call status:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};
+
+export const transcribeVoiceCallService = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("model_id", "scribe_v1");
+    formData.append("file", file);
+
+    const response = await axios.post(
+      "https://api.elevenlabs.io/v1/speech-to-text",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "xi-api-key": import.meta.env.VITE_ELEVENLABS_API_KEY,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error transcribing call:",
+        error.response?.data || error.message
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    throw error;
+  }
+};

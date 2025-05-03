@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useState, useEffect } from "react";
 import { getAllVoicesService } from "../../../api/services/voiceModuleServices";
 
@@ -7,6 +7,8 @@ type VoicebotBasicConfigProps = {
     name: string;
     language: string;
     voiceStyle: string;
+    systemPrompt?: string;
+    behavioralPrompt?: string;
   };
   updateConfig: (data: Partial<VoicebotBasicConfigProps["config"]>) => void;
 };
@@ -17,8 +19,8 @@ export const VoicebotBasicConfig = ({
 }: VoicebotBasicConfigProps) => {
   const [languages, setLanguages] = useState<string[]>([]);
   const [voiceStyles, setVoiceStyles] = useState<string[]>([]);
-  const [_isLoading, setIsLoading] = useState(true);
-  const [_fetchError, setFetchError] = useState<string | null>(null);
+  const [, setIsLoading] = useState(true);
+  const [, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -97,6 +99,32 @@ export const VoicebotBasicConfig = ({
                 </option>
               ))}
             </select>
+          </label>
+
+          <label className="block">
+            <span className="text-gray-700 font-medium mb-2 block">
+              System Prompt
+            </span>
+            <input
+              value={config.systemPrompt}
+              onChange={(e) => updateConfig({ systemPrompt: e.target.value })}
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-1 focus:ring-blue-800 focus:border-blue-600 outline-none transition-all"
+              placeholder="You are a helpful AI assistant..."
+            />
+          </label>
+
+          <label className="block mt-4">
+            <span className="text-gray-700 font-medium mb-2 block">
+              Behavioral Prompt
+            </span>
+            <input
+              value={config.behavioralPrompt}
+              onChange={(e) =>
+                updateConfig({ behavioralPrompt: e.target.value })
+              }
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-1 focus:ring-blue-800 focus:border-blue-600 outline-none transition-all"
+              placeholder="Always greet users warmly..."
+            />
           </label>
         </div>
       </div>

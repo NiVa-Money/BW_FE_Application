@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// -----------------------------
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import {
   Instagram,
@@ -21,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight as ChevronRightIcon,
   MoreVert,
+  Reply,
 } from "@mui/icons-material";
 import {
   XAxis,
@@ -49,6 +49,25 @@ import {
   Box,
   TextField,
 } from "@mui/material";
+import { getInstagramData } from "../../api/services/integrationServices";
+import { getFacebookIntegrations } from "../../api/services/integrationServices";
+
+// Define sender types as constants
+const SenderType = {
+  USER: "USER", // Message sent by the user
+  ADMIN: "ADMIN", // Message sent by an admin
+  AI: "AI", // AI-generated message
+  CUSTOM_MESSAGE: "CUSTOM_MESSAGE",
+};
+
+// Define CommentPayload type
+interface CommentPayload {
+  orgId: string | null;
+  postId: string;
+  text: string;
+  parentCommentId?: string;
+  integrationId?: string | null;
+}
 
 const EngagementTab = () => {
   const [conversations, setConversations] = useState<any[]>([]);
@@ -61,6 +80,10 @@ const EngagementTab = () => {
   >("all-platforms");
   const [inputText, setInputText] = useState("");
   const [commentText, setCommentText] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(
+    null
+  );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPost, setCurrentPost] = useState<any>(null);
@@ -69,13 +92,172 @@ const EngagementTab = () => {
   const [filterType, setFilterType] = useState<"conversations" | "comments">(
     "conversations"
   );
+  const [error, setError] = useState<string | null>(null);
+  const [integrationId, setIntegrationId] = useState<string | null>(null); // Instagram integrationId
+  const [facebookIntegrationId, setFacebookIntegrationId] = useState<
+    string | null
+  >(null); // Facebook-specific integrationId
+  const [integrationFetchError, setIntegrationFetchError] = useState<
+    string | null
+  >(null);
   const open = Boolean(anchorEl);
   const socketRef = useRef<Socket | null>(null);
   const orgId = localStorage.getItem("orgId");
 
+  // Fetch platform-specific integrationIds
+  useEffect(() => {
+    const fetchIntegrations = async () => {
+      try {
+        // Fetch Instagram integration
+        const igResponse = await getInstagramData();
+        const igIntegrations = Array.isArray(igResponse?.data)
+          ? igResponse.data
+          : [];
+        console.log("Instagram Integrations:", igIntegrations);
+        if (igIntegrations.length > 0) {
+          setIntegrationId(igIntegrations[0]._id);
+        } else {
+          setIntegrationId(null);
+        }
+
+        // Fetch Facebook integration
+        const fbResponse = await getFacebookIntegrations();
+        const fbIntegrations = Array.isArray(fbResponse?.data)
+          ? fbResponse.data
+          : [];
+        console.log("Facebook Integrations:", fbIntegrations);
+        if (fbIntegrations.length > 0) {
+          setFacebookIntegrationId(fbIntegrations[0]._id);
+        }
+        setIntegrationFetchError(null);
+      } catch (error) {
+        console.error("Error fetching integrations:", error);
+        setIntegrationFetchError(
+          "Failed to fetch integrations. Please try again later."
+        );
+        setIntegrationId(null);
+        setFacebookIntegrationId(null);
+      }
+    };
+
+    fetchIntegrations();
+  }, []);
+
+  const updateConversation = useCallback((data: any, channel: string) => {
+    setConversations((prev) => {
+      const existingConv = prev.find(
+        (c) => c.userId === data.userId && c.CHANNEL === channel
+      );
+      if (existingConv) {
+        return prev.map((c) =>
+          c.userId === data.userId && c.CHANNEL === channel
+            ? {
+                ...c,
+                messages: [
+                  ...(c.messages || []),
+                  {
+                    ...data,
+                    CHANNEL: channel,
+                    timestamp: data.timestamp || new Date().toISOString(),
+                  },
+                ],
+                messageCount: (c.messageCount || 0) + 1,
+              }
+            : c
+        );
+      } else {
+        return [
+          ...prev,
+          {
+            userId: data.userId,
+            username: data.recipientUsername || data.username || "Unknown",
+            CHANNEL: channel,
+            messages: [
+              {
+                ...data,
+                CHANNEL: channel,
+                timestamp: data.timestamp || new Date().toISOString(),
+              },
+            ],
+            messageCount: 1,
+          },
+        ];
+      }
+    });
+  }, []);
+
+  const updatePostComment = useCallback(
+    (data: any, channel: string) => {
+      const newComment = {
+        commentId: data.commentId,
+        username: data.recipientUsername || data.username || "botwot.io",
+        text: data.message?.text || data.text || "",
+        timestamp: data.timestamp || new Date().toISOString(),
+        CHANNEL: channel,
+        likeCount: data.likeCount || 0,
+        parentId: data.parentId || null,
+      };
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === data.postId && p.CHANNEL === channel
+            ? {
+                ...p,
+                comments: [...(p.comments || []), newComment],
+              }
+            : p
+        )
+      );
+
+      if (
+        currentPost &&
+        currentPost.postId === data.postId &&
+        currentPost.CHANNEL === channel
+      ) {
+        setCurrentPost((prev: any) => ({
+          ...prev,
+          comments: [...(prev.comments || []), newComment],
+        }));
+      }
+    },
+    [currentPost]
+  );
+
+  // Define setOptimisticComment to update UI immediately
+  const setOptimisticComment = useCallback(
+    (postId: string, comment: string, parentId: string | null = null) => {
+      const newComment = {
+        commentId: `temp_${Math.random().toString(36).substr(2, 9)}`,
+        username: "botwot.io",
+        text: comment,
+        timestamp: new Date().toISOString(),
+        CHANNEL: currentPost?.CHANNEL || "Instagram", // Fallback to Instagram if currentPost is null
+        likeCount: 0,
+        parentId: parentId,
+      };
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.postId === postId &&
+          p.CHANNEL === (currentPost?.CHANNEL || "Instagram")
+            ? { ...p, comments: [...(p.comments || []), newComment] }
+            : p
+        )
+      );
+
+      if (currentPost && currentPost.postId === postId) {
+        setCurrentPost((prev: any) => ({
+          ...prev,
+          comments: [...(prev.comments || []), newComment],
+        }));
+      }
+    },
+    [currentPost]
+  );
+
   useEffect(() => {
     if (!orgId) {
-      console.warn("No orgId available, cannot establish socket connection");
+      setError("No organization ID found. Please log in again.");
       return;
     }
 
@@ -84,39 +266,32 @@ const EngagementTab = () => {
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
       transports: ["websocket"],
+      query: { orgId },
     });
     socketRef.current = socket;
 
     const setupListeners = () => {
-      console.log("Setting up socket listeners");
-
       socket.on("connect", () => {
         console.log("Socket connected", socket.id);
-        if (platform === "all-platforms") {
-          socket.emit("fbFetchInitialData", orgId);
-          socket.emit("igFetchInitialData", orgId);
-        } else {
-          const event =
-            platform === "facebook"
-              ? "fbFetchInitialData"
-              : "igFetchInitialData";
-          socket.emit(event, orgId);
-        }
+        fetchInitialData();
       });
 
-      socket.on("connect_error", (err) =>
-        console.error("Socket connection error", err)
-      );
-      socket.on("reconnect_attempt", () =>
-        console.log("Socket reconnecting...")
-      );
-      socket.on("disconnect", (reason) =>
-        console.warn("Socket disconnected", reason)
-      );
+      socket.on("connect_error", (err) => {
+        console.error("Socket connection error", err);
+        setError("Failed to connect to server. Retrying...");
+      });
+
+      socket.on("reconnect_attempt", () => {
+        console.log("Socket reconnecting...");
+      });
+
+      socket.on("disconnect", (reason) => {
+        console.warn("Socket disconnected", reason);
+        setError("Disconnected from server. Reconnecting...");
+      });
 
       // Instagram Events
       socket.on("igInitialData", (data) => {
-        console.log("igInitialData received", data);
         if (platform === "all-platforms" || platform === "instagram") {
           const processedConversations = data.data.flatMap((item: any) =>
             item.conversations.map((conv: any) => ({
@@ -129,9 +304,9 @@ const EngagementTab = () => {
                 CHANNEL: "Instagram",
                 messageId: msg.messageId,
                 message: {
-                  text: msg.message.text || "",
-                  type: msg.message.type,
-                  senderType: msg.senderType,
+                  text: msg.message?.text || "",
+                  type: msg.message?.type || "TEXT",
+                  senderType: msg.senderType || SenderType.USER,
                 },
                 timestamp: msg.timestamp,
                 status: msg.status,
@@ -148,14 +323,20 @@ const EngagementTab = () => {
                 post.postId ||
                 post._id ||
                 `post_${Math.random().toString(36).substr(2, 9)}`,
-              caption: post.caption,
+              caption: post.caption || "",
               mediaType: post.mediaType,
-              likeCount: post.likeCount,
+              likeCount: post.likeCount || 0,
               timestamp: post.timestamp,
               createdAt: post.createdAt,
               updatedAt: post.updatedAt,
               carouselMedia: post.carouselMedia || [],
-              comments: post.comments || [],
+              comments: (post.comments || []).map((comment: any) => ({
+                ...comment,
+                text: comment.text || "",
+                username: comment.username || "Unknown",
+                timestamp: comment.timestamp || new Date().toISOString(),
+                likeCount: comment.likeCount || 0,
+              })),
               mediaUrl:
                 post.mediaUrl ||
                 (post.carouselMedia?.length ? post.carouselMedia[0].url : ""),
@@ -174,48 +355,49 @@ const EngagementTab = () => {
       });
 
       socket.on("igManualAdminMessage", (data) => {
-        console.log("igManualAdminMessage received", data);
-        if (platform === "all-platforms" || platform === "instagram")
+        if (platform === "all-platforms" || platform === "instagram") {
           updateConversation(data, "Instagram");
+        }
+      });
+
+      socket.on("igManualAdminComment", (data) => {
+        if (platform === "all-platforms" || platform === "instagram") {
+          updatePostComment(data, "Instagram");
+        }
       });
 
       socket.on("igBotReplyComment", (data) => {
-        console.log("igBotReplyComment received", data);
         if (platform === "all-platforms" || platform === "instagram") {
           updatePostComment(data, "Instagram");
           updateConversation(data, "Instagram");
         }
       });
 
-      socket.on("igNewPost", (data) => {
-        console.log("igNewPost received", data);
-        if (platform === "all-platforms" || platform === "instagram")
-          setPosts((prev) => [{ ...data, CHANNEL: "Instagram" }, ...prev]);
-      });
-
       socket.on("igIncomingUserComment", (data) => {
-        console.log("igIncomingUserComment received", data);
-        if (platform === "all-platforms" || platform === "instagram")
+        if (platform === "all-platforms" || platform === "instagram") {
           updatePostComment(data, "Instagram");
+        }
       });
 
       socket.on("igBotReplyMessage", (data) => {
-        console.log("igBotReplyMessage received", data);
-        if (platform === "all-platforms" || platform === "instagram")
+        if (platform === "all-platforms" || platform === "instagram") {
           updateConversation(data, "Instagram");
+        }
       });
 
       socket.on("igIncomingUserMessage", (data) => {
-        console.log("igIncomingUserMessage received", data);
-        if (platform === "all-platforms" || platform === "instagram")
+        if (platform === "all-platforms" || platform === "instagram") {
           updateConversation(data, "Instagram");
+        }
       });
 
-      socket.on("igCommentSendError", (e) =>
-        console.error("igCommentSendError", e)
-      );
+      socket.on("igCommentSendError", (e) => {
+        console.error("Instagram comment send failed:", e);
+        console.log("Current platform:", platform);
+        setError("Failed to send comment. Please try again.");
+      });
+
       socket.on("igBroadcastOutgoingComment", (data) => {
-        console.log("igBroadcastOutgoingComment received", data);
         if (platform === "all-platforms" || platform === "instagram") {
           updatePostComment(data, "Instagram");
           updateConversation(data, "Instagram");
@@ -223,50 +405,59 @@ const EngagementTab = () => {
       });
 
       socket.on("igCommentSendSuccess", (data) => {
-        console.log("igCommentSendSuccess received", data);
+        console.log("Instagram comment sent successfully:", data);
+        console.log("Current platform:", platform);
         if (platform === "all-platforms" || platform === "instagram") {
           updatePostComment(data, "Instagram");
+          updateConversation(data, "Instagram");
+          setError(null);
+        } else {
+          console.warn(
+            "Comment success received but platform mismatch:",
+            platform
+          );
+        }
+      });
+
+      socket.on("igMessageSendError", (e) => {
+        console.error("igMessageSendError", e);
+        setError("Failed to send message. Please try again.");
+      });
+
+      socket.on("igBroadcastOutgoingMessage", (data) => {
+        if (platform === "all-platforms" || platform === "instagram") {
           updateConversation(data, "Instagram");
         }
       });
 
-      socket.on("igMessageSendError", (e) =>
-        console.error("igMessageSendError", e)
-      );
-      socket.on("igBroadcastOutgoingMessage", (data) => {
-        console.log("igBroadcastOutgoingMessage received", data);
-        if (platform === "all-platforms" || platform === "instagram")
-          updateConversation(data, "Instagram");
-      });
-
       socket.on("igMessageSendSuccess", (data) => {
-        console.log("igMessageSendSuccess received", data);
-        if (platform === "all-platforms" || platform === "instagram")
+        if (platform === "all-platforms" || platform === "instagram") {
           updateConversation(data, "Instagram");
+          setError(null);
+        }
       });
 
       // Facebook Events
       socket.on("fbInitialData", (data) => {
-        console.log("fbInitialData received", data);
         if (platform === "all-platforms" || platform === "facebook") {
           const processedConversations = data.data.flatMap((item: any) =>
             item.conversations.map((conv: any) => ({
               ...conv,
               CHANNEL: "Facebook",
               userId: conv.userId,
+              username: conv.username || "Unknown",
               messages: conv.messages.map((msg: any) => ({
                 ...msg,
                 CHANNEL: "Facebook",
                 messageId: msg.messageId,
                 message: {
-                  text: msg.message.text,
-                  type: msg.message.type,
-                  senderType: msg.senderType,
+                  text: msg.message?.text || "",
+                  type: msg.message?.type || "TEXT",
+                  senderType: msg.senderType || SenderType.USER,
                 },
                 timestamp: msg.timestamp,
                 status: msg.status,
               })),
-              username: conv.username,
               messageCount: conv.messageCount,
             }))
           );
@@ -277,6 +468,23 @@ const EngagementTab = () => {
               CHANNEL: "Facebook",
               postId:
                 post._id || `post_${Math.random().toString(36).substr(2, 9)}`,
+              caption: post.caption || "",
+              mediaType: post.mediaType,
+              likeCount: post.likeCount || 0,
+              timestamp: post.timestamp,
+              createdAt: post.createdAt,
+              updatedAt: post.updatedAt,
+              carouselMedia: post.carouselMedia || [],
+              comments: (post.comments || []).map((comment: any) => ({
+                ...comment,
+                text: comment.text || "",
+                username: comment.username || "Unknown",
+                timestamp: comment.timestamp || new Date().toISOString(),
+                likeCount: comment.likeCount || 0,
+              })),
+              mediaUrl:
+                post.mediaUrl ||
+                (post.carouselMedia?.length ? post.carouselMedia[0].url : ""),
             }))
           );
 
@@ -292,13 +500,12 @@ const EngagementTab = () => {
       });
 
       socket.on("fbManualAdminMessage", (data) => {
-        console.log("fbManualAdminMessage received", data);
-        if (platform === "all-platforms" || platform === "facebook")
+        if (platform === "all-platforms" || platform === "facebook") {
           updateConversation(data, "Facebook");
+        }
       });
 
       socket.on("fbBotReplyComment", (data) => {
-        console.log("fbBotReplyComment received", data);
         if (platform === "all-platforms" || platform === "facebook") {
           updatePostComment(data, "Facebook");
           updateConversation(data, "Facebook");
@@ -306,49 +513,57 @@ const EngagementTab = () => {
       });
 
       socket.on("fbNewPost", (data) => {
-        console.log("fbNewPost received", data);
-        if (platform === "all-platforms" || platform === "facebook")
-          setPosts((prev) => [{ ...data, CHANNEL: "Facebook" }, ...prev]);
+        if (platform === "all-platforms" || platform === "facebook") {
+          setPosts((prev) => [
+            { ...data, CHANNEL: "Facebook" },
+            ...prev.filter((p) => p.postId !== data.postId),
+          ]);
+        }
       });
 
       socket.on("fbIncomingUserComment", (data) => {
-        console.log("fbIncomingUserComment received", data);
-        if (platform === "all-platforms" || platform === "facebook")
+        if (platform === "all-platforms" || platform === "facebook") {
           updatePostComment(data, "Facebook");
+        }
       });
 
       socket.on("fbBotReplyMessage", (data) => {
-        console.log("fbBotReplyMessage received", data);
-        if (platform === "all-platforms" || platform === "facebook")
+        if (platform === "all-platforms" || platform === "facebook") {
           updateConversation(data, "Facebook");
+        }
       });
 
       socket.on("fbIncomingUserMessage", (data) => {
-        console.log("fbIncomingUserMessage received", data);
-        if (platform === "all-platforms" || platform === "facebook")
+        if (platform === "all-platforms" || platform === "facebook") {
           updateConversation(data, "Facebook");
+        }
       });
 
       socket.on("fbMessageSendSuccess", (data) => {
-        console.log("fbMessageSendSuccess received", data);
-        if (platform === "all-platforms" || platform === "facebook")
+        if (platform === "all-platforms" || platform === "facebook") {
           updateConversation(data, "Facebook");
+          setError(null);
+        }
       });
 
       socket.on("fbBroadcastOutgoingMessage", (data) => {
-        console.log("fbBroadcastOutgoingMessage received", data);
-        if (platform === "all-platforms" || platform === "facebook")
+        if (platform === "all-platforms" || platform === "facebook") {
           updateConversation(data, "Facebook");
+        }
       });
 
-      socket.on("fbMessageSendError", (e) =>
-        console.error("fbMessageSendError", e)
-      );
-      socket.on("fbCommentSendError", (e) =>
-        console.error("fbCommentSendError", e)
-      );
+      socket.on("fbMessageSendError", (e) => {
+        console.error("fbMessageSendError", e);
+        setError("Failed to send message. Please try again.");
+      });
+
+      socket.on("fbCommentSendError", (e) => {
+        console.error("Facebook comment send failed:", e);
+        console.log("Current platform:", platform);
+        setError("Failed to send comment. Please try again.");
+      });
+
       socket.on("fbBroadcastOutgoingComment", (data) => {
-        console.log("fbBroadcastOutgoingComment received", data);
         if (platform === "all-platforms" || platform === "facebook") {
           updatePostComment(data, "Facebook");
           updateConversation(data, "Facebook");
@@ -356,71 +571,34 @@ const EngagementTab = () => {
       });
 
       socket.on("fbCommentSendSuccess", (data) => {
-        console.log("fbCommentSendSuccess received", data);
+        console.log("Facebook comment sent successfully:", data);
+        console.log("Current platform:", platform);
         if (platform === "all-platforms" || platform === "facebook") {
           updatePostComment(data, "Facebook");
           updateConversation(data, "Facebook");
+          setError(null);
+        } else {
+          console.warn(
+            "Comment success received but platform mismatch:",
+            platform
+          );
         }
       });
 
-      socket.on("error", (e) => console.error("Socket error", e));
+      socket.on("error", (e) => {
+        console.error("Socket error", e);
+        setError(`Server error: ${e.message || "Unknown error"}`);
+      });
     };
 
-    const updateConversation = (data: any, channel: string) => {
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.messageId === data.messageId && c.CHANNEL === channel
-            ? {
-                ...c,
-                messages: [
-                  ...(c.messages || []),
-                  { ...data, CHANNEL: channel },
-                ],
-              }
-            : c
-        )
-      );
-    };
-
-    const updatePostComment = (data: any, channel: string) => {
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.postId === data.postId && p.CHANNEL === channel
-            ? {
-                ...p,
-                comments: [
-                  ...(p.comments || []),
-                  {
-                    commentId: data.commentId,
-                    username:
-                      data.recipientUsername || data.username || "Agent",
-                    text: data.message.text,
-                    timestamp: data.timestamp,
-                    CHANNEL: channel,
-                  },
-                ],
-              }
-            : p
-        )
-      );
-      if (
-        currentPost &&
-        currentPost.postId === data.postId &&
-        currentPost.CHANNEL === channel
-      ) {
-        setCurrentPost((prev: any) => ({
-          ...prev,
-          comments: [
-            ...(prev.comments || []),
-            {
-              commentId: data.commentId,
-              username: data.recipientUsername || data.username || "Agent",
-              text: data.message.text,
-              timestamp: data.timestamp,
-              CHANNEL: channel,
-            },
-          ],
-        }));
+    const fetchInitialData = () => {
+      if (platform === "all-platforms") {
+        socketRef.current!.emit("fbFetchInitialData", orgId);
+        socketRef.current!.emit("igFetchInitialData", orgId);
+      } else {
+        const event =
+          platform === "facebook" ? "fbFetchInitialData" : "igFetchInitialData";
+        socketRef.current!.emit(event, orgId);
       }
     };
 
@@ -431,40 +609,31 @@ const EngagementTab = () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [platform, currentPost, orgId]);
+  }, [
+    platform,
+    orgId,
+    updateConversation,
+    updatePostComment,
+    currentPost?.postId,
+  ]);
 
-  useEffect(() => {
-    if (orgId && socketRef.current) {
-      if (platform === "all-platforms") {
-        socketRef.current.emit("fbFetchInitialData", orgId);
-        socketRef.current.emit("igFetchInitialData", orgId);
-      } else {
-        const event =
-          platform === "facebook" ? "fbFetchInitialData" : "igFetchInitialData";
-        socketRef.current.emit(event, orgId);
-      }
-    } else {
-      console.warn("Cannot fetch initial data: orgId or socket not ready", {
-        orgId,
-        socket: socketRef.current,
-      });
+  const sendMessage = useCallback(() => {
+    if (!inputText.trim()) {
+      setError("Message cannot be empty.");
+      return;
     }
-  }, [orgId, platform]);
-
-  const sendMessage = () => {
-    console.log("sendMessage called", {
-      inputText,
-      selectedConversationId,
-      orgId,
-    });
-    if (!inputText || !selectedConversationId || !orgId) return;
+    if (!selectedConversationId) {
+      setError("Please select a conversation.");
+      return;
+    }
+    if (!orgId) {
+      setError("Organization ID is missing. Please log in again.");
+      return;
+    }
 
     const conv = conversations.find((c) => c.userId === selectedConversationId);
-    if (!conv) {
-      console.warn(
-        "Conversation not found for userId:",
-        selectedConversationId
-      );
+    if (!conv || !conv.userId) {
+      setError("Selected conversation is invalid.");
       return;
     }
 
@@ -472,62 +641,243 @@ const EngagementTab = () => {
       conv.CHANNEL === "Facebook"
         ? "fbSendMessageRequest"
         : "igSendMessageRequest";
-    socketRef.current!.emit(event, {
-      orgId,
-      recipientId: conv.recipientId,
-      recipientUsername: conv.username,
-      recipientName: conv.recipientName || conv.username,
-      message: inputText,
-    });
-    console.log(`Emitted ${event}`, {
-      orgId,
-      recipientId: conv.recipientId,
-      recipientUsername: conv.username,
-      recipientName: conv.recipientName || conv.username,
-      message: inputText,
-    });
-    setInputText("");
-  };
+    const messageId = `msg_${Math.random().toString(36).substr(2, 9)}`;
 
-  const sendComment = () => {
-    console.log("sendComment called", { commentText, currentPost, orgId });
-    if (!commentText || !currentPost || !orgId) return;
+    let payload: {
+      integrationId: string | null;
+      recipientId: string;
+      recipientUsername: string;
+      recipientName?: string;
+      message: string;
+      orgId: string;
+    };
+    if (conv.CHANNEL === "Facebook") {
+      payload = {
+        integrationId: facebookIntegrationId,
+        recipientUsername: conv.username || "Unknown",
+        recipientId: conv.userId,
+        message: inputText.trim(),
+        orgId: orgId,
+      };
+    } else {
+      payload = {
+        integrationId: integrationId,
+        recipientId: conv.userId || "string",
+        recipientName: conv.recipientName || conv.username || "string",
+        recipientUsername: conv.username || "Unknown",
+        message: inputText.trim(),
+        orgId: orgId,
+      };
+    }
+
+    if (!payload.integrationId) {
+      setError(
+        `${conv.CHANNEL} integration(you need to connect your social media account to Botwot) ID is missing. Please set up an integration.`
+      );
+      return;
+    }
+    if (!payload.recipientId) {
+      setError("Recipient ID is missing.");
+      return;
+    }
+    if (!payload.message) {
+      setError("Message cannot be empty.");
+      return;
+    }
+    if (conv.CHANNEL === "Facebook" && !payload.recipientUsername) {
+      setError("Recipient username is required for Facebook.");
+      return;
+    }
+    if (conv.CHANNEL === "Instagram" && !payload.recipientUsername) {
+      setError("Recipient username is required for Instagram.");
+      return;
+    }
+    if (conv.CHANNEL === "Instagram" && !payload.recipientName) {
+      setError("Recipient name is required for Instagram.");
+      return;
+    }
+
+    console.log("Sending message payload:", payload);
+
+    socketRef.current!.emit(event, payload);
+
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.userId === selectedConversationId && c.CHANNEL === conv.CHANNEL
+          ? {
+              ...c,
+              messages: [
+                ...(c.messages || []),
+                {
+                  messageId,
+                  message: {
+                    text: inputText.trim(),
+                    type: "text",
+                    senderType: SenderType.ADMIN,
+                  },
+                  timestamp: new Date().toISOString(),
+                  status: "SENT",
+                  CHANNEL: conv.CHANNEL,
+                },
+              ],
+              messageCount: (c.messageCount || 0) + 1,
+            }
+          : c
+      )
+    );
+
+    setInputText("");
+    setError(null);
+  }, [
+    inputText,
+    selectedConversationId,
+    orgId,
+    conversations,
+    integrationId,
+    facebookIntegrationId,
+  ]);
+
+  const sendComment = (postId: string, text: string, channel: string) => {
+    if (!text.trim()) {
+      setError("Comment cannot be empty.");
+      return;
+    }
+    if (!postId) {
+      setError("Post ID is missing.");
+      return;
+    }
+    if (!orgId) {
+      setError("Organization ID is missing.");
+      return;
+    }
+
+    const integrationID =
+      channel === "Facebook" ? facebookIntegrationId : integrationId;
+    if (!integrationID) {
+      setError(
+        `${channel} integration ID is missing. Please set up an integration.`
+      );
+      return;
+    }
 
     const event =
-      currentPost.CHANNEL === "Facebook"
-        ? "fbSendCommentReplyRequest"
-        : "igSendCommentReplyRequest";
-    socketRef.current!.emit(event, {
+      channel === "Instagram"
+        ? "igSendCommentRequest"
+        : "fbSendCommentReplyRequest";
+    const payload: CommentPayload = {
       orgId,
-      parentId: null,
-      text: commentText,
-      postId: currentPost.postId,
-    });
-    console.log(`Emitted ${event}`, {
-      orgId,
-      parentId: null,
-      text: commentText,
-      postId: currentPost.postId,
-    });
-    setCommentText("");
+      postId,
+      text,
+      integrationId: integrationID,
+    };
+
+    console.log(`Attempting to emit ${event} with payload:`, payload);
+
+    if (socketRef.current && socketRef.current.connected) {
+      socketRef.current.emit(event, { ...payload });
+      console.log(`${event} emitted successfully`);
+    } else {
+      console.error("Failed to emit event: Socket is not connected");
+      setError("Cannot send comment: Socket is disconnected.");
+    }
+
+    setOptimisticComment(postId, text);
   };
 
-  const likePost = () => {
-    console.log("likePost called", {
-      currentPost,
+  const sendCommentReply = useCallback(() => {
+    if (!replyText.trim()) {
+      setError("Reply cannot be empty.");
+      return;
+    }
+    if (!currentPost) {
+      setError("No post selected.");
+      return;
+    }
+    if (!selectedCommentId) {
+      setError("No comment selected to reply to.");
+      return;
+    }
+    if (!orgId) {
+      setError("Organization ID is missing.");
+      return;
+    }
+
+    const integrationIdToUse =
+      currentPost.CHANNEL === "Facebook"
+        ? facebookIntegrationId
+        : integrationId;
+
+    if (!integrationIdToUse) {
+      setError(
+        `${currentPost.CHANNEL} integration ID is missing. Please set up an integration.`
+      );
+      return;
+    }
+
+    const event =
+      currentPost.CHANNEL === "Instagram"
+        ? "igBotReplyComment"
+        : "fbSendCommentReplyRequest";
+
+    const payload: CommentPayload = {
       orgId,
-      alreadyLiked: likedPosts.has(currentPost.postId),
-    });
-    if (!currentPost || !orgId || likedPosts.has(currentPost.postId)) return;
+      postId: currentPost.postId,
+      text: replyText.trim(),
+      parentCommentId: selectedCommentId,
+      integrationId: integrationIdToUse,
+    };
+
+    if (socketRef.current && socketRef.current.connected) {
+      socketRef.current.emit(event, payload);
+      console.log(`${event} emitted successfully with payload:`, payload);
+    } else {
+      console.error("Failed to emit event: Socket is not connected");
+      setError("Cannot send reply: Socket is disconnected.");
+      return;
+    }
+
+    setOptimisticComment(currentPost.postId, replyText, selectedCommentId);
+
+    setReplyText("");
+    setSelectedCommentId(null);
+    setError(null);
+  }, [
+    replyText,
+    currentPost,
+    selectedCommentId,
+    orgId,
+    integrationId,
+    facebookIntegrationId,
+    setOptimisticComment,
+  ]);
+
+  const likePost = useCallback(() => {
+    if (!currentPost || !orgId || likedPosts.has(currentPost.postId)) {
+      setError("Post already liked or invalid post.");
+      return;
+    }
 
     const event =
       currentPost.CHANNEL === "Facebook"
         ? "fbLikePostRequest"
         : "igLikePostRequest";
     socketRef.current!.emit(event, { orgId, postId: currentPost.postId });
-    console.log(`Emitted ${event}`, { orgId, postId: currentPost.postId });
+
     setLikedPosts((prev) => new Set(prev).add(currentPost.postId));
-  };
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.postId === currentPost.postId && p.CHANNEL === currentPost.CHANNEL
+          ? { ...p, likeCount: (p.likeCount || 0) + 1 }
+          : p
+      )
+    );
+    setCurrentPost((prev: any) => ({
+      ...prev,
+      likeCount: (prev.likeCount || 0) + 1,
+    }));
+
+    setError(null);
+  }, [currentPost, orgId, likedPosts]);
 
   const handleClick = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorEl(e.currentTarget);
@@ -536,6 +886,8 @@ const EngagementTab = () => {
     setCurrentPost(post);
     setCarouselIndex(0);
     setCommentText("");
+    setReplyText("");
+    setSelectedCommentId(null);
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
@@ -591,8 +943,25 @@ const EngagementTab = () => {
     { month: "Jul", value: 55 },
   ];
 
+  const isSendMessageDisabled =
+    !inputText.trim() ||
+    !selectedConversationId ||
+    !orgId ||
+    (selectedConversation?.CHANNEL === "Instagram" && !integrationId) ||
+    (selectedConversation?.CHANNEL === "Facebook" && !facebookIntegrationId);
+
   return (
     <div className="p-6 bg-white min-h-screen">
+      {error && (
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4">
+          {error}
+        </div>
+      )}
+      {integrationFetchError && (
+        <div className="bg-yellow-100 text-yellow-700 p-4 rounded-lg mb-4">
+          {integrationFetchError}
+        </div>
+      )}
       <h1 className="text-2xl font-semibold mb-1">Engagement</h1>
       <p className="text-gray-600 text-sm mb-6">
         Sentiment across all active channels
@@ -691,7 +1060,7 @@ const EngagementTab = () => {
                       </span>
                     </div>
                     <p className="text-sm mb-2 overflow-hidden overflow-ellipsis line-clamp-3">
-                      {post?.caption}
+                      {post?.caption || "No caption"}
                     </p>
                     <div className="flex justify-between items-center text-xs text-gray-500">
                       <span>
@@ -740,7 +1109,7 @@ const EngagementTab = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-4 h-[400px]">
-        <div className="col-span-3">
+        <div className="col-span-3 h-[calc(100vh-200px)] flex flex-col">
           <FormControl className="w-full">
             <InputLabel>Filter</InputLabel>
             <Select
@@ -752,7 +1121,7 @@ const EngagementTab = () => {
               <MenuItem value="comments">Comments</MenuItem>
             </Select>
           </FormControl>
-          <div className="bg-[#65558F] bg-opacity-[0.08] mt-4 rounded-lg">
+          <div className="bg-[#65558F] bg-opacity-[0.08] mt-4 rounded-lg overflow-y-auto flex-1">
             {displayedItems.map((item) => (
               <div
                 key={
@@ -794,7 +1163,8 @@ const EngagementTab = () => {
                     <p className="text-base">{item?.username || "Unknown"}</p>
                   ) : (
                     <p className="text-base">
-                      {item.username} commented: {item.text} (
+                      {item.username || "Unknown"} commented:{" "}
+                      {item.text || "No text"} (
                       {new Date(item.timestamp).toLocaleTimeString()})
                     </p>
                   )}
@@ -811,7 +1181,7 @@ const EngagementTab = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h2 className="text-md font-semibold">
-                      {selectedConversation.recipientUsername || "Unknown"}
+                      {selectedConversation.username || "Unknown"}
                     </h2>
                   </div>
                 </div>
@@ -820,31 +1190,57 @@ const EngagementTab = () => {
                   {(selectedConversation.messages || []).map(
                     (message, index) => (
                       <div
-                        key={index}
+                        key={message.messageId || index}
                         className={
-                          message.senderType === "ADMIN"
-                            ? "flex justify-end mb-4"
-                            : "flex gap-2 mb-4"
+                          message.senderType === SenderType.USER
+                            ? "flex gap-2 mb-4"
+                            : "flex justify-end mb-4"
                         }
                       >
-                        {message.senderType !== "ADMIN" && (
+                        {message.senderType === SenderType.USER && (
                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
                             <SmartToy className="text-white w-6 h-6" />
                           </div>
                         )}
                         <div
                           className={
-                            message.senderType === "ADMIN"
-                              ? "bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]"
-                              : "bg-white p-3 rounded-lg max-w-[70%]"
+                            message.senderType === SenderType.USER
+                              ? "bg-white p-3 rounded-lg max-w-[70%]"
+                              : "bg-[#2E2F5F] text-white p-3 rounded-lg max-w-[70%]"
                           }
                         >
-                          <p className="text-sm">{message.message.text}</p>
+                          {message.message.type === "text" ? (
+                            <p className="text-sm">
+                              {message.message.text || "No text"}
+                            </p>
+                          ) : message.message.type === "image" ? (
+                            <img
+                              src={message.message.mediaUrl}
+                              alt="Message image"
+                              className="max-w-[200px] rounded-md"
+                            />
+                          ) : message.message.type === "video" ? (
+                            <video
+                              src={message.message.mediaUrl}
+                              controls
+                              className="max-w-[200px] rounded-md"
+                            />
+                          ) : message.message.type === "audio" ? (
+                            <audio
+                              src={message.message.mediaUrl}
+                              controls
+                              className="w-full"
+                            />
+                          ) : (
+                            <p className="text-sm">Unsupported message type</p>
+                          )}
                           <p className="text-xs opacity-70 mt-1">
                             {new Date(message.timestamp).toLocaleTimeString()}
                           </p>
                         </div>
-                        {message.senderType === "ADMIN" && (
+                        {(message.senderType === SenderType.ADMIN ||
+                          message.senderType === SenderType.AI ||
+                          message.senderType === SenderType.CUSTOM_MESSAGE) && (
                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] ml-4 flex items-center justify-center">
                             <Person className="text-white w-6 h-6" />
                           </div>
@@ -860,11 +1256,12 @@ const EngagementTab = () => {
                       (text, index) => (
                         <button
                           key={index}
-                          className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100"
+                          className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => {
                             setInputText(text);
                             sendMessage();
                           }}
+                          disabled={isSendMessageDisabled}
                         >
                           {text}
                         </button>
@@ -932,10 +1329,12 @@ const EngagementTab = () => {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                    disabled={integrationFetchError !== null}
                   />
                   <button
-                    className="p-1.5 hover:bg-gray-200 rounded-full"
+                    className="p-1.5 hover:bg-gray-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={sendMessage}
+                    disabled={isSendMessageDisabled}
                   >
                     <Send className="w-5 h-5 text-gray-600" />
                   </button>
@@ -943,7 +1342,6 @@ const EngagementTab = () => {
               </>
             ) : selectedCommentPost && filterType === "comments" ? (
               <>
-                {/* Post Header */}
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h2 className="text-md font-semibold">
@@ -952,7 +1350,6 @@ const EngagementTab = () => {
                   </div>
                 </div>
 
-                {/* Post Content (Media and Caption) */}
                 <div className="mb-4">
                   <div className="relative mb-2">
                     {currentPost.mediaType === "VIDEO" ? (
@@ -1057,30 +1454,121 @@ const EngagementTab = () => {
                   <p className="text-sm mb-2">
                     {currentPost.caption || "No caption available"}
                   </p>
+                  <div className="flex items-center justify-around text-sm text-gray-600 mb-4">
+                    <div className="flex items-center gap-1">
+                      <IconButton
+                        onClick={likePost}
+                        disabled={likedPosts.has(currentPost.postId)}
+                        sx={{ padding: 0 }}
+                      >
+                        {likedPosts.has(currentPost.postId) ? (
+                          <Favorite fontSize="small" color="error" />
+                        ) : (
+                          <FavoriteBorder fontSize="small" />
+                        )}
+                      </IconButton>
+                      <span>{currentPost.likeCount || 0} Likes</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Comment fontSize="small" />
+                      <span>{currentPost.comments?.length || 0} Comments</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Send fontSize="small" />
+                      <span>{currentPost.sharesCount || 0} Shares</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Comments Section */}
                 <div className="h-[200px] overflow-y-auto mb-4">
                   <div className="flex flex-col gap-4">
                     {currentPost.comments?.map(
                       (comment: any, index: number) => (
-                        <div key={index} className="flex gap-2 mb-4">
-                          <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
-                            <Person className="text-white w-6 h-6" />
+                        <div key={comment.commentId || index}>
+                          <div className="flex gap-2 mb-4">
+                            <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
+                              <Person className="text-white w-6 h-6" />
+                            </div>
+                            <div className="bg-white p-3 rounded-lg max-w-[70%]">
+                              <p className="text-sm">
+                                {comment.text || "No text"}
+                              </p>
+                              <p className="text-xs opacity-70 mt-1">
+                                {new Date(
+                                  comment.timestamp
+                                ).toLocaleTimeString()}
+                              </p>
+                              {currentPost.CHANNEL === "Instagram" && (
+                                <IconButton
+                                  size="small"
+                                  onClick={() => {
+                                    setSelectedCommentId(comment.commentId);
+                                    setReplyText("");
+                                  }}
+                                >
+                                  <Reply fontSize="small" />
+                                </IconButton>
+                              )}
+                            </div>
                           </div>
-                          <div className="bg-white p-3 rounded-lg max-w-[70%]">
-                            <p className="text-sm">{comment.text}</p>
-                            <p className="text-xs opacity-70 mt-1">
-                              {new Date(comment.timestamp).toLocaleTimeString()}
-                            </p>
-                          </div>
+                          {selectedCommentId === comment.commentId && (
+                            <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50 ml-10 mb-4">
+                              <input
+                                type="text"
+                                placeholder="Write a reply..."
+                                className="flex-1 bg-transparent outline-none text-sm"
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                onKeyPress={(e) =>
+                                  e.key === "Enter" && sendCommentReply()
+                                }
+                              />
+                              <button
+                                className="p-1.5 hover:bg-gray-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={sendCommentReply}
+                                disabled={!replyText.trim()}
+                              >
+                                <Send className="w-5 h-5 text-gray-600" />
+                              </button>
+                              <button
+                                className="p-1.5 hover:bg-gray-200 rounded-full"
+                                onClick={() => setSelectedCommentId(null)}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
+                          {/* Display replies to this comment */}
+                          {currentPost.comments
+                            .filter(
+                              (c: any) => c.parentId === comment.commentId
+                            )
+                            .map((reply: any, replyIndex: number) => (
+                              <div
+                                key={reply.commentId || replyIndex}
+                                className="flex gap-2 mb-4 ml-10"
+                              >
+                                <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
+                                  <Person className="text-white w-6 h-6" />
+                                </div>
+                                <div className="bg-white p-3 rounded-lg max-w-[60%]">
+                                  <p className="text-sm">
+                                    {reply.text || "No text"}
+                                  </p>
+                                  <p className="text-xs opacity-70 mt-1">
+                                    {new Date(
+                                      reply.timestamp
+                                    ).toLocaleTimeString()}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
                         </div>
                       )
                     ) || <p>No comments available</p>}
                   </div>
                 </div>
 
-                {/* Quick Reply Buttons and Post Engagement */}
                 <div className="flex justify-between items-start mt-4 gap-6">
                   <div className="flex flex-col mt-10 gap-2">
                     {[
@@ -1093,8 +1581,14 @@ const EngagementTab = () => {
                         key={index}
                         className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100"
                         onClick={() => {
-                          setCommentText(text);
-                          sendComment();
+                          if (currentPost) {
+                            setCommentText(text);
+                            sendComment(
+                              currentPost.postId,
+                              text,
+                              currentPost.CHANNEL
+                            );
+                          }
                         }}
                       >
                         {text}
@@ -1129,7 +1623,6 @@ const EngagementTab = () => {
                   </div>
                 </div>
 
-                {/* Comment Input */}
                 <div className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-gray-50">
                   <button className="p-1.5 hover:bg-gray-200 rounded-full">
                     <Image className="w-5 h-5 text-gray-600" />
@@ -1143,11 +1636,29 @@ const EngagementTab = () => {
                     className="flex-1 bg-transparent outline-none text-sm"
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && sendComment()}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && currentPost) {
+                        sendComment(
+                          currentPost.postId,
+                          commentText,
+                          currentPost.CHANNEL
+                        );
+                        setCommentText("");
+                      }
+                    }}
                   />
                   <button
                     className="p-1.5 hover:bg-gray-200 rounded-full"
-                    onClick={sendComment}
+                    onClick={() => {
+                      if (currentPost) {
+                        sendComment(
+                          currentPost.postId,
+                          commentText,
+                          currentPost.CHANNEL
+                        );
+                        setCommentText("");
+                      }
+                    }}
                   >
                     <Send className="w-5 h-5 text-gray-600" />
                   </button>
@@ -1351,8 +1862,11 @@ const EngagementTab = () => {
                   )}
                   <Typography variant="h6">{currentPost.CHANNEL}</Typography>
                 </div>
-                <div className="flex items-center justify-around text-sm text-gray-600 mb-4">
-                  <div className="flex items-center gap-1">
+                <Typography variant="body1" className="mb-4">
+                  {currentPost.caption || "No caption available"}
+                </Typography>
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center gap-1 mr-4">
                     <IconButton
                       onClick={likePost}
                       disabled={likedPosts.has(currentPost.postId)}
@@ -1366,7 +1880,7 @@ const EngagementTab = () => {
                     </IconButton>
                     <span>{currentPost.likeCount || 0} Likes</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 mr-4">
                     <Comment fontSize="small" />
                     <span>{currentPost.comments?.length || 0} Comments</span>
                   </div>
@@ -1386,11 +1900,29 @@ const EngagementTab = () => {
                     placeholder="Write a comment..."
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && sendComment()}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && currentPost) {
+                        sendComment(
+                          currentPost.postId,
+                          commentText,
+                          currentPost.CHANNEL
+                        );
+                        setCommentText("");
+                      }
+                    }}
                     size="small"
                   />
                   <Button
-                    onClick={sendComment}
+                    onClick={() => {
+                      if (currentPost) {
+                        sendComment(
+                          currentPost.postId,
+                          commentText,
+                          currentPost.CHANNEL
+                        );
+                        setCommentText("");
+                      }
+                    }}
                     variant="contained"
                     sx={{
                       ml: 1,
@@ -1407,38 +1939,128 @@ const EngagementTab = () => {
                 </Typography>
                 <div className="overflow-y-auto max-h-[350px]">
                   {currentPost.comments?.map((c: any) => (
-                    <div
-                      key={c.commentId}
-                      className="flex items-start mb-3 p-2 hover:bg-gray-100 rounded-lg"
-                    >
-                      <Avatar sx={{ width: 24, height: 24 }} className="mr-2">
-                        {c.username[0]}
-                      </Avatar>
-                      <div className="flex-1">
-                        <Typography variant="subtitle2">
-                          {c.username}
-                        </Typography>
-                        <Typography variant="body2" className="break-words">
-                          {c.text}
-                        </Typography>
-                        <div className="flex items-center gap-2">
-                          <Typography
-                            variant="caption"
-                            className="text-gray-400"
-                          >
-                            {new Date(c.timestamp).toLocaleTimeString()}
+                    <div key={c.commentId} className="mb-3 p-2 rounded-lg">
+                      <div className="flex items-start hover:bg-gray-100 rounded-lg p-2">
+                        <Avatar sx={{ width: 24, height: 24 }} className="mr-2">
+                          {c.username?.[0] || "U"}
+                        </Avatar>
+                        <div className="flex-1">
+                          <Typography variant="subtitle2">
+                            {c.username || "Unknown"}
                           </Typography>
-                          <div className="flex items-center gap-1">
-                            <FavoriteBorder fontSize="small" />
+                          <Typography variant="body2" className="break-words">
+                            {c.text || "No text"}
+                          </Typography>
+                          <div className="flex items-center gap-2">
                             <Typography
                               variant="caption"
-                              className="text-gray-600"
+                              className="text-gray-400"
                             >
-                              {c.likeCount || 0} Likes
+                              {new Date(c.timestamp).toLocaleTimeString()}
                             </Typography>
+                            <div className="flex items-center gap-1">
+                              <FavoriteBorder fontSize="small" />
+                              <Typography
+                                variant="caption"
+                                className="text-gray-600"
+                              >
+                                {c.likeCount || 0} Likes
+                              </Typography>
+                            </div>
+                            {currentPost.CHANNEL === "Instagram" && (
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setSelectedCommentId(c.commentId);
+                                  setReplyText("");
+                                }}
+                              >
+                                <Reply fontSize="small" />
+                              </IconButton>
+                            )}
                           </div>
                         </div>
                       </div>
+                      {selectedCommentId === c.commentId && (
+                        <Box display="flex" alignItems="center" mt={1} ml={5}>
+                          <TextField
+                            fullWidth
+                            variant="outlined"
+                            placeholder="Write a reply..."
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            onKeyPress={(e) =>
+                              e.key === "Enter" && sendCommentReply()
+                            }
+                            size="small"
+                          />
+                          <Button
+                            onClick={sendCommentReply}
+                            variant="contained"
+                            sx={{
+                              ml: 1,
+                              backgroundColor: "#65558F",
+                              "&:hover": { backgroundColor: "#56497A" },
+                            }}
+                            disabled={!replyText.trim()}
+                          >
+                            Reply
+                          </Button>
+                          <Button
+                            onClick={() => setSelectedCommentId(null)}
+                            variant="outlined"
+                            sx={{ ml: 1 }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
+                      )}
+                      {/* Display replies to this comment */}
+                      {currentPost.comments
+                        .filter((reply: any) => reply.parentId === c.commentId)
+                        .map((reply: any) => (
+                          <div
+                            key={reply.commentId}
+                            className="flex items-start ml-5 mt-2 p-2 hover:bg-gray-100 rounded-lg"
+                          >
+                            <Avatar
+                              sx={{ width: 24, height: 24 }}
+                              className="mr-2"
+                            >
+                              {reply.username?.[0] || "U"}
+                            </Avatar>
+                            <div className="flex-1">
+                              <Typography variant="subtitle2">
+                                {reply.username || "Unknown"}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                className="break-words"
+                              >
+                                {reply.text || "No text"}
+                              </Typography>
+                              <div className="flex items-center gap-2">
+                                <Typography
+                                  variant="caption"
+                                  className="text-gray-400"
+                                >
+                                  {new Date(
+                                    reply.timestamp
+                                  ).toLocaleTimeString()}
+                                </Typography>
+                                <div className="flex items-center gap-1">
+                                  <FavoriteBorder fontSize="small" />
+                                  <Typography
+                                    variant="caption"
+                                    className="text-gray-600"
+                                  >
+                                    {reply.likeCount || 0} Likes
+                                  </Typography>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                     </div>
                   ))}
                 </div>

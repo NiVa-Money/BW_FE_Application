@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import { WhatsApp, Upload } from "@mui/icons-material";
@@ -45,13 +44,13 @@ const WhatsappCampaign: React.FC = () => {
   const [contactList, setContactList] = useState<File | null>(null);
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
-  const [_fileName, setFileName] = useState("");
+  const [, setFileName] = useState("");
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
   const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
-  const [_secretToken, setSecretToken] = useState("");
-  const [_whatsappName, setWhatsappName] = useState("");
+  const [, setSecretToken] = useState("");
+  const [, setWhatsappName] = useState("");
   const whatsappNumbers = useSelector(
     (state: RootState) => state.crudIntegration?.crudIntegration?.data
   );
@@ -101,7 +100,7 @@ const WhatsappCampaign: React.FC = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err) {
+    } catch {
       alert("Failed to download sample CSV. Please try again.");
     }
   };
@@ -342,7 +341,7 @@ const WhatsappCampaign: React.FC = () => {
     setSelectedTemplate({
       name: data.name,
       id: data.id,
-      header: headerContent,
+      header: data.header?.content || "",
       headerType: headerType,
       body: data.body.text,
       footer: data.footer ? data.footer.text : "",

@@ -48,7 +48,6 @@ const CreateBot: React.FC = () => {
   const [knowledgeBases, setKnowledgeBases] = useState<
     { file: File; filename: string; kbId?: string }[]
   >([]);
-  const [filename, setFileName] = useState("");
   const [selectedFileImage, setSelectedFileImage] = useState<File | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const totalPages = 4;
@@ -129,7 +128,7 @@ const CreateBot: React.FC = () => {
           botName: Yup.string().required("Agent Name is required"),
           botGreetingMessage: Yup.string().required("Greeting is required"),
           supportNumber: Yup.string()
-            .matches(/^\d{10}$/, "Phone number must be exactly 10 digits")
+            .matches(/^\d*$/, "Phone number must contain only digits")
             .required("Phone Number is required"),
           supportEmail: Yup.string()
             .email("Invalid email")
@@ -173,8 +172,7 @@ const CreateBot: React.FC = () => {
                   );
                 })
             ),
-          websiteURL: Yup.string()
-            .url("Invalid URL"),
+          websiteURL: Yup.string().url("Invalid URL"),
           agentRole: Yup.string().required("Agent Role is required"),
         })
       : Yup.object().shape({
@@ -233,7 +231,6 @@ const CreateBot: React.FC = () => {
       filename: file.name,
     }));
     setKnowledgeBases((prev) => [...prev, ...newKnowledgeBases]);
-    setFileName(newKnowledgeBases[newKnowledgeBases.length - 1].filename);
 
     formik.setFieldValue("knowledgeBaseFiles", [
       ...formik.values.knowledgeBaseFiles,
@@ -254,8 +251,6 @@ const CreateBot: React.FC = () => {
       formData.append("botGreetingMessage", values.botGreetingMessage || "");
       formData.append("supportNumber", values.supportNumber || "");
       formData.append("supportEmail", values.supportEmail || "");
-      formData.append("docName", filename || "");
-      formData.append("docType", filename ? "pdf" : "");
       formData.append(
         "appointmentSchedulerLink",
         values.appointmentSchedulerLink || ""
@@ -277,38 +272,15 @@ const CreateBot: React.FC = () => {
       );
       formData.append("wordLimitPerMessage", values.wordLimitPerMessage);
 
-      // Append all files for the "file" field
       if (knowledgeBases.length > 0) {
         knowledgeBases.forEach((kb) => {
-          formData.append("file", kb.file); // Append each file
+          formData.append("file", kb.file);
         });
       }
 
       // Create bot profile
       const botResponse = await createBotProfileService(formData);
       console.log("Response from api:", botResponse);
-      // const botId = botResponse.botId; // Assuming botId is returned
-
-      // Append knowledge bases
-      // for (let i = 0; i < knowledgeBases.length; i++) {
-      //   const kbFormData = new FormData();
-      //   kbFormData.append("file", knowledgeBases[i].file);
-
-      //   // Log the contents of kbFormData
-      //   for (const [key, value] of kbFormData.entries()) {
-      //     console.log(`Key: ${key}, Value:`, value);
-      //   }
-      //   const kbResponse = await appendKnowledgeBaseService(
-      //     botId,
-      //     "",
-      //     kbFormData
-      //   );
-      //   setKnowledgeBases((prev) =>
-      //     prev.map((kb, index) =>
-      //       index === i ? { ...kb, kbId: kbResponse.kbId } : kb
-      //     )
-      //   );
-      // }
 
       setIsModalOpen(true);
     } catch (error) {
@@ -921,6 +893,7 @@ const CreateBot: React.FC = () => {
                         <Button
                           variant="outlined"
                           size="small"
+                          color="error"
                           startIcon={<Delete />}
                           onClick={() =>
                             kb.kbId && createBotDataRedux?.botId
