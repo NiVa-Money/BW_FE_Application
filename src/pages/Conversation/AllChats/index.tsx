@@ -14,6 +14,7 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import { notifyError, notifySuccess } from "../../../components/Toast";
 import StarIcon from "@mui/icons-material/Star";
 import SendIcon from "@mui/icons-material/Send";
+import { EmojiEmotions } from "@mui/icons-material";
 import {
   XAxis,
   YAxis,
@@ -44,6 +45,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SessionsList from "./SessionsList";
 import WhatsappSectionData from "./whatsappSectionData";
 import WebsiteSectionData from "./websiteSectionData";
+import EmojiPicker from "emoji-picker-react";
 
 interface AnalysisSection {
   title: string;
@@ -89,6 +91,7 @@ const AllChats = () => {
   const [handledByFilter, setHandledByFilter] = useState("");
   const [favoriteFilter, setFavoriteFilter] = useState("");
   const [blockFilter, setBlockFilter] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
 
   const sessionsDataRedux = useSelector(
     (state: RootState) => state?.userChat?.allSession?.data
@@ -689,7 +692,7 @@ const AllChats = () => {
     setChannelNameVal(val);
     setSessionId("");
     setMessages([]);
-  
+
     if (botIdVal?.length && val) {
       dispatch(
         getAllSession({
@@ -723,6 +726,16 @@ const AllChats = () => {
         fill: "#8884d8",
       },
     ];
+  };
+
+  const onEmojiClick = (emojiObject) => {
+    // Insert emoji at current cursor position or at the end
+    setUserMessage((prevMessage) => prevMessage + emojiObject.emoji);
+    // setShowEmojiPicker(false); // Optional: hide picker after selection
+  };
+
+  const toggleEmojiPicker = () => {
+    setShowEmojiPicker((prev) => !prev);
   };
 
   const transformVulnerabilityData = (vulnerability) => {
@@ -1101,7 +1114,7 @@ const AllChats = () => {
               <input
                 type="text"
                 placeholder="Message"
-                className="flex-1 bg-gray-100 p-2 rounded-lg outline-none"
+                className="flex-1 bg-transparent outline-none text-sm border-none text-black placeholder:text-gray-500 focus:ring-0 focus:border-transparent"
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
                 onKeyDown={(e) => {
@@ -1109,11 +1122,26 @@ const AllChats = () => {
                 }}
               />
               <button
+                type="button" // Important: type="button" to prevent form submission
+                onClick={toggleEmojiPicker}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <EmojiEmotions />
+              </button>
+              <button
                 className="p-2 bg-gray-100 rounded-lg"
                 onClick={handleSendMessage}
               >
                 <SendIcon className="w-5 h-5 text-gray-400" />
               </button>
+              {showEmojiPicker && (
+                <div
+                  className="absolute right-40 z-10"
+                  style={{ bottom: "calc(12.5rem - 1000px)" }}
+                >
+                  <EmojiPicker onEmojiClick={onEmojiClick} />
+                </div>
+              )}
             </div>
           )}
         </div>
