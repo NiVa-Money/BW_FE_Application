@@ -52,7 +52,10 @@ export const getUserDetails = async (payload) => {
 };
 export const resendOtp = async (payload) => {
   try {
-    const response = await axios.post(`${publicBaseUrl}/resend-otp`, payload);
+    const response = await axios.post(
+      `${publicBaseUrl}/user-management/resendOtp`,
+      payload
+    );
     return response.data;
   } catch {
     throw new Error("Error: Sending OTP on Mail");
@@ -65,8 +68,10 @@ export const verifyOtp = async (payload) => {
       payload
     );
     return response.data;
-  } catch {
-    throw new Error("Error: Verifying OTP");
+  } catch (error) {
+    const errorMessage =
+      error?.response?.data?.error || "Error: Verifying OTP.";
+    throw new Error(errorMessage);
   }
 };
 export const setPassword = async (payload) => {

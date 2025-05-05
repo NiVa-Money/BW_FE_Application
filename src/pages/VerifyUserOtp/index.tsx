@@ -20,10 +20,22 @@ const VerifyUserOtp = () => {
   const [userDetails, setUserDetails] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
-  // Decode userId and fetch user data
   useEffect(() => {
-    const fetchUserData = async () => {
+    const checkUserVerificationAndFetchData = async () => {
       try {
+        // Check if the user is already verified
+        const userData = JSON.parse(localStorage.getItem("userData"))?.user;
+        const sameUser = userData?._id === userId;
+        debugger;
+        const isVerified = userData?.otpVerified;
+
+        if (sameUser && isVerified) {
+          navigate("/user/set-password");
+          return; // Exit early if the user is verified
+        }
+
+        // If not verified, fetch user data
+        setIsLoading(true);
         const payload = {
           userId: userId,
         };
@@ -44,13 +56,16 @@ const VerifyUserOtp = () => {
           setUserEmail(user.emailId);
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error(
+          "Error during user verification or fetching data:",
+          error
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUserData();
+    checkUserVerificationAndFetchData();
   }, [userId]);
 
   const validationSchema = Yup.object().shape({
@@ -90,10 +105,9 @@ const VerifyUserOtp = () => {
 
   const handleResendOtp = async () => {
     try {
-      const { email, otp } = formik.values;
+      setIsLoading(true);
       const payload = {
-        emailId: email,
-        otp: otp,
+        userId,
       };
       const response = await resendOtp(payload);
       if (response.success) {
@@ -102,6 +116,8 @@ const VerifyUserOtp = () => {
     } catch (error) {
       notifyError(error.message);
       console.error("Failed to resend OTP:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
