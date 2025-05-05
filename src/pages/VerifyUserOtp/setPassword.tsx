@@ -6,7 +6,7 @@ import FormikFieldInputComponent from "../../components/FormikFieldInputComponen
 import { notifyError } from "../../components/Toast";
 import Loader from "../../components/Loader";
 import { setPassword } from "../../api/services/userServices";
-import { Visibility, VisibilityOff } from "@mui/icons-material"; 
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const SetPassword = () => {
   const navigate = useNavigate();
@@ -80,7 +80,7 @@ const SetPassword = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                  {showPassword ? <Visibility /> : <VisibilityOff />}
                 </button>
               }
             />
@@ -103,7 +103,7 @@ const SetPassword = () => {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                 </button>
               }
             />
