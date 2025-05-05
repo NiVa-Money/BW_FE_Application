@@ -77,7 +77,7 @@ export const verifyOtp = async (payload) => {
 export const setPassword = async (payload) => {
   try {
     const response = await axios.post(
-      `${publicBaseUrl}/user/set-password`,
+      `${publicBaseUrl}/user-management/updatePassword`,
       payload
     );
     return response.data;
