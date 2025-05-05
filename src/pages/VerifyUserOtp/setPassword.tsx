@@ -6,12 +6,13 @@ import FormikFieldInputComponent from "../../components/FormikFieldInputComponen
 import { notifyError } from "../../components/Toast";
 import Loader from "../../components/Loader";
 import { setPassword } from "../../api/services/userServices";
+import { Visibility, VisibilityOff } from "@mui/icons-material"; 
 
 const SetPassword = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  // const [showPassword, setShowPassword] = useState(false);
-  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validationSchema = Yup.object().shape({
     password: Yup.string()
@@ -72,8 +73,16 @@ const SetPassword = () => {
                 onBlur: formik.handleBlur,
               }}
               form={formik}
-              type={"password"}
+              type={showPassword ? "text" : "password"}
               placeholder="Enter Password"
+              endIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </button>
+              }
             />
           </div>
 
@@ -87,8 +96,16 @@ const SetPassword = () => {
                 onBlur: formik.handleBlur,
               }}
               form={formik}
-              type={"password"}
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm Password"
+              endIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </button>
+              }
             />
           </div>
 

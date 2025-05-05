@@ -26,7 +26,6 @@ const VerifyUserOtp = () => {
         // Check if the user is already verified
         const userData = JSON.parse(localStorage.getItem("userData"))?.user;
         const sameUser = userData?._id === userId;
-        debugger;
         const isVerified = userData?.otpVerified;
 
         if (sameUser && isVerified) {
