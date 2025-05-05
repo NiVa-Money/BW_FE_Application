@@ -17,7 +17,6 @@ const VerifyUserOtp = () => {
   const userId = searchParams.get("userId");
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
-  const [userDetails, setUserDetails] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -47,11 +46,10 @@ const VerifyUserOtp = () => {
           localStorage.setItem(
             "userData",
             JSON.stringify({
-              user: response.user,
+              user: user,
               moduleMap: response.moduleMap,
             })
           );
-          setUserDetails(user);
           setUserEmail(user.emailId);
         }
       } catch (error) {
