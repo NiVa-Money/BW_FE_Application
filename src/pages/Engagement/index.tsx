@@ -21,6 +21,7 @@ import {
   ChevronRight as ChevronRightIcon,
   MoreVert,
   Reply,
+  EmojiEmotions,
 } from "@mui/icons-material";
 import {
   XAxis,
@@ -49,6 +50,7 @@ import {
   Box,
   TextField,
 } from "@mui/material";
+import EmojiPicker from "emoji-picker-react";
 import { getInstagramData } from "../../api/services/integrationServices";
 import { getFacebookIntegrations } from "../../api/services/integrationServices";
 
@@ -100,6 +102,7 @@ const EngagementTab = () => {
   const [integrationFetchError, setIntegrationFetchError] = useState<
     string | null
   >(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
   const open = Boolean(anchorEl);
   const socketRef = useRef<Socket | null>(null);
   const orgId = localStorage.getItem("orgId");
@@ -898,6 +901,16 @@ const EngagementTab = () => {
     );
   const handlePrev = () => setCarouselIndex((i) => Math.max(i - 1, 0));
 
+  const onEmojiClick = (emojiObject) => {
+    // Insert emoji at current cursor position or at the end
+    setInputText((prevMessage) => prevMessage + emojiObject.emoji);
+    // setShowEmojiPicker(false); // Optional: hide picker after selection
+  };
+
+  const toggleEmojiPicker = () => {
+    setShowEmojiPicker((prev) => !prev);
+  };
+
   const displayedItems =
     filterType === "conversations"
       ? conversations.filter(
@@ -1325,12 +1338,19 @@ const EngagementTab = () => {
                   <input
                     type="text"
                     placeholder="Message"
-                    className="flex-1 bg-transparent outline-none text-sm"
+                    className="flex-1 bg-transparent outline-none text-sm border-none text-black placeholder:text-gray-500 focus:ring-0 focus:border-transparent"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                     disabled={integrationFetchError !== null}
                   />
+                  <button
+                    type="button" // Important: type="button" to prevent form submission
+                    onClick={toggleEmojiPicker}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <EmojiEmotions />
+                  </button>
                   <button
                     className="p-1.5 hover:bg-gray-200 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={sendMessage}
@@ -1338,6 +1358,15 @@ const EngagementTab = () => {
                   >
                     <Send className="w-5 h-5 text-gray-600" />
                   </button>
+                  {/* Emoji Picker */}
+                  {showEmojiPicker && (
+                    <div
+                      className="absolute right-40 z-10"
+                      style={{ bottom: "calc(12.5rem - 1000px)" }}
+                    >
+                      <EmojiPicker onEmojiClick={onEmojiClick} />
+                    </div>
+                  )}
                 </div>
               </>
             ) : selectedCommentPost && filterType === "comments" ? (
