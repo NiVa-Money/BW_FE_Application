@@ -110,7 +110,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
         });
 
         socket.current?.on("sessionHistory", (history: any) => {
-          setMessages((prev) => [...(history.messages || []), ...prev]);
+          // Clear existing messages to avoid duplicates and set the history
+          setMessages(history.messages || []);
         });
 
         socket.current?.on("sessionMetrics", (metrics: any) => {
@@ -126,17 +127,26 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
       socket.current.on("messageToClient", (data: any) => {
         if (data.question || data.response) {
-          setMessages((prev) => [
-            ...prev,
-            {
-              ...data,
-              timestamp: data.timestamp || new Date().toISOString(),
-              sender: data.senderType === "AGENT" ? "agent" : "customer",
-              text: data.question || data.response,
-              type:
-                data.senderType === "AGENT" ? "bot-message" : "user-message",
-            },
-          ]);
+          const newMessage = {
+            ...data,
+            timestamp: data.timestamp || new Date().toISOString(),
+            sender: data.senderType === "AGENT" ? "agent" : "customer",
+            text: data.question || data.response,
+            type: data.senderType === "AGENT" ? "bot-message" : "user-message",
+          };
+
+          // Prevent duplicates by checking if the message already exists
+          setMessages((prev) => {
+            const messageExists = prev.some(
+              (msg) =>
+                msg.timestamp === newMessage.timestamp &&
+                msg.text === newMessage.text &&
+                msg.sender === newMessage.sender
+            );
+            if (messageExists) return prev; // Skip adding duplicate
+            return [...prev, newMessage];
+          });
+
           playNotificationSound();
         }
       });
@@ -160,6 +170,31 @@ const LiveChat: React.FC = (): React.ReactElement => {
         socket.current = null;
       }
     };
+  }, [userId, botId]);
+
+  useEffect(() => {
+    if (socket.current && isChatEnabled && selectedSessionId && userId && botId) {
+      socket.current.emit("joinSession", {
+        sessionId: selectedSessionId,
+        userId,
+        botId,
+        userType: "AGENT",
+      });
+  
+      socket.current.emit("sessionHistory", {
+        sessionId: selectedSessionId,
+        userId,
+        botId,
+      });
+  
+      socket.current.on("sessionHistory", (history: any) => {
+        setMessages(history.messages || []);
+      });
+  
+      socket.current.on("sessionMetrics", (metrics: any) => {
+        setSessionMetrics(metrics);
+      });
+    }
   }, [isChatEnabled, selectedSessionId, userId, botId]);
 
   // ---------- Handlers ----------
