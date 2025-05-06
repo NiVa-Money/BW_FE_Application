@@ -33,6 +33,7 @@ import SubscriptionFailure from "../pages/SubscriptionFailure";
 import SubscriptionSuccess from "../pages/SubscriptionSuccess";
 import ContactsCRM from "../pages/Contacts";
 import CloneCampaign from "../pages/Marketing/Campaign/CloneCampaign";
+import VerifyUserOtp from "../pages/VerifyUserOtp";
 import VoiceDashboard from "../pages/VoiceModule/Dashboard/VoiceDashboard";
 import VoiceAgentLayout from "../pages/VoiceModule/Agent/CreateVoiceAgent";
 import EditVoiceAgent from "../pages/VoiceModule/Agent/EditVoiceAgent";
@@ -42,6 +43,7 @@ import WhatsappIntegrationList from "../pages/Integration/WhatsappIntegration/in
 import ConversationsTable from "../pages/VoiceModule/ConversationsTable";
 import MainDashboard from "../pages/MainDashboard";
 import CampaignWorkflowBuilder from "../pages/Marketing/Whatsapp/CampaignWorkflow";
+import SetPassword from "../pages/VerifyUserOtp/setPassword";
 import InstagramIntegration from "../pages/Integration/InstagramIntegration";
 import FacebookIntegration from "../pages/Integration/FacebookIntegration";
 import CrudFacebookIntegration from "../pages/Integration/FacebookIntegration/crudFacebookIntegration";
@@ -106,7 +108,11 @@ export const autRoutes: any[] = [
     component: <EditWhatsappCampaign />,
   },
   { id: 5.3, path: "/marketing/omnigenStudio", component: <OmnigenUI /> },
-  { id: 5.3, path: "/marketing/workflowbuilder", component: <CampaignWorkflowBuilder /> },
+  {
+    id: 5.3,
+    path: "/marketing/workflowbuilder",
+    component: <CampaignWorkflowBuilder />,
+  },
 
   // { id: 6.1, path: "/voice/agents", component: <VoiceChatComponent /> },
   { id: 6.1, path: "/voice/agents", component: <MyVoiceAgents /> },
@@ -201,6 +207,14 @@ export const autRoutes: any[] = [
 export const publicRoutes: any[] = [
   { path: "/login", component: <Login /> },
   { path: "/signup", component: <SignUp /> },
+  {
+    path: "/user/verify-otp/*",
+    component: <VerifyUserOtp />,
+  },
+  {
+    path: "/user/set-password",
+    component: <SetPassword />,
+  },
   { path: "/subscription-success", component: <SubscriptionSuccess /> },
   { path: "/subscription-failure", component: <SubscriptionFailure /> },
 
