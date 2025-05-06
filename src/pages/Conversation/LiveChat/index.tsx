@@ -26,6 +26,7 @@ import LiveSessionList from "./LiveSession";
 import { createSelector } from "reselect";
 import InsightsPanel from "./InsightsPanel";
 import { io, Socket } from "socket.io-client";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 const LiveChat: React.FC = (): React.ReactElement => {
   const socket = useRef<Socket | null>(null);
@@ -363,6 +364,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log("Uploading file:", file); // Add this line to log the file object
+
     if (!file) {
       setError("No file selected");
       return;
@@ -380,6 +383,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
       setError("Agent not connected");
       return;
     }
+
+    const fileUrl = URL.createObjectURL(file); // Create local URL for the file
 
     const fileData = {
       sessionId: selectedSessionId,
@@ -404,6 +409,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
         chatMode: "manual",
         fileName: file.name,
         fileType: file.type,
+        fileUrl: fileUrl,
       },
     ]);
 
@@ -518,7 +524,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
                 <div className="overflow-y-auto max-h-[60vh]">
                   {messages?.map((msg: any, index: number) => (
-                    <div key={index} className="flex flex-col space-y-2">
+                    <div key={index} className="flex flex-col space-y-0">
                       {msg?.question && (
                         <div className="flex justify-start mb-4 mt-4">
                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] mr-4 flex items-center justify-center">
@@ -542,24 +548,61 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       )}
 
                       {msg?.chatMode === "manual" && msg?.text && (
-                        <div className="flex justify-end gap-2 mt-10 mb-4">
-                          <div className="bg-white p-3 rounded-lg max-w-[70%]">
+                        <div className="flex flex-col items-end gap-2 mt-10 mb-4 max-w-[70%] ml-auto">
+                          <div className="bg-white p-3 rounded-lg">
                             {msg.text}
+                            {msg.fileType?.includes("image") && (
+                              <img
+                                src={msg.fileUrl}
+                                alt={msg.fileName}
+                                className="max-w-xs rounded-lg"
+                              />
+                            )}
+
+                            {msg.fileType === "application/pdf" && (
+                              <embed
+                                src={msg.fileUrl}
+                                type="application/pdf"
+                                width="100%"
+                                height="450px"
+                              />
+                            )}
+
+                            {(msg.fileType === "application/msword" ||
+                              msg.fileType ===
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document") && (
+                              <a
+                                href={msg.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline"
+                              >
+                                <br />
+                                <DescriptionIcon fontSize="small" />
+                                {msg.fileName}
+                              </a>
+                            )}
                           </div>
                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
                             <SmartToy className="text-white w-6 h-6" />
                           </div>
+                          <div className="text-xs text-gray-400 mt-0">
+                            {new Date(msg.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }) || ""}
+                          </div>
                         </div>
                       )}
 
-                      {msg.timestamp && (
+                      {/* {msg.timestamp && (
                         <div className="text-xs text-gray-400 mt-1">
                           {new Date(msg.timestamp).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           }) || ""}
                         </div>
-                      )}
+                      )} */}
                     </div>
                   ))}
                 </div>
@@ -578,7 +621,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </div>
                 </div>
 
-                <div className="relative flex flex-col gap-4 px-6 py-5 mt-4 w-full max-w-full bg-[#65558F] bg-opacity-[0.06] rounded-2xl shadow-md text-white">
+                <div className="relative flex flex-col gap-4 px-6 py-5 mt-0 w-full max-w-full bg-[#65558F] bg-opacity-[0.06] rounded-2xl shadow-md text-white">
                   <div className="flex justify-end">
                     <button
                       onClick={handleToggleChat}
