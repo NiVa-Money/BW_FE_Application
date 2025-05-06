@@ -1,5 +1,3 @@
-
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, {
@@ -436,7 +434,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
       <div className="px-6 pt-4 flex-none">
         <h1 className="text-2xl p-2 font-semibold">Live Chat</h1>
-        <p className="text-gray-600 ml-2 text-sm">Guide Your Customers to Success</p>
+        <p className="text-gray-600 ml-2 text-sm">
+          Guide Your Customers to Success
+        </p>
 
         <div className="px-6 my-4">
           <div className="grid grid-cols-4 gap-4">

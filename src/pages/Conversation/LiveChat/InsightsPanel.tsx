@@ -1,6 +1,3 @@
-
-
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   BarChart,
@@ -309,7 +306,11 @@ export default function InsightsPanel({
                 >
                   <Metric
                     label="Churn Risk"
-                    value={advancedMetrics.churnRisk ? `${advancedMetrics.churnRisk}%` : "-"}
+                    value={
+                      advancedMetrics.churnRisk
+                        ? `${advancedMetrics.churnRisk}%`
+                        : "-"
+                    }
                   />
                   <Metric
                     label="Engagement Score"
@@ -329,7 +330,11 @@ export default function InsightsPanel({
                   />
                   <Metric
                     label="Opportunity Value"
-                    value={advancedMetrics.opportunityValue ? `$${advancedMetrics.opportunityValue}` : "-"}
+                    value={
+                      advancedMetrics.opportunityValue
+                        ? `$${advancedMetrics.opportunityValue}`
+                        : "-"
+                    }
                   />
                 </Box>
               </Box>
@@ -418,11 +423,15 @@ export default function InsightsPanel({
                 <Metric
                   label="Emotion"
                   value={`${emotionPrimary} (${emotionSecondary})`}
-                  barValue={isNaN(emotionIntensity) ? undefined : emotionIntensity}
+                  barValue={
+                    isNaN(emotionIntensity) ? undefined : emotionIntensity
+                  }
                 />
                 <Metric
                   label="Emotion Volatility"
-                  value={isNaN(emotionVolatility) ? "-" : `${emotionVolatility}%`}
+                  value={
+                    isNaN(emotionVolatility) ? "-" : `${emotionVolatility}%`
+                  }
                 />
                 <Metric
                   label="Intent"
@@ -462,19 +471,33 @@ export default function InsightsPanel({
               <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mt={1}>
                 <Metric
                   label="Emotional Score"
-                  value={csatFactors?.emotionalScore ? `${csatFactors?.emotionalScore}%` : "-"}
+                  value={
+                    csatFactors?.emotionalScore
+                      ? `${csatFactors?.emotionalScore}%`
+                      : "-"
+                  }
                 />
                 <Metric
                   label="Resolution Score"
-                  value={csatFactors?.resolutionScore ? `${csatFactors?.resolutionScore}%` : "-"}
+                  value={
+                    csatFactors?.resolutionScore
+                      ? `${csatFactors?.resolutionScore}%`
+                      : "-"
+                  }
                 />
                 <Metric
                   label="Tone Score"
-                  value={csatFactors?.toneScore ? `${csatFactors?.toneScore}%` : "-"}
+                  value={
+                    csatFactors?.toneScore ? `${csatFactors?.toneScore}%` : "-"
+                  }
                 />
                 <Metric
                   label="Word Choice Score"
-                  value={csatFactors?.wordChoiceScore ? `${csatFactors?.wordChoiceScore}%` : "-"}
+                  value={
+                    csatFactors?.wordChoiceScore
+                      ? `${csatFactors?.wordChoiceScore}%`
+                      : "-"
+                  }
                 />
               </Box>
               <Box mt={1}>
