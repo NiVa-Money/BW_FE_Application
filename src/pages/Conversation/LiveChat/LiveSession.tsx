@@ -46,7 +46,7 @@ const LiveSessionList: React.FC<LiveSessionListProps> = ({
   }, [sessionsDataRedux]);
 
   return (
-    <div className="w-80 h-[25rem] pl-0 bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4 border-r overflow-y-scroll">
+    <div className="w-80 h-[33rem] pl-0 bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4 border-r overflow-y-scroll">
       {sessionsData.length === 0 ? (
         <div className="text-center text-gray-500 p-4">No sessions found</div>
       ) : (
