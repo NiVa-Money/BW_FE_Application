@@ -20,7 +20,6 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
     if (typeof content === "string") return content;
     if (content?.text) return content.text;
     if (content?.template?.body?.text) {
-      // Handle both string and array cases for body text
       const bodyText = content.template.body.text;
       return Array.isArray(bodyText) ? bodyText.join(" ") : bodyText;
     }
@@ -36,7 +35,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
   });
 
   const commonClasses =
-    "px-3 py-2 rounded-lg max-w-[75%] break-words overflow-wrap"; // Removed flex-related classes
+    "px-3 py-2 rounded-lg max-w-[75%] break-words overflow-wrap";
   const getClasses = (base) => `${commonClasses} ${base}`;
 
   const renderTextWithParams = (text, parameters) => {
@@ -57,13 +56,26 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       });
     }
 
-    // Preserve newlines and replace multiple spaces
-    return renderedText
-      .replace(/\n\s*\n/g, "\n") // Normalize multiple newlines
-      .trim();
+    return renderedText.replace(/\n\s*\n/g, "\n").trim();
   };
 
   let messageContent;
+
+  // Helper to render status with specific styling for "failed"
+  const renderStatus = (status) => {
+    if (!status) return null;
+
+    const isFailed = msg?.status === "failed";
+    return (
+      <div
+        className={`text-xs mt-1 ${
+          isFailed ? "text-red-500 font-semibold" : "text-gray-400"
+        } ${isUserQuery ? "text-left" : "text-right"}`}
+      >
+        {isFailed ? "Failed to send" : status}
+      </div>
+    );
+  };
 
   switch (msgType) {
     case "text": {
@@ -74,7 +86,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       messageContent = (
         <div className={getClasses(textClasses)}>
           <p className="whitespace-pre-wrap">{getContent()}</p>
-          {status}
+          {renderStatus(status)}
         </div>
       );
       break;
@@ -88,7 +100,6 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       const template = msg.messageContent?.template || {};
       const header = template.header || template.Header || {};
 
-      // Handle header (text or image)
       const headerImage =
         header.type === "IMAGE"
           ? header.content || header.s3Url || header.image
@@ -111,7 +122,6 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
 
       messageContent = (
         <div className={getClasses(templateClasses)}>
-          {/* Header rendering */}
           {headerText && (
             <strong className="block mb-2 text-lg">{headerText}</strong>
           )}
@@ -146,18 +156,15 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
             </a>
           )}
 
-          {/* Body Text */}
           {bodyText && <p className="whitespace-pre-wrap mb-2">{bodyText}</p>}
-          {status}
+          {renderStatus(status)}
 
-          {/* Footer */}
           {template.footer?.text && (
             <span className="mt-2 text-sm italic text-gray-500">
               {template.footer.text}
             </span>
           )}
 
-          {/* Buttons - Only render if buttons exist */}
           {(Array.isArray(buttons) && buttons.length > 0) ||
           (buttons && typeof buttons === "object") ? (
             <div className="mt-2">
@@ -205,17 +212,18 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
     }
 
     case "button_reply": {
-      // For button replies, we simply render the text provided.
       const classesBasedOnOrigin = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-[#005C4B] text-white";
 
       messageContent = (
-        <div className={`${commonClasses} ${classesBasedOnOrigin} min-w-[240px]`}>
+        <div
+          className={`${commonClasses} ${classesBasedOnOrigin} min-w-[240px]`}
+        >
           <p className="whitespace-pre-wrap">
             {msg?.messageContent?.text || "No text provided."}
           </p>
-          {status}
+          {renderStatus(status)}
         </div>
       );
       break;
@@ -257,7 +265,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           className={`${commonClasses} ${flowResponseClasses} min-w-[240px]`}
         >
           {parseFlowResponse()}
-          {status}
+          {renderStatus(status)}
         </div>
       );
       break;
@@ -273,7 +281,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           {image.caption && (
             <p className="mt-2 text-sm whitespace-pre-wrap">{image.caption}</p>
           )}
-          {status}
+          {renderStatus(status)}
         </div>
       );
       break;
@@ -288,7 +296,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           <audio controls>
             <source src={getContent()} type="audio/ogg" />
           </audio>
-          {status}
+          {renderStatus(status)}
         </div>
       );
       break;
@@ -307,7 +315,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
           {video.caption && (
             <p className="mt-2 text-sm whitespace-pre-wrap">{video.caption}</p>
           )}
-          {status}
+          {renderStatus(status)}
         </div>
       );
       break;
@@ -320,7 +328,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       messageContent = (
         <div className={getClasses(classes)}>
           <p className="whitespace-pre-wrap">{getContent()}</p>
-          {status}
+          {renderStatus(status)}
         </div>
       );
     }

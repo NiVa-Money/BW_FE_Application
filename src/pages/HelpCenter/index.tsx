@@ -1,12 +1,8 @@
 import React, { useState } from "react";
-// import DescriptionIcon from "@mui/icons-material/Description";
-// import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SchoolIcon from "@mui/icons-material/School";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-
-// import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 interface Category {
   id: string;
@@ -41,16 +37,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 );
 
 const categories: Category[] = [
-  // {
-  //   id: "docs",
-  //   title: "Docs",
-  //   icon: <DescriptionIcon className="w-5 h-5" />,
-  // },
-  // {
-  //   id: "demos",
-  //   title: "Demos",
-  //   icon: <OndemandVideoIcon className="w-5 h-5" />,
-  // },
   {
     id: "faqs",
     title: "FAQs",
@@ -66,34 +52,34 @@ const categories: Category[] = [
 interface TutorialCardProps {
   badge: string;
   subtitle: string;
-  image: string;
+  image?: string; // Made optional to support video links
+  videoLink?: string; // Added to support YouTube video links
 }
-
-// const TutorialBackground: React.FC = () => (
-//   <svg
-//     className="absolute inset-0 w-full h-full"
-//     viewBox="0 0 327 216"
-//     preserveAspectRatio="none"
-//   >
-//     <defs>
-//       <linearGradient id="tutorialGradient" x1="0" y1="0" x2="1" y2="1">
-//         <stop offset="0%" stopColor="#edf2f7" />
-//         <stop offset="100%" stopColor="#e2e8f0" />
-//       </linearGradient>
-//     </defs>
-//     <rect width="100%" height="100%" fill="url(#tutorialGradient)" />
-//   </svg>
-// );
 
 const TutorialCard: React.FC<TutorialCardProps> = ({
   badge,
   subtitle,
   image,
+  videoLink,
 }) => (
   <div className="flex flex-col items-start min-w-[400px] w-[340px]">
     {/* Visual Card Block */}
     <div className="w-full h-full overflow-hidden rounded-2xl shadow-md">
-      <img src={image} alt={subtitle} className="object-cover w-full h-full" />
+      {videoLink ? (
+        <a href={videoLink} target="_blank" rel="noopener noreferrer">
+          <img
+            src="https://img.youtube.com/vi/PxxBpCdcoCM/maxresdefault.jpg" // YouTube thumbnail
+            alt={subtitle}
+            className="object-cover w-full h-full"
+          />
+        </a>
+      ) : (
+        <img
+          src={image}
+          alt={subtitle}
+          className="object-cover w-full h-full"
+        />
+      )}
     </div>
 
     {/* Separate Badge + Subtitle block */}
@@ -101,7 +87,20 @@ const TutorialCard: React.FC<TutorialCardProps> = ({
       <div className="px-3 py-1 text-sm rounded-lg border border-solid border-zinc-600 border-opacity-20 whitespace-nowrap">
         {badge}
       </div>
-      <div className="text-base text-black">{subtitle}</div>
+      <div className="text-base text-black">
+        {videoLink ? (
+          <a
+            href={videoLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            {subtitle}
+          </a>
+        ) : (
+          subtitle
+        )}
+      </div>
     </div>
   </div>
 );
@@ -113,9 +112,9 @@ const gettingStartedCards: TutorialCardProps[] = [
     image: "/assets/HelpCenter1.png",
   },
   {
-    badge: "Tutorial",
-    subtitle: "Build your bot in 2 steps",
-    image: "/assets/HelpCenter2.png",
+    badge: "Video Tutorial",
+    subtitle: "How to create an agent",
+    videoLink: "https://youtu.be/PxxBpCdcoCM?si=fz9qNp1oGkhJUfi8",
   },
   {
     badge: "Tutorial",
@@ -129,11 +128,6 @@ const basicTutorialsCards: TutorialCardProps[] = [
     badge: "Introduction",
     subtitle: "UI kit for chat overview",
     image: "/assets/HelpCenter1.png",
-  },
-  {
-    badge: "Introduction",
-    subtitle: "Build your bot in 2 steps",
-    image: "/assets/HelpCenter2.png",
   },
   {
     badge: "Tutorial",

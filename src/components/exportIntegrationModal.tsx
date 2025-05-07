@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useState } from "react";
 import {
   Dialog,
@@ -18,10 +18,11 @@ interface ConfirmationModalProps {
   exportResponse: { success: boolean; url: string } | null; // onConfirm: () => void;
 }
 
-const ExportIntegrationModal: React.FC<ConfirmationModalProps> = ({
+const ExportIntegrationModal: React.FC<ConfirmationModalProps & { isLoading: boolean }> = ({
   open,
   onClose,
   exportResponse,
+  isLoading,
 }) => {
   const [copySuccess, setCopySuccess] = useState("");
   const handleCopy = () => {
@@ -48,7 +49,11 @@ const ExportIntegrationModal: React.FC<ConfirmationModalProps> = ({
           }}
         >
           <Box>
-            {exportResponse && exportResponse.success ? (
+            {isLoading ? (
+              <Typography variant="body1" align="center" color="textSecondary" sx={{ py: 4 }}>
+                Exporting bot profile...
+              </Typography>
+            ) : exportResponse && exportResponse.success ? (
               <>
                 <DialogTitle className="h-[150px] flex items-center bg-[#EBEBEB] relative">
                   <Typography

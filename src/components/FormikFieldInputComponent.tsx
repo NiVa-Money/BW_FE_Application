@@ -1,16 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { TextField } from "@mui/material";
+import { TextField, InputAdornment } from "@mui/material";
 
-const FormikFieldInputComponent: React.FC<any> = ({
+interface FormikFieldInputComponentProps {
+  field: any;
+  form: any;
+  startIcon?: React.ReactNode;
+  endIcon?: React.ReactNode;
+  [key: string]: any;
+}
+
+const FormikFieldInputComponent: React.FC<FormikFieldInputComponentProps> = ({
   field,
   form,
+  startIcon,
+  endIcon,
   ...props
 }) => {
   const errorText =
     form.touched[field.name] && form.errors[field.name]
       ? form.errors[field.name]
       : "";
+
   return (
     <div>
       <TextField
@@ -32,6 +43,14 @@ const FormikFieldInputComponent: React.FC<any> = ({
               padding: "0 10px",
             },
           },
+        }}
+        InputProps={{
+          startAdornment: startIcon ? (
+            <InputAdornment position="start">{startIcon}</InputAdornment>
+          ) : null,
+          endAdornment: endIcon ? (
+            <InputAdornment position="end">{endIcon}</InputAdornment>
+          ) : null,
         }}
         fullWidth
       />

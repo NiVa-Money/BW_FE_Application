@@ -3,6 +3,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { MODULE_MAPPING, ROLES } from "../../enums";
 import { COLORS } from "../../constants";
+import FormikFieldInputComponent from "../../components/FormikFieldInputComponent";
 
 interface UserDetails {
   id?: string;
@@ -32,16 +33,20 @@ interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (userData: {
+    firstName: string;
+    lastName: string;
     employeeId: string;
     mobileNo: string;
     modules: number[];
     role: string;
-    id?: string;
+    userId?: string;
   }) => void;
 }
 
 // Form Validation Schema
 const validationSchema = Yup.object().shape({
+  firstName: Yup.string().required("FirstName is required"),
+  lastName: Yup.string().required("LastName is required"),
   employeeId: Yup.string()
     .email("Invalid email format")
     .required("Employee ID is required"),
@@ -79,27 +84,37 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 }) => {
   const formik = useFormik({
     initialValues: {
+      firstName: userDetails?.firstName || "",
+      lastName: userDetails?.lastName || "",
       employeeId: userDetails?.emailId || "",
       mobileNo: userDetails?.mobileNo || "",
       modules: userDetails?.module_maps || [],
       role: userDetails?.roleName
         ? mapRoleNameToEnum(userDetails.roleName)
         : ROLES.SUPERADMIN,
-      id: userDetails?.id,
+      userId: userDetails?.id,
     },
     validationSchema,
     onSubmit: (values) => {
       onSave({
+        firstName: values.firstName,
+        lastName: values.lastName,
         employeeId: values.employeeId,
         mobileNo: values.mobileNo,
         modules: values.modules,
         role: values.role,
-        id: values.id,
+        userId: values.userId,
       });
+      formik.resetForm();
       onClose();
     },
     enableReinitialize: true, // This allows the form to reinitialize when props change
   });
+
+  const clearForm = () => {
+    formik.resetForm();
+    onClose();
+  };
 
   // Update selected modules when role changes
   useEffect(() => {
@@ -147,7 +162,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             alt="user management"
           />
           <h2 className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-semibold text-gray-800">
-            {userDetails ? "Edit User" : "Add User"}
+            {userDetails?.id ? "Edit User" : "Add User"}
           </h2>
         </div>
         {/* TODO: Convert in FORMIK FORM usinf FormikFieldInputComponent */}
@@ -157,62 +172,77 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         >
           <div className="mb-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              First Name
+            </label>
+            <FormikFieldInputComponent
+              field={{
+                name: "firstName",
+                value: formik.values.firstName,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
+              placeholder="John"
+            />
+          </div>
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Last Name
+            </label>
+            <FormikFieldInputComponent
+              field={{
+                name: "lastName",
+                value: formik.values.lastName,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
+              placeholder="Doe"
+            />
+          </div>
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Employee ID
             </label>
-            <input
-              type="text"
-              name="employeeId"
-              className={`w-full p-2 bg-gray-100 rounded-md ${
-                formik.touched.employeeId && formik.errors.employeeId
-                  ? "border border-red-500"
-                  : ""
-              }`}
+            <FormikFieldInputComponent
+              field={{
+                name: "employeeId",
+                value: formik.values.employeeId,
+                onChange: formik.handleChange,
+                onBlur: formik.handleBlur,
+              }}
+              disabled={userDetails?.id}
+              form={formik}
               placeholder="example@gmail.com"
-              value={formik.values.employeeId}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              disabled={!!userDetails} // Disable for edit mode
+              type="email"
             />
-            {formik.touched.employeeId && formik.errors.employeeId && (
-              <div className="text-red-500 text-xs mt-1">
-                {formik.errors.employeeId}
-              </div>
-            )}
           </div>
           <div className="mb-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Mobile No
             </label>
-            <input
-              type="tel"
-              name="mobileNo"
-              className={`w-full p-2 bg-gray-100 rounded-md ${
-                formik.touched.mobileNo && formik.errors.mobileNo
-                  ? "border border-red-500"
-                  : ""
-              }`}
+            <FormikFieldInputComponent
+              field={{
+                name: "mobileNo",
+                value: formik.values.mobileNo,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                  formik.setFieldValue(
+                    "mobileNo",
+                    e.target.value.replace(/\D/g, "")
+                  );
+                },
+                onBlur: formik.handleBlur,
+              }}
+              form={formik}
               placeholder="9876543210"
-              value={formik.values.mobileNo}
-              maxLength={10}
-              onKeyDown={(e) => {
+              inputProps={{ maxLength: 10 }}
+              onKeyDown={(e: React.KeyboardEvent) => {
                 if (!/[0-9]|Backspace|Tab|ArrowLeft|ArrowRight/.test(e.key)) {
                   e.preventDefault();
                 }
               }}
-              onChange={(e) => {
-                formik.setFieldValue(
-                  "mobileNo",
-                  e.target.value.replace(/\D/g, "")
-                );
-              }}
-              onBlur={formik.handleBlur}
               inputMode="numeric"
             />
-            {formik.touched.mobileNo && formik.errors.mobileNo && (
-              <div className="text-red-500 text-xs mt-1">
-                {formik.errors.mobileNo}
-              </div>
-            )}
           </div>
 
           {/* Roles in flex row */}
@@ -256,7 +286,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           <div className="mb-6">
             <h3 className="text-base font-medium text-gray-700 mb-2">Access</h3>
             <div
-              className="grid grid-cols-2 gap-x-4 gap-y-3 pr-3"
+              className="grid grid-cols-2 gap-x-4 gap-y-3 p-1"
               style={{
                 maxHeight: "20vh",
                 overflowY: "auto",
@@ -271,6 +301,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     <input
                       type="checkbox"
                       className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 border-gray-300 rounded mr-2"
+                      disabled
                       checked={formik.values.modules.includes(
                         module.value as number
                       )}
@@ -295,7 +326,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
           <div className="flex justify-end space-x-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={clearForm}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               Cancel
@@ -305,7 +336,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               className="px-4 py-2 text-white rounded-md"
               style={{ backgroundColor: COLORS.VIOLET }}
             >
-              {userDetails ? "Update" : "Done"}
+              {userDetails?.id ? "Update" : "Done"}
             </button>
           </div>
         </form>

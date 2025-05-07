@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from "../axiosConfig";
 
@@ -51,7 +51,7 @@ export const deleteBotService = async (payload: any) => {
 
 export const exportBotProfileService = async (payload: any) => {
   try {
-    const response = await axiosInstance.post("/user/v2/widget/export/", {
+    const response = await axiosInstance.post("/bot/widget/export", {
       botId: payload.botId,
       userId: payload?.userId,
     });
@@ -76,6 +76,6 @@ export const generatePromptService = async (payload: any) => {
     const response = await axiosInstance.post("/user/genrate-prompt", payload);
     return response.data;
   } catch (error) {
-    throw new Error("Error generating prompt"); 
+    throw new Error("Error generating prompt");
   }
 };

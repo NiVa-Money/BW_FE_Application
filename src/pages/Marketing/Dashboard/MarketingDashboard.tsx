@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@mui/material";
@@ -23,7 +23,7 @@ import {
   Cell,
 } from "recharts";
 import ReactMarkdown from "react-markdown";
-import WhatsappDash from "../Whatsapp/WhatsappDashboard";
+import WhatsappDash from "../Whatsapp/WhatsappDashboard1";
 
 // Import your API service functions
 import { getMarketingInsightsService } from "../../../api/services/marketingDashboardService";

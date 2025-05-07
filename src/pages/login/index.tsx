@@ -35,7 +35,8 @@ const Login = () => {
       try {
         const response = await LoginUserService({ email, password });
         if (response.success) {
-          localStorage.setItem("user_id", response.user_id);
+          localStorage.setItem("user_id", response.user_id); 
+          localStorage.setItem("orgId", response.orgId);
           localStorage.setItem("token", response.token);
           localStorage.setItem(
             "userData",
@@ -304,7 +305,7 @@ const Login = () => {
           <div className="flex flex-col ml-5 w-[55%] max-md:ml-0 max-md:w-full">
             <img
               loading="lazy"
-              src="/assets/login.gif"
+               src="/assets/login.gif"
               width={500}
               height={300}
               alt="Animated GIF"
