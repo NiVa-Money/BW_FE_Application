@@ -28,7 +28,7 @@ const Donut = ({ percentage }: DonutProps) => (
   <Box position="relative" display="inline-flex">
     <CircularProgress
       variant="determinate"
-      value={percentage}
+      value={isNaN(percentage) ? 0 : percentage}
       size={48}
       thickness={5}
       sx={{
@@ -48,7 +48,7 @@ const Donut = ({ percentage }: DonutProps) => (
       justifyContent="center"
     >
       <Typography variant="caption" component="div" color="textSecondary">
-        {`${percentage}%`}
+        {isNaN(percentage) ? "-%" : `${percentage}%`}
       </Typography>
     </Box>
   </Box>
@@ -87,9 +87,11 @@ const Metric = ({ label, value, barValue }: MetricProps) => (
       {label}
     </Typography>
     <Typography variant="body1" fontWeight="500">
-      {value}
+      {value ?? "-"}
     </Typography>
-    {barValue != null && <LinearProgressBar value={barValue} color="#65558F" />}
+    {barValue != null && !isNaN(barValue) && (
+      <LinearProgressBar value={barValue} color="#65558F" />
+    )}
   </Box>
 );
 
@@ -99,38 +101,38 @@ export default function InsightsPanel({
   sessionMetrics: any;
 }) {
   // Map sessionMetrics to component state
-  const csat = sessionMetrics?.customerSatisfaction || 0;
-  const intentClarity = sessionMetrics?.customerIntent?.clarity || 0;
-  const intentPrimary = sessionMetrics?.customerIntent?.primary || "—";
-  const intentSecondary = sessionMetrics?.customerIntent?.secondary || [];
-  const sentiment = sessionMetrics?.conversationSentiment?.overall || "Unknown";
+  const csat = sessionMetrics?.customerSatisfaction ?? NaN;
+  const intentClarity = sessionMetrics?.customerIntent?.clarity ?? NaN;
+  const intentPrimary = sessionMetrics?.customerIntent?.primary ?? "-";
+  const intentSecondary = sessionMetrics?.customerIntent?.secondary ?? [];
+  const sentiment = sessionMetrics?.conversationSentiment?.overall ?? "-";
   const sentimentTrajectory =
-    sessionMetrics?.conversationSentiment?.trajectory || "Unknown";
+    sessionMetrics?.conversationSentiment?.trajectory ?? "-";
   const sentimentKeyPhrases =
-    sessionMetrics?.conversationSentiment?.keyPhrases || [];
+    sessionMetrics?.conversationSentiment?.keyPhrases ?? [];
 
   const resolutionLikelihood =
-    sessionMetrics?.summaryAndNextSteps?.resolutionLikelihood || "Unknown";
+    sessionMetrics?.summaryAndNextSteps?.resolutionLikelihood ?? "-";
   const retentionProbability =
-    sessionMetrics?.summaryAndNextSteps?.retentionProbability || 0;
-  const nextSteps = sessionMetrics?.summaryAndNextSteps?.nextSteps || [];
+    sessionMetrics?.summaryAndNextSteps?.retentionProbability ?? NaN;
+  const nextSteps = sessionMetrics?.summaryAndNextSteps?.nextSteps ?? [];
 
   const potentialRisk =
-    sessionMetrics?.vulnerabilityAnalysis?.potentialRisk || "Unknown";
+    sessionMetrics?.vulnerabilityAnalysis?.potentialRisk ?? "-";
   const salesOpportunity =
-    sessionMetrics?.vulnerabilityAnalysis?.salesOpportunity || "Unknown";
+    sessionMetrics?.vulnerabilityAnalysis?.salesOpportunity ?? "-";
   const upcomingTrends =
-    sessionMetrics?.vulnerabilityAnalysis?.upcomingTrends || [];
+    sessionMetrics?.vulnerabilityAnalysis?.upcomingTrends ?? [];
 
-  const emotionPrimary = sessionMetrics?.customerEmotion?.primary || "Neutral";
-  const emotionSecondary = sessionMetrics?.customerEmotion?.secondary || "None";
-  const emotionIntensity = sessionMetrics?.customerEmotion?.intensity || 0;
-  const emotionVolatility = sessionMetrics?.customerEmotion?.volatility || 0;
+  const emotionPrimary = sessionMetrics?.customerEmotion?.primary ?? "-";
+  const emotionSecondary = sessionMetrics?.customerEmotion?.secondary ?? "-";
+  const emotionIntensity = sessionMetrics?.customerEmotion?.intensity ?? NaN;
+  const emotionVolatility = sessionMetrics?.customerEmotion?.volatility ?? NaN;
 
-  const chatCue = sessionMetrics?.chatCues?.primaryCue || "No cue identified";
-  const cueReason = sessionMetrics?.chatCues?.reasonForCue || "—";
-  const allCues = sessionMetrics?.chatCues?.allCues || [];
-  const cueConfidence = sessionMetrics?.chatCues?.cueConfidence || 0;
+  const chatCue = sessionMetrics?.chatCues?.primaryCue ?? "-";
+  const cueReason = sessionMetrics?.chatCues?.reasonForCue ?? "-";
+  const allCues = sessionMetrics?.chatCues?.allCues ?? [];
+  const cueConfidence = sessionMetrics?.chatCues?.cueConfidence ?? NaN;
 
   const csatFactors = sessionMetrics?.csatFactors || {};
   const advancedMetrics = sessionMetrics?.advancedMetrics || {};
@@ -141,7 +143,7 @@ export default function InsightsPanel({
     val === "High" ? 75 : val === "Medium" ? 50 : 25;
 
   return (
-    <Box p={2} overflow="auto" height="100%">
+    <Box p={2} overflow="scroll" height="100%">
       <Grid container spacing={2} direction="column">
         {/* SUMMARY AND NEXT STEPS */}
         <Grid item>
@@ -152,16 +154,21 @@ export default function InsightsPanel({
             <Typography variant="h6" fontWeight="500">
               Summary and Next Steps
             </Typography>
-            <Grid container mt={2} spacing={3}>
+            <Grid container mt={2} spacing={2}>
               <Grid item xs={6}>
                 <Box
                   display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
+                  flexDirection="column"
+                  alignItems="flex-start"
+                  gap={1}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
                     <BarChart color="success" />
-                    <Typography color="textSecondary">
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ whiteSpace: "normal", wordWrap: "break-word" }}
+                    >
                       Resolution Likelihood
                     </Typography>
                   </Box>
@@ -173,12 +180,17 @@ export default function InsightsPanel({
               <Grid item xs={6}>
                 <Box
                   display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
+                  flexDirection="column"
+                  alignItems="flex-start"
+                  gap={1}
                 >
                   <Box display="flex" alignItems="center" gap={1}>
                     <SyncAlt sx={{ color: "#65558F" }} />
-                    <Typography color="textSecondary">
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ whiteSpace: "normal", wordWrap: "break-word" }}
+                    >
                       Retention Probability
                     </Typography>
                   </Box>
@@ -294,27 +306,35 @@ export default function InsightsPanel({
                 >
                   <Metric
                     label="Churn Risk"
-                    value={`${advancedMetrics.churnRisk}%`}
+                    value={
+                      advancedMetrics.churnRisk
+                        ? `${advancedMetrics.churnRisk}%`
+                        : "-"
+                    }
                   />
                   <Metric
                     label="Engagement Score"
-                    value={advancedMetrics.engagementScore}
+                    value={advancedMetrics.engagementScore ?? "-"}
                   />
                   <Metric
                     label="Estimated Resolution Time"
-                    value={advancedMetrics.estimatedResolutionTime}
+                    value={advancedMetrics.estimatedResolutionTime ?? "-"}
                   />
                   <Metric
                     label="Issue Complexity"
-                    value={advancedMetrics.issueComplexity}
+                    value={advancedMetrics.issueComplexity ?? "-"}
                   />
                   <Metric
                     label="Lifetime Value Change"
-                    value={advancedMetrics.lifetimeValueChange}
+                    value={advancedMetrics.lifetimeValueChange ?? "-"}
                   />
                   <Metric
                     label="Opportunity Value"
-                    value={`$${advancedMetrics.opportunityValue}`}
+                    value={
+                      advancedMetrics.opportunityValue
+                        ? `$${advancedMetrics.opportunityValue}`
+                        : "-"
+                    }
                   />
                 </Box>
               </Box>
@@ -343,14 +363,18 @@ export default function InsightsPanel({
             <Grid container spacing={2} textAlign="center">
               <Grid item xs={4}>
                 <Donut percentage={csat} />
-                <Typography fontWeight="600">{csat}%</Typography>
+                <Typography fontWeight="600">
+                  {isNaN(csat) ? "-" : `${csat}%`}
+                </Typography>
                 <Typography color="textSecondary" variant="body2">
                   CSAT Score
                 </Typography>
               </Grid>
               <Grid item xs={4}>
                 <Speed sx={{ color: "red" }} fontSize="large" />
-                <Typography fontWeight="600">{intentClarity}%</Typography>
+                <Typography fontWeight="600">
+                  {isNaN(intentClarity) ? "-" : `${intentClarity}%`}
+                </Typography>
                 <Typography color="textSecondary" variant="body2">
                   Intent Confidence
                 </Typography>
@@ -376,9 +400,12 @@ export default function InsightsPanel({
             >
               <Box display="flex" flexDirection="column" gap={2}>
                 <Metric label="Chat Cue" value={chatCue} />
-                <Metric label="Cue Confidence" value={`${cueConfidence}%`} />
+                <Metric
+                  label="Cue Confidence"
+                  value={isNaN(cueConfidence) ? "-" : `${cueConfidence}%`}
+                />
                 <Metric label="Reason" value={cueReason} />
-                <Metric label="Next Step" value={nextSteps[0] || "—"} />
+                <Metric label="Next Step" value={nextSteps[0] || "-"} />
                 <Box>
                   <Typography variant="body2" color="textSecondary">
                     All Cues
@@ -396,19 +423,24 @@ export default function InsightsPanel({
                 <Metric
                   label="Emotion"
                   value={`${emotionPrimary} (${emotionSecondary})`}
-                  barValue={emotionIntensity}
+                  barValue={
+                    isNaN(emotionIntensity) ? undefined : emotionIntensity
+                  }
                 />
                 <Metric
                   label="Emotion Volatility"
-                  value={`${emotionVolatility}%`}
+                  value={
+                    isNaN(emotionVolatility) ? "-" : `${emotionVolatility}%`
+                  }
                 />
                 <Metric
                   label="Intent"
-                  value={`${intentPrimary} ${intentSecondary.length
-                    ? `(${intentSecondary.join(", ")})`
-                    : ""
-                    }`}
-                  barValue={intentClarity}
+                  value={`${intentPrimary} ${
+                    intentSecondary.length
+                      ? `(${intentSecondary.join(", ")})`
+                      : ""
+                  }`}
+                  barValue={isNaN(intentClarity) ? undefined : intentClarity}
                 />
                 <Metric
                   label="Sentiment Trajectory"
@@ -439,21 +471,33 @@ export default function InsightsPanel({
               <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mt={1}>
                 <Metric
                   label="Emotional Score"
-                  value={`${csatFactors?.emotionalScore ? `${csatFactors?.emotionalScore} %` : '-'}`}
-
+                  value={
+                    csatFactors?.emotionalScore
+                      ? `${csatFactors?.emotionalScore}%`
+                      : "-"
+                  }
                 />
                 <Metric
                   label="Resolution Score"
-                  value={`${csatFactors?.resolutionScore ? `${csatFactors?.resolutionScore} %` : '-'}`}
+                  value={
+                    csatFactors?.resolutionScore
+                      ? `${csatFactors?.resolutionScore}%`
+                      : "-"
+                  }
                 />
                 <Metric
                   label="Tone Score"
-                  value={`${csatFactors?.toneScore ? `${csatFactors?.toneScore} %` : '-'}`}
+                  value={
+                    csatFactors?.toneScore ? `${csatFactors?.toneScore}%` : "-"
+                  }
                 />
                 <Metric
                   label="Word Choice Score"
-                  value={`${csatFactors?.wordChoiceScore ? `${csatFactors?.wordChoiceScore} %` : '-'}`}
-
+                  value={
+                    csatFactors?.wordChoiceScore
+                      ? `${csatFactors?.wordChoiceScore}%`
+                      : "-"
+                  }
                 />
               </Box>
               <Box mt={1}>

@@ -7,7 +7,15 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { SmartToy, Person, Send, EmojiEmotions } from "@mui/icons-material";
+import {
+  SmartToy,
+  Person,
+  Send,
+  EmojiEmotions,
+  AttachFile,
+  ArrowBackIos,
+  ArrowForwardIos,
+} from "@mui/icons-material";
 import EmojiPicker from "emoji-picker-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
@@ -17,12 +25,13 @@ import { getBotsAction } from "../../../store/actions/botActions";
 import LiveSessionList from "./LiveSession";
 import { createSelector } from "reselect";
 import InsightsPanel from "./InsightsPanel";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { io, Socket } from "socket.io-client";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 const LiveChat: React.FC = (): React.ReactElement => {
   const socket = useRef<Socket | null>(null);
   const dispatch = useDispatch();
+  const fileInputRef = useRef<HTMLInputElement>(null); // Add ref to reset file input
 
   // ---------- State ----------
   const [isAgentAssistOpen, setIsAgentAssistOpen] = useState(true);
@@ -50,7 +59,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   );
 
   // ---------- Derived Values ----------
-  const userId = localStorage.getItem("user_id") || "default-user-id"; // Fallback userId
+  const userId = localStorage.getItem("user_id") || "default-user-id";
   const botId = botsDataRedux?.[0]?._id || "";
   const botLists = useMemo(
     () =>
@@ -66,7 +75,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
     if (userId) dispatch(getBotsAction(userId));
   }, [userId, dispatch]);
 
-  // Socket initialization and management
   useEffect(() => {
     if (
       !socket.current &&
@@ -91,7 +99,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
         reconnectionDelay: 1000,
       });
 
-      // Standard socket events
       socket.current.on("connect", () => {
         console.log("Socket connected");
         setAgentState("connecting");
@@ -102,7 +109,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
           userType: "AGENT",
         });
 
-        // Request session history when joining
         socket.current?.emit("sessionHistory", {
           sessionId: selectedSessionId,
           userId,
@@ -110,7 +116,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
         });
 
         socket.current?.on("sessionHistory", (history: any) => {
-          // Clear existing messages to avoid duplicates and set the history
           setMessages(history.messages || []);
         });
 
@@ -135,7 +140,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
             type: data.senderType === "AGENT" ? "bot-message" : "user-message",
           };
 
-          // Prevent duplicates by checking if the message already exists
           setMessages((prev) => {
             const messageExists = prev.some(
               (msg) =>
@@ -143,7 +147,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                 msg.text === newMessage.text &&
                 msg.sender === newMessage.sender
             );
-            if (messageExists) return prev; // Skip adding duplicate
+            if (messageExists) return prev;
             return [...prev, newMessage];
           });
 
@@ -170,27 +174,33 @@ const LiveChat: React.FC = (): React.ReactElement => {
         socket.current = null;
       }
     };
-  }, [userId, botId]);
+  }, [userId, botId, isChatEnabled, selectedSessionId]);
 
   useEffect(() => {
-    if (socket.current && isChatEnabled && selectedSessionId && userId && botId) {
+    if (
+      socket.current &&
+      isChatEnabled &&
+      selectedSessionId &&
+      userId &&
+      botId
+    ) {
       socket.current.emit("joinSession", {
         sessionId: selectedSessionId,
         userId,
         botId,
         userType: "AGENT",
       });
-  
+
       socket.current.emit("sessionHistory", {
         sessionId: selectedSessionId,
         userId,
         botId,
       });
-  
+
       socket.current.on("sessionHistory", (history: any) => {
         setMessages(history.messages || []);
       });
-  
+
       socket.current.on("sessionMetrics", (metrics: any) => {
         setSessionMetrics(metrics);
       });
@@ -348,12 +358,69 @@ const LiveChat: React.FC = (): React.ReactElement => {
   }, [selectedSessionId, userId, handleSessionEnd]);
 
   const onEmojiClick = (emojiObject) => {
-    // Insert emoji at current cursor position or at the end
     setNewMessage((prevMessage) => prevMessage + emojiObject.emoji);
-    setShowEmojiPicker(false); // Optional: hide picker after selection
+    setShowEmojiPicker(false);
   };
 
-  // Notification Sound Function
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    console.log("Uploading file:", file); // Add this line to log the file object
+
+    if (!file) {
+      setError("No file selected");
+      return;
+    }
+
+    if (!socket.current) {
+      setError("Socket not connected. Please start the chat.");
+      return;
+    }
+    if (!selectedSessionId) {
+      setError("No session selected");
+      return;
+    }
+    if (!isAgentConnected) {
+      setError("Agent not connected");
+      return;
+    }
+
+    const fileUrl = URL.createObjectURL(file); // Create local URL for the file
+
+    const fileData = {
+      sessionId: selectedSessionId,
+      userId,
+      botId,
+      userType: "AGENT",
+      file: file,
+      fileName: file.name,
+      fileType: file.type,
+    };
+
+    // Emit the file to the server
+    socket.current.emit("uploadFile", fileData);
+
+    // Add a message to the chat to indicate a file was sent
+    setMessages((prev) => [
+      ...prev,
+      {
+        text: `Sent a file: ${file.name}`,
+        sender: "agent",
+        timestamp: new Date().toISOString(),
+        chatMode: "manual",
+        fileName: file.name,
+        fileType: file.type,
+        fileUrl: fileUrl,
+      },
+    ]);
+
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    setError("");
+  };
+
   const playNotificationSound = () => {
     const audio = new Audio("https://jumpshare.com/s/NiLeGdQk6YJJh1PzNDg4");
     audio.play().catch((error: any) => {
@@ -365,20 +432,19 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   return (
     <div className="h-screen flex flex-col relative">
-      {/* Error Message */}
       {error && (
         <div className="bg-red-100 text-red-700 p-3 mx-6 mb-4 rounded">
           {error}
         </div>
       )}
 
-      {/* Header Section */}
       <div className="px-6 pt-4 flex-none">
-        <h1 className="text-2xl font-semibold">Live Chat</h1>
-        <p className="text-gray-600 text-sm">Guide Your Customers to Success</p>
+        <h1 className="text-2xl p-2 font-semibold">Live Chat</h1>
+        <p className="text-gray-600 ml-2 text-sm">
+          Guide Your Customers to Success
+        </p>
 
-        {/* Queue Stats Section */}
-        <div className="px-6 flex-none my-4">
+        <div className="px-6 my-4">
           <div className="grid grid-cols-4 gap-4">
             <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4 shadow">
               <div className="text-gray-500">Ques Stats</div>
@@ -419,13 +485,11 @@ const LiveChat: React.FC = (): React.ReactElement => {
           </div>
         </div>
 
-        {/* Main Content (3-column layout) */}
-        <div className="px-6 flex-1 overflow-y-auto pb-10">
-          <div className="grid grid-cols-[1fr_2fr_1fr] gap-6 h-full">
-            {/* Left Section */}
-            <div className="space-y-4 w-80 overflow-y-auto">
+        <div className="px-6 flex-1">
+          <div className="grid grid-cols-[1fr_2fr_1fr] gap-4 h-full">
+            <div className="w-80 overflow-y-auto">
               <select
-                className="w-full p-3 border border-gray-300 rounded-lg mb-4"
+                className="w-full p-4 border border-gray-300 rounded-lg mb-2"
                 onChange={(e) => getBotSession(e.target.value)}
               >
                 <option value="">Select a bot</option>
@@ -445,8 +509,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
               />
             </div>
 
-            {/* Middle Section (Chat) */}
-            <div className="overflow-y-auto w-full h-[25rem]">
+            <div className="overflow-y-auto w-full max-h-[60vh]">
               <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4">
                 <div className="flex justify-between items-start mb-4">
                   {messages?.length > 0 && (
@@ -459,11 +522,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   )}
                 </div>
 
-                {/* Chat Messages */}
                 <div className="overflow-y-auto max-h-[60vh]">
                   {messages?.map((msg: any, index: number) => (
-                    <div key={index} className="flex flex-col space-y-2">
-                      {/* AI-style question */}
+                    <div key={index} className="flex flex-col space-y-0">
                       {msg?.question && (
                         <div className="flex justify-start mb-4 mt-4">
                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] mr-4 flex items-center justify-center">
@@ -475,7 +536,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                         </div>
                       )}
 
-                      {/* AI-style answer */}
                       {msg?.answer && (
                         <div className="flex justify-end gap-2 mt-10 mb-4">
                           <div className="bg-white p-3 rounded-lg max-w-[70%]">
@@ -487,32 +547,66 @@ const LiveChat: React.FC = (): React.ReactElement => {
                         </div>
                       )}
 
-                      {/* Manual mode (Agent) */}
                       {msg?.chatMode === "manual" && msg?.text && (
-                        <div className="flex justify-end gap-2 mt-10 mb-4">
-                          <div className="bg-white p-3 rounded-lg max-w-[70%]">
+                        <div className="flex flex-col items-end gap-2 mt-10 mb-4 max-w-[70%] ml-auto">
+                          <div className="bg-white p-3 rounded-lg">
                             {msg.text}
+                            {msg.fileType?.includes("image") && (
+                              <img
+                                src={msg.fileUrl}
+                                alt={msg.fileName}
+                                className="max-w-xs rounded-lg"
+                              />
+                            )}
+
+                            {msg.fileType === "application/pdf" && (
+                              <embed
+                                src={msg.fileUrl}
+                                type="application/pdf"
+                                width="100%"
+                                height="450px"
+                              />
+                            )}
+
+                            {(msg.fileType === "application/msword" ||
+                              msg.fileType ===
+                                "application/vnd.openxmlformats-officedocument.wordprocessingml.document") && (
+                              <a
+                                href={msg.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline"
+                              >
+                                <br />
+                                <DescriptionIcon fontSize="small" />
+                                {msg.fileName}
+                              </a>
+                            )}
                           </div>
                           <div className="w-8 h-8 rounded-full bg-[#2E2F5F] flex items-center justify-center">
                             <SmartToy className="text-white w-6 h-6" />
                           </div>
+                          <div className="text-xs text-gray-400 mt-0">
+                            {new Date(msg.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }) || ""}
+                          </div>
                         </div>
                       )}
 
-                      {/* Timestamp */}
-                      {msg.timestamp && (
+                      {/* {msg.timestamp && (
                         <div className="text-xs text-gray-400 mt-1">
                           {new Date(msg.timestamp).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           }) || ""}
                         </div>
-                      )}
+                      )} */}
                     </div>
                   ))}
                 </div>
 
-                {/* Quick Replies */}
                 <div className="flex justify-between items-start mt-10 mb-2 gap-6">
                   <div className="flex flex-col mt-10 gap-2">
                     {suggestedResponses.map((response, index) => (
@@ -527,9 +621,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </div>
                 </div>
 
-                {/* Chat Controls */}
-                <div className="relative flex flex-col gap-4 px-6 py-5 mt-4 w-full max-w-full bg-[#65558F] bg-opacity-[0.06] rounded-2xl shadow-md text-white">
-                  {/* Chat Toggle */}
+                <div className="relative flex flex-col gap-4 px-6 py-5 mt-0 w-full max-w-full bg-[#65558F] bg-opacity-[0.06] rounded-2xl shadow-md text-white">
                   <div className="flex justify-end">
                     <button
                       onClick={handleToggleChat}
@@ -543,7 +635,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     </button>
                   </div>
 
-                  {/* Confirmation Modal */}
                   {showConfirmationModal && (
                     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
                       <div className="bg-[#1e1e1e] text-white rounded-2xl p-6 w-full max-w-sm space-y-6">
@@ -568,7 +659,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                     </div>
                   )}
 
-                  {/* Chat Input */}
                   {isChatEnabled && (
                     <form onSubmit={sendMessage} className="mt-4">
                       <div className="flex items-center gap-2 p-3 rounded-full bg-white/10 border border-white/20">
@@ -578,10 +668,19 @@ const LiveChat: React.FC = (): React.ReactElement => {
                           className="flex-1 bg-transparent outline-none border-none text-black placeholder:text-gray-500 focus:ring-0 focus:border-transparent"
                           value={newMessage}
                           onChange={(e) => setNewMessage(e.target.value)}
-                          // Temporarily removed disabled prop for testing
                         />
+                        <label htmlFor="file-upload" className="cursor-pointer">
+                          <AttachFile className="text-gray-500 hover:text-gray-700" />
+                          <input
+                            id="file-upload"
+                            type="file"
+                            className="hidden"
+                            onChange={handleFileChange}
+                            ref={fileInputRef}
+                          />
+                        </label>
                         <button
-                          type="button" // Important: type="button" to prevent form submission
+                          type="button"
                           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                           className="text-gray-500 hover:text-gray-700"
                         >
@@ -594,7 +693,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                           <Send />
                         </button>
                       </div>
-                      {/* Emoji Picker */}
                       {showEmojiPicker && (
                         <div className="absolute bottom-16 right-0 z-10">
                           <EmojiPicker onEmojiClick={onEmojiClick} />
@@ -606,9 +704,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
               </div>
             </div>
 
-            {/* Right Section (Customer Details - Always visible) */}
             <div>
-              <div className="space-y-4">
+              <div className="space-y-4 overflow-y-auto max-h-[75vh]">
                 <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -617,7 +714,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       </div>
                       <span className="font-medium">Customer Detail</span>
                     </div>
-                    <button className="text-gray-600">⋮</button>
                   </div>
 
                   <div className="mb-4">
@@ -688,20 +784,24 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   <div className="mt-4 text-center">
                     <h3>Details of Consumers</h3>
                   </div>
-                  <div className="flex mt-6 justify-between text-xs">
+                  <div className="grid grid-cols-3 gap-4 mt-6 text-sm">
                     <div>
-                      <p className="text-red-500 font-semibold">Complaint</p>
+                      <p className="text-red-500 font-semibold text-xs uppercase">
+                        Complaint
+                      </p>
                       <p className="text-gray-600 mt-2">Order misplaced</p>
                     </div>
                     <div>
-                      <p className="text-gray-700 font-semibold">
+                      <p className="text-gray-700 font-semibold text-xs uppercase">
                         Issue Raised by
                       </p>
-                      <p className="text-sm font-medium mt-2">SJ</p>
+                      <p className="text-gray-600 mt-2">SJ</p>
                     </div>
                     <div>
-                      <p className="text-gray-700 font-semibold">Platform</p>
-                      <p className="text-sm font-medium mt-2">Whatsapp</p>
+                      <p className="text-gray-700 font-semibold text-xs uppercase">
+                        Platform
+                      </p>
+                      <p className="text-gray-600 mt-2">Whatsapp</p>
                     </div>
                   </div>
                 </div>
@@ -734,7 +834,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
             </div>
           )}
 
-          {/* Agent Assist Overlay */}
           <div
             className={`fixed top-0 right-0 h-full w-[400px] bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
               isAgentAssistOpen ? "translate-x-0" : "translate-x-full"
@@ -745,7 +844,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
         </div>
       </div>
 
-      {/* Toggle Button (fixed at bottom-right) */}
       <button
         onClick={() => setIsAgentAssistOpen(!isAgentAssistOpen)}
         style={{
@@ -757,7 +855,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
         className="bottom-4 right-4 z-50 bg-[#eadeff] text-black px-4 py-2 rounded-l-full shadow-lg transition-all duration-300 hover:scale-105"
       >
         <span>
-          <ArrowBackIcon /> Agent Assist
+          {isAgentAssistOpen ? <ArrowForwardIos /> : <ArrowBackIos />}
+          Agent Assist
         </span>
       </button>
     </div>
