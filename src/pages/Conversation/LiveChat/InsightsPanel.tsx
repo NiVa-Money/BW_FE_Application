@@ -35,6 +35,8 @@ const Donut = ({ percentage }: DonutProps) => (
         color: "#65558F",
         backgroundColor: "#eee",
         borderRadius: "50%",
+        boxShadow:
+          "2px 2px 5px rgba(0,0,0,0.1), -2px -2px 5px rgba(255,255,255,0.7)", // 3D effect
       }}
     />
     <Box
@@ -143,7 +145,20 @@ export default function InsightsPanel({
     val === "High" ? 75 : val === "Medium" ? 50 : 25;
 
   return (
-    <Box p={2} overflow="scroll" height="100%">
+    <Box
+      p={2}
+      overflow="scroll"
+      height="100%"
+      sx={{
+        background: "#ffffff",
+        borderRadius: "24px",
+        boxShadow: `
+      0 8px 30px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6)
+    `,
+        transition: "box-shadow 0.3s ease-in-out",
+      }}
+    >
       <Grid container spacing={2} direction="column">
         {/* SUMMARY AND NEXT STEPS */}
         <Grid item>
