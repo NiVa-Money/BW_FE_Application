@@ -424,7 +424,7 @@ export default function InstagramIntegrationList() {
                 <div className="mt-4 flex justify-end">
                   <button
                     onClick={() => handleEdit(integration)}
-                    className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-blue-700 transition-colors"
+                    className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-[#65558F]/90 transition-colors"
                   >
                     <EditIcon /> Edit
                   </button>
