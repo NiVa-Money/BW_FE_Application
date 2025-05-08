@@ -128,7 +128,13 @@ export default function CampaignManager() {
           <h2 className="text-3xl font-bold text-gray-900">Active Campaigns</h2>
           <button
             className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
-            onClick={() => navigate("/marketing/createcampaign")}
+            // onClick={() => navigate("/marketing/createcampaign" )}
+            onClick={() => {
+              console.log(
+                "Add Campaign button clicked, navigating to /marketing/createcampaign"
+              );
+              navigate("/marketing/createcampaign", { replace: true });
+            }}
           >
             <AddIcon /> Add Campaign
           </button>
