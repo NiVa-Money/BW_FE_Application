@@ -207,8 +207,8 @@ const SignUp: React.FC = () => {
   ];
 
   return (
-    <div className="overflow-hidden py-4 pr-20 pl-4 bg-white rounded-none max-md:pr-5">
-      <div className="flex gap-5 max-md:flex-col">
+    <div className="overflow-hidden  bg-white rounded-none max-md:pr-5">
+      <div className="flex gap-5 max-md:flex-col h-[100vh]">
         {/* Left Image Section */}
         <div className="flex flex-col w-[55%] max-md:ml-0 max-md:w-full">
           <img
@@ -217,11 +217,11 @@ const SignUp: React.FC = () => {
             width={500}
             height={300}
             alt="Animated GIF"
-            className="w-full rounded-3xl max-md:mt-10 max-md:max-w-full"
+            className="w-full rounded-3xl max-md:mt-10 h-[100%] py-3 max-md:max-w-full"
           />
         </div>
         {/* Right Content Section */}
-        <div className="flex flex-col ml-5 w-[45%] max-md:ml-0 max-md:w-full">
+        <div className="flex flex-col px-5 overflow-scroll w-[45%] py-3 max-md:ml-0 max-md:w-full">
           <div className="flex flex-col self-stretch my-auto max-md:mt-10 max-md:max-w-full">
             {/* Header */}
             <div className="flex flex-col justify-center w-full max-md:max-w-full">
