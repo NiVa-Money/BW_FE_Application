@@ -211,7 +211,7 @@ export default function WhatsappIntegrationList() {
             Active Whatsapp Integrations
           </h2>
           <button
-            className="bg-[#005C4B] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#005C4B]/90 transition-colors flex items-center gap-2"
+            className="bg-[#65558F] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#65558F]/90 transition-colors flex items-center gap-2"
             onClick={() => navigate("/createintegration")}
           >
             <AddIcon /> Add Integration
@@ -299,7 +299,7 @@ export default function WhatsappIntegrationList() {
                 <div className="mt-4 flex justify-end">
                   <button
                     onClick={() => handleEdit(integration)}
-                    className="text-gray-100 bg-[#005C4B] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-blue-700 transition-colors"
+                    className="text-gray-100 bg-[#65558F] rounded-3xl px-4 py-2 flex items-center gap-2 hover:bg-[#65558F]/90 transition-colors"
                   >
                     <EditIcon /> Edit
                   </button>

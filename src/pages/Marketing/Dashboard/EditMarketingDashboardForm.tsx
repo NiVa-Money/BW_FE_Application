@@ -1,41 +1,10 @@
 import { useState, useEffect } from "react";
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Card,
-  styled,
-  MenuItem,
-} from "@mui/material";
-import {
   fetchCompetitorsService,
   fetchMarketingInsightsService,
   getMarketingInsightsService,
   updateMarketingInsightsService,
 } from "../../../api/services/marketingDashboardService";
-
-// ---------- STYLED COMPONENTS ----------
-const StyledCard = styled(Card)(() => ({
-  maxWidth: "800px",
-  margin: "auto",
-  borderRadius: "16px",
-  boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.05)",
-  overflow: "hidden",
-  backgroundColor: "white",
-}));
-
-const SectionHeader = styled(Box)(() => ({
-  padding: "24px",
-  background: "linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)",
-  color: "white",
-  textAlign: "center",
-  borderBottom: "1px solid rgba(255,255,255,0.2)",
-}));
-
-const FormContainer = styled(Box)(() => ({
-  padding: "24px",
-}));
 
 const countryCodes = {
   AFGHANISTAN: "AF",
@@ -235,8 +204,6 @@ const countryCodes = {
 };
 
 const EditMarketingDashboardForm = () => {
-  // const navigate = useNavigate();
-
   // COMPANY STATE (nested under "company" as per existing data structure)
   const [companyData, setCompanyData] = useState({
     company: {
@@ -283,12 +250,12 @@ const EditMarketingDashboardForm = () => {
     };
   };
 
-  // ---------- COMPANY FIELD HANDLER ----------
+  // COMPANY FIELD HANDLER
   const handleCompanyChange = (fieldPath, value) => {
     setCompanyData((prev) => updateNestedField(prev, fieldPath, value));
   };
 
-  // ---------- COMPETITOR FIELD HANDLER ----------
+  // COMPETITOR FIELD HANDLER
   const handleCompetitorChange = (index, fieldPath, value) => {
     setCompetitorsData((prev) => {
       const newCompetitors = [...prev];
@@ -301,7 +268,7 @@ const EditMarketingDashboardForm = () => {
     });
   };
 
-  // ---------- FETCH EXISTING DATA ON MOUNT ----------
+  // FETCH EXISTING DATA ON MOUNT
   useEffect(() => {
     async function fetchExistingData() {
       setIsLoading(true);
@@ -412,7 +379,7 @@ const EditMarketingDashboardForm = () => {
     ]);
   };
 
-  // ---------- SUBMISSION HANDLER ----------
+  // SUBMISSION HANDLER
   const handleSubmit = async () => {
     setError("");
     setIsLoading(true);
@@ -439,7 +406,6 @@ const EditMarketingDashboardForm = () => {
           .filter((k) => k),
       };
 
-      // If an ID exists, update; otherwise, create new insights
       if (marketingId) {
         const response = await updateMarketingInsightsService(
           marketingId,
@@ -450,13 +416,11 @@ const EditMarketingDashboardForm = () => {
         const response = await fetchMarketingInsightsService(payload);
         console.log("Created new marketing insights:", response);
       }
-      // navigate("/marketing/dashboard");
       window.location.href = "/marketing/dashboard";
     } catch (err) {
       const serverError =
         err?.response?.data?.error || err?.response?.data?.message || "";
       if (serverError.includes("E11000 duplicate key error")) {
-        // navigate("/marketing/dashboard");
         window.location.href = "/marketing/dashboard";
         return;
       }
@@ -474,297 +438,306 @@ const EditMarketingDashboardForm = () => {
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        background: "#f4f6f9",
-        p: 5,
-      }}
-    >
-      <StyledCard>
+    <div className="min-h-screen bg-white flex items-center justify-center p-5">
+      <div className="w-full max-w-6xl rounded-2xl shadow-2xl overflow-hidden">
         {/* Company Details Section */}
-        <SectionHeader>
-          <Typography variant="h5" component="h1">
-            Company Details
-          </Typography>
-        </SectionHeader>
-        <FormContainer>
-          <TextField
-            fullWidth
-            label="Name of the Company"
-            value={companyData.company.name}
-            onChange={(e) =>
-              handleCompanyChange("company.name", e.target.value)
-            }
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Description of your brand"
-            value={companyData.company.description}
-            onChange={(e) =>
-              handleCompanyChange("company.description", e.target.value)
-            }
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Industry"
-            value={companyData.company.industry}
-            onChange={(e) =>
-              handleCompanyChange("company.industry", e.target.value)
-            }
-            sx={{ mb: 2 }}
-          />
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 2,
-              mb: 2,
-            }}
-          >
-            <TextField
-              fullWidth
-              label="Instagram"
-              value={companyData.company.socialLinks.instagram}
-              onChange={(e) =>
-                handleCompanyChange(
-                  "company.socialLinks.instagram",
-                  e.target.value
-                )
-              }
-            />
-            <TextField
-              fullWidth
-              label="Twitter"
-              value={companyData.company.socialLinks.twitter}
-              onChange={(e) =>
-                handleCompanyChange(
-                  "company.socialLinks.twitter",
-                  e.target.value
-                )
-              }
-            />
-            <TextField
-              fullWidth
-              label="LinkedIn"
-              value={companyData.company.socialLinks.linkedin}
-              onChange={(e) =>
-                handleCompanyChange(
-                  "company.socialLinks.linkedin",
-                  e.target.value
-                )
-              }
-            />
-          </Box>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-            <TextField
-              select
-              fullWidth
-              label="Location of the Company"
-              value={companyData.country}
-              onChange={(e) => handleCompanyChange("country", e.target.value)}
-            >
-              {Object.entries(countryCodes).map(([countryName, code]) => (
-                <MenuItem key={code} value={code}>
-                  {countryName} ({code})
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              fullWidth
-              label="Next Update In (Hours)"
+        <div
+          className="h-40 bg-cover bg-center flex items-center justify-center relative"
+          style={{ backgroundImage: "url(/assets/marketing1.svg)" }}
+        ></div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Your Company
+              </label>
+              <input
+                type="text"
+                placeholder="Name of the Company"
+                value={companyData.company.name}
+                onChange={(e) =>
+                  handleCompanyChange("company.name", e.target.value)
+                }
+                className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Description of your company
+              </label>
+              <input
+                type="text"
+                placeholder="enter the geographies where you work and promote your brand"
+                value={companyData.company.description}
+                onChange={(e) =>
+                  handleCompanyChange("company.description", e.target.value)
+                }
+                className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Industry
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your Industry Name"
+                value={companyData.company.industry}
+                onChange={(e) =>
+                  handleCompanyChange("company.industry", e.target.value)
+                }
+                className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Location of the company
+              </label>
+              <select
+                value={companyData.country}
+                onChange={(e) => handleCompanyChange("country", e.target.value)}
+                className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+              >
+                <option value="" disabled>
+                  Select a country
+                </option>
+                {Object.entries(countryCodes).map(([countryName, code]) => (
+                  <option key={code} value={code}>
+                    {countryName} ({code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Next Updates Need In (Hours)
+            </label>
+            <input
               type="number"
               value={companyData.nextUpdateInHours}
               onChange={(e) =>
                 handleCompanyChange("nextUpdateInHours", e.target.value)
               }
+              className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
             />
-          </Box>
-        </FormContainer>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Social Links
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input
+                type="text"
+                placeholder="Facebook"
+                value={companyData.company.socialLinks.linkedin}
+                onChange={(e) =>
+                  handleCompanyChange(
+                    "company.socialLinks.linkedin",
+                    e.target.value
+                  )
+                }
+                className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+              />
+              <input
+                type="text"
+                placeholder="Instagram"
+                value={companyData.company.socialLinks.instagram}
+                onChange={(e) =>
+                  handleCompanyChange(
+                    "company.socialLinks.instagram",
+                    e.target.value
+                  )
+                }
+                className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+              />
+              <input
+                type="text"
+                placeholder="Twitter"
+                value={companyData.company.socialLinks.twitter}
+                onChange={(e) =>
+                  handleCompanyChange(
+                    "company.socialLinks.twitter",
+                    e.target.value
+                  )
+                }
+                className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Competitor Details Section */}
-        <SectionHeader sx={{ background: "#000", backgroundImage: "none" }}>
-          <Typography variant="h5" component="h2">
-            Competitor Details
-          </Typography>
-        </SectionHeader>
-        <Box
-          sx={{
-            p: 3,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Button
-            variant="outlined"
-            onClick={handleAIGenCompetitors}
-            disabled={isLoading}
-            sx={{
-              textTransform: "none",
-              color: "#6a11cb",
-              borderColor: "#6a11cb",
-            }}
-          >
-            Generate Via AI
-          </Button>
-          <Button
-            onClick={addCompetitor}
-            variant="contained"
-            sx={{
-              bgcolor: "#65558F",
-              color: "white",
-              borderRadius: "8px",
-              textTransform: "none",
-            }}
-          >
-            Add Competitor
-          </Button>
-        </Box>
-        <FormContainer>
-          {competitorsData.slice(0, 5).map((comp, index) => (
-            <Box
-              key={index}
-              sx={{ borderBottom: "1px solid #eee", mb: 2, pb: 2 }}
+        <div
+          className="h-40 bg-cover bg-center flex items-center justify-center relative"
+          style={{ backgroundImage: "url(/assets/marketing2.svg)" }}
+        ></div>
+        <div className="p-6">
+          <div className="flex justify-between mb-4">
+            <button
+              onClick={handleAIGenCompetitors}
+              disabled={isLoading}
+              className="px-4 py-2 border border-[#65558F] text-[#65558F] rounded-full"
             >
-              <Typography variant="h6" sx={{ mb: 2 }}>
+              Generate Via AI
+            </button>
+            <button
+              onClick={addCompetitor}
+              className="px-4 py-2 bg-[#65558F] text-white rounded-full"
+            >
+              Add Competitor
+            </button>
+          </div>
+          {competitorsData.slice(0, 5).map((comp, index) => (
+            <div key={index} className="mb-6">
+              <h2 className="text-lg font-semibold mb-2">
                 Competitor {index + 1}
-              </Typography>
-              <TextField
-                fullWidth
-                label="Name of the Competitor Company"
-                value={comp.name}
-                onChange={(e) =>
-                  handleCompetitorChange(index, "name", e.target.value)
-                }
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Description of the Competitor"
-                value={comp.description}
-                onChange={(e) =>
-                  handleCompetitorChange(index, "description", e.target.value)
-                }
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Enter Industry Name"
-                value={comp.industry}
-                onChange={(e) =>
-                  handleCompetitorChange(index, "industry", e.target.value)
-                }
-                sx={{ mb: 2 }}
-              />
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 2,
-                  mb: 2,
-                }}
-              >
-                <TextField
-                  fullWidth
-                  label="LinkedIn"
-                  value={comp.socialLinks.linkedin}
-                  onChange={(e) =>
-                    handleCompetitorChange(
-                      index,
-                      "socialLinks.linkedin",
-                      e.target.value
-                    )
-                  }
-                />
-                <TextField
-                  fullWidth
-                  label="Instagram"
-                  value={comp.socialLinks.instagram}
-                  onChange={(e) =>
-                    handleCompetitorChange(
-                      index,
-                      "socialLinks.instagram",
-                      e.target.value
-                    )
-                  }
-                />
-              </Box>
-              <Box
-                sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}
-              >
-                <TextField
-                  fullWidth
-                  label="Twitter"
-                  value={comp.socialLinks.twitter}
-                  onChange={(e) =>
-                    handleCompetitorChange(
-                      index,
-                      "socialLinks.twitter",
-                      e.target.value
-                    )
-                  }
-                />
-              </Box>
-            </Box>
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Name of the Company
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter your Industry Name"
+                    value={comp.name}
+                    onChange={(e) =>
+                      handleCompetitorChange(index, "name", e.target.value)
+                    }
+                    className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Description of your company
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="enter the geographies where you work and promote your brand"
+                    value={comp.description}
+                    onChange={(e) =>
+                      handleCompetitorChange(
+                        index,
+                        "description",
+                        e.target.value
+                      )
+                    }
+                    className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Industry
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter your Industry Name"
+                    value={comp.industry}
+                    onChange={(e) =>
+                      handleCompetitorChange(index, "industry", e.target.value)
+                    }
+                    className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Social Links
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Facebook"
+                    value={comp.socialLinks.linkedin}
+                    onChange={(e) =>
+                      handleCompetitorChange(
+                        index,
+                        "socialLinks.linkedin",
+                        e.target.value
+                      )
+                    }
+                    className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Instagram"
+                    value={comp.socialLinks.instagram}
+                    onChange={(e) =>
+                      handleCompetitorChange(
+                        index,
+                        "socialLinks.instagram",
+                        e.target.value
+                      )
+                    }
+                    className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Twitter"
+                    value={comp.socialLinks.twitter}
+                    onChange={(e) =>
+                      handleCompetitorChange(
+                        index,
+                        "socialLinks.twitter",
+                        e.target.value
+                      )
+                    }
+                    className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+                  />
+                </div>
+              </div>
+            </div>
           ))}
-          <Box>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Marketing Keywords
-            </Typography>
-            <TextField
-              fullWidth
-              label="News Keywords"
-              value={newsKeywords}
-              onChange={(e) => setNewsKeywords(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Trends Keywords (comma separated)"
-              value={trendsKeywords}
-              onChange={(e) => setTrendsKeywords(e.target.value)}
-            />
-          </Box>
-        </FormContainer>
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Marketing Keywords</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">
+                  New Keywords
+                </label>
+                <input
+                  type="text"
+                  placeholder="New Keywords"
+                  value={newsKeywords}
+                  onChange={(e) => setNewsKeywords(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Trendy Keywords
+                </label>
+                <input
+                  type="text"
+                  placeholder="Trendy Keywords"
+                  value={trendsKeywords}
+                  onChange={(e) => setTrendsKeywords(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-gray-100 border-none focus:outline-none focus:ring-1 focus:ring-[#65558F]"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Footer Submission */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            p: 2,
-            borderTop: "1px solid #e0e0e0",
-          }}
-        >
-          <Button
-            variant="contained"
+        <div className="p-4 flex justify-end items-center">
+          <button
             onClick={handleSubmit}
             disabled={isLoading}
-            sx={{
-              textTransform: "none",
-              borderRadius: "8px",
-              bgcolor: "#65558F",
-              color: "white",
-            }}
+            className="px-4 py-2 bg-[#65558F] text-white rounded-full"
           >
             Submit
-          </Button>
-        </Box>
-        {error && (
-          <Typography color="error" sx={{ textAlign: "center", p: 2 }}>
-            {error}
-          </Typography>
-        )}
-      </StyledCard>
-    </Box>
+          </button>
+        </div>
+        {error && <p className="text-red-500 text-center p-2">{error}</p>}
+      </div>
+    </div>
   );
 };
 
 export default EditMarketingDashboardForm;
-
