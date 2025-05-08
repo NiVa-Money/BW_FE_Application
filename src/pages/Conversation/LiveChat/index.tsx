@@ -32,6 +32,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const socket = useRef<Socket | null>(null);
   const dispatch = useDispatch();
   const fileInputRef = useRef<HTMLInputElement>(null); // Add ref to reset file input
+  const messagesContainerRef = useRef<HTMLDivElement>(null); // Add ref for messages container
 
   // ---------- State ----------
   const [isAgentAssistOpen, setIsAgentAssistOpen] = useState(true);
@@ -364,7 +365,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log("Uploading file:", file); // Add this line to log the file object
 
     if (!file) {
       setError("No file selected");
@@ -509,9 +509,9 @@ const LiveChat: React.FC = (): React.ReactElement => {
               />
             </div>
 
-            <div className="overflow-y-auto w-full max-h-[60vh]">
-              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md p-4">
-                <div className="flex justify-between items-start mb-4">
+            <div className="w-full">
+              <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg shadow-md flex flex-col h-[75vh]">
+                <div className="flex justify-between items-center p-4 border-b border-gray-200">
                   {messages?.length > 0 && (
                     <button
                       className="self-end bg-[#65558F] text-white p-1 w-[140px] rounded-[100px]"
@@ -522,7 +522,10 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   )}
                 </div>
 
-                <div className="overflow-y-auto max-h-[60vh]">
+                <div
+                  ref={messagesContainerRef}
+                  className="flex-1 overflow-y-auto p-4 bg-gray-50"
+                >
                   {messages?.map((msg: any, index: number) => (
                     <div key={index} className="flex flex-col space-y-0">
                       {msg?.question && (
@@ -607,8 +610,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   ))}
                 </div>
 
-                <div className="flex justify-between items-start mt-10 mb-2 gap-6">
-                  <div className="flex flex-col mt-10 gap-2">
+                <div className="p-2 bg-gray-50 border-t border-gray-200">
+                  <div className="flex flex-wrap gap-2">
                     {suggestedResponses.map((response, index) => (
                       <button
                         key={index}
@@ -621,8 +624,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   </div>
                 </div>
 
-                <div className="relative flex flex-col gap-4 px-6 py-5 mt-0 w-full max-w-full bg-[#65558F] bg-opacity-[0.06] rounded-2xl shadow-md text-white">
-                  <div className="flex justify-end">
+                <div className="p-4 bg-gray-100 border-t border-gray-200">
+                  <div className="flex justify-end mb-3">
                     <button
                       onClick={handleToggleChat}
                       className={`px-5 py-2 rounded-full font-semibold text-sm transition-all ${
@@ -660,7 +663,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
                   )}
 
                   {isChatEnabled && (
-                    <form onSubmit={sendMessage} className="mt-4">
+                    <form onSubmit={sendMessage} className="relative">
                       <div className="flex items-center gap-2 p-3 rounded-full bg-white/10 border border-white/20">
                         <input
                           type="text"

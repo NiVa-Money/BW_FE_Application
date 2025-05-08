@@ -67,9 +67,9 @@ const DashboardCard = ({
 );
 
 const MarketingDashboard = () => {
-  const [_loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
-  const [showWhatsappDash, _setShowWhatsappDash] = useState(false);
+  const [showWhatsappDash] = useState(false);
   const navigate = useNavigate();
   const [insightsData, setInsightsData] = useState<any>(null);
   const [allNewscurrentPage, setAllNewsCurrentPage] = useState(0);

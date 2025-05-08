@@ -2346,13 +2346,13 @@ const AllChats = () => {
           variant="contained"
           sx={{
             borderRadius: "9999px",
-            backgroundColor: "#6B7280",
+            backgroundColor: "#65558F",
             color: "#fff",
             px: 4,
             py: 2,
             fontWeight: "500",
             "&:hover": {
-              backgroundColor: "#4B5563",
+              backgroundColor: "rgba(101, 85, 143, 0.9)",
             },
           }}
         >

@@ -35,7 +35,7 @@ const Login = () => {
       try {
         const response = await LoginUserService({ email, password });
         if (response.success) {
-          localStorage.setItem("user_id", response.user_id); 
+          localStorage.setItem("user_id", response.user_id);
           localStorage.setItem("orgId", response.orgId);
           localStorage.setItem("token", response.token);
           localStorage.setItem(
@@ -166,8 +166,8 @@ const Login = () => {
 
   return (
     <>
-      <div className="overflow-hidden py-4 pr-4 pl-20 bg-white rounded-none max-md:pl-5">
-        <div className="flex gap-5 max-md:flex-col">
+      <div className="overflow-hidden  bg-white rounded-none">
+        <div className="flex gap-5 max-md:flex-col h-[100vh]">
           {/* Left Section */}
           <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full">
             <div className="flex flex-col items-center self-stretch my-auto h-[758px] max-md:mt-10 max-md:max-w-full">
@@ -195,7 +195,7 @@ const Login = () => {
 
                 {/* Google Login */}
                 <div
-                  className="flex items-center justify-center gap-2 mt-6 px-4 py-2 bg-neutral-800 text-white rounded-full cursor-pointer"
+                  className="flex items-center justify-center gap-2 mt-6 p-4 bg-neutral-800 text-white rounded-full cursor-pointer"
                   onClick={handleGoogleLogin}
                 >
                   <img
@@ -302,14 +302,12 @@ const Login = () => {
 
           {/* Right Section */}
 
-          <div className="flex flex-col ml-5 w-[55%] max-md:ml-0 max-md:w-full">
+          <div className="flex flex-col w-[50%] h-[100%] tems-center justify-center max-md:ml-0 max-md:w-full">
             <img
               loading="lazy"
-               src="/assets/login.gif"
-              width={500}
-              height={300}
+              src="/assets/login.gif"
               alt="Animated GIF"
-              className="w-full rounded-3xl max-md:mt-10 max-md:max-w-full"
+              className="object-contain max-w-[100%] max-h-[95%] rounded-3xl mx-auto"
             />
           </div>
         </div>

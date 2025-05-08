@@ -48,7 +48,7 @@ const EditWhatsappCampaign: React.FC = () => {
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const [scheduleTime, setScheduleTime] = useState<Date | null>(null);
   const [showTemplate, setShowTemplate] = useState<boolean>(false);
-  const [_fileName, setFileName] = useState("");
+  const [, setFileName] = useState("");
   // const [customizeScreen, setCustomizeScreen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
@@ -420,8 +420,7 @@ const EditWhatsappCampaign: React.FC = () => {
               <div className="leading-snug">Upload The Contact List *</div>
               <div className="mt-2 leading-6 text-zinc-500">
                 Upload the contact list you wish to target with your campaigns
-                on WhatsApp. The CSV file should only include the following
-                columns: name, number, and country code.
+                on WhatsApp.
                 <br />
                 <strong>Only CSV files are allowed.</strong>
               </div>
