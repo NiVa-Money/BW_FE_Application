@@ -134,7 +134,7 @@ const Login = () => {
                   } else {
                     setError(
                       response.message ||
-                      "Google login failed. Please try again."
+                        "Google login failed. Please try again."
                     );
                   }
                 } catch (error) {
@@ -195,7 +195,7 @@ const Login = () => {
 
                 {/* Google Login */}
                 <div
-                  className="flex items-center justify-center gap-2 mt-6 px-4 py-2 bg-neutral-800 text-white rounded-full cursor-pointer"
+                  className="flex items-center justify-center gap-2 mt-6 p-4 bg-neutral-800 text-white rounded-full cursor-pointer"
                   onClick={handleGoogleLogin}
                 >
                   <img
@@ -302,14 +302,12 @@ const Login = () => {
 
           {/* Right Section */}
 
-          <div className="flex flex-col mx-5 w-[55%] py-3 h-[100%] tems-center justify-center max-md:ml-0 max-md:w-full">
+          <div className="flex flex-col w-[50%] h-[100%] tems-center justify-center max-md:ml-0 max-md:w-full">
             <img
               loading="lazy"
               src="/assets/login.gif"
-              width={500}
-              height={300}
               alt="Animated GIF"
-              className="w-full rounded-3xl max-md:mt-10 h-[100%] max-md:max-w-full"
+              className="object-contain max-w-[100%] max-h-[95%] rounded-3xl mx-auto"
             />
           </div>
         </div>
