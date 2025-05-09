@@ -178,16 +178,16 @@ const Login = () => {
                     <a href="https://botwot.io" className="cursor-pointer">
                       <img
                         loading="lazy"
-                        src="/assets/logo.svg"
+                        src="/assets/botwotLogo.svg"
                         alt="BotWot Logo"
-                        className="object-contain shrink-0 self-stretch my-auto w-[300px]"
+                        className="object-contain shrink-0 self-stretch my-auto w-[250px]"
                       />
                     </a>
                   </div>
                 </div>
 
                 {/* Welcome Text */}
-                <div className="mt-6 text-5xl font-bold text-neutral-800">
+                <div className="mt-6 text-4xl font-bold text-neutral-800 items-center text-center">
                   Welcome to
                   <br />
                   Future of iCX
@@ -195,7 +195,7 @@ const Login = () => {
 
                 {/* Google Login */}
                 <div
-                  className="flex items-center justify-center gap-2 mt-6 p-4 bg-neutral-800 text-white rounded-full cursor-pointer"
+                  className="flex items-center justify-center gap-2 mt-6 p-3 bg-gray-200 border-8 border-gray-300 hover:bg-gray-300 text-black rounded-full cursor-pointer w-96 mx-auto"
                   onClick={handleGoogleLogin}
                 >
                   <img
@@ -219,7 +219,7 @@ const Login = () => {
                 onSubmit={handleSubmit}
                 className="flex flex-col justify-center max-w-full w-[600px]"
               >
-                <div className="flex relative flex-col w-full text-base leading-snug text-black max-md:max-w-full">
+                <div className="flex flex-col justify-center text-black self-center max-w-full w-96 mx-auto ">
                   {/* Input Fields */}
                   <div className="flex flex-col justify-center text-black self-center max-w-full w-[600px]">
                     {[
@@ -240,7 +240,7 @@ const Login = () => {
                     ].map((field, index) => (
                       <div
                         key={index}
-                        className="flex gap-2.5 items-center px-8 py-4 mt-7 w-full bg-neutral-100 text-black rounded-[128px] max-md:px-5 max-md:max-w-full"
+                        className="relative flex gap-2.5 items-center px-6 py-2 mt-7 w-full bg-neutral-100 text-black rounded-[128px] max-md:px-5 max-md:max-w-full"
                       >
                         <img
                           loading="lazy"
@@ -255,7 +255,7 @@ const Login = () => {
                           placeholder={field.placeholder}
                           value={field.value}
                           onChange={(e) => field.onChange(e.target.value)}
-                          className="w-full bg-transparent outline-none relative"
+                          className="w-full bg-transparent outline-none border-0 relative focus:outline-none focus:ring-0"
                         />
                         {field.isPassword && (
                           <button
@@ -283,7 +283,7 @@ const Login = () => {
                   <div className="flex flex-col items-center self-center mt-16 w-full max-w-[600px] min-h-[323px] max-md:mt-10 max-md:max-w-full">
                     <button
                       type="submit"
-                      className="gap-2.5 self-stretch px-2.5 py-4 w-full text-xl text-white rounded-full bg-neutral-800 min-h-[63px]"
+                      className="gap-2.5 self-stretch px-2.5 py-2 w-full text-xl text-white rounded-full bg-neutral-800 min-h-[55px]"
                       disabled={isLoading}
                     >
                       {isLoading ? "Logging in..." : "Log in"}
@@ -292,7 +292,9 @@ const Login = () => {
                       <span className="leading-6 text-black">
                         Don't have an account?{" "}
                       </span>
-                      <Link to="/Signup">Sign Up</Link>
+                      <Link to="/Signup" style={{ color: "#65558F" }}>
+                        Sign Up
+                      </Link>
                     </div>
                   </div>
                 </div>
