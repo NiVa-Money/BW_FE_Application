@@ -16,15 +16,18 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import HelpIcon from "@mui/icons-material/Help";
 import SettingsIcon from "@mui/icons-material/Settings";
-import CallIcon from '@mui/icons-material/Call';
-import MicIcon from '@mui/icons-material/Mic';
+import CallIcon from "@mui/icons-material/Call";
+import MicIcon from "@mui/icons-material/Mic";
+import LogoutIcon from "@mui/icons-material/Logout";
+
 const filterMenuItems = (items: any[], allowedIds: string | any[]) =>
   items?.reduce((acc: any[], item: { subItems: any[]; id: any }) => {
-    // If the item has subItems, filter them
+    // If the item has subItems, filter them - but always keep logout item
     const subItems = item.subItems
-      ? item.subItems.filter((subItem: { id: any }) =>
-        allowedIds?.includes(subItem.id)
-      )
+      ? item.subItems.filter(
+          (subItem: { id: any; isLogout: boolean }) =>
+            subItem.isLogout || allowedIds?.includes(subItem.id)
+        )
       : null;
 
     // Include the item if its ID or any subItem's ID is in allowedIds
@@ -37,7 +40,8 @@ const filterMenuItems = (items: any[], allowedIds: string | any[]) =>
 
     return acc;
   }, []);
-export const sidebarNavLinks = (moduleMapping: []) => {
+
+export const sidebarNavLinks = (moduleMapping: [] | null) => {
   const menuItems = [
     { id: 1, text: "Dashboard", icon: <HomeIcon />, path: "/dashboard" },
     {
@@ -120,7 +124,7 @@ export const sidebarNavLinks = (moduleMapping: []) => {
           path: "/voice/dashboard",
           icon: <CampaignIcon />,
         },
-      ]
+      ],
     },
     { id: 7, text: "Workflow", icon: <AccountTreeIcon />, path: "/workflow" },
     { id: 8, text: "Reports", icon: <AssessmentIcon />, path: "/reports" },
@@ -137,7 +141,6 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       path: "/integrations",
     },
     { id: 11, text: "Help Center", icon: <HelpIcon />, path: "/help-center" },
-
     {
       id: 12,
       text: "Settings",
@@ -145,10 +148,16 @@ export const sidebarNavLinks = (moduleMapping: []) => {
       path: "/settings",
       subItems: [
         {
-          id: 12,
+          id: 12.1,
           text: "User Management",
           path: "/user-management",
           icon: <ManageAccountsOutlinedIcon />,
+        },
+        {
+          id: 12.2,
+          text: "Log Out",
+          icon: <LogoutIcon />,
+          isLogout: true, // custom flag to identify logout item
         },
       ],
     },
