@@ -1,3 +1,6 @@
+
+
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { FC, useState, useEffect, Key } from "react";
@@ -32,6 +35,7 @@ import {
   Send,
   MarkEmailUnread,
   TrendingUp,
+  People,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
@@ -75,8 +79,8 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [deliveredMessagesValue, setDeliveredMessagesValue] = useState(0);
   const [unreadMessagesValue, setUnreadMessagesValue] = useState(0);
   const [hotLeadsValue, setHotLeadsValue] = useState(0);
+  const [totalContactsValue, setTotalContactsValue] = useState(0);
   const [responseChartData, setResponseChartData] = useState([]);
-  // const [engagementRate, setEngagementRate] = useState<string | null>(null);
   const [, setResponse] = useState<any>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -126,7 +130,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
     if (campaignData && campaignData.length > 0 && !campaign) {
       const firstCampaign = campaignData[0].campaignName;
       setCampaign(firstCampaign);
-      // Set dates based on first campaign
       const campaignDetails = campaignData.find(
         (c) => c.campaignName === firstCampaign
       );
@@ -217,11 +220,13 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           formattedStartDate,
           formattedEndDate
         );
-        console.log("API Response:", data); // Log the API response
+        console.log("API Response:", data);
         if (data && data.success) {
           setResponse(data);
-          const { sent, delivered, read, replied, failed } = data.data;
+          const { totalContacts, sent, delivered, read, replied, failed } =
+            data.data;
 
+          setTotalContactsValue(totalContacts || 0);
           setTotalMessagesValue(sent || 0);
           setSeenMessagesValue(read || 0);
           setDeliveredMessagesValue(delivered || 0);
@@ -254,13 +259,11 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
 
     const { performanceAnalytics } = insights.campaignInsights;
 
-    // Check if totalMessagesSent is greater than 0
     if (performanceAnalytics.totalMessagesSent <= 0) {
       console.warn("No data available for this campaign");
-      return []; // Return an empty array if no data is available
+      return [];
     }
 
-    // Map the performance analytics data to chart format
     const chartData = [
       {
         name: "Response",
@@ -324,10 +327,50 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
 
   return (
     <div className="p-6">
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-4">
+      <div className="mb-6">
+        <div className="flex flex-col gap-2 max-w-full">
+          <FormControl variant="outlined" className="w-full">
+            <InputLabel className="text-[#65558F]">Campaign Name</InputLabel>
+            <Select
+              value={campaign}
+              onChange={handleCampaignChange}
+              label="Campaign Name"
+              className="bg-white border border-[#65558F] rounded-full text-sm"
+            >
+              {campaignData?.map((campaignItem, index) => (
+                <MenuItem key={index} value={campaignItem.campaignName}>
+                  {campaignItem.campaignName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <CustomDatePicker
+            label="Start Date"
+            value={startDate}
+            onChange={handleStartDateChange}
+            minDate={minDate}
+            maxDate={maxDate}
+            placeholder="Select start date"
+          />
+          <CustomDatePicker
+            label="End Date"
+            value={endDate}
+            onChange={handleEndDateChange}
+            minDate={minDate}
+            maxDate={maxDate}
+            placeholder="Select end date"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
         <StatsCard
-          title="Total Send Messages"
+          title="Total Contacts"
+          value={totalContactsValue}
+          icon={<People />}
+        />
+        <StatsCard
+          title="Send Messages"
           value={totalMessagesValue}
           icon={<Send />}
         />
@@ -342,7 +385,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           icon={<Message />}
         />
         <StatsCard
-          title="Not Delivered Messages"
+          title="Failed to Deliver Messages"
           value={unreadMessagesValue}
           icon={<MarkEmailUnread />}
         />
@@ -350,7 +393,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           title="Hot Leads"
           value={hotLeadsValue}
           icon={<TrendingUp />}
-          onClick={handleOpenModal} // Make the card clickable
+          onClick={handleOpenModal}
         />
         <Dialog
           open={isModalOpen}
@@ -399,45 +442,9 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             </Button>
           </DialogActions>
         </Dialog>
-
-        <div className="flex flex-col gap-2">
-          <FormControl variant="outlined" className="w-full">
-            <InputLabel className="text-[#65558F]">Campaign Name</InputLabel>
-            <Select
-              value={campaign}
-              onChange={handleCampaignChange}
-              label="Campaign Name"
-              className="bg-white border border-[#65558F] rounded-full text-sm"
-            >
-              {campaignData?.map((campaignItem, index) => (
-                <MenuItem key={index} value={campaignItem.campaignName}>
-                  {campaignItem.campaignName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <CustomDatePicker
-            label="Start Date"
-            value={startDate}
-            onChange={handleStartDateChange}
-            minDate={minDate}
-            maxDate={maxDate}
-            placeholder="Select start date"
-          />
-          <CustomDatePicker
-            label="End Date"
-            value={endDate}
-            onChange={handleEndDateChange}
-            minDate={minDate}
-            maxDate={maxDate}
-            placeholder="Select end date"
-          />
-        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4"> 
-        {/* Response Rate Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
@@ -546,7 +553,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           </ChartCard>
         </div>
 
-        {/* Campaign Section */}
         <div className="space-y-4">
           <div className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
@@ -561,7 +567,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             </div>
           </div>
 
-          {/* Text Insights */}
           <div
             className="bg-[rgba(101,85,143,0.08)] p-4 rounded-xl"
             style={{ height: "450px", overflowY: "auto" }}
@@ -763,61 +768,6 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
         </div>
       </div>
 
-      {/*     
-      <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
-        <CampaignStatsCard
-          activeCampaigns={3}
-          scheduledCampaigns={2}
-          messagesSent={150}
-          scheduledNames={
-            Array.isArray(campaignData)
-              ? campaignData
-                  .filter((c) => new Date(c.startDate) > new Date())
-                  .map((c) => c.campaignName)
-              : []
-          }
-          sentMessages={hotLeads.map((m) => ({
-            id: m.id,
-            content: m.text,
-          }))}
-          stepStats={[
-            {
-              stepName: "Step1",
-              sent: 50,
-              read: 45,
-              delivered: 48,
-              failed: 2,
-              intentAnalysis: 10,
-            },
-            {
-              stepName: "Step2",
-              sent: 50,
-              read: 48,
-              delivered: 50,
-              failed: 0,
-              intentAnalysis: 12,
-            },
-            {
-              stepName: "Step3",
-              sent: 50,
-              read: 50,
-              delivered: 50,
-              failed: 0,
-              intentAnalysis: 8,
-            },
-            {
-              stepName: "Finish",
-              sent: 0,
-              read: 0,
-              delivered: 0,
-              failed: 0,
-              intentAnalysis: 0,
-            },
-          ]}
-        />
-      </div> */}
-
-      {/* Contact Insights Table */}
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Contact Insights</h3>
@@ -1048,7 +998,6 @@ const StatsCard: FC<StatsCardProps> = ({ icon, title, value, onClick }) => (
     }`}
     onClick={onClick}
   >
-    {" "}
     <div className="flex items-center gap-2">
       <div className="text-[#65558F]">{icon}</div>
       <p className="text-base text-[#65558F]">{title}</p>
