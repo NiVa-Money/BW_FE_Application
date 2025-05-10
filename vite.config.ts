@@ -17,6 +17,9 @@ export default defineConfig({
     watch: {
       ignored: ["**/.git/**"],
     },
+    hmr: {
+      overlay: false, 
+    },
   },
   css: {
     postcss: {
