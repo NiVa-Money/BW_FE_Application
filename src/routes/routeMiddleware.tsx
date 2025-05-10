@@ -38,18 +38,28 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
     [key: number]: boolean;
   }>({});
   const [menuItems, setMenuItems] = useState<any>([]);
+
   const handleSubItemsToggle = (id: number) => {
     setOpenDropdown((prev) => ({ ...prev, [id]: !prev[id] }));
     handleToggle();
   };
 
   const handleToggle = () => {
-    // To handle anything on click of sidaebar sub items
+    // To handle anything on click of sidebar sub items
   };
-  // const navigate = useNavigate();
+
+  // Function to handle logout
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "https://botwot.io";
+  };
+
   const toggleSidebar = () => setOpen(!open);
   const userData = localStorage.getItem("userData") || JSON.stringify({});
-  const moduleMapping = JSON.parse(userData).moduleMap;
+  const moduleMapping =
+    userData && JSON.parse(userData).moduleMap
+      ? JSON.parse(userData).moduleMap
+      : [];
   const location = useLocation();
   const pathname: string = location?.pathname;
   const userId = localStorage.getItem("user_id"); // Get user_id from localStorage
@@ -73,8 +83,8 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
     return (
       <Link to="/dashboard">
         <img
-          className="w-8 h-8"
-          src="/assets/botwot_favicon.svg"
+          className="w-[180px] h-[40px] object-contain"
+          src="/assets/botwotLogo.svg"
           alt="Botwot"
         />
       </Link>
@@ -115,11 +125,6 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                 )}
               </Box>
             </CustomTooltip>
-            {open && (
-              <a href="https://botwot.io" onClick={() => localStorage.clear()}>
-                Log Out
-              </a>
-            )}
           </div>
 
           {/* Scrollable Content */}
@@ -194,14 +199,17 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                         {item.subItems.map((subItem: any) => (
                           <ListItem
                             key={subItem.id}
-                            component={NavLink}
-                            to={subItem.path}
-                            onClick={handleToggle}
+                            component={subItem.isLogout ? "div" : NavLink}
+                            to={!subItem.isLogout ? subItem.path : undefined}
+                            onClick={
+                              subItem.isLogout ? handleLogout : handleToggle
+                            }
                             sx={{
                               pl: open ? 4 : "auto",
                               minHeight: 48,
                               justifyContent: open ? "initial" : "center",
                               py: 0.25,
+                              cursor: "pointer", // Add cursor pointer for all items including logout
                               "&.active": {
                                 backgroundColor: COLORS.LIGHTGRAY,
                                 "& .MuiListItemIcon-root": {
@@ -251,6 +259,8 @@ const RouteMiddleware: React.FC<AuthMiddlewareProps> = ({
                   <Divider />
                 </React.Fragment>
               ))}
+
+              {/* Removed the standalone logout item that was here */}
             </List>
           </div>
         </Drawer>
