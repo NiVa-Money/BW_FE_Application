@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -6,6 +5,8 @@ import {
   verifyOtpUserService,
 } from "../../api/services/authServices";
 import OtpModal from "./otpModal";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 interface FormData {
   firstName: string;
@@ -28,13 +29,6 @@ interface SignUpResponse {
   message?: string;
 }
 
-interface FieldConfig {
-  name: keyof FormData;
-  placeholder: string;
-  imgSrc: string;
-  type: string;
-}
-
 const SignUp: React.FC = () => {
   const [isOtpModalOpen, setOtpModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -50,6 +44,7 @@ const SignUp: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [otp, setOtp] = useState<string>("");
   const [saveDataEmail, setSaveDataEmail] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateField = (name: keyof FormData, value: string): string => {
     switch (name) {
@@ -142,7 +137,7 @@ const SignUp: React.FC = () => {
             "Signup failed. Please try again."
         );
       }
-    } catch (error: any) {
+    } catch (error) {
       const errorMsg =
         error?.response?.data?.error || "An error occurred. Please try again.";
       setErrorMessage(errorMsg);
@@ -172,41 +167,29 @@ const SignUp: React.FC = () => {
     }
   };
 
-  const fields: FieldConfig[] = [
-    {
-      name: "firstName",
-      placeholder: "Enter your first name",
-      imgSrc: "/assets/key_icon.svg",
-      type: "text",
-    },
-    {
-      name: "lastName",
-      placeholder: "Enter your last name",
-      imgSrc: "/assets/key_icon.svg",
-      type: "text",
-    },
-    {
-      name: "email",
-      placeholder: "Enter your email",
-      imgSrc: "/assets/mail_icon.svg",
-      type: "email",
-    },
-    {
-      name: "phone",
-      placeholder: "Enter your phone no",
-      imgSrc: "/assets/mobile_icon.svg",
-      type: "tel",
-    },
-    {
-      name: "password",
-      placeholder: "Enter your password",
-      imgSrc: "/assets/key_icon.svg",
-      type: "password",
-    },
-  ];
+  const emailField = {
+    name: "email",
+    placeholder: "Enter your email",
+    imgSrc: "/assets/mail_icon.svg",
+    type: "email",
+  };
+
+  const phoneField = {
+    name: "phone",
+    placeholder: "Enter your phone no",
+    imgSrc: "/assets/mobile_icon.svg",
+    type: "tel",
+  };
+
+  const passwordField = {
+    name: "password",
+    placeholder: "Enter your password",
+    imgSrc: "/assets/key_icon.svg",
+    type: showPassword ? "text" : "password", // Fixed: Toggle between text and password
+  };
 
   return (
-    <div className="overflow-hidden  bg-white rounded-none max-md:pr-5">
+    <div className="overflow-hidden bg-white rounded-none max-md:pr-5">
       <div className="flex max-md:flex-col h-[100vh]">
         {/* Left Image Section */}
         <div className="flex flex-col mx-5 w-[50%] h-[100%] tems-center justify-center max-md:ml-0 max-md:w-full">
@@ -217,64 +200,158 @@ const SignUp: React.FC = () => {
             className="object-contain max-w-[100%] max-h-[95%] rounded-3xl mx-auto"
           />
         </div>
+
         {/* Right Content Section */}
-        <div className="flex flex-col px-5 overflow-scroll w-[45%] py-3 max-md:ml-0 max-md:w-full">
-          <div className="flex flex-col self-stretch my-auto max-md:mt-10 max-md:max-w-full">
-            {/* Header */}
-            <div className="flex flex-col justify-center w-full max-md:max-w-full">
-              <div className="flex z-0 flex-col justify-center items-start w-full ">
-                <div className="flex gap-4 justify-center items-center">
-                  <a href="https://botwot.io" className="cursor-pointer">
-                    <img
-                      loading="lazy"
-                      src="/assets/logo.svg"
-                      alt="BotWot Logo"
-                      className="object-contain shrink-0 self-stretch my-auto w-[300px]"
-                    />
-                  </a>
-                </div>
-              </div>
-              <div className="mt-6 text-xl font-medium text-zinc-600">
-                Create Account
-              </div>
-              <div className="mt-6 text-5xl font-bold text-neutral-800 max-md:max-w-full">
+        <div className="w-1/2 max-md:w-full flex flex-col justify-center px-16 max-md:px-6">
+          <div className="max-w-md mx-auto w-full">
+            {/* Logo */}
+            <div className="flex gap-4">
+              <a href="https://botwot.io" className="cursor-pointer">
+                <img
+                  loading="lazy"
+                  src="/assets/botwotLogo.svg"
+                  alt="BotWot Logo"
+                  className="object-contain shrink-0 self-stretch my-auto w-[250px]"
+                />
+              </a>
+            </div>
+
+            {/* Heading */}
+            <div className="mb-10">
+              <h1 className="mt-6 text-4xl font-bold text-neutral-800 items-center text-center">
                 Welcome to
                 <br />
                 Future of ICX
-              </div>
+              </h1>
             </div>
-            {/* Input Fields */}
-            <form
-              onSubmit={handleSubmit}
-              className="flex flex-col justify-center text-black self-center rounded-[128px] max-w-full w-[600px]"
-            >
-              {fields.map((field, index) => (
-                <div key={index} className="relative">
-                  <div className="flex gap-2.5 items-center px-8 py-4 mt-7 w-full bg-neutral-100 text-black rounded-[128px] max-md:px-5 max-md:max-w-full">
-                    <img
-                      loading="lazy"
-                      src={field.imgSrc}
-                      alt="Input Icon"
-                      width={20}
-                      height={20}
-                      className="object-contain shrink-0 self-stretch my-auto w-6 aspect-[1.04]"
-                    />
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="w-full">
+              {/* First Name and Last Name in one line */}
+              <div className="flex gap-4 mb-6">
+                <div className="flex-1 relative">
+                  <div className="flex items-center gap-2 px-6 py-4 bg-gray-100 rounded-full">
                     <input
-                      type={field.type}
-                      name={field.name}
-                      placeholder={field.placeholder}
-                      value={formData[field.name]}
+                      type="text"
+                      name="firstName"
+                      placeholder="First name"
+                      value={formData.firstName}
                       onChange={handleInputChange}
-                      className="w-full bg-transparent outline-none"
+                      className="w-full bg-transparent outline-none border-0 focus:outline-none focus:ring-0"
                     />
                   </div>
-                  {errors[field.name] && (
+                  {errors.firstName && (
                     <div className="text-red-500 text-sm mt-1 ml-4">
-                      {errors[field.name]}
+                      {errors.firstName}
                     </div>
                   )}
                 </div>
-              ))}
+                <div className="flex-1 relative">
+                  <div className="flex items-center gap-2 px-6 py-4 bg-gray-100 rounded-full">
+                    <input
+                      type="text"
+                      name="lastName"
+                      placeholder="Last name"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent outline-none border-0 focus:outline-none focus:ring-0"
+                    />
+                  </div>
+                  {errors.lastName && (
+                    <div className="text-red-500 text-sm mt-1 ml-4">
+                      {errors.lastName}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Email Field */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 px-6 py-4 bg-gray-100 rounded-full">
+                  <img
+                    loading="lazy"
+                    src={emailField.imgSrc}
+                    alt="Input Icon"
+                    width={20}
+                    height={20}
+                    className="object-contain shrink-0 self-stretch my-auto w-5 aspect-[1.04]"
+                  />
+                  <input
+                    type={emailField.type}
+                    name={emailField.name}
+                    placeholder={emailField.placeholder}
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full bg-transparent outline-none border-0 focus:outline-none focus:ring-0"
+                  />
+                </div>
+                {errors.email && (
+                  <div className="text-red-500 text-sm mt-1 ml-4">
+                    {errors.email}
+                  </div>
+                )}
+              </div>
+
+              {/* Phone Field */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 px-6 py-4 bg-gray-100 rounded-full">
+                  <img
+                    loading="lazy"
+                    src={phoneField.imgSrc}
+                    alt="Input Icon"
+                    width={20}
+                    height={20}
+                    className="object-contain shrink-0 self-stretch my-auto w-5 aspect-[1.04]"
+                  />
+                  <input
+                    type={phoneField.type}
+                    name={phoneField.name}
+                    placeholder={phoneField.placeholder}
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full bg-transparent outline-none border-0 focus:outline-none focus:ring-0"
+                  />
+                </div>
+                {errors.phone && (
+                  <div className="text-red-500 text-sm mt-1 ml-4">
+                    {errors.phone}
+                  </div>
+                )}
+              </div>
+
+              {/* Password Field - Fixed positioning for visibility toggle */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 px-6 py-4 bg-gray-100 rounded-full relative">
+                  <img
+                    loading="lazy"
+                    src={passwordField.imgSrc}
+                    alt="Input Icon"
+                    width={20}
+                    height={20}
+                    className="object-contain shrink-0 self-stretch my-auto w-5 aspect-[1.04]"
+                  />
+                  <input
+                    type={passwordField.type}
+                    name="password"
+                    placeholder={passwordField.placeholder}
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="w-full bg-transparent outline-none border-0 focus:outline-none focus:ring-0"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="text-gray-500 hover:text-gray-700 absolute right-6"
+                  >
+                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <div className="text-red-500 text-sm mt-1 ml-4">
+                    {errors.password}
+                  </div>
+                )}
+              </div>
 
               {errorMessage && (
                 <div className="text-red-500 text-sm mt-4 text-center">
@@ -283,29 +360,35 @@ const SignUp: React.FC = () => {
               )}
 
               {/* Sign-Up Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="gap-2.5 self-stretch mt-8 px-2.5 py-4 w-full text-xl text-white whitespace-nowrap rounded-full bg-neutral-800 min-h-[63px] disabled:opacity-50"
-              >
-                {isSubmitting ? "Signing Up..." : "Sign-Up"}
-              </button>
-            </form>
-            {/* Footer */}
-            <div className="mt-4 text-base text-center font-medium text-black">
-              - OR -
-            </div>
-            <div className="flex gap-1 justify-center items-start mt-2 text-lg">
-              <div className="text-center text-black">
-                Already have an account?
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-3/4 mt-4 py-4 bg-neutral-800 text-white text-xl font-medium rounded-full disabled:opacity-50 hover:bg-neutral-700 transition-colors"
+                >
+                  {isSubmitting ? "Signing Up..." : "Sign-Up"}
+                </button>
               </div>
-              <Link to="/login" className="text-blue-600 hover:text-blue-800">
-                Login
-              </Link>
-            </div>
+
+              {/* Footer */}
+              <div className="mt-6 text-center">
+                <div className="text-base font-medium text-black mb-2">
+                  - OR -
+                </div>
+                <div className="flex gap-1 justify-center items-center text-lg">
+                  <span className="leading-6 text-black">
+                    Already have an account?
+                  </span>
+                  <Link to="/login" style={{ color: "#65558F" }}>
+                    Login
+                  </Link>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       </div>
+
       <OtpModal
         isOpen={isOtpModalOpen}
         onClose={() => setOtpModalOpen(false)}
