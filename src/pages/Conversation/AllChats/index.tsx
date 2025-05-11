@@ -874,6 +874,7 @@ const AllChats = () => {
             <option value="" disabled hidden>
               Intent
             </option>
+            <option value="">No Filter</option>
             <option value="Sales_Lead">Sales Lead</option>
             <option value="Inquiry">Inquiry</option>
             <option value="Complaint">Complaint</option>
@@ -892,6 +893,7 @@ const AllChats = () => {
             <option value="" disabled hidden>
               Handled By
             </option>
+            <option value="">No Filter</option>
             <option value="All">All</option>
             <option value="AI">AI</option>
             <option value="Human">Human</option>
@@ -908,6 +910,7 @@ const AllChats = () => {
             <option value="" disabled hidden>
               Favorites
             </option>
+            <option value="">No Filter</option>
             <option value="All">All</option>
             <option value="Fav">Favourite</option>
             <option value="Unfav">Unfavourite</option>
@@ -924,6 +927,7 @@ const AllChats = () => {
             <option value="" disabled hidden>
               Blocked Status
             </option>
+            <option value="">No Filter</option>
             <option value="All">All</option>
             <option value="Block">Blocked</option>
             <option value="Unblock">Unblocked</option>
