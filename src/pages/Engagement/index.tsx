@@ -318,6 +318,8 @@ const EngagementTab = () => {
             }))
           );
 
+          console.log("Processed conversations:", processedConversations);
+
           const processedPosts = data.data.flatMap((item: any) =>
             item.posts.map((post: any) => ({
               ...post,
@@ -345,6 +347,8 @@ const EngagementTab = () => {
                 (post.carouselMedia?.length ? post.carouselMedia[0].url : ""),
             }))
           );
+
+          console.log("Insta Processed posts:", processedPosts);
 
           setConversations((prev) => [
             ...prev.filter((c) => c.CHANNEL !== "Instagram"),
@@ -465,6 +469,11 @@ const EngagementTab = () => {
             }))
           );
 
+          console.log(
+            "Processed Facebook conversations:",
+            processedConversations
+          );
+
           const processedPosts = data.data.flatMap((item: any) =>
             item.posts.map((post: any) => ({
               ...post,
@@ -490,6 +499,7 @@ const EngagementTab = () => {
                 (post.carouselMedia?.length ? post.carouselMedia[0].url : ""),
             }))
           );
+          console.log("Processed Facebook posts:", processedPosts);
 
           setConversations((prev) => [
             ...prev.filter((c) => c.CHANNEL !== "Facebook"),
