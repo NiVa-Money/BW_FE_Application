@@ -14,4 +14,6 @@ export const COLORS = {
   BLUE: "#78c8f0",
   WHITE: "#FFFFFF",
   BLACK: "#000000",
+  success: "#34C759",
+  ERROR: "rgba(190, 53, 69, 1)",
 } as const;
