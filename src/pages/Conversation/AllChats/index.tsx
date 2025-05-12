@@ -44,6 +44,7 @@ import WebsiteSectionData from "./websiteSectionData";
 import EmojiPicker from "emoji-picker-react";
 import { EmojiEmotions, Send } from "@mui/icons-material";
 
+
 interface AnalysisSection {
   title: string;
   description: string;
