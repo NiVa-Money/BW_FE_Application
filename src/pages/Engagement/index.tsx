@@ -53,6 +53,10 @@ import {
 import EmojiPicker from "emoji-picker-react";
 import { getInstagramData } from "../../api/services/integrationServices";
 import { getFacebookIntegrations } from "../../api/services/integrationServices";
+import { DateRangePicker, LocalizationProvider } from "@mui/x-date-pickers-pro";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DateRange } from "@mui/x-date-pickers-pro/models";
+import dayjs, { Dayjs } from "dayjs";
 
 // Define sender types as constants
 const SenderType = {
@@ -94,6 +98,10 @@ const EngagementTab = () => {
   const [filterType, setFilterType] = useState<"conversations" | "comments">(
     "conversations"
   );
+
+  const [igInitialData, setIgInitialData] = useState<any>(null);
+  const [fbInitialData, setFbInitialData] = useState<any>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [integrationId, setIntegrationId] = useState<string | null>(null); // Instagram integrationId
   const [facebookIntegrationId, setFacebookIntegrationId] = useState<
@@ -106,6 +114,10 @@ const EngagementTab = () => {
   const open = Boolean(anchorEl);
   const socketRef = useRef<Socket | null>(null);
   const orgId = localStorage.getItem("orgId");
+  const [dateRange, setDateRange] = useState<DateRange<Dayjs>>([
+    dayjs().subtract(7, "day"),
+    dayjs(),
+  ]);
 
   // Fetch platform-specific integrationIds
   useEffect(() => {
@@ -145,6 +157,55 @@ const EngagementTab = () => {
 
     fetchIntegrations();
   }, []);
+
+  const fetchEngagementMetrics = () => {
+    if (!orgId || !dateRange[0] || !dateRange[1]) return;
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const payloadCommon = {
+      orgId,
+      startDate: dateRange[0].toISOString(),
+      endDate: dateRange[1].toISOString(),
+      timezone,
+    };
+
+    console.log("Fetching engagement metrics", {
+      platform,
+      orgId,
+      integrationId,
+      facebookIntegrationId,
+      igUserId: igInitialData?.userId,
+      fbUserId: fbInitialData?.userId,
+      dateRange,
+    });
+
+    if (platform === "facebook") {
+      if (!facebookIntegrationId || !fbInitialData?.userId) {
+        console.warn("Facebook user ID or integration ID missing.");
+        return;
+      }
+
+      socketRef.current?.emit("fbEngagementMetrics", {
+        integrationId: facebookIntegrationId,
+        fbUserId: fbInitialData.userId,
+        ...payloadCommon,
+      });
+    }
+
+    if (platform === "instagram") {
+      if (!integrationId || !igInitialData?.userId) {
+        console.warn("Instagram user ID or integration ID missing.");
+        return;
+      }
+
+      socketRef.current?.emit("igEngagementMetrics", {
+        integrationId,
+        igUserId: igInitialData.userId,
+        ...payloadCommon,
+      });
+    }
+  };
 
   const updateConversation = useCallback((data: any, channel: string) => {
     setConversations((prev) => {
@@ -295,6 +356,9 @@ const EngagementTab = () => {
 
       // Instagram Events
       socket.on("igInitialData", (data) => {
+        console.log("Received igInitialData socket event:", data);
+
+        setIgInitialData(data?.data?.[0]);
         if (platform === "all-platforms" || platform === "instagram") {
           const processedConversations = data.data.flatMap((item: any) =>
             item.conversations.map((conv: any) => ({
@@ -444,8 +508,18 @@ const EngagementTab = () => {
         }
       });
 
+      socket.on("igEngagementMetricsSuccess", (data) => {
+        console.log("Instagram metrics:", data);
+      });
+
+      socket.on("igEngagementMetricsError", (err) => {
+        console.error("IG metrics error:", err);
+      });
+
       // Facebook Events
       socket.on("fbInitialData", (data) => {
+        console.log("Received fbInitialData socket event:", data);
+        setFbInitialData(data?.data?.[0]);
         if (platform === "all-platforms" || platform === "facebook") {
           const processedConversations = data.data.flatMap((item: any) =>
             item.conversations.map((conv: any) => ({
@@ -596,6 +670,14 @@ const EngagementTab = () => {
             platform
           );
         }
+      });
+
+      socket.on("fbEngagementMetricsSuccess", (data) => {
+        console.log("Facebook metrics:", data);
+      });
+
+      socket.on("fbEngagementMetricsError", (err) => {
+        console.error("FB metrics error:", err);
       });
 
       socket.on("error", (e) => {
@@ -1713,28 +1795,36 @@ const EngagementTab = () => {
 
         <div className="col-span-4 space-y-4">
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-sm font-semibold">
-                Platforms Health Details
-              </h2>
-              <div className="flex gap-2">
-                <button className="px-4 py-1.5 text-sm border border-purple-100 text-[#65558F] rounded-lg hover:bg-purple-50">
-                  Date Range
-                </button>
-                <button className="px-4 py-1.5 text-sm bg-[#65558F] text-white rounded-lg">
-                  Platform
-                </button>
-                <IconButton onClick={handleClick}>
-                  <MoreVert />
-                </IconButton>
-                <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                  <MenuItem onClick={handleClose}>Engagement Graph</MenuItem>
-                  <MenuItem onClick={handleClose}>Sentiment Graph</MenuItem>
-                  <MenuItem onClick={handleClose}>Interaction Graph</MenuItem>
-                  <MenuItem onClick={handleClose}>Chats Graph</MenuItem>
-                </Menu>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-base font-medium">
+                  Platforms Engagement Details
+                </h2>
+                <div className="flex gap-2">
+                  <DateRangePicker
+                    value={dateRange}
+                    onChange={(newValue: DateRange<Dayjs> | null) =>
+                      setDateRange(newValue || [null, null])
+                    }
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        variant: "outlined",
+                      },
+                    }}
+                  />
+
+                  <IconButton onClick={handleClick}>
+                    <MoreVert />
+                  </IconButton>
+                  <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                    <MenuItem onClick={fetchEngagementMetrics}>
+                      Engagement Graph
+                    </MenuItem>
+                  </Menu>
+                </div>
               </div>
-            </div>
+            </LocalizationProvider>
             <div className="h-[300px]">
               <ResponsiveContainer>
                 <BarChart data={chartData}>
