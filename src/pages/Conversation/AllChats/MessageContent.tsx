@@ -84,7 +84,9 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
 
       messageContent = (
         <div className={getClasses(textClasses)}>
-          <p className="whitespace-pre-wrap">{msg?.messageContent?.body || getContent()}</p>
+          <p className="whitespace-pre-wrap">
+            {msg?.messageContent?.body || getContent()}
+          </p>
           {renderStatus(status)}
         </div>
       );
@@ -106,10 +108,15 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       );
 
       const headerImage =
-        header.type === "IMAGE" ? header.IMAGE || header.content || header.image : null;
+        header.type === "IMAGE"
+          ? header.IMAGE || header.content || header.image
+          : null;
       const headerText =
         header.type === "TEXT"
-          ? renderTextWithParams(header.content || header.text, header.parameters)
+          ? renderTextWithParams(
+              header.content || header.text,
+              header.parameters
+            )
           : null;
 
       const buttons = template.buttons || [];
@@ -186,7 +193,9 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
         : "bg-[#005C4B] text-white";
 
       messageContent = (
-        <div className={`${commonClasses} ${classesBasedOnOrigin} min-w-[240px]`}>
+        <div
+          className={`${commonClasses} ${classesBasedOnOrigin} min-w-[240px]`}
+        >
           <p className="whitespace-pre-wrap">
             {msg?.messageContent?.text || "No text provided."}
           </p>
@@ -229,7 +238,9 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       };
 
       messageContent = (
-        <div className={`${commonClasses} ${flowResponseClasses} min-w-[240px]`}>
+        <div
+          className={`${commonClasses} ${flowResponseClasses} min-w-[240px]`}
+        >
           {parseFlowResponse()}
           {renderStatus(status)}
         </div>
@@ -361,7 +372,9 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
   }
 
   return (
-    <div className={`flex ${isUserQuery ? "justify-start" : "justify-end"} mb-2`}>
+    <div
+      className={`flex ${isUserQuery ? "justify-start" : "justify-end"} mb-2`}
+    >
       {messageContent}
     </div>
   );
