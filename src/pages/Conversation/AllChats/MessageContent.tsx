@@ -59,9 +59,6 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
     return renderedText.replace(/\n\s*\n/g, "\n").trim();
   };
 
-  let messageContent;
-
-  // Helper to render status with specific styling for "failed"
   const renderStatus = (status) => {
     if (!status) return null;
 
@@ -77,6 +74,8 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
     );
   };
 
+  let messageContent;
+
   switch (msgType) {
     case "text": {
       const textClasses = isUserQuery
@@ -85,7 +84,9 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
 
       messageContent = (
         <div className={getClasses(textClasses)}>
-          <p className="whitespace-pre-wrap">{getContent()}</p>
+          <p className="whitespace-pre-wrap">
+            {msg?.messageContent?.body || getContent()}
+          </p>
           {renderStatus(status)}
         </div>
       );
@@ -98,27 +99,27 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
         : "bg-white text-black border border-gray-200";
 
       const template = msg.messageContent?.template || {};
-      const header = template.header || template.Header || {};
-
-      const headerImage =
-        header.type === "IMAGE"
-          ? header.content || header.s3Url || header.image
-          : header.image || null;
-      const headerText =
-        header.type === "TEXT"
-          ? renderTextWithParams(
-              header.content || header.text,
-              header.parameters
-            )
-          : header.text || null;
-
-      const buttons = template.buttons || [];
+      const header = template.header || {};
       const bodyText = renderTextWithParams(
         Array.isArray(template.body?.text)
           ? template.body.text.join(" ")
           : template.body?.text || "",
         template.body?.parameters
       );
+
+      const headerImage =
+        header.type === "IMAGE"
+          ? header.IMAGE || header.content || header.image
+          : null;
+      const headerText =
+        header.type === "TEXT"
+          ? renderTextWithParams(
+              header.content || header.text,
+              header.parameters
+            )
+          : null;
+
+      const buttons = template.buttons || [];
 
       messageContent = (
         <div className={getClasses(templateClasses)}>
@@ -129,9 +130,9 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
             <img
               src={headerImage}
               onError={(e) => {
-                const target = e.target;
-                if (header.s3Url && (target as HTMLImageElement).src !== header.s3Url) {
-                  (target as HTMLImageElement).src = header.s3Url;
+                const target = e.target as HTMLImageElement;
+                if (header.s3Url && target.src !== header.s3Url) {
+                  target.src = header.s3Url;
                 }
               }}
               className="self-center w-full max-w-[300px] rounded-md mb-2"
@@ -155,57 +156,32 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
               View Document
             </a>
           )}
-
           {bodyText && <p className="whitespace-pre-wrap mb-2">{bodyText}</p>}
           {renderStatus(status)}
-
           {template.footer?.text && (
             <span className="mt-2 text-sm italic text-gray-500">
               {template.footer.text}
             </span>
           )}
-
-          {(Array.isArray(buttons) && buttons.length > 0) ||
-          (buttons && typeof buttons === "object") ? (
+          {Array.isArray(buttons) && buttons.length > 0 && (
             <div className="mt-2">
-              {Array.isArray(buttons) ? (
-                buttons.map((btn, i) => (
-                  <button
-                    key={i}
-                    className="w-full h-10 text-base text-center mb-2 bg-transparent font-medium text-[#005C4B] border border-[#005C4B] rounded-md hover:bg-gray-100"
-                    onClick={() => {
-                      if (btn.type === "URL" && btn.url) {
-                        window.open(btn.url, "_blank");
-                      } else if (
-                        btn.type === "PHONE_NUMBER" &&
-                        btn.phoneNumber
-                      ) {
-                        window.location.href = `tel:${btn.phoneNumber}`;
-                      }
-                    }}
-                  >
-                    {btn.text}
-                  </button>
-                ))
-              ) : (
+              {buttons.map((btn, i) => (
                 <button
+                  key={i}
                   className="w-full h-10 text-base text-center mb-2 bg-transparent font-medium text-[#005C4B] border border-[#005C4B] rounded-md hover:bg-gray-100"
                   onClick={() => {
-                    if (buttons.type === "URL" && buttons.url) {
-                      window.open(buttons.url, "_blank");
-                    } else if (
-                      buttons.type === "PHONE_NUMBER" &&
-                      buttons.phoneNumber
-                    ) {
-                      window.location.href = `tel:${buttons.phoneNumber}`;
+                    if (btn.type === "URL" && btn.url) {
+                      window.open(btn.url, "_blank");
+                    } else if (btn.type === "PHONE_NUMBER" && btn.phoneNumber) {
+                      window.location.href = `tel:${btn.phoneNumber}`;
                     }
                   }}
                 >
-                  {buttons.text}
+                  {btn.text}
                 </button>
-              )}
+              ))}
             </div>
-          ) : null}
+          )}
         </div>
       );
       break;
@@ -247,7 +223,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
               {Object.entries(parsed).map(([key, value]) => (
                 <div key={key} className="grid grid-cols-3 text-base">
                   <span className="col-span-1 w-[200px] opacity-80 capitalize">
-                    {key}:
+                    {key.replace(/_/g, " ")}:
                   </span>
                   <span className="col-span-2 font-medium">
                     {String(value)}
@@ -279,9 +255,15 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       const image = msg?.messageContent?.image || {};
       messageContent = (
         <div className={getClasses(classes)}>
-          <img src={image.url} alt="Shared" className="w-full rounded-md" />
-          {image.caption && (
-            <p className="mt-2 text-sm whitespace-pre-wrap">{image.caption}</p>
+          <img
+            src={image.url}
+            alt="Shared"
+            className="w-full max-w-[300px] rounded-md"
+          />
+          {(image.caption || image.text) && (
+            <p className="mt-2 text-sm whitespace-pre-wrap">
+              {image.caption || image.text}
+            </p>
           )}
           {renderStatus(status)}
         </div>
@@ -293,11 +275,16 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       const classes = isUserQuery
         ? "bg-[#d8ede6] text-black"
         : "bg-white text-black";
+      const audio = msg?.messageContent?.audio || {};
       messageContent = (
         <div className={getClasses(classes)}>
-          <audio controls>
-            <source src={getContent()} type="audio/ogg" />
+          <audio controls className="w-full">
+            <source src={audio.url} type="audio/ogg" />
+            Your browser does not support the audio element.
           </audio>
+          {audio.text && (
+            <p className="mt-2 text-sm whitespace-pre-wrap">{audio.text}</p>
+          )}
           {renderStatus(status)}
         </div>
       );
@@ -311,8 +298,9 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       const video = msg?.messageContent?.video || {};
       messageContent = (
         <div className={getClasses(classes)}>
-          <video controls className="w-full rounded-md">
+          <video controls className="w-full max-w-[300px] rounded-md">
             <source src={video.url || getContent()} type="video/mp4" />
+            Your browser does not support the video element.
           </video>
           {video.caption && (
             <p className="mt-2 text-sm whitespace-pre-wrap">{video.caption}</p>
@@ -323,10 +311,10 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       break;
     }
 
-    case "interactive": {
+    case "Interactive": {
       const interactiveClasses = isUserQuery
-        ? "bg-[#d8ede6] text-black"
-        : "bg-white text-black border border-gray-200";
+        ? "bg-[#d8ede6] max-w-[250px] text-black"
+        : "bg-white text-black border max-w-[250px] border-gray-200";
 
       const interactive = msg?.messageContent?.interactive || {};
       const bodyText = interactive.body?.text || "";
@@ -360,9 +348,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
         : "bg-[#005C4B] text-white";
 
       messageContent = (
-        <div
-          className={`${commonClasses} ${listReplyClasses} min-w-[240px]`}
-        >
+        <div className={`${commonClasses} ${listReplyClasses} min-w-[250px]`}>
           <p className="whitespace-pre-wrap">
             {msg?.messageContent?.text || "No selection provided."}
           </p>
