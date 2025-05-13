@@ -74,6 +74,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [totalMessagesValue, setTotalMessagesValue] = useState(0);
   const [seenMessagesValue, setSeenMessagesValue] = useState(0);
   const [deliveredMessagesValue, setDeliveredMessagesValue] = useState(0);
+    const [unDeliveredMessagesValue, setunDeliveredMessagesValue] = useState(0);
   const [unreadMessagesValue, setUnreadMessagesValue] = useState(0);
   const [hotLeadsValue, setHotLeadsValue] = useState(0);
   const [totalContactsValue, setTotalContactsValue] = useState(0);
@@ -227,6 +228,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
           setTotalMessagesValue(sent || 0);
           setSeenMessagesValue(read || 0);
           setDeliveredMessagesValue(delivered || 0);
+          setunDeliveredMessagesValue(sent - delivered || 0);
           setUnreadMessagesValue(failed || 0);
           setHotLeadsValue(replied || 0);
           setHotLeads(data.data.hotLeads || []);
@@ -360,26 +362,31 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-5 lg:grid-cols-7 gap-4 mb-4">
         <StatsCard
           title="Total Contacts"
           value={totalContactsValue}
           icon={<People />}
         />
         <StatsCard
-          title="Send Messages"
-          value={totalMessagesValue}
-          icon={<Send />}
+          title="Delivered Messages"
+          value={deliveredMessagesValue}
+          icon={<Message />}
         />
         <StatsCard
-          title="Seen Messages"
+          title="Undelivered Messages"
+          value={unDeliveredMessagesValue}
+          icon={<Message />}
+        />
+        <StatsCard
+          title="Read Messages"
           value={seenMessagesValue}
           icon={<Visibility />}
         />
         <StatsCard
-          title="Delivered Messages"
-          value={deliveredMessagesValue}
-          icon={<Message />}
+          title="Send Messages"
+          value={totalMessagesValue}
+          icon={<Send />}
         />
         <StatsCard
           title="Failed to Deliver Messages"
