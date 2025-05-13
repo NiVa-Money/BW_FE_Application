@@ -1,6 +1,3 @@
-
-
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { FC, useState, useEffect, Key } from "react";
@@ -919,7 +916,15 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
                     },
                     i: Key
                   ) => (
-                    <tr key={i} className="border-t even:bg-gray-50">
+                    <tr
+                      key={i}
+                      className="border-t even:bg-gray-50 cursor-pointer hover:bg-gray-100"
+                      onClick={() =>
+                        navigate(
+                          `/conversations/all-chats?phoneNumber=${msg.receiverNumber}`
+                        )
+                      }
+                    >
                       <td className="py-3 px-4">{msg.campaignName || "N/A"}</td>
                       <td className="py-3 px-4">{msg.receiverName || "-"}</td>
                       <td className="py-3 px-4">{msg.receiverNumber || "-"}</td>
