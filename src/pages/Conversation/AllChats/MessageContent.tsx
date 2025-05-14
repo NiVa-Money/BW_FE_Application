@@ -35,7 +35,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
   });
 
   const commonClasses =
-    "px-3 py-2 rounded-lg max-w-[75%] break-words overflow-wrap";
+    "px-4 py-3 rounded-lg max-w-[80%] break-words shadow-sm";
   const getClasses = (base) => `${commonClasses} ${base}`;
 
   const renderTextWithParams = (text, parameters) => {
@@ -164,11 +164,11 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
             </span>
           )}
           {Array.isArray(buttons) && buttons.length > 0 && (
-            <div className="mt-2">
+            <div className="mt-2 space-y-2">
               {buttons.map((btn, i) => (
                 <button
                   key={i}
-                  className="w-full h-10 text-base text-center mb-2 bg-transparent font-medium text-[#005C4B] border border-[#005C4B] rounded-md hover:bg-gray-100"
+                  className="w-full h-10 text-base text-center bg-transparent font-medium text-[#005C4B] border border-[#005C4B] rounded-md hover:bg-gray-100 transition-colors"
                   onClick={() => {
                     if (btn.type === "URL" && btn.url) {
                       window.open(btn.url, "_blank");
@@ -311,34 +311,139 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
       break;
     }
 
-    case "Interactive": {
+    case "interactive": {
       const interactiveClasses = isUserQuery
-        ? "bg-[#d8ede6] max-w-[250px] text-black"
-        : "bg-white text-black border max-w-[250px] border-gray-200";
+        ? "bg-[#d8ede6] max-w-[300px] text-black"
+        : "bg-white text-black border border-gray-200 max-w-[300px]";
 
-      const interactive = msg?.messageContent?.interactive || {};
+      const interactive = content || {};
+      const type = interactive.type || "";
       const bodyText = interactive.body?.text || "";
-      const buttons = interactive.action?.buttons || [];
+      const headerText = interactive.header?.text || "";
+      const footerText = interactive.footer?.text || "";
 
-      messageContent = (
-        <div className={getClasses(interactiveClasses)}>
-          {bodyText && <p className="whitespace-pre-wrap mb-2">{bodyText}</p>}
-          {renderStatus(status)}
-          {Array.isArray(buttons) && buttons.length > 0 && (
-            <div className="mt-2">
-              {buttons.map((btn, i) => (
-                <button
-                  key={i}
-                  className="w-full h-10 text-base text-center mb-2 bg-transparent font-medium text-[#005C4B] border border-[#005C4B] rounded-md hover:bg-gray-100"
-                  disabled
-                >
-                  {btn.reply?.title || "Button"}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      );
+      if (type === "list") {
+        const sections = interactive.action?.sections || [];
+        const listButtonText = interactive.action?.button || "Select";
+
+        messageContent = (
+          <div className={getClasses(interactiveClasses)}>
+            {headerText && (
+              <strong className="block mb-2 text-lg font-semibold text-gray-800">
+                {headerText}
+              </strong>
+            )}
+            {bodyText && (
+              <p className="whitespace-pre-wrap mb-3 text-gray-700">
+                {bodyText}
+              </p>
+            )}
+            {sections.map((section, index) => (
+              <div key={index} className="mb-3">
+                {section.title && (
+                  <h4 className="font-medium text-gray-700 mb-2">
+                    {section.title}
+                  </h4>
+                )}
+                {section.rows && section.rows.length > 0 && (
+                  <div className="space-y-2">
+                    {section.rows.map((row, i) => (
+                      <div
+                        key={i}
+                        className="w-full p-3 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        <p className="font-medium text-gray-800">{row.title}</p>
+                        {row.description && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            {row.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            <button
+              className="w-full h-10 text-base text-center bg-gray-100 font-medium text-[#005C4B] border border-[#005C4B] rounded-md opacity-50 cursor-not-allowed mt-2"
+              disabled
+            >
+              {listButtonText}
+            </button>
+            {footerText && (
+              <span className="mt-3 block text-sm italic text-gray-500">
+                {footerText}
+              </span>
+            )}
+            {renderStatus(status)}
+          </div>
+        );
+      } else if (type === "button") {
+        const buttons = interactive.action?.buttons || [];
+
+        messageContent = (
+          <div className={getClasses(interactiveClasses)}>
+            {bodyText && (
+              <p className="whitespace-pre-wrap mb-3 text-gray-700">
+                {bodyText}
+              </p>
+            )}
+            {buttons.length > 0 && (
+              <div className="space-y-2">
+                {buttons.map((btn, i) => (
+                  <button
+                    key={i}
+                    className="w-full h-10 text-base text-center bg-gray-100 font-medium text-[#005C4B] border border-[#005C4B] rounded-md opacity-50 cursor-not-allowed"
+                    disabled
+                  >
+                    {btn.reply?.title || "Button"}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {renderStatus(status)}
+          </div>
+        );
+      } else if (type === "location_request_message") {
+        const actionName = interactive.action?.name || "Send Location";
+
+        messageContent = (
+          <div className={getClasses(interactiveClasses)}>
+            {headerText && (
+              <strong className="block mb-2 text-lg font-semibold text-gray-800">
+                {headerText}
+              </strong>
+            )}
+            {bodyText && (
+              <p className="whitespace-pre-wrap mb-3 text-gray-700">
+                {bodyText}
+              </p>
+            )}
+            <button
+              className="w-full h-10 text-base text-center bg-gray-100 font-medium text-[#005C4B] border border-[#005C4B] rounded-md opacity-50 cursor-not-allowed mt-2"
+              disabled
+            >
+              {actionName}
+            </button>
+            {footerText && (
+              <span className="mt-3 block text-sm italic text-gray-500">
+                {footerText}
+              </span>
+            )}
+            {renderStatus(status)}
+          </div>
+        );
+      } else {
+        messageContent = (
+          <div className={getClasses(interactiveClasses)}>
+            <p className="whitespace-pre-wrap mb-2 text-gray-700">
+              Interactive message
+            </p>
+            {renderStatus(status)}
+          </div>
+        );
+      }
       break;
     }
 
@@ -371,13 +476,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
     }
   }
 
-  return (
-    <div
-      className={`flex ${isUserQuery ? "justify-start" : "justify-end"} mb-2`}
-    >
-      {messageContent}
-    </div>
-  );
+  return messageContent;
 };
 
 export default MessageComponent;
