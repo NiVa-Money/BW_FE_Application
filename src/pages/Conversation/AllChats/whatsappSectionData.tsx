@@ -27,12 +27,17 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
     setIsAtBottom(nearBottom);
   };
 
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
   return (
-    <div className="relative h-full">
+    <div className="relative h-full min-h-[400px]">
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="p-4 h-full overflow-y-auto flex flex-col"
+        className="p-4 h-full overflow-y-auto flex flex-col gap-4"
       >
         {messages && messages.length > 0 ? (
           messages.map((msg: any, index: number) => {
@@ -51,6 +56,8 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
                 ? msg?.messageContent?.audio?.url || ""
                 : msg?.messageType === "flow_response"
                 ? msg?.messageContent?.flowResponse?.responseJson || ""
+                : msg?.messageType === "interactive"
+                ? msg?.messageContent?.interactive || {}
                 : isUserQuery
                 ? msg?.messageContent?.text || ""
                 : isAnswerCategory
@@ -63,9 +70,9 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
             return (
               <div
                 key={index}
-                className={`flex ${
-                  isUserQuery ? "justify-start" : "justify-end"
-                } mb-2`}
+                className={`flex flex-col ${
+                  isUserQuery ? "items-start" : "items-end"
+                } mb-4`}
               >
                 <MessageComponent
                   msgType={msg?.messageType}
@@ -73,11 +80,16 @@ const WhatsappSectionData: React.FC<WhatsappSectionProps> = ({ messages }) => {
                   isUserQuery={isUserQuery}
                   content={content}
                 />
+                <span className="text-xs text-gray-500 mt-1">
+                  {formatTime(msg.sentTime)}
+                </span>
               </div>
             );
           })
         ) : (
-          <p>Select a Session to view the chats</p>
+          <p className="text-center text-gray-500">
+            Select a Session to view the chats
+          </p>
         )}
       </div>
     </div>

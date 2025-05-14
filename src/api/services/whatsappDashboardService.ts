@@ -122,3 +122,17 @@ export const exportWhatsAppMessages = async (params: {
     throw error;
   }
 };
+
+export const sendInteractiveMessageService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post("/whatsapp/send-interactive-message", payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to send interactive message:", error);
+    throw error;
+  }
+};
