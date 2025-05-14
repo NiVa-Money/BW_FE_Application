@@ -1621,7 +1621,7 @@ const AllChats = () => {
       data.phoneNumber = searchValue.trim();
     }
     try {
-      const response: any = await dispatch(getAllSession(data));
+      const response: any = dispatch(getAllSession(data));
       if (response.payload?.success) {
         const filteredSessions = response.payload.data.sessions || [];
         console.log(
