@@ -1,4 +1,3 @@
- 
 // /* eslint-disable react-hooks/exhaustive-deps */
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -1477,9 +1476,7 @@
 
 // export default AllChats;
 
-
-
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useEffect, useState } from "react";
 import SessionsList from "./SessionsList";
@@ -1575,6 +1572,32 @@ const AllChats = () => {
     (state: RootState) => state?.userChat?.allSession?.data
   );
 
+  const userId = localStorage.getItem("user_id");
+
+  // Fetch bots on component mount
+  useEffect(() => {
+    if (userId?.length) {
+      dispatch(getBotsAction(userId));
+    }
+  }, [dispatch, userId]);
+
+  // Set botIdVal when botsDataRedux is available
+  useEffect(() => {
+    if (
+      Array.isArray(botsDataRedux) &&
+      botsDataRedux.length &&
+      !botsDataLoader
+    ) {
+      const formattedBots = botsDataRedux.map((bot: any) => ({
+        value: bot._id,
+        name: bot.botName,
+      }));
+      setBotLists(formattedBots);
+      setBotIdVal(formattedBots[0]?.value || "");
+    }
+  }, [botsDataRedux, botsDataLoader]);
+
+  // Handle search functionality
   const handleSearch = async () => {
     if (!botIdVal) {
       notifyError("Please select a bot before searching");
@@ -1598,10 +1621,13 @@ const AllChats = () => {
       data.phoneNumber = searchValue.trim();
     }
     try {
-      const response: any = await dispatch(getAllSession(data)); // Added await
+      const response: any = await dispatch(getAllSession(data));
       if (response.payload?.success) {
         const filteredSessions = response.payload.data.sessions || [];
-        console.log("handleSearch - Setting searchResults to:", filteredSessions);
+        console.log(
+          "handleSearch - Setting searchResults to:",
+          filteredSessions
+        );
         setSearchResults(filteredSessions);
         setIsSearchActive(true);
         setSessionId("");
@@ -1615,38 +1641,111 @@ const AllChats = () => {
           setSessionId(firstSessionId);
           handleSessionSelection(firstSessionId);
         } else {
-          console.log("handleSearch - No sessions found for the search criteria.");
+          console.log(
+            "handleSearch - No sessions found for the search criteria."
+          );
         }
       } else {
-        console.error("handleSearch - Failed to fetch sessions:", response.payload?.message);
+        console.error(
+          "handleSearch - Failed to fetch sessions:",
+          response.payload?.message
+        );
+        notifyError("Failed to fetch chat sessions.");
       }
     } catch (error) {
       console.error("handleSearch - Search error:", error);
+      notifyError("Failed to fetch chat sessions.");
     }
   };
 
+  // Handle navigation-based session fetch
   useEffect(() => {
-    if (
-      Array.isArray(botsDataRedux) &&
-      botsDataRedux.length &&
-      !botsDataLoader
-    ) {
-      const formattedBots = botsDataRedux.map((bot: any) => ({
-        value: bot._id,
-        name: bot.botName,
-      }));
-      setBotLists(formattedBots);
-      setBotIdVal(formattedBots[0]?.value || "");
-    }
-  }, [botsDataRedux, botsDataLoader]);
+    const queryParams = new URLSearchParams(location.search);
+    const phoneNumber = queryParams.get("phoneNumber");
 
-  const userId = localStorage.getItem("user_id");
+    if (!phoneNumber || !botIdVal) {
+      console.log(
+        "location.search - Skipping fetch: phoneNumber or botIdVal missing",
+        { phoneNumber, botIdVal }
+      );
+      return;
+    }
+
+    const fetchSessionByPhoneNumber = async () => {
+      const formattedPhoneNumber = phoneNumber.startsWith("+91")
+        ? phoneNumber.replace("+91", "")
+        : phoneNumber;
+
+      console.log(
+        "location.search - Fetching session for phoneNumber:",
+        formattedPhoneNumber
+      );
+
+      setSearchValue(formattedPhoneNumber);
+      setSearchType("phone");
+      setIsSearchActive(true);
+
+      const data = {
+        botId: botIdVal,
+        page: 1,
+        channelName: channelNameVal,
+        phoneNumber: formattedPhoneNumber,
+      };
+
+      try {
+        const response: any = await dispatch(getAllSession(data));
+        console.log("location.search useEffect - API Response:", response);
+
+        if (response.payload?.success) {
+          const filteredSessions = response.payload.data.sessions || [];
+          console.log(
+            "location.search - Setting searchResults to:",
+            filteredSessions
+          );
+          setSearchResults(filteredSessions);
+
+          if (filteredSessions.length > 0) {
+            const firstSessionId =
+              channelNameVal === "whatsapp"
+                ? filteredSessions[0].userPhoneId
+                : filteredSessions[0]._id;
+            setSessionId(firstSessionId);
+            handleSessionSelection(firstSessionId);
+          } else {
+            console.log(
+              "location.search - No sessions found for the search criteria."
+            );
+            notifyError(
+              "No chat sessions found for the provided phone number."
+            );
+            setSearchResults([]);
+          }
+        } else {
+          console.error(
+            "location.search - Failed to fetch sessions:",
+            response.payload?.message || "Unknown error"
+          );
+          notifyError("Failed to fetch chat sessions.");
+          setSearchResults([]);
+        }
+      } catch (error) {
+        console.error("location.search - Failed to fetch session:", error);
+        notifyError("Failed to fetch chat sessions.");
+        setSearchResults([]);
+      }
+    };
+
+    fetchSessionByPhoneNumber();
+  }, [location.search, botIdVal, channelNameVal, dispatch]);
+
+  // Log state updates for debugging
+  useEffect(() => {
+    console.log("searchResults updated:", searchResults);
+  }, [searchResults]);
 
   useEffect(() => {
-    if (userId?.length) {
-      dispatch(getBotsAction(userId));
-    }
-  }, [dispatch, userId]);
+    console.log("sessionsDataRedux updated:", sessionsDataRedux);
+  }, [sessionsDataRedux]);
 
   const handleIntentChange = (selectedIntent: string) => {
     setIntent(selectedIntent);
@@ -1885,14 +1984,11 @@ const AllChats = () => {
     botIdVal,
     sessionsDataRedux?.sessions,
     isSearchActive,
-    searchType,
-    searchValue,
     showAIOnly,
     location.search,
-    sessionsDataRedux,
   ]);
 
-    const handleSessionSelection = (selectedSessionId: string) => {
+  const handleSessionSelection = (selectedSessionId: string) => {
     const sourceData = isSearchActive
       ? searchResults
       : sessionsDataRedux?.sessions || [];
@@ -1946,78 +2042,6 @@ const AllChats = () => {
 
     setSessionId(selectedSessionId);
   };
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const phoneNumber = queryParams.get("phoneNumber");
-
-    if (!phoneNumber || !botIdVal) {
-      console.log("location.search - Skipping fetch: phoneNumber or botIdVal missing", { phoneNumber, botIdVal });
-      return;
-    }
-
-    const fetchSessionByPhoneNumber = async () => {
-      const formattedPhoneNumber = phoneNumber.startsWith("+91")
-        ? phoneNumber.replace("+91", "")
-        : phoneNumber;
-
-      console.log("location.search - Fetching session for phoneNumber:", formattedPhoneNumber);
-
-      setSearchValue(formattedPhoneNumber);
-      setSearchType("phone");
-      setIsSearchActive(true);
-
-      const data = {
-        botId: botIdVal,
-        page: 1,
-        channelName: channelNameVal,
-        phoneNumber: formattedPhoneNumber,
-      };
-
-      try {
-        const response: any = await dispatch(getAllSession(data));
-        console.log("location.search useEffect - API Response:", response);
-
-        if (response.payload?.success) {
-          const filteredSessions = response.payload.data.sessions || [];
-          console.log("location.search - Setting searchResults to:", filteredSessions);
-          setSearchResults(filteredSessions); // Update searchResults
-
-          // Only reset states if we have sessions
-          if (filteredSessions.length > 0) {
-            setSessionId("");
-            setMessages([]);
-            setPage(1);
-
-            const firstSessionId =
-              channelNameVal === "whatsapp"
-                ? filteredSessions[0].userPhoneId
-                : filteredSessions[0]._id;
-
-            setSessionId(firstSessionId);
-            handleSessionSelection(firstSessionId);
-          } else {
-            console.log("location.search - No sessions found for the search criteria.");
-            setSearchResults([]); // Ensure searchResults is empty if no sessions
-          }
-        } else {
-          console.error("location.search - Failed to fetch sessions:", response.payload?.message);
-          setSearchResults([]); // Reset on failure
-        }
-      } catch (error) {
-        console.error("location.search - Failed to fetch session:", error);
-        setSearchResults([]); // Reset on error
-      }
-    };
-
-    fetchSessionByPhoneNumber();
-  }, [location.search, botIdVal, channelNameVal, dispatch]);
-
-  useEffect(() => {
-    console.log("searchResults updated:", searchResults);
-  }, [searchResults]);
-
-
 
   const [analysisSections, setAnalysisSections] = useState<AnalysisSection[]>([
     {
@@ -2393,10 +2417,6 @@ const AllChats = () => {
     }
   }, [analysis, intentData, reasonData, emotionData, smartSuggestionData]);
 
-  useEffect(() => {
-    console.log("sessionsDataRedux updated:", sessionsDataRedux);
-  }, [sessionsDataRedux]);
-
   return (
     <div className="flex flex-col min-h-screen p-6">
       <div className="flex-col items-center mb-4">
@@ -2413,7 +2433,7 @@ const AllChats = () => {
           className="p-3 bg-white border border-gray-200 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
         >
           <option value="order">Order ID / Order Name</option>
-          <option value="phone">Contact Name</option>
+          <option value="phone">Contact Number</option>
         </select>
         {searchType === "order" ? (
           <input
@@ -2591,7 +2611,11 @@ const AllChats = () => {
 
       <div className="flex bg-white rounded-xl shadow-lg h-[calc(100vh-200px)]">
         <SessionsList
-          key={isSearchActive ? searchResults.length : sessionsDataRedux?.sessions?.length}
+          key={
+            isSearchActive
+              ? searchResults.length
+              : sessionsDataRedux?.sessions?.length
+          }
           onSessionSelect={handleSessionSelection}
           channelNameVal={channelNameVal}
           setPage={setPage}

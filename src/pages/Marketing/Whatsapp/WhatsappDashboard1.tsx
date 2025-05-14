@@ -46,7 +46,10 @@ import { Card, CardContent, Typography } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 import { fetchCampaignsAction } from "../../../store/actions/whatsappCampaignActions";
 import CustomDatePicker from "../../../components/CustomDatePicker";
-import { whatsAppDashboardService } from "../../../api/services/whatsappDashboardService";
+import {
+  exportWhatsAppMessages,
+  whatsAppDashboardService,
+} from "../../../api/services/whatsappDashboardService";
 // import CampaignStatsCard from "./CampaignStatsCard";
 
 interface DashboardProps {
@@ -74,7 +77,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
   const [totalMessagesValue, setTotalMessagesValue] = useState(0);
   const [seenMessagesValue, setSeenMessagesValue] = useState(0);
   const [deliveredMessagesValue, setDeliveredMessagesValue] = useState(0);
-    const [unDeliveredMessagesValue, setunDeliveredMessagesValue] = useState(0);
+  const [unDeliveredMessagesValue, setunDeliveredMessagesValue] = useState(0);
   const [unreadMessagesValue, setUnreadMessagesValue] = useState(0);
   const [hotLeadsValue, setHotLeadsValue] = useState(0);
   const [totalContactsValue, setTotalContactsValue] = useState(0);
@@ -94,6 +97,30 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleExportClick = async () => {
+    const filters: any = {};
+    if (selectedReceiverNumber) filters.receiverNumber = selectedReceiverNumber;
+    if (selectedStatus) filters.status = selectedStatus;
+    if (selectedIntent) filters.intent = selectedIntent;
+    if (selectedSentiment) filters.sentiment = selectedSentiment;
+    if (selectedReplied) filters.replied = selectedReplied;
+    if (campaign && selectedCampaignId) {
+      filters.campaignIds = [selectedCampaignId];
+    }
+
+    const payload = {
+      page: 1,
+      limit: 1000, // Adjust as needed
+      filter: filters,
+    };
+
+    try {
+      await exportWhatsAppMessages(payload);
+    } catch {
+      console.error("Export failed. Please try again.");
+    }
   };
 
   const insights = useSelector(
@@ -775,6 +802,12 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
       <div className="bg-[rgba(101,85,143,0.08)] mt-4 p-4 rounded-xl">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Contact Insights</h3>
+          <button
+            onClick={handleExportClick}
+            className="flex items-center justify-center gap-2 px-6 py-2 bg-[#65558F] text-white rounded-full"
+          >
+            📥
+          </button>
         </div>
         <div className="flex flex-wrap gap-4 mb-2">
           <div className="bg-gray-100 rounded-full px-4 py-2 text-sm font-medium text-[#65558F]">
