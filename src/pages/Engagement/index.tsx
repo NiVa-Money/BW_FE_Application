@@ -19,9 +19,8 @@ import {
   Comment,
   ChevronLeft,
   ChevronRight as ChevronRightIcon,
-  MoreVert,
-  Reply,
   EmojiEmotions,
+  Reply,
 } from "@mui/icons-material";
 import {
   XAxis,
@@ -29,12 +28,12 @@ import {
   CartesianGrid,
   BarChart,
   Bar,
-  Tooltip,
   ResponsiveContainer,
+  Legend,
+  Tooltip,
 } from "recharts";
 import {
   IconButton,
-  Menu,
   Select,
   MenuItem,
   FormControl,
@@ -59,9 +58,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
 // Define sender types as constants
 const SenderType = {
-  USER: "USER", // Message sent by the user
-  ADMIN: "ADMIN", // Message sent by an admin
-  AI: "AI", // AI-generated message
+  USER: "USER",
+  ADMIN: "ADMIN",
+  AI: "AI",
   CUSTOM_MESSAGE: "CUSTOM_MESSAGE",
 };
 
@@ -73,6 +72,23 @@ interface CommentPayload {
   parentCommentId?: string;
   integrationId?: string | null;
 }
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-2 border border-gray-300 rounded shadow">
+        <p className="font-semibold">Day: {label}</p>
+        <p style={{ color: "#FF6384" }}>
+          DMs: {payload.find((p) => p.dataKey === "dm")?.value ?? 0}
+        </p>
+        <p style={{ color: "#36A2EB" }}>
+          Comments: {payload.find((p) => p.dataKey === "comment")?.value ?? 0}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const EngagementTab = () => {
   const [conversations, setConversations] = useState<any[]>([]);
@@ -89,7 +105,6 @@ const EngagementTab = () => {
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(
     null
   );
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPost, setCurrentPost] = useState<any>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -97,29 +112,29 @@ const EngagementTab = () => {
   const [filterType, setFilterType] = useState<"conversations" | "comments">(
     "conversations"
   );
-
   const [igInitialData, setIgInitialData] = useState<any>(null);
   const [fbInitialData, setFbInitialData] = useState<any>(null);
-
   const [error, setError] = useState<string | null>(null);
-  const [integrationId, setIntegrationId] = useState<string | null>(null); // Instagram integrationId
+  const [integrationId, setIntegrationId] = useState<string | null>(null);
   const [facebookIntegrationId, setFacebookIntegrationId] = useState<
     string | null
-  >(null); // Facebook-specific integrationId
+  >(null);
   const [integrationFetchError, setIntegrationFetchError] = useState<
     string | null
   >(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
-  const open = Boolean(anchorEl);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [dateRange, setDateRange] = useState<(Date | null)[]>([
+    new Date("2025-05-07T00:00:00.000Z"), // 7 days before May 14, 2025
+    new Date("2025-05-14T00:00:00.000Z"), // Current date
+  ]);
   const socketRef = useRef<Socket | null>(null);
   const orgId = localStorage.getItem("orgId");
-  const [dateRange, setDateRange] = useState<(Date | null)[]>([null, null]);
 
   // Fetch platform-specific integrationIds
   useEffect(() => {
     const fetchIntegrations = async () => {
       try {
-        // Fetch Instagram integration
         const igResponse = await getInstagramData();
         const igIntegrations = Array.isArray(igResponse?.data)
           ? igResponse.data
@@ -131,7 +146,6 @@ const EngagementTab = () => {
           setIntegrationId(null);
         }
 
-        // Fetch Facebook integration
         const fbResponse = await getFacebookIntegrations();
         const fbIntegrations = Array.isArray(fbResponse?.data)
           ? fbResponse.data
@@ -152,71 +166,141 @@ const EngagementTab = () => {
     };
 
     fetchIntegrations();
-  }, []);
-
-const fetchEngagementMetrics = () => {
-  if (!orgId) {
-    setError("Organization ID is missing. Please log in again.");
-    return;
-  }
-
-  if (!dateRange[0] || !dateRange[1]) {
-    setError("Please select both start and end dates.");
-    return;
-  }
-
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-  // Standard payload structure for both platforms
-  const basePayload = {
+  }, [
+    inputText,
+    selectedConversationId,
     orgId,
-    startDate: dateRange[0].toISOString(),
-    endDate: dateRange[1].toISOString(),
-    timezone,
-  };
+    conversations,
+    integrationId,
+    facebookIntegrationId,
+  ]);
 
-  console.log("Fetching engagement metrics", {
+  // Fetch engagement metrics when platform or date range changes
+  useEffect(() => {
+    if (platform === "all-platforms") {
+      setChartData([]); // Clear chart data when "All Platforms" is selected
+      return;
+    }
+
+    // Extract userId from the first conversation
+    const igUserId = igInitialData?.conversations?.[0]?.userId;
+    const fbUserId = fbInitialData?.conversations?.[0]?.userId;
+
+    // Check if all required data is available
+    const canFetchMetrics =
+      dateRange[0] &&
+      dateRange[1] &&
+      orgId &&
+      ((platform === "instagram" && integrationId && igUserId) ||
+        (platform === "facebook" && facebookIntegrationId && fbUserId));
+
+    if (canFetchMetrics) {
+      console.log(
+        "All required data available, fetching engagement metrics..."
+      );
+      fetchEngagementMetrics();
+    } else {
+      console.warn("Cannot fetch engagement metrics. Missing required data:", {
+        platform,
+        orgId,
+        integrationId,
+        facebookIntegrationId,
+        igUserId,
+        fbUserId,
+        dateRange,
+      });
+      if (!dateRange[0] || !dateRange[1]) {
+        setError("Please select both start and end dates.");
+      } else if (platform === "instagram" && (!integrationId || !igUserId)) {
+        setError(
+          "Waiting for Instagram user ID or integration ID. Please wait or refresh the page."
+        );
+      } else if (
+        platform === "facebook" &&
+        (!facebookIntegrationId || !fbUserId)
+      ) {
+        setError(
+          "Waiting for Facebook user ID or integration ID. Please wait or refresh the page."
+        );
+      }
+    }
+  }, [
     platform,
+    dateRange,
     orgId,
     integrationId,
     facebookIntegrationId,
-    igUserId: igInitialData?.userId,
-    fbUserId: fbInitialData?.userId,
-    dateRange,
-  });
+    igInitialData,
+    fbInitialData,
+  ]);
 
-  if (platform === "facebook") {
-    if (!facebookIntegrationId || !fbInitialData?.userId) {
-      setError("Facebook user ID or integration ID is missing.");
+  const fetchEngagementMetrics = () => {
+    if (!orgId) {
+      setError("Organization ID is missing. Please log in again.");
       return;
     }
 
-    const fbPayload = {
-      ...basePayload,
-      integrationId: facebookIntegrationId,
-      fbUserId: fbInitialData.userId, // Standardized field name
-      platform: "facebook", // Added platform identifier
-    };
-
-    socketRef.current?.emit("fbEngagementMetrics", fbPayload);
-  }
-
-  if (platform === "instagram") {
-    if (!integrationId || !igInitialData?.userId) {
-      setError("Instagram user ID or integration ID is missing.");
+    if (!dateRange[0] || !dateRange[1]) {
+      setError("Please select both start and end dates.");
       return;
     }
 
-    const igPayload = {
-      ...basePayload,
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    // Extract userId from the first conversation
+    const igUserId = igInitialData?.conversations?.[0]?.userId;
+    const fbUserId = fbInitialData?.conversations?.[0]?.userId;
+    console.log("Instagram User ID:", igUserId);
+    console.log("Facebook User ID:", fbUserId);
+
+    console.log("Fetching engagement metrics with details:", {
+      platform,
+      orgId,
       integrationId,
-      igUserId: igInitialData.userId, // Standardized field name
-      platform: "instagram", // Added platform identifier
-    };
+      facebookIntegrationId,
+      igUserId,
+      fbUserId,
+      dateRange,
+    });
 
-    socketRef.current?.emit("igEngagementMetrics", igPayload);
-  }
-};
+    if (platform === "facebook") {
+      if (!facebookIntegrationId || !fbUserId) {
+        setError("Facebook user ID or integration ID is missing.");
+        return;
+      }
+
+      const fbPayload = {
+        integrationId: facebookIntegrationId,
+        fbUserId, // Use the userId from the first conversation
+        startDate: dateRange[0].toISOString(),
+        endDate: dateRange[1].toISOString(),
+        orgId,
+        timezone,
+      };
+
+      socketRef.current?.emit("fbEngagementMetrics", fbPayload);
+      console.log("Emitted fbEngagementMetrics with payload:", fbPayload);
+    }
+
+    if (platform === "instagram") {
+      if (!integrationId || !igUserId) {
+        setError("Instagram user ID or integration ID is missing.");
+        return;
+      }
+
+      const igPayload = {
+        integrationId,
+        igUserId, // Use the userId from the first conversation
+        startDate: dateRange[0].toISOString(),
+        endDate: dateRange[1].toISOString(),
+        orgId,
+        timezone,
+      };
+
+      socketRef.current?.emit("igEngagementMetrics", igPayload);
+      console.log("Emitted igEngagementMetrics with payload:", igPayload);
+    }
+  };
 
   const updateConversation = useCallback((data: any, channel: string) => {
     setConversations((prev) => {
@@ -298,7 +382,6 @@ const fetchEngagementMetrics = () => {
     [currentPost]
   );
 
-  // Define setOptimisticComment to update UI immediately
   const setOptimisticComment = useCallback(
     (postId: string, comment: string, parentId: string | null = null) => {
       const newComment = {
@@ -306,7 +389,7 @@ const fetchEngagementMetrics = () => {
         username: "botwot.io",
         text: comment,
         timestamp: new Date().toISOString(),
-        CHANNEL: currentPost?.CHANNEL || "Instagram", // Fallback to Instagram if currentPost is null
+        CHANNEL: currentPost?.CHANNEL || "Instagram",
         likeCount: 0,
         parentId: parentId,
       };
@@ -368,7 +451,6 @@ const fetchEngagementMetrics = () => {
       // Instagram Events
       socket.on("igInitialData", (data) => {
         console.log("Received igInitialData socket event:", data);
-
         setIgInitialData(data?.data?.[0]);
         if (platform === "all-platforms" || platform === "instagram") {
           const processedConversations = data.data.flatMap((item: any) =>
@@ -475,7 +557,6 @@ const fetchEngagementMetrics = () => {
 
       socket.on("igCommentSendError", (e) => {
         console.error("Instagram comment send failed:", e);
-        console.log("Current platform:", platform);
         setError("Failed to send comment. Please try again.");
       });
 
@@ -488,16 +569,10 @@ const fetchEngagementMetrics = () => {
 
       socket.on("igCommentSendSuccess", (data) => {
         console.log("Instagram comment sent successfully:", data);
-        console.log("Current platform:", platform);
         if (platform === "all-platforms" || platform === "instagram") {
           updatePostComment(data, "Instagram");
           updateConversation(data, "Instagram");
           setError(null);
-        } else {
-          console.warn(
-            "Comment success received but platform mismatch:",
-            platform
-          );
         }
       });
 
@@ -517,14 +592,6 @@ const fetchEngagementMetrics = () => {
           updateConversation(data, "Instagram");
           setError(null);
         }
-      });
-
-      socket.on("igEngagementMetricsSuccess", (data) => {
-        console.log("Instagram metrics:", data);
-      });
-
-      socket.on("igEngagementMetricsError", (err) => {
-        console.error("IG metrics error:", err);
       });
 
       // Facebook Events
@@ -657,7 +724,6 @@ const fetchEngagementMetrics = () => {
 
       socket.on("fbCommentSendError", (e) => {
         console.error("Facebook comment send failed:", e);
-        console.log("Current platform:", platform);
         setError("Failed to send comment. Please try again.");
       });
 
@@ -670,25 +736,78 @@ const fetchEngagementMetrics = () => {
 
       socket.on("fbCommentSendSuccess", (data) => {
         console.log("Facebook comment sent successfully:", data);
-        console.log("Current platform:", platform);
         if (platform === "all-platforms" || platform === "facebook") {
           updatePostComment(data, "Facebook");
           updateConversation(data, "Facebook");
           setError(null);
-        } else {
-          console.warn(
-            "Comment success received but platform mismatch:",
-            platform
-          );
         }
       });
 
+      socket.on("igEngagementMetricsSuccess", (data) => {
+        console.log("Received Instagram engagement metrics:", data);
+        const rawMetrics = data?.data || {};
+        const startDate = new Date("2025-05-07T00:00:00.000Z");
+        const endDate = new Date("2025-05-14T00:00:00.000Z");
+
+        const metricsArray = [];
+        const currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+          const dateKey = currentDate.toISOString().split("T")[0];
+          const day = currentDate.getDate().toString();
+          const metric = rawMetrics[dateKey] || { dm: 0, comment: 0 };
+          metricsArray.push({
+            day,
+            dm: metric.dm || 0,
+            comment: metric.comment || 0,
+          });
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        console.log("Processed IG chartData:", metricsArray);
+        setChartData(metricsArray);
+        setError(null);
+      });
+
+      socket.on("igEngagementMetricsError", (err) => {
+        console.error("Instagram engagement metrics error:", err);
+        setError(
+          "Failed to fetch Instagram engagement metrics. Please try again."
+        );
+      });
+
+      // New Facebook Engagement Metrics Listeners
       socket.on("fbEngagementMetricsSuccess", (data) => {
-        console.log("Facebook metrics:", data);
+        console.log("Received Facebook engagement metrics:", data);
+        const rawMetrics = data?.data || {};
+        const startDate = new Date("2025-05-07T00:00:00.000Z");
+        const endDate = new Date("2025-05-14T00:00:00.000Z");
+
+        const metricsArray = [];
+        const currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+          const dateKey = currentDate.toISOString().split("T")[0];
+          const day = currentDate.getDate().toString();
+          const metric = rawMetrics[dateKey] || { dm: 0, comment: 0 };
+
+          metricsArray.push({
+            day,
+            dm: metric.dm || 0,
+            comment: metric.comment || 0,
+          });
+
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        console.log("Processed Facebook chartData:", metricsArray);
+        setChartData(metricsArray);
+        setError(null);
       });
 
       socket.on("fbEngagementMetricsError", (err) => {
-        console.error("FB metrics error:", err);
+        console.error("Facebook engagement metrics error:", err);
+        setError(
+          "Failed to fetch Facebook engagement metrics. Please try again."
+        );
       });
 
       socket.on("error", (e) => {
@@ -778,7 +897,7 @@ const fetchEngagementMetrics = () => {
 
     if (!payload.integrationId) {
       setError(
-        `${conv.CHANNEL} integration(you need to connect your social media account to Botwot) ID is missing. Please set up an integration.`
+        `${conv.CHANNEL} integration ID is missing. Please set up an integration.`
       );
       return;
     }
@@ -834,14 +953,7 @@ const fetchEngagementMetrics = () => {
 
     setInputText("");
     setError(null);
-  }, [
-    inputText,
-    selectedConversationId,
-    orgId,
-    conversations,
-    integrationId,
-    facebookIntegrationId,
-  ]);
+  }, [inputText, selectedConversationId, orgId, conversations]);
 
   const sendComment = (postId: string, text: string, channel: string) => {
     if (!text.trim()) {
@@ -985,9 +1097,6 @@ const fetchEngagementMetrics = () => {
     setError(null);
   }, [currentPost, orgId, likedPosts]);
 
-  const handleClick = (e: React.MouseEvent<HTMLElement>) =>
-    setAnchorEl(e.currentTarget);
-  const handleClose = () => setAnchorEl(null);
   const openPostModal = (post: any) => {
     setCurrentPost(post);
     setCarouselIndex(0);
@@ -1005,9 +1114,7 @@ const fetchEngagementMetrics = () => {
   const handlePrev = () => setCarouselIndex((i) => Math.max(i - 1, 0));
 
   const onEmojiClick = (emojiObject) => {
-    // Insert emoji at current cursor position or at the end
     setInputText((prevMessage) => prevMessage + emojiObject.emoji);
-    // setShowEmojiPicker(false); // Optional: hide picker after selection
   };
 
   const toggleEmojiPicker = () => {
@@ -1048,15 +1155,6 @@ const fetchEngagementMetrics = () => {
     { icon: <LinkedIn />, sentiment: 60 },
     { icon: <Twitter />, sentiment: 60 },
     { icon: <WhatsApp />, sentiment: 60 },
-  ];
-  const chartData = [
-    { month: "Jan", value: 30 },
-    { month: "Feb", value: 45 },
-    { month: "Mar", value: 75 },
-    { month: "Apr", value: 60 },
-    { month: "May", value: 45 },
-    { month: "Jun", value: 65 },
-    { month: "Jul", value: 55 },
   ];
 
   const isSendMessageDisabled =
@@ -1448,7 +1546,7 @@ const fetchEngagementMetrics = () => {
                     disabled={integrationFetchError !== null}
                   />
                   <button
-                    type="button" // Important: type="button" to prevent form submission
+                    type="button"
                     onClick={toggleEmojiPicker}
                     className="text-gray-500 hover:text-gray-700"
                   >
@@ -1461,7 +1559,6 @@ const fetchEngagementMetrics = () => {
                   >
                     <Send className="w-5 h-5 text-gray-600" />
                   </button>
-                  {/* Emoji Picker */}
                   {showEmojiPicker && (
                     <div
                       className="absolute right-40 z-10"
@@ -1670,7 +1767,6 @@ const fetchEngagementMetrics = () => {
                               </button>
                             </div>
                           )}
-                          {/* Display replies to this comment */}
                           {currentPost.comments
                             .filter(
                               (c: any) => c.parentId === comment.commentId
@@ -1797,7 +1893,7 @@ const fetchEngagementMetrics = () => {
                 </div>
               </>
             ) : (
-              <div className="text-center text-gray-500 mt-10">
+              <div className="text-center text-gray-500 mt become a paid member to read the full story-10">
                 Select a conversation or post to start
               </div>
             )}
@@ -1815,7 +1911,9 @@ const fetchEngagementMetrics = () => {
                   <DatePicker
                     label="Start Date"
                     value={dateRange[0]}
-                    onChange={(newValue) => setDateRange([newValue, dateRange[1]])}
+                    onChange={(newValue) =>
+                      setDateRange([newValue, dateRange[1]])
+                    }
                     slotProps={{
                       textField: { variant: "outlined", size: "small" },
                     }}
@@ -1823,37 +1921,68 @@ const fetchEngagementMetrics = () => {
                   <DatePicker
                     label="End Date"
                     value={dateRange[1]}
-                    onChange={(newValue) => setDateRange([dateRange[0], newValue])}
+                    onChange={(newValue) =>
+                      setDateRange([dateRange[0], newValue])
+                    }
                     slotProps={{
                       textField: { variant: "outlined", size: "small" },
                     }}
                   />
-                  <IconButton onClick={handleClick}>
-                    <MoreVert />
-                  </IconButton>
-                  <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                    <MenuItem onClick={fetchEngagementMetrics}>
-                      Engagement Graph
-                    </MenuItem>
-                  </Menu>
                 </div>
               </div>
             </LocalizationProvider>
             <div className="h-[300px]">
-              <ResponsiveContainer>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar
-                    dataKey="value"
-                    fill="#673ab7"
-                    barSize={40}
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              {chartData.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  No engagement data available for the selected date range.
+                </div>
+              ) : (
+                <ResponsiveContainer>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                    <XAxis
+                      dataKey="day"
+                      label={{
+                        value: "Day",
+                        position: "insideBottom",
+                        offset: -5,
+                      }}
+                    />
+                    <YAxis
+                      domain={[0, "auto"]}
+                      label={{
+                        value: "Engagement",
+                        angle: -90,
+                        position: "insideLeft",
+                      }}
+                    />
+                    <Tooltip
+                      content={
+                        <CustomTooltip
+                          active={undefined}
+                          payload={undefined}
+                          label={undefined}
+                        />
+                      }
+                    />
+                    <Legend />
+                    <Bar
+                      dataKey="dm"
+                      name="DMs"
+                      fill="#FF6384"
+                      barSize={20}
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="comment"
+                      name="Comments"
+                      fill="#36A2EB"
+                      barSize={20}
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
@@ -2158,7 +2287,6 @@ const fetchEngagementMetrics = () => {
                           </Button>
                         </Box>
                       )}
-                      {/* Display replies to this comment */}
                       {currentPost.comments
                         .filter((reply: any) => reply.parentId === c.commentId)
                         .map((reply: any) => (
