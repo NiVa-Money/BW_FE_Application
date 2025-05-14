@@ -321,13 +321,45 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const handleResolution = (resolution: any) => {
     setShowConfirmationModal(false);
     if (resolution === "Yes") {
-      setIsChatEnabled(false);
-      socket.current?.emit("closeSession", {
-        sessionId: selectedSessionId,
-        userId,
-        botId,
-        userType: "AGENT",
-      });
+      // First send a message that the agent is ending the chat
+      if (socket.current && selectedSessionId) {
+        const endChatMessage =
+          "Agent has ended the chat. Thank you for your time.";
+
+        // Send the message to the server
+        socket.current.emit("messageToServer", {
+          sessionId: selectedSessionId,
+          userId,
+          botId,
+          message: endChatMessage,
+          userType: "AGENT",
+        });
+
+        // Add the message locally to the chat
+        setMessages((prev) => [
+          ...prev,
+          {
+            text: endChatMessage,
+            sender: "agent",
+            timestamp: new Date().toISOString(),
+            chatMode: "manual",
+          },
+        ]);
+
+        // Wait a short time for the message to be sent before closing
+        setTimeout(() => {
+          setIsChatEnabled(false);
+          socket.current?.emit("closeSession", {
+            sessionId: selectedSessionId,
+            userId,
+            botId,
+            userType: "AGENT",
+          });
+        }, 1500); // Wait 1.5 seconds before closing
+      } else {
+        // Fallback if socket or sessionId is not available
+        setIsChatEnabled(false);
+      }
     }
   };
 
