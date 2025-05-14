@@ -134,7 +134,7 @@ const Login = () => {
                   } else {
                     setError(
                       response.message ||
-                        "Google login failed. Please try again."
+                      "Google login failed. Please try again."
                     );
                   }
                 } catch (error) {
@@ -278,6 +278,21 @@ const Login = () => {
                   {error && (
                     <div className="text-red-500 text-sm mt-2">{error}</div>
                   )}
+                  <div className="mb-6 mt-4">
+                    <div className="flex items-center gap-2 px-6 py-4 bg-[#fef7ff] ">
+                      <input
+                        type="checkbox"
+                        className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 items-start border-gray-300 rounded mr-2 mt-5"
+
+                        // checked={formik.values.modules.includes(
+                        //   module.value as number
+                        // )}
+                        onChange={() => { }}
+                      />
+                      <span className="font-[400] text-[#49454F] text-[smaller]">By selecting 'Create account', you confirm that you have read and agree to Botwot iCX's Terms of Use and Privacy Policy, and you may choose to receive emails about weekly flyers, rollback & clearance items, exclusive products, and other offers. You can unsubscribe anytime.</span>
+                    </div>
+
+                  </div>
 
                   {/* Login Button */}
                   <div className="flex flex-col items-center self-center mt-16 w-full max-w-[600px] min-h-[323px] max-md:mt-10 max-md:max-w-full">
