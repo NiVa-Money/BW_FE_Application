@@ -365,7 +365,7 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
               </div>
             ))}
             <button
-              className="w-full h-10 text-base text-center bg-gray-100 font-medium text-[#005C4B] border border-[#005C4B] rounded-md opacity-50 cursor-not-allowed"
+              className="w-full h-10 text-base text-center bg-gray-100 font-medium text-[#005C4B] border border-[#005C4B] rounded-md opacity-50 cursor-not-allowed mt-2"
               disabled
             >
               {listButtonText}
@@ -378,8 +378,8 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
             {renderStatus(status)}
           </div>
         );
-      } else if (type === "location_request_message") {
-        const actionName = interactive.action?.name || "Send Location";
+      } else if (type === "button") {
+        const buttons = interactive.action?.buttons || [];
 
         messageContent = (
           <div className={getClasses(interactiveClasses)}>
@@ -388,12 +388,49 @@ const MessageComponent = ({ msg, isUserQuery, content, msgType }) => {
                 {bodyText}
               </p>
             )}
+            {buttons.length > 0 && (
+              <div className="space-y-2">
+                {buttons.map((btn, i) => (
+                  <button
+                    key={i}
+                    className="w-full h-10 text-base text-center bg-gray-100 font-medium text-[#005C4B] border border-[#005C4B] rounded-md opacity-50 cursor-not-allowed"
+                    disabled
+                  >
+                    {btn.reply?.title || "Button"}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {renderStatus(status)}
+          </div>
+        );
+      } else if (type === "location_request_message") {
+        const actionName = interactive.action?.name || "Send Location";
+
+        messageContent = (
+          <div className={getClasses(interactiveClasses)}>
+            {headerText && (
+              <strong className="block mb-2 text-lg font-semibold text-gray-800">
+                {headerText}
+              </strong>
+            )}
+            {bodyText && (
+              <p className="whitespace-pre-wrap mb-3 text-gray-700">
+                {bodyText}
+              </p>
+            )}
             <button
-              className="w-full h-10 text-base text-center bg-gray-100 font-medium text-[#005C4B] border border-[#005C4B] rounded-md opacity-50 cursor-not-allowed"
+              className="w-full h-10 text-base text-center bg-gray-100 font-medium text-[#005C4B] border border-[#005C4B] rounded-md opacity-50 cursor-not-allowed mt-2"
               disabled
             >
               {actionName}
             </button>
+            {footerText && (
+              <span className="mt-3 block text-sm italic text-gray-500">
+                {footerText}
+              </span>
+            )}
             {renderStatus(status)}
           </div>
         );
