@@ -131,12 +131,12 @@ const EngagementTab = () => {
   const socketRef = useRef<Socket | null>(null);
   const orgId = localStorage.getItem("orgId");
   const [sentimentData, setSentimentData] = useState<{
-  instagram: { dmSentiment: any; commentSentiment: any } | null;
-  facebook: { dmSentiment: any; commentSentiment: any } | null;
-}>({
-  instagram: null,
-  facebook: null,
-});
+    instagram: { dmSentiment: any; commentSentiment: any } | null;
+    facebook: { dmSentiment: any; commentSentiment: any } | null;
+  }>({
+    instagram: null,
+    facebook: null,
+  });
 
   // Fetch platform-specific integrationIds
   useEffect(() => {
@@ -312,34 +312,34 @@ const EngagementTab = () => {
   };
 
   const fetchSentiment = () => {
-  if (!orgId) {
-    setError("Organization ID is missing. Please log in again.");
-    return;
-  }
+    if (!orgId) {
+      setError("Organization ID is missing. Please log in again.");
+      return;
+    }
 
-  const igUserId = igInitialData?.conversations?.[0]?.userId;
-  const fbUserId = fbInitialData?.conversations?.[0]?.userId;
+    const igUserId = igInitialData?.conversations?.[0]?.userId;
+    const fbUserId = fbInitialData?.conversations?.[0]?.userId;
 
-  if (platform === "instagram" && integrationId && igUserId) {
-    const igPayload = {
-      integrationId,
-      igUserId,
-      orgId,
-    };
-    socketRef.current?.emit("igUserSentiment", igPayload);
-    console.log("Emitted igUserSentiment with payload:", igPayload);
-  }
+    if (platform === "instagram" && integrationId && igUserId) {
+      const igPayload = {
+        integrationId,
+        igUserId,
+        orgId,
+      };
+      socketRef.current?.emit("igUserSentiment", igPayload);
+      console.log("Emitted igUserSentiment with payload:", igPayload);
+    }
 
-  if (platform === "facebook" && facebookIntegrationId && fbUserId) {
-    const fbPayload = {
-      integrationId: facebookIntegrationId,
-      fbUserId,
-      orgId,
-    };
-    socketRef.current?.emit("fbUserSentiment", fbPayload);
-    console.log("Emitted fbUserSentiment with payload:", fbPayload);
-  }
-};
+    if (platform === "facebook" && facebookIntegrationId && fbUserId) {
+      const fbPayload = {
+        integrationId: facebookIntegrationId,
+        fbUserId,
+        orgId,
+      };
+      socketRef.current?.emit("fbUserSentiment", fbPayload);
+      console.log("Emitted fbUserSentiment with payload:", fbPayload);
+    }
+  };
 
   const updateConversation = useCallback((data: any, channel: string) => {
     setConversations((prev) => {
@@ -815,7 +815,14 @@ const EngagementTab = () => {
       });
 
       socket.on("igUserSentimentSuccess", (data) => {
-        console.log("Received Instagram user sentiment:", data);
+        console.log(
+          "igUserSentimentSuccess: Received Instagram user sentiment",
+          {
+            data,
+            platform,
+            timestamp: new Date().toISOString(),
+          }
+        );
         setSentimentData((prev) => ({
           ...prev,
           instagram: {
@@ -827,7 +834,14 @@ const EngagementTab = () => {
       });
 
       socket.on("igUserSentimentError", (err) => {
-        console.error("Instagram user sentiment error:", err);
+        console.error(
+          "igUserSentimentError: Failed to fetch Instagram user sentiment",
+          {
+            error: err,
+            platform,
+            timestamp: new Date().toISOString(),
+          }
+        );
         setError("Failed to fetch Instagram user sentiment. Please try again.");
       });
 
