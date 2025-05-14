@@ -9,11 +9,14 @@ export const whatsAppDashboardService = async (
 ): Promise<any> => {
   // Replace `any` with your expected response type if available
   try {
-    const response = await axiosInstance.post("/marketing/whatsapp/dashboard/v2", {
-      campaignId,
-      startDate,
-      endDate,
-    });
+    const response = await axiosInstance.post(
+      "/marketing/whatsapp/dashboard/v2",
+      {
+        campaignId,
+        startDate,
+        endDate,
+      }
+    );
 
     return response.data; // Return the data from the API response
   } catch (error) {
@@ -81,3 +84,41 @@ export const whatsAppDashboardCampaignInsightsService = async (
   }
 };
 
+export const exportWhatsAppMessages = async (params: {
+  page: number;
+  limit?: number;
+  filter?: {
+    campaignIds?: string[];
+    receiverNumber?: string;
+    status?: string;
+    intent?: string;
+    sentiment?: string;
+  };
+}) => {
+  try {
+    const response = await axiosInstance.post(
+      "/marketing/whatsapp/messages-overview/export",
+      params,
+      {
+        responseType: "blob", // Required for downloading binary files
+      }
+    );
+
+    // Get filename from content-disposition header (if available)
+    const contentDisposition = response.headers["content-disposition"];
+    const suggestedFilename =
+      contentDisposition?.split("filename=")[1]?.replace(/['"]/g, "") ||
+      "whatsapp-messages.xlsx";
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", suggestedFilename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Export failed:", error);
+    throw error;
+  }
+};
