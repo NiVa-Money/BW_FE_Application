@@ -1650,58 +1650,48 @@ const AllChats = () => {
           "handleSearch - Failed to fetch sessions:",
           response.payload?.message
         );
-        notifyError("Failed to fetch chat sessions.");
+        console.error("Failed to fetch chat sessions.");
       }
     } catch (error) {
       console.error("handleSearch - Search error:", error);
-      notifyError("Failed to fetch chat sessions.");
     }
   };
 
   // Handle navigation-based session fetch
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const phoneNumber = queryParams.get("phoneNumber");
+    const phone = queryParams.get("phoneNumber");
 
-    if (!phoneNumber || !botIdVal) {
-      console.log(
-        "location.search - Skipping fetch: phoneNumber or botIdVal missing",
-        { phoneNumber, botIdVal }
-      );
-      return;
-    }
-
-    const fetchSessionByPhoneNumber = async () => {
-      const formattedPhoneNumber = phoneNumber.startsWith("+91")
-        ? phoneNumber.replace("+91", "")
-        : phoneNumber;
-
-      console.log(
-        "location.search - Fetching session for phoneNumber:",
-        formattedPhoneNumber
-      );
-
-      setSearchValue(formattedPhoneNumber);
-      setSearchType("phone");
+    if (phone && sessionsDataRedux?.sessions?.length > 0) {
+      setSearchValue(phone);
       setIsSearchActive(true);
+      setSearchResults(sessionsDataRedux.sessions); // ✅ use the existing fetched sessions
+      const firstSessionId =
+        channelNameVal === "whatsapp"
+          ? sessionsDataRedux.sessions[0].userPhoneId
+          : sessionsDataRedux.sessions[0]._id;
+
+      setSessionId(firstSessionId);
+      handleSessionSelection(firstSessionId);
+      setMessages(sessionsDataRedux.sessions[0].sessions || []);
+    }
+  }, [location.search, sessionsDataRedux, channelNameVal]);
+
+  useEffect(() => {
+    const fetchSessionByPhoneNumber = async () => {
+      if (!botIdVal || !searchValue || !isSearchActive) return;
 
       const data = {
         botId: botIdVal,
         page: 1,
         channelName: channelNameVal,
-        phoneNumber: formattedPhoneNumber,
+        phoneNumber: searchValue.trim(),
       };
 
       try {
-        const response: any = await dispatch(getAllSession(data));
-        console.log("location.search useEffect - API Response:", response);
-
-        if (response.payload?.success) {
-          const filteredSessions = response.payload.data.sessions || [];
-          console.log(
-            "location.search - Setting searchResults to:",
-            filteredSessions
-          );
+        const response = await dispatch(getAllSession(data));
+        if (response?.payload?.success) {
+          const filteredSessions = response.payload.data.sessions;
           setSearchResults(filteredSessions);
 
           if (filteredSessions.length > 0) {
@@ -1709,34 +1699,21 @@ const AllChats = () => {
               channelNameVal === "whatsapp"
                 ? filteredSessions[0].userPhoneId
                 : filteredSessions[0]._id;
+
             setSessionId(firstSessionId);
             handleSessionSelection(firstSessionId);
-          } else {
-            console.log(
-              "location.search - No sessions found for the search criteria."
-            );
-            notifyError(
-              "No chat sessions found for the provided phone number."
-            );
-            setSearchResults([]);
+            setMessages(filteredSessions[0].sessions || []);
           }
         } else {
-          console.error(
-            "location.search - Failed to fetch sessions:",
-            response.payload?.message || "Unknown error"
-          );
-          notifyError("Failed to fetch chat sessions.");
-          setSearchResults([]);
+          console.error("Failed to fetch chat session.");
         }
       } catch (error) {
-        console.error("location.search - Failed to fetch session:", error);
-        notifyError("Failed to fetch chat sessions.");
-        setSearchResults([]);
+        console.error("Error fetching session by phone number:", error);
       }
     };
 
     fetchSessionByPhoneNumber();
-  }, [location.search, botIdVal, channelNameVal, dispatch]);
+  }, [botIdVal, searchValue, isSearchActive]);
 
   // Log state updates for debugging
   useEffect(() => {
@@ -1988,6 +1965,59 @@ const AllChats = () => {
     location.search,
   ]);
 
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const sourceData = isSearchActive
+      ? searchResults
+      : sessionsDataRedux?.sessions || [];
+
+    const selectedSession = sourceData.find(
+      (obj) => obj._id === sessionId || obj.userPhoneId === sessionId
+    );
+
+    if (!selectedSession) {
+      console.log("Selected session not found for sessionId:", sessionId);
+      return; // ❌ Don't show error here — just skip silently
+    }
+
+    console.log("Handling session selection for sessionId:", sessionId);
+
+    setTalkWithHuman(selectedSession?.handledBy === "Human");
+    setIsBlocked(selectedSession?.isBlocked || false);
+    setIsFavorite(selectedSession?.isFavorite || false);
+    setMessages(selectedSession.sessions || []);
+
+    const adminPhoneNumberId = selectedSession?.adminPhoneNumberId;
+    const userPhoneNumberId = selectedSession?.userPhoneId;
+
+    console.log("Dispatching getAdvanceFeature with params:", {
+      sessionId,
+      botIdVal,
+      adminPhoneNumberId,
+      userPhoneNumberId,
+      channelNameVal,
+    });
+
+    dispatch(
+      getAdvanceFeature(
+        sessionId,
+        botIdVal,
+        adminPhoneNumberId,
+        userPhoneNumberId,
+        channelNameVal
+      )
+    );
+  }, [
+    sessionId,
+    isSearchActive,
+    searchResults,
+    sessionsDataRedux?.sessions,
+    botIdVal,
+    channelNameVal,
+    dispatch,
+  ]);
+
   const handleSessionSelection = (selectedSessionId: string) => {
     const sourceData = isSearchActive
       ? searchResults
@@ -2003,7 +2033,7 @@ const AllChats = () => {
         "Selected session not found for sessionId:",
         selectedSessionId
       );
-      notifyError("Selected session not found.");
+
       setSessionId("");
       setMessages([]);
       setTalkWithHuman(false);

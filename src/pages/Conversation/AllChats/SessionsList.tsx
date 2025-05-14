@@ -154,7 +154,7 @@
 
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { formatDateString } from "../../../hooks/functions";
 import { markWhatsAppMessageAsRead } from "../../../api/services/conversationServices";
 import StarIcon from "@mui/icons-material/Star";
@@ -187,35 +187,13 @@ const SessionsList: React.FC<SessionsListProps> = ({
     website: "/assets/website.png",
   };
 
-  const [sessionsDataState, setSessionsDataState] = useState(sessionsData);
-
-  useEffect(() => {
-    console.log("SessionsList - Received sessionsData:", sessionsData);
-    setSessionsDataState(sessionsData);
-    console.log("SessionsList - Updated sessionsDataState to:", sessionsData);
-  }, [sessionsData]);
-
-  useEffect(() => {
-    console.log("SessionsList - sessionsDataState updated:", sessionsDataState);
-  }, [sessionsDataState]);
-
   const handleSessionClick = async (item: any) => {
     const id = channelNameVal === "whatsapp" ? item.userPhoneId : item._id;
 
     if (channelNameVal === "whatsapp" && item.unreadCount > 0) {
       try {
-        await markWhatsAppMessageAsRead(
-          item.userPhoneId,
-          item.adminPhoneNumberId
-        );
-
-        // Update unread count in state
-        const updatedSessions = sessionsDataState.map((session) =>
-          session.userPhoneId === item.userPhoneId
-            ? { ...session, unreadCount: 0 }
-            : session
-        );
-        setSessionsDataState(updatedSessions);
+        await markWhatsAppMessageAsRead(item.userPhoneId, item.adminPhoneNumberId);
+        // The parent component (AllChats) will handle updating the unread count
       } catch (error) {
         console.error("Error marking message as read:", error);
       }
@@ -226,11 +204,11 @@ const SessionsList: React.FC<SessionsListProps> = ({
 
   return (
     <div className="w-80 bg-white p-4 border-r overflow-y-scroll">
-      {sessionsDataState.length === 0 ? (
+      {sessionsData.length === 0 ? (
         <div className="text-center text-gray-500 p-4">No sessions found</div>
       ) : (
         <div className="flex flex-col gap-1">
-          {sessionsDataState.map((item, index) => (
+          {sessionsData.map((item, index) => (
             <div
               key={item._id || item.userPhoneId}
               className="relative flex justify-between items-center p-[8px] rounded-[10px] cursor-pointer hover:bg-gray-100"
@@ -285,9 +263,8 @@ const SessionsList: React.FC<SessionsListProps> = ({
         </div>
       )}
 
-      {sessionsDataState?.length > 0 ? (
+      {sessionsData?.length > 0 ? (
         <div className="flex justify-between mt-4">
-          {/* Previous Button */}
           <button
             disabled={page === 1}
             onClick={() => setPage && setPage(page! - 1)}
@@ -298,7 +275,6 @@ const SessionsList: React.FC<SessionsListProps> = ({
 
           <span className="mt-2">{page}</span>
 
-          {/* Next Button */}
           <button
             disabled={sessionFetched < 20}
             onClick={() => setPage && setPage(page! + 1)}
