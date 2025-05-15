@@ -46,6 +46,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
   const [sessionMetrics, setSessionMetrics] = useState<any>(null);
   const [error, setError] = useState<string>("");
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+  const [showDetails, setShowDetails] = useState({});
 
   // ---------- Memoized Selectors ----------
   const selectUserChat = (state: RootState) => state.userChat;
@@ -121,6 +122,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
         });
 
         socket.current?.on("sessionMetrics", (metrics: any) => {
+          console.log("Session metrics:", metrics);
           setSessionMetrics(metrics);
         });
       });
@@ -151,8 +153,6 @@ const LiveChat: React.FC = (): React.ReactElement => {
             if (messageExists) return prev;
             return [...prev, newMessage];
           });
-
-          playNotificationSound();
         }
       });
 
@@ -453,14 +453,8 @@ const LiveChat: React.FC = (): React.ReactElement => {
     setError("");
   };
 
-  const playNotificationSound = () => {
-    const audio = new Audio("https://jumpshare.com/s/NiLeGdQk6YJJh1PzNDg4");
-    audio.play().catch((error: any) => {
-      console.log("Audio play failed:", error);
-    });
-  };
-
   const suggestedResponses = sessionMetrics?.suggestedResponses || [];
+  console.log("Suggested responses:", suggestedResponses);
 
   return (
     <div className="h-screen flex flex-col relative">
@@ -644,7 +638,7 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
                 <div className="p-2 bg-gray-50 border-t border-gray-200">
                   <div className="flex flex-wrap gap-2">
-                    {suggestedResponses.map((response, index) => (
+                    {/* {suggestedResponses.map((response, index) => (
                       <button
                         key={index}
                         className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100 text-left"
@@ -652,6 +646,46 @@ const LiveChat: React.FC = (): React.ReactElement => {
                       >
                         {response.message}
                       </button>
+                    ))} */}
+                    {suggestedResponses.map((response, index) => (
+                      <div
+                        key={index}
+                        className="px-4 py-2 bg-purple-50 border border-purple-100 rounded-lg text-left"
+                      >
+                        <button
+                          className="text-sm text-[#65558F] hover:underline mb-2"
+                          onClick={() => sendMessageQuick(response.message)}
+                        >
+                          {response.message}
+                        </button>
+                        <button
+                          className="text-xs text-[#65558F] ml-2 mb-2"
+                          onClick={() =>
+                            setShowDetails({
+                              ...showDetails,
+                              [index]: !showDetails[index],
+                            })
+                          }
+                        >
+                          {showDetails[index] ? "Hide Details" : "Show Details"}
+                        </button>
+                        {showDetails[index] && (
+                          <div className="text-xs text-gray-600">
+                            <p>
+                              <strong>Appropriateness Score:</strong>{" "}
+                              {response.appropriatenessScore}
+                            </p>
+                            <p>
+                              <strong>Emotional Tone:</strong>{" "}
+                              {response.emotionalTone}
+                            </p>
+                            <p>
+                              <strong>Expected Impact:</strong>{" "}
+                              {response.expectedImpact}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
