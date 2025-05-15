@@ -32,7 +32,7 @@ interface SignUpResponse {
 const SignUp: React.FC = () => {
   const [isOtpModalOpen, setOtpModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [, setErrorMessage] = useState<string>("");
   const [otpErrorMessage, setOtpErrorMessage] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -45,6 +45,7 @@ const SignUp: React.FC = () => {
   const [otp, setOtp] = useState<string>("");
   const [saveDataEmail, setSaveDataEmail] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
+  const [EUAChecked, setEUAChecked] = useState(false)
 
   const validateField = (name: keyof FormData, value: string): string => {
     switch (name) {
@@ -358,11 +359,8 @@ const SignUp: React.FC = () => {
                   <input
                     type="checkbox"
                     className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 items-start border-gray-300 rounded mr-2 mt-5"
-
-                    // checked={formik.values.modules.includes(
-                    //   module.value as number
-                    // )}
-                    onChange={() => { }}
+                    checked={EUAChecked}
+                    onChange={() => setEUAChecked(!EUAChecked)}
                   />
                   <span className="font-[400] text-[#49454F] text-[smaller]">By selecting 'Create account', you confirm that you have read and agree to Botwot iCX's Terms of Use and Privacy Policy, and you may choose to receive emails about weekly flyers, rollback & clearance items, exclusive products, and other offers. You can unsubscribe anytime.</span>
                 </div>
@@ -375,7 +373,7 @@ const SignUp: React.FC = () => {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !EUAChecked}
                   className="w-3/4 mt-4 py-4 bg-neutral-800 text-white text-xl font-medium rounded-full disabled:opacity-50 hover:bg-neutral-700 transition-colors"
                 >
                   {isSubmitting ? "Signing Up..." : "Sign-Up"}
