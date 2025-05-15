@@ -638,26 +638,19 @@ const LiveChat: React.FC = (): React.ReactElement => {
 
                 <div className="p-2 bg-gray-50 border-t border-gray-200">
                   <div className="flex flex-wrap gap-2">
-                    {/* {suggestedResponses.map((response, index) => (
-                      <button
-                        key={index}
-                        className="px-4 py-1.5 text-sm bg-purple-50 text-[#65558F] border border-purple-100 rounded-full hover:bg-purple-100 text-left"
-                        onClick={() => sendMessageQuick(response.message)}
-                      >
-                        {response.message}
-                      </button>
-                    ))} */}
                     {suggestedResponses.map((response, index) => (
                       <div
                         key={index}
                         className="px-4 py-2 bg-purple-50 border border-purple-100 rounded-lg text-left"
                       >
+                        {/* Clickable message button */}
                         <button
                           className="text-sm text-[#65558F] hover:underline mb-2"
                           onClick={() => sendMessageQuick(response.message)}
                         >
                           {response.message}
                         </button>
+                        {/* Toggle details button */}
                         <button
                           className="text-xs text-[#65558F] ml-2 mb-2"
                           onClick={() =>
@@ -669,20 +662,30 @@ const LiveChat: React.FC = (): React.ReactElement => {
                         >
                           {showDetails[index] ? "Hide Details" : "Show Details"}
                         </button>
+                        {/* Details as tags */}
                         {showDetails[index] && (
-                          <div className="text-xs text-gray-600">
-                            <p>
-                              <strong>Appropriateness Score:</strong>{" "}
-                              {response.appropriatenessScore}
-                            </p>
-                            <p>
-                              <strong>Emotional Tone:</strong>{" "}
-                              {response.emotionalTone}
-                            </p>
-                            <p>
-                              <strong>Expected Impact:</strong>{" "}
-                              {response.expectedImpact}
-                            </p>
+                          <div className="flex flex-wrap gap-2 text-xs">
+                            {/* Appropriateness Score Tag */}
+                            <span
+                              className="px-2 py-1 rounded-full text-white"
+                              style={{ backgroundColor: "#DB2828" }} // Red, similar to "bug" tag
+                            >
+                              Score: {response.appropriatenessScore}
+                            </span>
+                            {/* Emotional Tone Tag */}
+                            <span
+                              className="px-2 py-1 rounded-full text-white"
+                              style={{ backgroundColor: "#21BA45" }} // Green, similar to "help wanted" tag
+                            >
+                              Tone: {response.emotionalTone}
+                            </span>
+                            {/* Expected Impact Tag */}
+                            <span
+                              className="px-2 py-1 rounded-full text-white"
+                              style={{ backgroundColor: "#6435C9" }} // Purple, similar to "good first issue" tag
+                            >
+                              Impact: {response.expectedImpact}
+                            </span>
                           </div>
                         )}
                       </div>
