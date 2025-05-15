@@ -195,7 +195,7 @@ const Login = () => {
 
                 {/* Google Login */}
                 <div
-                  className="flex items-center justify-center gap-2 mt-6 p-3 bg-gray-200 border-8 border-gray-300 hover:bg-gray-300 text-black rounded-full cursor-pointer w-96 mx-auto"
+                  className="flex items-center justify-center gap-2 mt-6 p-3 bg-gray-200 hover:bg-gray-300 text-black rounded-full cursor-pointer w-96 mx-auto"
                   onClick={handleGoogleLogin}
                 >
                   <img
