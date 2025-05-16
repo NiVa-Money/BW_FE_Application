@@ -207,7 +207,6 @@ const EngagementTab = () => {
         "All required data available, fetching engagement metrics..."
       );
       fetchEngagementMetrics();
-      fetchSentiment();
     } else {
       console.warn("Cannot fetch engagement metrics. Missing required data:", {
         platform,
@@ -308,36 +307,6 @@ const EngagementTab = () => {
 
       socketRef.current?.emit("igEngagementMetrics", igPayload);
       console.log("Emitted igEngagementMetrics with payload:", igPayload);
-    }
-  };
-
-  const fetchSentiment = () => {
-    if (!orgId) {
-      setError("Organization ID is missing. Please log in again.");
-      return;
-    }
-
-    const igUserId = igInitialData?.conversations?.[0]?.userId;
-    const fbUserId = fbInitialData?.conversations?.[0]?.userId;
-
-    if (platform === "instagram" && integrationId && igUserId) {
-      const igPayload = {
-        integrationId,
-        igUserId,
-        orgId,
-      };
-      socketRef.current?.emit("igUserSentiment", igPayload);
-      console.log("Emitted igUserSentiment with payload:", igPayload);
-    }
-
-    if (platform === "facebook" && facebookIntegrationId && fbUserId) {
-      const fbPayload = {
-        integrationId: facebookIntegrationId,
-        fbUserId,
-        orgId,
-      };
-      socketRef.current?.emit("fbUserSentiment", fbPayload);
-      console.log("Emitted fbUserSentiment with payload:", fbPayload);
     }
   };
 
@@ -1423,55 +1392,96 @@ const EngagementTab = () => {
             </Select>
           </FormControl>
           <div className="bg-[#65558F] bg-opacity-[0.08] mt-4 rounded-lg overflow-y-auto flex-1">
-            {displayedItems.map((item) => (
-              <div
-                key={
-                  filterType === "conversations" ? item.userId : item.commentId
+            {displayedItems.map((item) => {
+              const isConversation = filterType === "conversations";
+              const itemId = isConversation ? item.userId : item.commentId;
+              const isSelected =
+                (isConversation && selectedConversationId === item.userId) ||
+                (!isConversation &&
+                  currentPost &&
+                  currentPost.postId === item.postId);
+
+              // Determine userId and platform for sentiment
+              const userId = isConversation
+                ? item.userId
+                : item.userId || item.username; // Use item.userId if available, fallback to username
+              const channel = item.CHANNEL;
+              const integrationIdToUse =
+                channel === "Facebook" ? facebookIntegrationId : integrationId;
+
+              const handleItemClick = () => {
+                if (isConversation) {
+                  setSelectedConversationId(item.userId);
+                  setCurrentPost(null);
+                } else {
+                  setSelectedConversationId(null);
+                  const post = posts.find((p) => p.postId === item.postId);
+                  setCurrentPost(post || null);
                 }
-                className={`p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer ${
-                  (filterType === "conversations" &&
-                    selectedConversationId === item.userId) ||
-                  (filterType === "comments" &&
-                    currentPost &&
-                    currentPost.postId === item.postId)
-                    ? "bg-gray-200"
-                    : ""
-                }`}
-                onClick={() => {
-                  if (filterType === "conversations") {
-                    setSelectedConversationId(item.userId);
-                    setCurrentPost(null);
+
+                // Trigger sentiment socket event
+                if (userId && orgId && integrationIdToUse) {
+                  const event =
+                    channel === "Instagram"
+                      ? "igUserSentiment"
+                      : "fbUserSentiment";
+                  const payload = {
+                    integrationId: integrationIdToUse,
+                    [channel === "Instagram" ? "igUserId" : "fbUserId"]: userId,
+                    orgId,
+                  };
+
+                  if (socketRef.current && socketRef.current.connected) {
+                    socketRef.current.emit(event, payload);
+                    console.log(`Emitted ${event} with payload:`, payload);
                   } else {
-                    setSelectedConversationId(null);
-                    const post = posts.find((p) => p.postId === item.postId);
-                    setCurrentPost(post || null);
+                    console.error(
+                      "Socket not connected, cannot emit sentiment event"
+                    );
+                    setError("Cannot fetch sentiment: Socket is disconnected.");
                   }
-                }}
-              >
-                <span className="w-8 h-8">
-                  {filterType === "conversations" ? (
-                    item.CHANNEL === "Instagram" ? (
-                      <Instagram />
+                } else {
+                  console.warn("Missing data for sentiment event:", {
+                    userId,
+                    orgId,
+                    integrationIdToUse,
+                  });
+                  setError("Cannot fetch sentiment: Missing required data.");
+                }
+              };
+              return (
+                <div
+                  key={itemId}
+                  className={`p-3 border-b border-gray-100 flex items-center gap-2 cursor-pointer ${
+                    isSelected ? "bg-gray-200" : ""
+                  }`}
+                  onClick={handleItemClick}
+                >
+                  <span className="w-8 h-8">
+                    {isConversation ? (
+                      channel === "Instagram" ? (
+                        <Instagram />
+                      ) : (
+                        <Facebook />
+                      )
                     ) : (
-                      <Facebook />
-                    )
-                  ) : (
-                    <Comment />
-                  )}
-                </span>
-                <div>
-                  {filterType === "conversations" ? (
-                    <p className="text-base">{item?.username || "Unknown"}</p>
-                  ) : (
-                    <p className="text-base">
-                      {item.username || "Unknown"} commented:{" "}
-                      {item.text || "No text"} (
-                      {new Date(item.timestamp).toLocaleTimeString()})
-                    </p>
-                  )}
+                      <Comment />
+                    )}
+                  </span>
+                  <div>
+                    {isConversation ? (
+                      <p className="text-base">{item?.username || "Unknown"}</p>
+                    ) : (
+                      <p className="text-base">
+                        {item.username || "Unknown"} commented:{" "}
+                        {item.text || "No text"} (
+                        {new Date(item.timestamp).toLocaleTimeString()})
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -1588,14 +1598,6 @@ const EngagementTab = () => {
                       <div className="flex justify-between">
                         <span className="text-black">Reason</span>
                         <span>Order mix up</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-black">Next Step</span>
-                        <span>Confirm order details</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-black">Predictive AI</span>
-                        <span>High resolution</span>
                       </div>
                     </div>
                     <hr className="my-2 border-gray-400" />
@@ -2078,9 +2080,13 @@ const EngagementTab = () => {
             <h2 className="text-sm font-semibold mb-3">
               AI Recommendation and Actions
             </h2>
-            {platform === "all-platforms" || !sentimentData[platform] ? (
+            {!(selectedConversationId || currentPost) ? (
               <p className="text-sm text-gray-500">
-                Select a platform to view recommendations
+                Select a conversation or comment to view recommendations
+              </p>
+            ) : platform === "all-platforms" || !sentimentData[platform] ? (
+              <p className="text-sm text-gray-500">
+                Waiting for sentiment data...
               </p>
             ) : (
               <div className="space-y-2">
@@ -2107,11 +2113,16 @@ const EngagementTab = () => {
             )}
           </div>
 
+          {/* Summary  */}
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <h2 className="text-sm font-semibold mb-3">Summary</h2>
-            {platform === "all-platforms" || !sentimentData[platform] ? (
+            {!(selectedConversationId || currentPost) ? (
               <p className="text-sm text-gray-500">
-                Select a platform to view summary
+                Select a conversation or comment to view summary
+              </p>
+            ) : platform === "all-platforms" || !sentimentData[platform] ? (
+              <p className="text-sm text-gray-500">
+                Waiting for sentiment data...
               </p>
             ) : (
               <div className="space-y-2">
@@ -2128,7 +2139,7 @@ const EngagementTab = () => {
                     key: "retention_probability",
                   },
                 ].map((item, index) => (
-                  <div key={index} className="flex justify-between">
+                  <div key={index} className="grid grid-cols-2 gap-4 ">
                     <p className="text-sm">{item.label}</p>
                     <p className="text-sm">
                       {filterType === "conversations"

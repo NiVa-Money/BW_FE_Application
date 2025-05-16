@@ -34,6 +34,7 @@ import {
   TrendingUp,
   People,
 } from "@mui/icons-material";
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import {
@@ -806,7 +807,7 @@ const WhatsappDash: FC<DashboardProps> = ({ campaignName = "Campaign 1" }) => {
             onClick={handleExportClick}
             className="flex items-center justify-center gap-2 px-6 py-2 bg-[#65558F] text-white rounded-full"
           >
-            📥
+            Download <CloudDownloadIcon/>
           </button>
         </div>
         <div className="flex flex-wrap gap-4 mb-2">
