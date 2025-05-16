@@ -5,8 +5,8 @@ import { io, Socket } from "socket.io-client";
 import {
   Instagram,
   Facebook,
-  LinkedIn,
-  Twitter,
+  // LinkedIn,
+  // Twitter,
   WhatsApp,
   AttachFile,
   Send,
@@ -130,6 +130,13 @@ const EngagementTab = () => {
   ]);
   const socketRef = useRef<Socket | null>(null);
   const orgId = localStorage.getItem("orgId");
+  const [sentimentData, setSentimentData] = useState<{
+    instagram: { dmSentiment: any; commentSentiment: any } | null;
+    facebook: { dmSentiment: any; commentSentiment: any } | null;
+  }>({
+    instagram: null,
+    facebook: null,
+  });
 
   // Fetch platform-specific integrationIds
   useEffect(() => {
@@ -179,6 +186,7 @@ const EngagementTab = () => {
   useEffect(() => {
     if (platform === "all-platforms") {
       setChartData([]); // Clear chart data when "All Platforms" is selected
+      setSentimentData({ instagram: null, facebook: null });
       return;
     }
 
@@ -199,6 +207,7 @@ const EngagementTab = () => {
         "All required data available, fetching engagement metrics..."
       );
       fetchEngagementMetrics();
+      fetchSentiment();
     } else {
       console.warn("Cannot fetch engagement metrics. Missing required data:", {
         platform,
@@ -299,6 +308,36 @@ const EngagementTab = () => {
 
       socketRef.current?.emit("igEngagementMetrics", igPayload);
       console.log("Emitted igEngagementMetrics with payload:", igPayload);
+    }
+  };
+
+  const fetchSentiment = () => {
+    if (!orgId) {
+      setError("Organization ID is missing. Please log in again.");
+      return;
+    }
+
+    const igUserId = igInitialData?.conversations?.[0]?.userId;
+    const fbUserId = fbInitialData?.conversations?.[0]?.userId;
+
+    if (platform === "instagram" && integrationId && igUserId) {
+      const igPayload = {
+        integrationId,
+        igUserId,
+        orgId,
+      };
+      socketRef.current?.emit("igUserSentiment", igPayload);
+      console.log("Emitted igUserSentiment with payload:", igPayload);
+    }
+
+    if (platform === "facebook" && facebookIntegrationId && fbUserId) {
+      const fbPayload = {
+        integrationId: facebookIntegrationId,
+        fbUserId,
+        orgId,
+      };
+      socketRef.current?.emit("fbUserSentiment", fbPayload);
+      console.log("Emitted fbUserSentiment with payload:", fbPayload);
     }
   };
 
@@ -775,6 +814,37 @@ const EngagementTab = () => {
         );
       });
 
+      socket.on("igUserSentimentSuccess", (data) => {
+        console.log(
+          "igUserSentimentSuccess: Received Instagram user sentiment",
+          {
+            data,
+            platform,
+            timestamp: new Date().toISOString(),
+          }
+        );
+        setSentimentData((prev) => ({
+          ...prev,
+          instagram: {
+            dmSentiment: data.data.dmSentiment,
+            commentSentiment: data.data.commentSentiment,
+          },
+        }));
+        setError(null);
+      });
+
+      socket.on("igUserSentimentError", (err) => {
+        console.error(
+          "igUserSentimentError: Failed to fetch Instagram user sentiment",
+          {
+            error: err,
+            platform,
+            timestamp: new Date().toISOString(),
+          }
+        );
+        setError("Failed to fetch Instagram user sentiment. Please try again.");
+      });
+
       // New Facebook Engagement Metrics Listeners
       socket.on("fbEngagementMetricsSuccess", (data) => {
         console.log("Received Facebook engagement metrics:", data);
@@ -808,6 +878,23 @@ const EngagementTab = () => {
         setError(
           "Failed to fetch Facebook engagement metrics. Please try again."
         );
+      });
+
+      socket.on("fbUserSentimentSuccess", (data) => {
+        console.log("Received Facebook user sentiment:", data);
+        setSentimentData((prev) => ({
+          ...prev,
+          facebook: {
+            dmSentiment: data.data.dmSentiment,
+            commentSentiment: data.data.commentSentiment,
+          },
+        }));
+        setError(null);
+      });
+
+      socket.on("fbUserSentimentError", (err) => {
+        console.error("Facebook user sentiment error:", err);
+        setError("Failed to fetch Facebook user sentiment. Please try again.");
       });
 
       socket.on("error", (e) => {
@@ -1151,9 +1238,9 @@ const EngagementTab = () => {
     filterType === "comments" && currentPost ? currentPost : null;
   const socialPlatforms = [
     { icon: <Instagram />, sentiment: 60 },
-    { icon: <Facebook />, sentiment: 60 },
-    { icon: <LinkedIn />, sentiment: 60 },
-    { icon: <Twitter />, sentiment: 60 },
+    { icon: <Facebook />, sentiment: 40 },
+    // { icon: <LinkedIn />, sentiment: 60 },
+    // { icon: <Twitter />, sentiment: 60 },
     { icon: <WhatsApp />, sentiment: 60 },
   ];
 
@@ -1986,41 +2073,76 @@ const EngagementTab = () => {
             </div>
           </div>
 
+          {/* AI Recommendation and Actions */}
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <h2 className="text-sm font-semibold mb-3">
               AI Recommendation and Actions
             </h2>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <p className="text-sm">Action</p>
-                <p className="text-sm">Sell the product</p>
+            {platform === "all-platforms" || !sentimentData[platform] ? (
+              <p className="text-sm text-gray-500">
+                Select a platform to view recommendations
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <p className="text-sm">Action</p>
+                  <p className="text-sm">
+                    {filterType === "conversations"
+                      ? sentimentData[platform]?.dmSentiment?.action || "N/A"
+                      : sentimentData[platform]?.commentSentiment?.action ||
+                        "N/A"}
+                  </p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-sm">AI Recommendation</p>
+                  <p className="text-sm">
+                    {filterType === "conversations"
+                      ? sentimentData[platform]?.dmSentiment
+                          ?.ai_recommendation || "N/A"
+                      : sentimentData[platform]?.commentSentiment
+                          ?.ai_recommendation || "N/A"}
+                  </p>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <p className="text-sm">AI Recommendation</p>
-                <p className="text-sm">Sell the product</p>
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="bg-[#65558F] bg-opacity-[0.08] rounded-lg p-4">
             <h2 className="text-sm font-semibold mb-3">Summary</h2>
-            <div className="space-y-2">
-              {[
-                { label: "Potential Risk", value: "Low" },
-                { label: "Sales Opportunity", value: "High" },
-                {
-                  label: "Upcoming Trends",
-                  value: "AI-driven automation is gaining traction",
-                },
-                { label: "Resolution Likelihood", value: "High" },
-                { label: "Retention Probability", value: "95%" },
-              ].map((item, index) => (
-                <div key={index} className="flex justify-between">
-                  <p className="text-sm">{item.label}</p>
-                  <p className="text-sm">{item.value}</p>
-                </div>
-              ))}
-            </div>
+            {platform === "all-platforms" || !sentimentData[platform] ? (
+              <p className="text-sm text-gray-500">
+                Select a platform to view summary
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {[
+                  { label: "Potential Risk", key: "potential_risk" },
+                  { label: "Sales Opportunity", key: "sales_opportunity" },
+                  { label: "Upcoming Trends", key: "upcoming_trends" },
+                  {
+                    label: "Resolution Likelihood",
+                    key: "resolution_likelihood",
+                  },
+                  {
+                    label: "Retention Probability",
+                    key: "retention_probability",
+                  },
+                ].map((item, index) => (
+                  <div key={index} className="flex justify-between">
+                    <p className="text-sm">{item.label}</p>
+                    <p className="text-sm">
+                      {filterType === "conversations"
+                        ? sentimentData[platform]?.dmSentiment?.summary?.[
+                            item.key
+                          ] || "N/A"
+                        : sentimentData[platform]?.commentSentiment?.summary?.[
+                            item.key
+                          ] || "N/A"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

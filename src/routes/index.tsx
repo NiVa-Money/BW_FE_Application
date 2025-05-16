@@ -6,7 +6,7 @@ import CreateBot from "../pages/CreateBot";
 import IntegrationsPage from "../pages/Integration";
 import EngagementTab from "../pages/Engagement";
 import MyBots from "../pages/MyBots/index";
-import EditBot from "../pages/EditBot/index1";
+import EditBot from "../pages/EditBot";
 import LiveChat from "../pages/Conversation/LiveChat";
 import TestBot from "../pages/TestBot";
 import WhatsAppIntegration from "../pages/Integration/WhatsappIntegration";

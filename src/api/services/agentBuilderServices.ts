@@ -36,10 +36,17 @@ export const editBotProfileService = async (botId: string, payload: any) => {
   try {
     const response = await axiosInstance.put(
       `/bot/editBotProfile/${botId}`,
-      payload
+      payload,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data", // Important for FormData
+        },
+      }
     );
+
     return response.data;
-  } catch {
+  } catch (err: any) {
+     console.error("Edit Bot API Error:", err?.response?.data || err.message);
     throw new Error("Error editing bot profile");
   }
 };
@@ -114,5 +121,38 @@ export const exportBotProfileService = async (payload: any) => {
     return response.data;
   } catch {
     throw new Error("Error exporting bot profile");
+  }
+};
+
+export const generatePromptService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post("/user/genrate-prompt", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error generating prompt:", error);
+    throw new Error("Error generating prompt");
+  }
+};
+
+export const botTestService = async (payload: any) => {
+  try {
+    const response = await axiosInstance.post("/user/sessionChatV2", {
+      data: JSON.stringify(payload),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error in bot test:", error);
+    throw new Error("Error in Creating Bot");
+  }
+};
+
+// Get Bot Profile by Bot ID
+export const getBotProfileByIDService = async (botId: string) => {
+  try {
+    const response = await axiosInstance.get(`/bot/getBotProfile/${botId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching bot profile:", error?.response?.data || error.message);
+    throw new Error("Error fetching bot profile");
   }
 };

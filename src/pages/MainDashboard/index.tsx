@@ -224,6 +224,7 @@ interface AgentData {
 const MainDashboard = () => {
   const dispatch = useDispatch();
   const botsDataRedux = useSelector((state: RootState) => state.bot.lists.data);
+  console.log("botsDataRedux", botsDataRedux);
   const userId = localStorage.getItem("user_id");
 
   const [selectedBotId, setSelectedBotId] = useState<string>("");

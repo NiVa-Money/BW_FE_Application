@@ -53,6 +53,7 @@ const Login = () => {
           );
         }
       } catch (err) {
+        console.error("Error logging in:", err);
         setError("An unexpected error occurred.");
       } finally {
         setIsLoading(false);
@@ -169,7 +170,7 @@ const Login = () => {
       <div className="overflow-hidden  bg-white rounded-none">
         <div className="flex gap-5 max-md:flex-col h-[100vh]">
           {/* Left Section */}
-          <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full overflow-scroll">
+          <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full">
             <div className="flex flex-col items-center self-stretch my-auto h-[100%] max-md:mt-10 max-md:max-w-full ">
               {/* Header */}
               <div className="flex relative flex-col justify-center self-stretch w-full max-md:max-w-full">
@@ -210,7 +211,7 @@ const Login = () => {
               </div>
 
               {/* Divider */}
-              <div className="mt-8 mb-0 text-base font-medium text-black">
+              <div className="mt-3 mb-0 text-base font-medium text-black">
                 - OR -
               </div>
 
@@ -240,7 +241,7 @@ const Login = () => {
                     ].map((field, index) => (
                       <div
                         key={index}
-                        className="relative flex gap-2.5 items-center px-6 py-2 mt-7 w-full bg-neutral-100 text-black rounded-[128px] max-md:px-5 max-md:max-w-full"
+                        className="relative flex gap-2.5 items-center px-6 py-2 mt-4 w-full bg-neutral-100 text-black rounded-[128px] max-md:px-5 max-md:max-w-full"
                       >
                         <img
                           loading="lazy"
@@ -292,10 +293,10 @@ const Login = () => {
                   </div>
 
                   {/* Login Button */}
-                  <div className="flex flex-col items-center self-center mt-16 w-full max-w-[600px]  max-md:mt-10 max-md:max-w-full mb-4">
+                  <div className="flex flex-col items-center self-center w-full max-w-[600px]  max-md:mt-10 max-md:max-w-full mb-4">
                     <button
                       type="submit"
-                      className="gap-2.5 self-stretch px-2.5 py-2 w-full text-xl text-white rounded-full bg-neutral-800 min-h-[55px] disabled:opacity-50 hover:bg-neutral-700 transition-colors"
+                      className="gap-2.5 self-stretch px-2.5 py-2 w-full text-xl text-white rounded-full bg-black min-h-[55px] disabled:opacity-50 hover:bg-neutral-700 transition-colors"
                       disabled={isLoading || !EUAChecked}
                     >
                       {isLoading ? "Logging in..." : "Log in"}
