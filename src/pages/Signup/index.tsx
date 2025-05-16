@@ -204,7 +204,7 @@ const SignUp: React.FC = () => {
 
         {/* Right Content Section */}
         <div className="w-1/2 max-md:w-full flex flex-col justify-center px-16 max-md:px-6 overflow-scroll">
-          <div className="max-w-md mx-auto w-full mt-[6rem] mb-[6rem]">
+          <div className="max-w-md mx-auto w-full mt-[8rem]">
             {/* Logo */}
             <div className="flex gap-4 mt-[7rem]">
               <a href="https://botwot.io" className="cursor-pointer">
