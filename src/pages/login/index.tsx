@@ -16,6 +16,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [EUAChecked, setEUAChecked] = useState(false)
 
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -52,7 +53,6 @@ const Login = () => {
           );
         }
       } catch (err) {
-        console.error("Error logging in with Google:", err);
         setError("An unexpected error occurred.");
       } finally {
         setIsLoading(false);
@@ -134,7 +134,7 @@ const Login = () => {
                   } else {
                     setError(
                       response.message ||
-                        "Google login failed. Please try again."
+                      "Google login failed. Please try again."
                     );
                   }
                 } catch (error) {
@@ -163,17 +163,17 @@ const Login = () => {
   useEffect(() => {
     document.title = "BotWot iCX - Login";
   }, []);
-
+  console.log("EUAChecked", EUAChecked, "isLoading", isLoading);
   return (
     <>
       <div className="overflow-hidden  bg-white rounded-none">
         <div className="flex gap-5 max-md:flex-col h-[100vh]">
           {/* Left Section */}
-          <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full">
-            <div className="flex flex-col items-center self-stretch my-auto h-[758px] max-md:mt-10 max-md:max-w-full">
+          <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full overflow-scroll">
+            <div className="flex flex-col items-center self-stretch my-auto h-[100%] max-md:mt-10 max-md:max-w-full ">
               {/* Header */}
               <div className="flex relative flex-col justify-center self-stretch w-full max-md:max-w-full">
-                <div className="flex z-0 flex-col justify-center items-start w-full ">
+                <div className="flex z-0 flex-col justify-center items-start w-full mt-[2rem]">
                   <div className="flex gap-4 justify-center items-center">
                     <a href="https://botwot.io" className="cursor-pointer">
                       <img
@@ -278,13 +278,25 @@ const Login = () => {
                   {error && (
                     <div className="text-red-500 text-sm mt-2">{error}</div>
                   )}
+                  <div className="mb-6 mt-4">
+                    <div className="flex items-center gap-2 px-6 py-4 bg-[#fef7ff] ">
+                      <input
+                        type="checkbox"
+                        className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 items-start border-gray-300 rounded mr-2 mt-5"
+                        checked={EUAChecked}
+                        onChange={() => setEUAChecked(!EUAChecked)}
+                      />
+                      <span className="font-[400] text-[#49454F] text-[smaller]">By selecting 'Create account', you confirm that you have read and agree to Botwot iCX's Terms of Use and Privacy Policy, and you may choose to receive emails about weekly flyers, rollback & clearance items, exclusive products, and other offers. You can unsubscribe anytime.</span>
+                    </div>
+
+                  </div>
 
                   {/* Login Button */}
-                  <div className="flex flex-col items-center self-center mt-16 w-full max-w-[600px] min-h-[323px] max-md:mt-10 max-md:max-w-full">
+                  <div className="flex flex-col items-center self-center mt-16 w-full max-w-[600px]  max-md:mt-10 max-md:max-w-full mb-4">
                     <button
                       type="submit"
-                      className="gap-2.5 self-stretch px-2.5 py-2 w-full text-xl text-white rounded-full bg-neutral-800 min-h-[55px]"
-                      disabled={isLoading}
+                      className="gap-2.5 self-stretch px-2.5 py-2 w-full text-xl text-white rounded-full bg-neutral-800 min-h-[55px] disabled:opacity-50 hover:bg-neutral-700 transition-colors"
+                      disabled={isLoading || !EUAChecked}
                     >
                       {isLoading ? "Logging in..." : "Log in"}
                     </button>
