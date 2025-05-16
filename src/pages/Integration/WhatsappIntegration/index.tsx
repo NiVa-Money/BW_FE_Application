@@ -12,7 +12,7 @@ const WhatsAppIntegration: React.FC = () => {
   const [formData, setFormData] = useState({
     botId: "bot-id",
     appId: "",
-    phoneNumberId: "",
+    phoneNumberId: 0,
     whatsappBusinessAccountId: "",
     phoneNumber: "",
     accessToken: "",
@@ -21,7 +21,7 @@ const WhatsAppIntegration: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [botLists, setbotLists] = useState<any>([]);
-
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
@@ -63,6 +63,7 @@ const WhatsAppIntegration: React.FC = () => {
     }
 
     try {
+      setErrorMessage("");
       dispatch(saveWhatsapp(formData)); // Trigger API call
       if (secretToken && webhookUrl) {
         setIsModalOpen(true); // Only open the modal if the data is available
@@ -85,12 +86,23 @@ const WhatsAppIntegration: React.FC = () => {
     (state: any) => state.integration?.webhookUrl || ""
   );
   console.log("Webhook URL:", webhookUrl); // Debugging
+  const handlePhoneNumberIdChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+    setFormData({ ...formData, phoneNumberId: value ? parseInt(value) : 0 });
+  };
 
   return (
     <div className="w-full flex justify-center items-center">
       <div className="w-full mt-12 justify-center items-center">
         {/* Form Container */}
         <div className="rounded-2xl p-8">
+          {errorMessage && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+              {errorMessage}
+            </div>
+          )}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <img
@@ -162,8 +174,9 @@ const WhatsAppIntegration: React.FC = () => {
                 type="text"
                 placeholder="Enter your Meta Mobile number ID"
                 className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-                onChange={(e) =>
-                  setFormData({ ...formData, phoneNumberId: e.target.value })
+                onChange={handlePhoneNumberIdChange}
+                value={
+                  formData.phoneNumberId === 0 ? "" : formData.phoneNumberId
                 }
               />
             </div>
@@ -175,7 +188,7 @@ const WhatsAppIntegration: React.FC = () => {
               {botLists.length === 0 ? (
                 <button
                   onClick={() => navigate("/createbot")}
-                 className="bg-[#65558F] w-[200px] text-white px-6 py-3 rounded-3xl font-semibold hover:bg-[#65558F]/85"
+                  className="bg-[#65558F] w-[200px] text-white px-6 py-3 rounded-3xl font-semibold hover:bg-[#65558F]/85"
                 >
                   Create Agent
                 </button>

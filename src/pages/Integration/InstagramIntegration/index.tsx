@@ -21,7 +21,7 @@ const InstagramIntegration: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [botLists, setbotLists] = useState<any>([]);
-
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
@@ -69,6 +69,7 @@ const InstagramIntegration: React.FC = () => {
     }
 
     try {
+      setErrorMessage("");
       const result = await saveInstagramService(formData);
 
       if (result?.data) {
@@ -101,6 +102,11 @@ const InstagramIntegration: React.FC = () => {
     <div className="w-full flex justify-center items-center">
       <div className="w-full mt-12 justify-center items-center">
         <div className="rounded-2xl p-8">
+          {errorMessage && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+              {errorMessage}
+            </div>
+          )}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <img
