@@ -32,7 +32,7 @@ interface SignUpResponse {
 const SignUp: React.FC = () => {
   const [isOtpModalOpen, setOtpModalOpen] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [, setErrorMessage] = useState<string>("");
   const [otpErrorMessage, setOtpErrorMessage] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -45,6 +45,7 @@ const SignUp: React.FC = () => {
   const [otp, setOtp] = useState<string>("");
   const [saveDataEmail, setSaveDataEmail] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
+  const [EUAChecked, setEUAChecked] = useState(false)
 
   const validateField = (name: keyof FormData, value: string): string => {
     switch (name) {
@@ -66,10 +67,10 @@ const SignUp: React.FC = () => {
         return value.length < 8
           ? "Password must be at least 8 characters long"
           : !value.match(/[A-Z]/)
-          ? "Password must contain at least one uppercase letter"
-          : !value.match(/[0-9]/)
-          ? "Password must contain at least one number"
-          : "";
+            ? "Password must contain at least one uppercase letter"
+            : !value.match(/[0-9]/)
+              ? "Password must contain at least one number"
+              : "";
       default:
         return "";
     }
@@ -133,8 +134,8 @@ const SignUp: React.FC = () => {
       } else {
         setErrorMessage(
           response.error ||
-            response.message ||
-            "Signup failed. Please try again."
+          response.message ||
+          "Signup failed. Please try again."
         );
       }
     } catch (error) {
@@ -202,10 +203,10 @@ const SignUp: React.FC = () => {
         </div>
 
         {/* Right Content Section */}
-        <div className="w-1/2 max-md:w-full flex flex-col justify-center px-16 max-md:px-6">
-          <div className="max-w-md mx-auto w-full">
+        <div className="w-1/2 max-md:w-full flex flex-col justify-center px-16 max-md:px-6 overflow-scroll">
+          <div className="max-w-md mx-auto w-full mt-[6rem] mb-[6rem]">
             {/* Logo */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 mt-[7rem]">
               <a href="https://botwot.io" className="cursor-pointer">
                 <img
                   loading="lazy"
@@ -353,17 +354,26 @@ const SignUp: React.FC = () => {
                 )}
               </div>
 
-              {errorMessage && (
-                <div className="text-red-500 text-sm mt-4 text-center">
-                  {errorMessage}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 px-6 py-4 bg-[#fef7ff] ">
+                  <input
+                    type="checkbox"
+                    className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 items-start border-gray-300 rounded mr-2 mt-5"
+                    checked={EUAChecked}
+                    onChange={() => setEUAChecked(!EUAChecked)}
+                  />
+                  <span className="font-[400] text-[#49454F] text-[smaller]">By selecting 'Create account', you confirm that you have read and agree to Botwot iCX's Terms of Use and Privacy Policy, and you may choose to receive emails about weekly flyers, rollback & clearance items, exclusive products, and other offers. You can unsubscribe anytime.</span>
                 </div>
-              )}
+
+              </div>
+
+
 
               {/* Sign-Up Button */}
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !EUAChecked}
                   className="w-3/4 mt-4 py-4 bg-neutral-800 text-white text-xl font-medium rounded-full disabled:opacity-50 hover:bg-neutral-700 transition-colors"
                 >
                   {isSubmitting ? "Signing Up..." : "Sign-Up"}
