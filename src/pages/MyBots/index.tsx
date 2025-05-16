@@ -44,7 +44,6 @@ const MyBots: React.FC = () => {
     (state: RootState) => state.bot?.lists?.data
   );
 
-  console.log("Bots Data Redux:", botsDataRedux);
   const createBotRedux = useSelector(
     (state: RootState) => state.bot?.create?.data
   );
@@ -276,9 +275,11 @@ const MyBots: React.FC = () => {
                       </span>
                       <br />
                       <span className="text-gray-600">
-                        {(bot.docName?.length ?? 0) > 15
-                          ? `${bot.docName.slice(0, 15)}...`
-                          : bot.docName || "No document"}
+                        {bot.docName && bot.docName.trim().length > 0
+                          ? bot.docName.length > 15
+                            ? `${bot.docName.slice(0, 15)}...`
+                            : bot.docName
+                          : "No document"}
                       </span>
                     </p>
                   </div>

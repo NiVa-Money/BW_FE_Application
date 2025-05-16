@@ -18,7 +18,6 @@ import BedtimeIcon from "@mui/icons-material/Bedtime";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { generatePromptService } from "../../api/services/botService";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
@@ -26,6 +25,7 @@ import {
   createBotProfileService,
   deleteKnowledgeBaseService,
   detachKnowledgeBaseService,
+  generatePromptService,
 } from "../../api/services/agentBuilderServices";
 import { Delete, LinkOff } from "@mui/icons-material";
 

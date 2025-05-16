@@ -5,8 +5,8 @@ import { io, Socket } from "socket.io-client";
 import {
   Instagram,
   Facebook,
-  LinkedIn,
-  Twitter,
+  // LinkedIn,
+  // Twitter,
   WhatsApp,
   AttachFile,
   Send,
@@ -1238,9 +1238,9 @@ const EngagementTab = () => {
     filterType === "comments" && currentPost ? currentPost : null;
   const socialPlatforms = [
     { icon: <Instagram />, sentiment: 60 },
-    { icon: <Facebook />, sentiment: 60 },
-    { icon: <LinkedIn />, sentiment: 60 },
-    { icon: <Twitter />, sentiment: 60 },
+    { icon: <Facebook />, sentiment: 40 },
+    // { icon: <LinkedIn />, sentiment: 60 },
+    // { icon: <Twitter />, sentiment: 60 },
     { icon: <WhatsApp />, sentiment: 60 },
   ];
 
