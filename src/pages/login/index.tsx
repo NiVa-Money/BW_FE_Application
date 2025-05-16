@@ -16,7 +16,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [EUAChecked, setEUAChecked] = useState(false)
+  const [EUAChecked, setEUAChecked] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -135,7 +135,7 @@ const Login = () => {
                   } else {
                     setError(
                       response.message ||
-                      "Google login failed. Please try again."
+                        "Google login failed. Please try again."
                     );
                   }
                 } catch (error) {
@@ -196,7 +196,7 @@ const Login = () => {
 
                 {/* Google Login */}
                 <div
-                  className="flex items-center justify-center gap-2 mt-6 p-3 bg-gray-200 hover:bg-gray-300 text-black rounded-full cursor-pointer w-96 mx-auto"
+                  className="flex items-center justify-center gap-2 mt-6 p-3 bg-gray-200 hover:bg-gray-300 text-black rounded-full cursor-pointer w-96 mx-auto shadow-lg"
                   onClick={handleGoogleLogin}
                 >
                   <img
@@ -287,9 +287,14 @@ const Login = () => {
                         checked={EUAChecked}
                         onChange={() => setEUAChecked(!EUAChecked)}
                       />
-                      <span className="font-[400] text-[#49454F] text-[smaller]">By selecting 'Create account', you confirm that you have read and agree to Botwot iCX's Terms of Use and Privacy Policy, and you may choose to receive emails about weekly flyers, rollback & clearance items, exclusive products, and other offers. You can unsubscribe anytime.</span>
+                      <span className="font-[400] text-[#49454F] text-[smaller]">
+                        By selecting 'Create account', you confirm that you have
+                        read and agree to Botwot iCX's Terms of Use and Privacy
+                        Policy, and you may choose to receive emails about
+                        weekly flyers, rollback & clearance items, exclusive
+                        products, and other offers. You can unsubscribe anytime.
+                      </span>
                     </div>
-
                   </div>
 
                   {/* Login Button */}
