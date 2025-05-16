@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -49,6 +48,8 @@ const CrudIntegration: React.FC = () => {
   });
 
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
+  const [phoneError, setPhoneError] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [botLists, setBotLists] = useState<any[]>([]);
 
   const botsDataRedux = useSelector(
@@ -69,7 +70,7 @@ const CrudIntegration: React.FC = () => {
       setFormData({
         botId: integration.botId || "",
         appId: integration.appId || "",
-        phoneNumberId: integration.phoneNumberId || "",
+        phoneNumberId: integration.phoneNumberId || 0,
         whatsappBusinessAccountId: integration.whatsappBusinessAccountId || "",
         phoneNumber: integration.phoneNumber || "",
         accessToken: integration.accessToken || "",
@@ -103,18 +104,70 @@ const CrudIntegration: React.FC = () => {
 
   const secretToken = integration?.secretToken || "";
 
-  const handleUpdate = () => {
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    setFormData({ ...formData, phoneNumber: value });
+  };
+
+  const handlePhoneNumberIdChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value.replace(/\D/g, "");
+    setFormData({ ...formData, phoneNumberId: value ? parseInt(value) : 0 });
+  };
+
+  const validatePhoneNumber = (phone: string, code: string): string => {
+    const length = phone.length;
+    switch (code) {
+      case "+1": // USA
+      case "+234": // Nigeria
+      case "+91": // India
+      case "+44": // UK
+      case "+66": // Thailand
+      case "+60": // Malaysia
+        return length === 10
+          ? ""
+          : `Phone number must be 10 digits for ${code}.`;
+      case "+971": // UAE
+      case "+61": // Australia
+      case "+852": // Hong Kong
+        return length === 9 ? "" : `Phone number must be 9 digits for ${code}.`;
+      default:
+        return "Unsupported country code.";
+    }
+  };
+
+  const handleUpdate = async () => {
     if (
       !formData.botId ||
       !formData.appId ||
       !formData.phoneNumber ||
       !formData.accessToken
     ) {
-      alert("Please fill in all required fields.");
+      setErrorMessage("Please fill in all required fields.");
       return;
     }
-    dispatch(updateWhatsappRequest({ ...formData, secretToken }));
-    navigate("/integrations");
+
+    const phoneValidationError = validatePhoneNumber(
+      formData.phoneNumber,
+      formData.countryCode
+    );
+    if (phoneValidationError) {
+      setPhoneError(phoneValidationError);
+      return;
+    }
+
+    try {
+      setErrorMessage("");
+      setPhoneError("");
+      await dispatch(updateWhatsappRequest({ ...formData, secretToken }));
+      navigate("/integrations");
+    } catch (error) {
+      console.error("Error updating WhatsApp integration:", error);
+      setErrorMessage(
+        "Failed to update WhatsApp integration. Please try again."
+      );
+    }
   };
 
   const handleDelete = () => {
@@ -130,6 +183,11 @@ const CrudIntegration: React.FC = () => {
     <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
         <div className="rounded-2xl p-8">
+          {errorMessage && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+              {errorMessage}
+            </div>
+          )}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <img
@@ -139,7 +197,6 @@ const CrudIntegration: React.FC = () => {
               />
               <h2 className="text-4xl font-semibold">WhatsApp Integration</h2>
             </div>
-
             <div className="flex gap-4">
               <button
                 onClick={handleUpdate}
@@ -184,16 +241,22 @@ const CrudIntegration: React.FC = () => {
                   <option value="+971">(+971)</option>
                   <option value="+234">(+234)</option>
                   <option value="+91">(+91)</option>
+                  <option value="+44">(+44)</option>
+                  <option value="+61">(+61)</option>
+                  <option value="+852">(+852)</option>
+                  <option value="+66">(+66)</option>
+                  <option value="+60">(+60)</option>
                 </select>
                 <input
                   type="text"
                   value={formData.phoneNumber}
                   placeholder="Enter your WhatsApp number"
                   className="flex-1 p-3 border border-gray-300 rounded-r-lg"
-                  onChange={(e) =>
-                    setFormData({ ...formData, phoneNumber: e.target.value })
-                  }
+                  onChange={handlePhoneNumberChange}
                 />
+                {phoneError && (
+                  <p className="text-red-600 text-sm mt-1">{phoneError}</p>
+                )}
               </div>
 
               <label className="block text-gray-700 font-medium mb-2">
@@ -201,15 +264,12 @@ const CrudIntegration: React.FC = () => {
               </label>
               <input
                 type="text"
-                value={formData.phoneNumberId}
+                value={
+                  formData.phoneNumberId === 0 ? "" : formData.phoneNumberId
+                }
                 placeholder="Enter your Meta Mobile number ID"
                 className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    phoneNumberId: Number(e.target.value),
-                  })
-                }
+                onChange={handlePhoneNumberIdChange}
               />
             </div>
 

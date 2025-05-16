@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +21,8 @@ const WhatsAppIntegration: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [botLists, setbotLists] = useState<any>([]);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [phoneError, setPhoneError] = useState<string>("");
+
   const botsDataRedux = useSelector(
     (state: RootState) => state.bot?.lists?.data
   );
@@ -41,7 +42,6 @@ const WhatsAppIntegration: React.FC = () => {
         _id: bot._id,
         botName: bot.botName,
       }));
-
       setbotLists(formattedBots);
     }
   }, [botsDataRedux, botsDataLoader]);
@@ -54,49 +54,80 @@ const WhatsAppIntegration: React.FC = () => {
     }
   }, [dispatch, userIdLocal]);
 
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "");
+    setFormData({ ...formData, phoneNumber: value });
+  };
+
+  const handlePhoneNumberIdChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value.replace(/\D/g, "");
+    setFormData({ ...formData, phoneNumberId: value ? parseInt(value) : 0 });
+  };
+
+  const validatePhoneNumber = (phone: string, code: string): string => {
+    const length = phone.length;
+    switch (code) {
+      case "+1": // USA
+      case "+234": // Nigeria
+      case "+91": // India
+      case "+44": // UK
+      case "+66": // Thailand
+      case "+60": // Malaysia
+        return length === 10
+          ? ""
+          : `Phone number must be 10 digits for ${code}.`;
+      case "+971": // UAE
+      case "+61": // Australia
+      case "+852": // Hong Kong
+        return length === 9 ? "" : `Phone number must be 9 digits for ${code}.`;
+      default:
+        return "Unsupported country code.";
+    }
+  };
+
   const handleSubmit = async () => {
     const { phoneNumber, appId, accessToken } = formData;
 
     if (!phoneNumber || !appId || !accessToken) {
-      alert("Please fill in all required fields.");
+      setErrorMessage("Please fill in all required fields.");
+      return;
+    }
+
+    const phoneValidationError = validatePhoneNumber(
+      phoneNumber,
+      formData.countryCode
+    );
+    if (phoneValidationError) {
+      setPhoneError(phoneValidationError);
       return;
     }
 
     try {
       setErrorMessage("");
-      dispatch(saveWhatsapp(formData)); // Trigger API call
+      setPhoneError("");
+      await dispatch(saveWhatsapp(formData));
       if (secretToken && webhookUrl) {
-        setIsModalOpen(true); // Only open the modal if the data is available
+        setIsModalOpen(true);
       }
     } catch (error) {
       console.error("Error saving WhatsApp data:", error);
+      setErrorMessage("Failed to save WhatsApp integration. Please try again.");
     }
   };
 
   const integration = useSelector((state: RootState) => state.integration);
-
-  console.log("Integration Data:", integration); // Debugging
-
   const secretToken = useSelector(
     (state: any) => state.integration?.secretToken || ""
   );
-
-  console.log("Secret Token:", secretToken); // Debugging
   const webhookUrl = useSelector(
     (state: any) => state.integration?.webhookUrl || ""
   );
-  console.log("Webhook URL:", webhookUrl); // Debugging
-  const handlePhoneNumberIdChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value.replace(/\D/g, ""); // Remove non-digits
-    setFormData({ ...formData, phoneNumberId: value ? parseInt(value) : 0 });
-  };
 
   return (
     <div className="w-full flex justify-center items-center">
       <div className="w-full mt-12 justify-center items-center">
-        {/* Form Container */}
         <div className="rounded-2xl p-8">
           {errorMessage && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
@@ -112,7 +143,6 @@ const WhatsAppIntegration: React.FC = () => {
               />
               <h2 className="text-4xl font-semibold">WhatsApp Integration</h2>
             </div>
-
             <button
               onClick={handleSubmit}
               className="bg-[#65558F] w-[200px] text-white px-6 py-3 rounded-3xl font-semibold hover:bg-[#65558F]/85"
@@ -126,10 +156,8 @@ const WhatsAppIntegration: React.FC = () => {
             Integration.
           </p>
 
-          {/* Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              {/* Provider Dropdown */}
               <label className="block text-gray-700 font-medium mb-2">
                 Choose your provider
               </label>
@@ -137,7 +165,6 @@ const WhatsAppIntegration: React.FC = () => {
                 <option value="Meta">Meta</option>
               </select>
 
-              {/* WhatsApp Number */}
               <label className="block text-gray-700 font-medium mb-2">
                 WhatsApp number
               </label>
@@ -153,20 +180,24 @@ const WhatsAppIntegration: React.FC = () => {
                   <option value="+971">(+971)</option>
                   <option value="+234">(+234)</option>
                   <option value="+91">(+91)</option>
+                  <option value="+44">(+44)</option>
+                  <option value="+61">(+61)</option>
+                  <option value="+852">(+852)</option>
+                  <option value="+66">(+66)</option>
+                  <option value="+60">(+60)</option>
                 </select>
-
                 <input
                   type="text"
                   placeholder="Enter your WhatsApp number"
                   className="flex-1 p-3 border border-gray-300 rounded-r-lg"
-                  onChange={(e) =>
-                    setFormData({ ...formData, phoneNumber: e.target.value })
-                  }
+                  onChange={handlePhoneNumberChange}
                   value={formData.phoneNumber}
                 />
+                {phoneError && (
+                  <p className="text-red-600 text-sm mt-1">{phoneError}</p>
+                )}
               </div>
 
-              {/* Mobile Number ID */}
               <label className="block text-gray-700 font-medium mb-2">
                 Mobile number ID
               </label>
@@ -210,7 +241,6 @@ const WhatsAppIntegration: React.FC = () => {
                 </select>
               )}
 
-              {/* App ID */}
               <label className="block text-gray-700 font-medium mb-2">
                 App ID
               </label>
@@ -223,7 +253,6 @@ const WhatsAppIntegration: React.FC = () => {
                 }
               />
 
-              {/* Business Account ID */}
               <label className="block text-gray-700 font-medium mb-2">
                 Business account ID
               </label>
@@ -241,7 +270,6 @@ const WhatsAppIntegration: React.FC = () => {
             </div>
           </div>
 
-          {/* Permanent access token */}
           <label className="block text-gray-700 font-medium mb-2">
             Permanent access token given by Meta
           </label>
@@ -256,7 +284,6 @@ const WhatsAppIntegration: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal for Secret Token and Webhook URL */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
