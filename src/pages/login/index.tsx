@@ -167,7 +167,7 @@ const Login = () => {
   console.log("EUAChecked", EUAChecked, "isLoading", isLoading);
   return (
     <>
-      <div className="overflow-hidden  bg-white rounded-none">
+      <div className="bg-white rounded-none">
         <div className="flex gap-5 max-md:flex-col h-[100vh]">
           {/* Left Section */}
           <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full">
@@ -211,7 +211,7 @@ const Login = () => {
               </div>
 
               {/* Divider */}
-              <div className="mt-3 mb-0 text-base font-medium text-black">
+              <div className="mt-5 text-base font-medium text-black">
                 - OR -
               </div>
 
@@ -222,7 +222,7 @@ const Login = () => {
               >
                 <div className="flex flex-col justify-center text-black self-center max-w-full w-96 mx-auto ">
                   {/* Input Fields */}
-                  <div className="flex flex-col justify-center text-black self-center max-w-full w-[600px]">
+                  <div className="flex flex-col gap-2 justify-center text-black self-center max-w-full w-[600px]">
                     {[
                       {
                         placeholder: "Enter your email",
@@ -279,20 +279,27 @@ const Login = () => {
                   {error && (
                     <div className="text-red-500 text-sm mt-2">{error}</div>
                   )}
-                  <div className="mb-6 mt-4">
-                    <div className="flex items-center gap-2 px-6 py-4 bg-[#fef7ff] ">
+                  <div className="mb-6 mt-8">
+                    <div className="flex items-start gap-2 px-6 py-4 bg-[#fef7ff]">
                       <input
                         type="checkbox"
-                        className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 items-start border-gray-300 rounded mr-2 mt-5"
+                        className="h-5 w-5 min-w-[20px] text-[#65558F] border-2 border-gray-300 rounded mt-1"
                         checked={EUAChecked}
                         onChange={() => setEUAChecked(!EUAChecked)}
                       />
-                      <span className="font-[400] text-[#49454F] text-[smaller]">
-                        By selecting 'Create account', you confirm that you have
-                        read and agree to Botwot iCX's Terms of Use and Privacy
-                        Policy, and you may choose to receive emails about
-                        weekly flyers, rollback & clearance items, exclusive
-                        products, and other offers. You can unsubscribe anytime.
+                      <span className="font-medium  text-[#49454F] text-sm">
+                        By creating an account, you agree to Botwot iCX's Terms
+                        and&nbsp;
+                        <a
+                          href="https://botwot.io/resources/policy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#65558F] underline"
+                        >
+                          Privacy Policy
+                        </a>
+                        , and consent to receive occasional promotional emails.
+                        You can unsubscribe anytime.
                       </span>
                     </div>
                   </div>
@@ -301,7 +308,7 @@ const Login = () => {
                   <div className="flex flex-col items-center self-center w-full max-w-[600px]  max-md:mt-10 max-md:max-w-full mb-4">
                     <button
                       type="submit"
-                      className="gap-2.5 self-stretch px-2.5 py-2 w-full text-xl text-white rounded-full bg-black min-h-[55px] disabled:opacity-50 hover:bg-neutral-700 transition-colors"
+                      className="px-2.5 py-2 mt-2 w-full text-xl text-white rounded-full bg-black min-h-[55px] disabled:opacity-50 hover:bg-neutral-700 transition-colors"
                       disabled={isLoading || !EUAChecked}
                     >
                       {isLoading ? "Logging in..." : "Log in"}

@@ -9,7 +9,7 @@ import {
   getAllSession,
 } from "../../../store/actions/conversationActions";
 import { RootState } from "../../../store";
-import { getBotsAction } from "../../../store/actions/botActions";
+// import { getBotsAction } from "../../../store/actions/botActions";
 import { notifyError, notifySuccess } from "../../../components/Toast";
 import {
   XAxis,
@@ -47,6 +47,7 @@ import WebsiteSectionData from "./websiteSectionData";
 import EmojiPicker from "emoji-picker-react";
 import { EmojiEmotions, Send } from "@mui/icons-material";
 import { sendInteractiveMessageService } from "../../../api/services/whatsappDashboardService";
+import { getAllBotsService } from "../../../api/services/agentBuilderServices"; // Import the service
 
 interface AnalysisSection {
   title: string;
@@ -82,14 +83,14 @@ const AllChats = () => {
     { name: "Whatsapp", value: "whatsapp" },
     { name: "Website", value: "website" },
   ]);
-  const botsDataRedux = useSelector(
-    (state: RootState) => state.bot?.lists?.data
-  );
+  // const botsDataRedux = useSelector(
+  //   (state: RootState) => state.bot?.lists?.data
+  // );
   const [channelNameVal, setChannelNameVal] = useState("whatsapp");
   const [botIdVal, setBotIdVal] = useState("");
-  const botsDataLoader = useSelector(
-    (state: RootState) => state.bot?.lists?.loader
-  );
+  // const botsDataLoader = useSelector(
+  //   (state: RootState) => state.bot?.lists?.loader
+  // );
   const [talkWithHuman, setTalkWithHuman] = useState(false);
   const [isEnablingManualMode, setIsEnablingManualMode] = useState(false);
   const [userMessage, setUserMessage] = useState("");
@@ -132,28 +133,36 @@ const AllChats = () => {
 
   const userId = localStorage.getItem("user_id");
 
-  // Fetch bots on component mount
+  // Fetch bots directly using getAllBotsService
   useEffect(() => {
-    if (userId?.length) {
-      dispatch(getBotsAction(userId));
-    }
-  }, [dispatch, userId]);
+    const fetchBots = async () => {
+      if (!userId) {
+        notifyError("User ID not found");
+        return;
+      }
 
-  // Set botIdVal when botsDataRedux is available
-  useEffect(() => {
-    if (
-      Array.isArray(botsDataRedux) &&
-      botsDataRedux.length &&
-      !botsDataLoader
-    ) {
-      const formattedBots = botsDataRedux.map((bot: any) => ({
-        value: bot._id,
-        name: bot.botName,
-      }));
-      setBotLists(formattedBots);
-      setBotIdVal(formattedBots[0]?.value || "");
-    }
-  }, [botsDataRedux, botsDataLoader]);
+      try {
+        const response = await getAllBotsService();
+        if (response.success) {
+          const formattedBots = response.data.map((bot: any) => ({
+            value: bot._id,
+            name: bot.botName,
+          }));
+          setBotLists(formattedBots);
+          if (formattedBots.length > 0) {
+            setBotIdVal(formattedBots[0].value); // Set default bot
+          }
+        } else {
+          notifyError("Failed to fetch bots");
+        }
+      } catch (error) {
+        console.error("Error fetching bots:", error);
+        notifyError("Error fetching bots");
+      }
+    };
+
+    fetchBots();
+  }, [userId]);
 
   // Handle search functionality
   const handleSearch = async () => {

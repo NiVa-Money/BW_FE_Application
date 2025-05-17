@@ -4,23 +4,23 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  deleteBotAction,
   exportBotProfileServiceAction,
-  getBotsAction,
   resetBotAction,
 } from "../../store/actions/botActions";
 import { RootState } from "../../store";
-// import { formatDateString } from "../../hooks/functions";
 import { useNavigate } from "react-router-dom";
+import {
+  getAllBotsService,
+  deleteBotProfileService,
+} from "../../api/services/agentBuilderServices"; // Added deleteBotProfileService import
 import ExportIntegrationModal from "../../components/exportIntegrationModal";
-import { notifyError } from "../../components/Toast";
+import { notifyError, notifySuccess } from "../../components/Toast";
 import TestBotModal from "../../components/TestBotModal";
 
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileExportIcon from "@mui/icons-material/FileUpload";
-// import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { Button } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -30,7 +30,7 @@ import IconButton from "@mui/material/IconButton";
 
 const MyBots: React.FC = () => {
   const dispatch = useDispatch();
-  const [botLists, setbotLists] = useState<any>([]);
+  const [botLists, setBotLists] = useState<any>([]);
   const [userId, setUserId] = useState("");
   const [exportResponse, setExportResponse] = useState<{
     success: boolean;
@@ -38,12 +38,10 @@ const MyBots: React.FC = () => {
   } | null>(null);
   const [isExportLoading, setIsExportLoading] = useState(false);
   const [botId, setBotId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDeletingBot, setIsDeletingBot] = useState(false);
 
   const exportS = useSelector((state: RootState) => state?.bot?.export?.data);
-  const botsDataRedux = useSelector(
-    (state: RootState) => state.bot?.lists?.data
-  );
-
   const createBotRedux = useSelector(
     (state: RootState) => state.bot?.create?.data
   );
@@ -70,17 +68,12 @@ const MyBots: React.FC = () => {
   };
 
   const handleMenuClose = () => {
-    console.log("Menu close for bot:", botId);
+    console.log("Menu close for bot:", selectedBotId);
     setMenuAnchorEl(null);
     setSelectedBotId(null);
   };
 
   const navigate = useNavigate();
-
-  // Loaders, etc.
-  const botsDataLoader = useSelector(
-    (state: RootState) => state.bot?.lists?.loader
-  );
 
   // Handlers
   const createBotHandler = () => {
@@ -99,10 +92,39 @@ const MyBots: React.FC = () => {
   };
   const handleEdit = (id: string) => {
     navigate(`/editbot/${id}`);
+    handleMenuClose();
   };
-  const handleDelete = () => {
-    dispatch(deleteBotAction(payloadDelete));
+  const handleDelete = async () => {
+    // Modified to use direct API call
+    setIsDeletingBot(true);
     setIsModalOpen(false);
+    // Temporarily clear the bot list to show the loading state
+    setBotLists([]);
+
+    try {
+      console.log("Deleting bot with payload:", payloadDelete);
+      const response = await deleteBotProfileService(payloadDelete);
+      console.log("Delete API response:", response);
+
+      // Add a small delay to ensure backend sync
+      setTimeout(() => {
+        if (response?.success) {
+          notifySuccess("Bot deleted successfully");
+          fetchBots();
+        } else {
+          notifyError(response?.message || "Failed to delete bot");
+          fetchBots();
+        }
+        setIsDeletingBot(false);
+      }, 500);
+    } catch (error: any) {
+      console.error("Error deleting bot:", error);
+      setTimeout(() => {
+        notifyError(error.message || "Failed to delete bot");
+        fetchBots();
+        setIsDeletingBot(false);
+      }, 500);
+    }
   };
   const handleTest = (id: string) => {
     setBotId(id);
@@ -122,6 +144,67 @@ const MyBots: React.FC = () => {
     setExportResponse(null);
   };
 
+  // New function to fetch bots directly using API
+  const fetchBots = async () => {
+    if (!userId) return;
+
+    setIsLoading(true);
+    try {
+      console.log("Fetching bots for userId:", userId);
+      const response = await getAllBotsService();
+      console.log("API response:", response);
+
+      // Check for response structure
+      if (response) {
+        if (response.data) {
+          console.log("Setting bot list from response.data:", response.data);
+          setBotLists(response.data);
+        } else if (Array.isArray(response)) {
+          console.log("Setting bot list from direct response:", response);
+          setBotLists(response);
+        } else {
+          console.warn("Unexpected API response structure:", response);
+          setBotLists([]);
+          notifyError("Unexpected API response format");
+        }
+      } else {
+        console.warn("Empty response from API");
+        setBotLists([]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching bots:", error);
+      notifyError(error.message || "Failed to fetch bots");
+      setBotLists([]);
+    } finally {
+      setIsLoading(false);
+      console.log("Finished loading bots, isLoading set to false");
+    }
+  };
+
+  // Add a fallback to refresh the list if we're stuck in loading state
+  useEffect(() => {
+    let loadingTimeout: ReturnType<typeof setTimeout>;
+
+    if (isLoading || isDeletingBot) {
+      loadingTimeout = setTimeout(() => {
+        if (isLoading) {
+          console.log("Loading timeout reached, forcing refresh");
+          setIsLoading(false);
+          fetchBots();
+        }
+        if (isDeletingBot) {
+          console.log("Deleting timeout reached, forcing refresh");
+          setIsDeletingBot(false);
+          fetchBots();
+        }
+      }, 500);
+    }
+
+    return () => {
+      if (loadingTimeout) clearTimeout(loadingTimeout);
+    };
+  }, [isLoading, isDeletingBot]);
+
   // Effects
   useEffect(() => {
     if (exportS) {
@@ -133,30 +216,28 @@ const MyBots: React.FC = () => {
   useEffect(() => {
     if (createBotRedux !== null) {
       if (createBotRedux?.success && userIdLocal?.length) {
-        dispatch(getBotsAction(userId));
+        // Fetch bots again when a new bot is created
+        fetchBots();
       }
     }
   }, [createBotRedux]);
 
   useEffect(() => {
-    if (botsDataRedux) {
-      setbotLists(botsDataRedux);
-    }
-  }, [botsDataRedux, botsDataLoader]);
-
-  useEffect(() => {
-    if (userId?.length) {
-      dispatch(getBotsAction(userId));
+    if (userId) {
+      console.log("UserId changed, fetching bots for:", userId);
+      fetchBots();
     }
   }, [userId]);
 
+  // Debug logging for botLists
   useEffect(() => {
-    if (userId?.length) {
-      dispatch(getBotsAction(userId));
-    }
+    console.log("botLists updated:", botLists);
+  }, [botLists]);
+
+  useEffect(() => {
     dispatch(resetBotAction("create"));
     dispatch(resetBotAction("edit"));
-    dispatch(resetBotAction("delete"));
+    // Removed resetBotAction("delete") as it's no longer needed
   }, []);
 
   useEffect(() => {
@@ -189,8 +270,17 @@ const MyBots: React.FC = () => {
           </button>
         </div>
 
+        {/* Loading state */}
+        {(isLoading || isDeletingBot) && (
+          <div className="text-center py-6">
+            <p className="text-gray-500">
+              {isDeletingBot ? "Deleting agent..." : "Loading agents..."}
+            </p>
+          </div>
+        )}
+
         {/* Grid of Bots */}
-        {botLists && botLists.length > 0 ? (
+        {!isLoading && !isDeletingBot && botLists && botLists.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {botLists.map((bot: any) => (
               <div
@@ -211,11 +301,11 @@ const MyBots: React.FC = () => {
                     open={menuOpen && selectedBotId === bot._id}
                     onClose={handleMenuClose}
                     anchorOrigin={{
-                      vertical: "bottom", // Position relative to the anchor element
+                      vertical: "bottom",
                       horizontal: "right",
                     }}
                     transformOrigin={{
-                      vertical: "top", // Position relative to the menu itself
+                      vertical: "top",
                       horizontal: "right",
                     }}
                   >
@@ -223,7 +313,12 @@ const MyBots: React.FC = () => {
                       <EditIcon fontSize="small" />
                       <span style={{ marginLeft: "8px" }}>Edit</span>
                     </MenuItem>
-                    <MenuItem onClick={() => handleOpen(bot._id)}>
+                    <MenuItem
+                      onClick={() => {
+                        handleOpen(bot._id);
+                        handleMenuClose();
+                      }}
+                    >
                       <DeleteIcon fontSize="small" />
                       <span style={{ marginLeft: "8px" }}>Delete</span>
                     </MenuItem>
@@ -300,7 +395,7 @@ const MyBots: React.FC = () => {
                         fontWeight: "500",
                         textTransform: "none",
                         "&:hover": {
-                          backgroundColor: "#65558F1A", // ~10% opacity
+                          backgroundColor: "#65558F1A",
                         },
                       }}
                     >
@@ -319,7 +414,7 @@ const MyBots: React.FC = () => {
                         fontWeight: "500",
                         textTransform: "none",
                         "&:hover": {
-                          backgroundColor: "#56497A", // or `#65558FE6` for ~90% opacity
+                          backgroundColor: "#56497A",
                         },
                       }}
                     >
@@ -331,9 +426,16 @@ const MyBots: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-gray-500 text-center">No Agents found.</p>
-        )}
+        ) : !isLoading && !isDeletingBot ? (
+          <p className="text-gray-500 text-center">
+            No Agents found.{" "}
+            {botLists
+              ? `Received ${
+                  Array.isArray(botLists) ? botLists.length : "non-array"
+                } data`
+              : "No data received"}
+          </p>
+        ) : null}
       </div>
 
       {/* Modals */}
