@@ -167,7 +167,7 @@ const Login = () => {
   console.log("EUAChecked", EUAChecked, "isLoading", isLoading);
   return (
     <>
-      <div className="overflow-hidden  bg-white rounded-none">
+      <div className="bg-white rounded-none">
         <div className="flex gap-5 max-md:flex-col h-[100vh]">
           {/* Left Section */}
           <div className="flex flex-col w-[45%] max-md:ml-0 max-md:w-full">
