@@ -45,7 +45,7 @@ const SignUp: React.FC = () => {
   const [otp, setOtp] = useState<string>("");
   const [saveDataEmail, setSaveDataEmail] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
-  const [EUAChecked, setEUAChecked] = useState(false)
+  const [EUAChecked, setEUAChecked] = useState(false);
 
   const validateField = (name: keyof FormData, value: string): string => {
     switch (name) {
@@ -67,10 +67,10 @@ const SignUp: React.FC = () => {
         return value.length < 8
           ? "Password must be at least 8 characters long"
           : !value.match(/[A-Z]/)
-            ? "Password must contain at least one uppercase letter"
-            : !value.match(/[0-9]/)
-              ? "Password must contain at least one number"
-              : "";
+          ? "Password must contain at least one uppercase letter"
+          : !value.match(/[0-9]/)
+          ? "Password must contain at least one number"
+          : "";
       default:
         return "";
     }
@@ -134,8 +134,8 @@ const SignUp: React.FC = () => {
       } else {
         setErrorMessage(
           response.error ||
-          response.message ||
-          "Signup failed. Please try again."
+            response.message ||
+            "Signup failed. Please try again."
         );
       }
     } catch (error) {
@@ -362,12 +362,22 @@ const SignUp: React.FC = () => {
                     checked={EUAChecked}
                     onChange={() => setEUAChecked(!EUAChecked)}
                   />
-                  <span className="font-[400] text-[#49454F] text-[smaller]">By selecting 'Create account', you confirm that you have read and agree to Botwot iCX's Terms of Use and Privacy Policy, and you may choose to receive emails about weekly flyers, rollback & clearance items, exclusive products, and other offers. You can unsubscribe anytime.</span>
+                  <span className="font-medium  text-[#49454F] text-sm">
+                    By creating an account, you agree to Botwot iCX's Terms
+                    and&nbsp;
+                    <a
+                      href="https://botwot.io/resources/policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#65558F] underline"
+                    >
+                      Privacy Policy
+                    </a>
+                    , and consent to receive occasional promotional emails. You
+                    can unsubscribe anytime.
+                  </span>{" "}
                 </div>
-
               </div>
-
-
 
               {/* Sign-Up Button */}
               <div className="flex justify-center">
